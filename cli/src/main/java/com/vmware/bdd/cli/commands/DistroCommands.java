@@ -64,9 +64,8 @@ public class DistroCommands implements CommandMarker {
             prettyOutputDistroInfo(distro);
          }
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_DISTRO, name,
-               Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL,
-               e.getMessage());
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_DISTRO,
+               Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
       }
    }
 
@@ -94,9 +93,8 @@ public class DistroCommands implements CommandMarker {
             if (distros.length == 1) {
                distroName = distros[0].getName();
             }
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_DISTRO, distroName,
-                  Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL,
-                  e.getMessage());
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_DISTRO,
+                  Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          }
       }
    }

@@ -120,6 +120,7 @@ public class Constants {
    public static final String OUTPUT_OP_RESULT_RESIZE = "resized";
    public static final String OUTPUT_OP_RESULT_RESUME = "resumed";
    public static final String OUTPUT_OP_RESULT_ADD = "added";
+   public static final String OUTPUT_OP_RESULT_GET = "got";
    public static final String OUTPUT_OP_RESULT_UPLOAD = "uploaded";
    public static final String OUTPUT_OP_RESULT_RESET = "reset";
    public static final String OUTPUT_OP_RESULT_FIX = "fixed";

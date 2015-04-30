@@ -93,10 +93,10 @@ public class UserMgmtServerCommands implements CommandMarker {
                   distroColumnNamesWithGetMethodNames, new Object[]{userMgmtServer},
                   Constants.OUTPUT_INDENT);
          } catch (Exception e) {
-            CommandOutputHelper.GET_LDAP_OUTPUT.printFailure("", e);
+            CommandOutputHelper.GET_LDAP_OUTPUT.printFailure(e);
          }
       } catch (CliRestException e) {
-         CommandOutputHelper.GET_LDAP_OUTPUT.printFailure("", e);
+         CommandOutputHelper.GET_LDAP_OUTPUT.printFailure(e);
       }
    }
 
@@ -128,7 +128,7 @@ public class UserMgmtServerCommands implements CommandMarker {
             }
          }
       } catch (CliRestException e) {
-         CommandOutputHelper.MODIFY_LDAP_OUTPUT.printFailure("", e.getMessage());
+         CommandOutputHelper.MODIFY_LDAP_OUTPUT.printFailure(e.getMessage());
       } catch (ValidationException e) {
          handleValidationErrors(e, CommandOutputHelper.MODIFY_LDAP_OUTPUT);
       }
@@ -166,7 +166,7 @@ public class UserMgmtServerCommands implements CommandMarker {
             try {
                mgmtCfgOnMgmtVMClient.config(UserMgmtMode.MIXED.name());
             } catch (Exception e1) {
-               CommandOutputHelper.ADD_LDAP_OUTPUT.printFailure("", e1);
+               CommandOutputHelper.ADD_LDAP_OUTPUT.printFailure(e1);
                System.out.println("Try to recover the old server configuration.");
                userMgmtServerRestClient.removeUserMgmtServer(userMgmtServer.getName());
                System.out.println("Recover successfully.");
@@ -177,7 +177,7 @@ public class UserMgmtServerCommands implements CommandMarker {
          }
 
       } catch (CliRestException e) {
-         CommandOutputHelper.ADD_LDAP_OUTPUT.printFailure("", e);
+         CommandOutputHelper.ADD_LDAP_OUTPUT.printFailure(e);
       } catch (ValidationException e) {
          handleValidationErrors(e, CommandOutputHelper.ADD_LDAP_OUTPUT);
       }
@@ -186,7 +186,7 @@ public class UserMgmtServerCommands implements CommandMarker {
    private boolean handleUntrustedCertificate(UntrustedCertificateException e,
                                               CommandOutputHelper commandOutputHelper,
                                               Runnable runnable) {
-      commandOutputHelper.printWarning("", e.getMessage());
+      commandOutputHelper.printWarning(e.getMessage());
 
       TlsHelper.presentUserWithCert(e.getCertInfo(), System.out);
 
@@ -199,14 +199,14 @@ public class UserMgmtServerCommands implements CommandMarker {
       if (userConfirmed) {
          runnable.run();
       } else {
-         commandOutputHelper.printFailure("", "The server certificate is not trusted, so the command will stop.");
+         commandOutputHelper.printFailure("The server certificate is not trusted, so the command will stop.");
       }
 
       return userConfirmed;
    }
 
    private void handleValidationErrors(ValidationException validationEx, CommandOutputHelper outputHelper) {
-      outputHelper.printFailure("", validationEx);
+      outputHelper.printFailure(validationEx);
 
       ValidationErrorsStringBuilder stringBuilder = new ValidationErrorsStringBuilder();
 
@@ -220,11 +220,11 @@ public class UserMgmtServerCommands implements CommandMarker {
          fr = new FileReader(cfgFilePath);
          return objectMapper.readValue(new BufferedReader(fr), UserMgmtServer.class);
       } catch (FileNotFoundException e) {
-         MODIFY_LDAP_OUTPUT.printFailure(null, "File " +  cfgFilePath + " not found.");
+         MODIFY_LDAP_OUTPUT.printFailure("File " +  cfgFilePath + " not found.");
       } catch (JsonMappingException | JsonParseException e) {
-         MODIFY_LDAP_OUTPUT.printFailure(null, "Failed to parse file " + cfgFilePath);
+         MODIFY_LDAP_OUTPUT.printFailure("Failed to parse file " + cfgFilePath);
       } catch (IOException e) {
-         MODIFY_LDAP_OUTPUT.printFailure(null, "IO error on reading file " + cfgFilePath);
+         MODIFY_LDAP_OUTPUT.printFailure("IO error on reading file " + cfgFilePath);
       } finally {
          if (fr != null) {
             try {

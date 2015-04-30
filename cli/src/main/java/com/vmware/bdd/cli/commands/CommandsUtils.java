@@ -347,36 +347,21 @@ public class CommandsUtils {
       System.out.println();
    }
 
-   public static void printCmdSuccess(String objectType, String name,
+   public static void printCmdSuccess(String objectType,
          String result) {
-      if (isJansiAvailable() && !isBlank(name)) {
-         try {
-            name = transferEncoding(name);
-         } catch (UnsupportedEncodingException|CliException e) {
-            logger.warn("failed to transferEncoding: " + e.getMessage());
-         }
-      }
-      if (!isBlank(name)) {
-         System.out.println(objectType + " " + name + " " + result);
-      } else {
          System.out.println(objectType + " " + result);
-      }
    }
 
-   public static void printCmdFailure(String objectType, String name,
+   public static void printCmdFailure(String objectType,
          String opName, String result, String message) {
-      if (isJansiAvailable() && !isBlank(name)) {
+      if (isJansiAvailable() && !isBlank(message)) {
          try {
-            name = transferEncoding(name);
             message = transferEncoding(message);
          } catch (UnsupportedEncodingException|CliException e) {
             logger.warn("failed to transferEncoding: " + e.getMessage());
          }
       }
-      if (!isBlank(name)) {
-         System.out.println(objectType + " " + name + " " + opName + " "
-               + result + ": " + message);
-      } else if (!isBlank(opName)) {
+      if (!isBlank(opName)) {
          System.out.println(objectType + " " + opName + " " + result + ": "
                + message);
       } else {
@@ -552,9 +537,8 @@ public class CommandsUtils {
             }
          }
       } catch (Exception e) {
-         CommandsUtils.printCmdFailure(targetObject,
-               name, operateType,
-               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+         CommandsUtils.printCmdFailure(targetObject, operateType,
+                 Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          continueCreate = false;
       }
       return continueCreate;

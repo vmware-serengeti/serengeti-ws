@@ -108,22 +108,20 @@ public class ClusterCommands implements CommandMarker {
       ) {
       // validate the name
       if (name.indexOf("-") != -1) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
-               Constants.PARAM_CLUSTER
-                     + Constants.PARAM_NOT_CONTAIN_HORIZONTAL_LINE);
+               Constants.PARAM_CLUSTER + Constants.PARAM_NOT_CONTAIN_HORIZONTAL_LINE);
          return;
       } else if (name.indexOf(" ") != -1) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
-               Constants.PARAM_CLUSTER
-                     + Constants.PARAM_NOT_CONTAIN_BLANK_SPACE);
+               Constants.PARAM_CLUSTER + Constants.PARAM_NOT_CONTAIN_BLANK_SPACE);
          return;
       }
 
       // process resume
       if (resume && setClusterPassword) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.RESUME_DONOT_NEED_SET_PASSWORD);
          return;
@@ -143,11 +141,9 @@ public class ClusterCommands implements CommandMarker {
             CommandsUtils
                   .printCmdFailure(
                         Constants.OUTPUT_OBJECT_CLUSTER,
-                        name,
                         Constants.OUTPUT_OP_CREATE,
                         Constants.OUTPUT_OP_RESULT_FAIL,
-                        appManager
-                              + " cannot be found in the list of application managers.");
+                        appManager + " cannot be found in the list of application managers.");
             return;
          }
       }
@@ -177,9 +173,8 @@ public class ClusterCommands implements CommandMarker {
          ClusterType clusterType = ClusterType.getByDescription(type);
          if (clusterType == null) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  name, Constants.OUTPUT_OP_CREATE,
-                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
-                        + " " + "type=" + type);
+                    Constants.OUTPUT_OP_CREATE,
+                    Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE + " " + "type=" + type);
             return;
          }
          clusterCreate.setType(clusterType);
@@ -209,10 +204,9 @@ public class ClusterCommands implements CommandMarker {
 
             if (distroRead4Create == null) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                     name, Constants.OUTPUT_OP_CREATE,
-                     Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM_DISTRO
-                           + Constants.PARAM_NOT_SUPPORTED
-                           + getDistroNames(distroReads));
+                       Constants.OUTPUT_OP_CREATE,
+                       Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM_DISTRO +
+                       Constants.PARAM_NOT_SUPPORTED + getDistroNames(distroReads));
                return;
             }
          } else {
@@ -222,14 +216,14 @@ public class ClusterCommands implements CommandMarker {
             if (distroRead4Create == null
                   || CommandsUtils.isBlank(distroRead4Create.getName())) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                     name, Constants.OUTPUT_OP_CREATE,
+                     Constants.OUTPUT_OP_CREATE,
                      Constants.OUTPUT_OP_RESULT_FAIL,
                      Constants.PARAM_NO_DEFAULT_DISTRO);
                return;
             }
          }
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
                e.getMessage());
          return;
@@ -248,7 +242,7 @@ public class ClusterCommands implements CommandMarker {
          userMgmtConfig.put(UserMgmtConstants.USER_GROUP_NAME, userGroupName);
          clusterCreate.setInfrastructure_config(infraConfigs);
       } else {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
                "You need to supply both AdminGroupName and UserGroupName.");
          return;
@@ -262,7 +256,7 @@ public class ClusterCommands implements CommandMarker {
          List<String> rpNamesList = CommandsUtils.inputsConvert(rpNames);
          if (rpNamesList.isEmpty()) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  name, Constants.OUTPUT_OP_CREATE,
+                  Constants.OUTPUT_OP_CREATE,
                   Constants.OUTPUT_OP_RESULT_FAIL,
                   Constants.INPUT_RPNAMES_PARAM + Constants.MULTI_INPUTS_CHECK);
             return;
@@ -274,9 +268,9 @@ public class ClusterCommands implements CommandMarker {
          List<String> dsNamesList = CommandsUtils.inputsConvert(dsNames);
          if (dsNamesList.isEmpty()) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  name, Constants.OUTPUT_OP_CREATE,
-                  Constants.OUTPUT_OP_RESULT_FAIL,
-                  Constants.INPUT_DSNAMES_PARAM + Constants.MULTI_INPUTS_CHECK);
+                    Constants.OUTPUT_OP_CREATE,
+                    Constants.OUTPUT_OP_RESULT_FAIL,
+                    Constants.INPUT_DSNAMES_PARAM + Constants.MULTI_INPUTS_CHECK);
             return;
          } else {
             clusterCreate.setDsNames(dsNamesList);
@@ -307,9 +301,9 @@ public class ClusterCommands implements CommandMarker {
             clusterCreate.validateNodeGroupNames();
             if (!validateHAInfo(clusterCreate.getNodeGroups())) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                     name, Constants.OUTPUT_OP_CREATE,
-                     Constants.OUTPUT_OP_RESULT_FAIL,
-                     Constants.PARAM_CLUSTER_SPEC_HA_ERROR + specFilePath);
+                       Constants.OUTPUT_OP_CREATE,
+                       Constants.OUTPUT_OP_RESULT_FAIL,
+                       Constants.PARAM_CLUSTER_SPEC_HA_ERROR + specFilePath);
                return;
             }
 
@@ -339,14 +333,13 @@ public class ClusterCommands implements CommandMarker {
          }
          allNetworkNames = getAllNetworkNames();
       } catch (Exception e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
-               Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
-               e.getMessage());
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                 Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          return;
       }
 
       if (allNetworkNames.isEmpty()) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.PARAM_CANNOT_FIND_NETWORK);
          return;
@@ -362,9 +355,8 @@ public class ClusterCommands implements CommandMarker {
                   allNetworkNames);
          } else {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  name, Constants.OUTPUT_OP_CREATE,
-                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM_NETWORK_NAME
-                        + Constants.PARAM_NOT_SPECIFIED);
+                    Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
+                    Constants.PARAM_NETWORK_NAME + Constants.PARAM_NOT_SPECIFIED);
             return;
          }
       } else {
@@ -374,10 +366,8 @@ public class ClusterCommands implements CommandMarker {
                || (mapredNetworkName != null && !allNetworkNames
                      .contains(mapredNetworkName))) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  name, Constants.OUTPUT_OP_CREATE,
-                  Constants.OUTPUT_OP_RESULT_FAIL,
-                  Constants.PARAM_NETWORK_NAME + Constants.PARAM_NOT_SUPPORTED
-                        + allNetworkNames.toString());
+                    Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
+                    Constants.PARAM_NETWORK_NAME + Constants.PARAM_NOT_SUPPORTED + allNetworkNames.toString());
             return;
          }
 
@@ -428,10 +418,10 @@ public class ClusterCommands implements CommandMarker {
             return;
          }
          restClient.create(clusterCreate);
-         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name,
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_RESULT_CREAT);
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
                CommandsUtils.getExceptionMessage(e));
       }
@@ -568,7 +558,7 @@ public class ClusterCommands implements CommandMarker {
       }
 
       if (!firstPassword.equals(secondPassword)) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, null,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.PASSWORD_CONFIRMATION_FAILED);
          return null;
@@ -595,7 +585,7 @@ public class ClusterCommands implements CommandMarker {
 
    private boolean isValidPassword(String password) {
       if (!CommonUtil.validateClusterPassword(password)) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, null,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
                com.vmware.bdd.utils.Constants.PASSWORD_REQUIREMENT);
          return false;
@@ -624,7 +614,7 @@ public class ClusterCommands implements CommandMarker {
             }
          }
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL,
                e.getMessage());
       }
@@ -680,7 +670,7 @@ public class ClusterCommands implements CommandMarker {
             System.out.println(Constants.UNKNOWN_EXPORT_TYPE);
          }
       } catch (Exception e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_EXPORT, Constants.OUTPUT_OP_RESULT_FAIL,
                e.getMessage());
       }
@@ -693,12 +683,11 @@ public class ClusterCommands implements CommandMarker {
       // rest invocation
       try {
          restClient.delete(name);
-         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name,
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_RESULT_DELETE);
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
-               Constants.OUTPUT_OP_DELETE, Constants.OUTPUT_OP_RESULT_FAIL,
-               e.getMessage());
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+               Constants.OUTPUT_OP_DELETE, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
       }
    }
 
@@ -715,14 +704,13 @@ public class ClusterCommands implements CommandMarker {
       try {
          restClient.actionOps(clusterName, queryStrings);
          CommandsUtils.printCmdSuccess(
-               Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
+               Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER,
                Constants.OUTPUT_OP_RESULT_START);
 
       } catch (CliRestException e) {
          CommandsUtils.printCmdFailure(
-               Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
-               Constants.OUTPUT_OP_START, Constants.OUTPUT_OP_RESULT_FAIL,
-               e.getMessage());
+                 Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, Constants.OUTPUT_OP_START,
+                 Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
       }
    }
 
@@ -736,13 +724,11 @@ public class ClusterCommands implements CommandMarker {
       try {
          restClient.actionOps(clusterName, queryStrings);
          CommandsUtils.printCmdSuccess(
-               Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
+               Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER,
                Constants.OUTPUT_OP_RESULT_STOP);
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(
-               Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER, clusterName,
-               Constants.OUTPUT_OP_STOP, Constants.OUTPUT_OP_RESULT_FAIL,
-               e.getMessage());
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NODES_IN_CLUSTER,
+               Constants.OUTPUT_OP_STOP, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
       }
    }
 
@@ -760,9 +746,8 @@ public class ClusterCommands implements CommandMarker {
             ClusterRead cluster = restClient.get(name, false);
             if (cluster == null) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                     name, Constants.OUTPUT_OP_RESIZE,
-                     Constants.OUTPUT_OP_RESULT_FAIL, "cluster " + name
-                           + " does not exist.");
+                       Constants.OUTPUT_OP_RESIZE, Constants.OUTPUT_OP_RESULT_FAIL,
+                       "cluster " + name + " does not exist.");
                return;
             }
             // disallow scale out zookeeper node group.
@@ -788,9 +773,8 @@ public class ClusterCommands implements CommandMarker {
 
             if (!found) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                     name, Constants.OUTPUT_OP_RESIZE,
-                     Constants.OUTPUT_OP_RESULT_FAIL, "node group " + nodeGroup
-                           + " does not exist.");
+                       Constants.OUTPUT_OP_RESIZE, Constants.OUTPUT_OP_RESULT_FAIL,
+                       "node group " + nodeGroup + " does not exist.");
                return;
             }
             TaskRead taskRead = null;
@@ -799,7 +783,7 @@ public class ClusterCommands implements CommandMarker {
             } else if (cpuNumber > 0 || memory > 0) {
                if (!cluster.getStatus().isActiveServiceStatus()) {
                   CommandsUtils.printCmdFailure(
-                        Constants.OUTPUT_OBJECT_CLUSTER, name,
+                        Constants.OUTPUT_OBJECT_CLUSTER,
                         Constants.OUTPUT_OP_RESIZE,
                         Constants.OUTPUT_OP_RESULT_FAIL,
                         "Cluster must be in 'RUNNING' state to scale up/down");
@@ -810,22 +794,20 @@ public class ClusterCommands implements CommandMarker {
                taskRead = restClient.scale(resScale);
             }
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
-                  name, Constants.OUTPUT_OP_RESULT_RESIZE);
+                    Constants.OUTPUT_OP_RESULT_RESIZE);
             if (taskRead != null) {
                System.out.println();
                printScaleReport(taskRead, name, nodeGroup);
             }
          } catch (CliRestException e) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  name, Constants.OUTPUT_OP_RESIZE,
-                  Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+                    Constants.OUTPUT_OP_RESIZE, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          }
       } else {
          if (instanceNum > 0 && (cpuNumber > 0 || memory > 0)) {
             CommandsUtils
                   .printCmdFailure(
                         Constants.OUTPUT_OBJECT_CLUSTER,
-                        name,
                         Constants.OUTPUT_OP_RESIZE,
                         Constants.OUTPUT_OP_RESULT_FAIL,
                         "Can not scale out/in and scale up/down at the same time, you have to run those commands separately");
@@ -833,7 +815,6 @@ public class ClusterCommands implements CommandMarker {
             CommandsUtils
                   .printCmdFailure(
                         Constants.OUTPUT_OBJECT_CLUSTER,
-                        name,
                         Constants.OUTPUT_OP_RESIZE,
                         Constants.OUTPUT_OP_RESULT_FAIL,
                         "You must specify one positive value for instanceNum/cpuNumPerNode/memCapacityMbPerNode");
@@ -850,9 +831,8 @@ public class ClusterCommands implements CommandMarker {
                invalidParams.add("memCapacityMbPerNode=" + memory);
             }
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  name, Constants.OUTPUT_OP_RESIZE,
-                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
-                        + " " + StringUtils.join(invalidParams, ", "));
+                    Constants.OUTPUT_OP_RESIZE, Constants.OUTPUT_OP_RESULT_FAIL,
+                    Constants.INVALID_VALUE + " " + StringUtils.join(invalidParams, ", "));
          }
       }
    }
@@ -915,9 +895,8 @@ public class ClusterCommands implements CommandMarker {
          ClusterRead cluster = restClient.get(clusterName, false);
          if (cluster == null) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  clusterName, Constants.OUTPUT_OP_SET_PARAM,
-                  Constants.OUTPUT_OP_RESULT_FAIL, "cluster " + clusterName
-                        + " does not exist.");
+                    Constants.OUTPUT_OP_SET_PARAM, Constants.OUTPUT_OP_RESULT_FAIL,
+                    "cluster " + clusterName + " does not exist.");
             return;
          }
 
@@ -926,9 +905,8 @@ public class ClusterCommands implements CommandMarker {
                || maxComputeNodeNum != null || targetComputeNodeNum != null) {
             if (!cluster.validateSetManualElasticity()) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                     clusterName, Constants.OUTPUT_OP_SET_PARAM,
-                     Constants.OUTPUT_OP_RESULT_FAIL,
-                     Constants.PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP);
+                       Constants.OUTPUT_OP_SET_PARAM, Constants.OUTPUT_OP_RESULT_FAIL,
+                       Constants.PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP);
                return;
             }
          } else if (ioShares == null) {
@@ -945,9 +923,8 @@ public class ClusterCommands implements CommandMarker {
                mode = ElasticityMode.valueOf(elasticityMode.toUpperCase());
             } catch (IllegalArgumentException e) {
                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                     clusterName, Constants.OUTPUT_OP_SET_PARAM,
-                     Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
-                           + " elasticityMode = " + elasticityMode);
+                       Constants.OUTPUT_OP_SET_PARAM, Constants.OUTPUT_OP_RESULT_FAIL,
+                       Constants.INVALID_VALUE + " elasticityMode = " + elasticityMode);
                return;
             }
          }
@@ -964,8 +941,7 @@ public class ClusterCommands implements CommandMarker {
             }
          } catch (Exception e) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  clusterName, Constants.OUTPUT_OP_SET_PARAM,
-                  Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+                    Constants.OUTPUT_OP_SET_PARAM, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
             return;
          }
 
@@ -975,10 +951,9 @@ public class ClusterCommands implements CommandMarker {
             try {
                ioPriority = Priority.valueOf(ioShares.toUpperCase());
             } catch (IllegalArgumentException ex) {
-               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                     clusterName, Constants.OUTPUT_OP_SET_PARAM,
-                     Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE
-                           + " " + "ioShares = " + ioShares);
+                CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                        Constants.OUTPUT_OP_SET_PARAM, Constants.OUTPUT_OP_RESULT_FAIL,
+                        Constants.INVALID_VALUE + " " + "ioShares = " + ioShares);
                return;
             }
          }
@@ -1002,7 +977,7 @@ public class ClusterCommands implements CommandMarker {
 
          restClient.setParam(cluster, requestBody);
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
-               clusterName, Constants.OUTPUT_OP_RESULT_ADJUST);
+                 Constants.OUTPUT_OP_RESULT_ADJUST);
          //print warning for ignored parameters under different mode
          if (mode != null) {
             if (mode == ElasticityMode.AUTO) {
@@ -1020,8 +995,7 @@ public class ClusterCommands implements CommandMarker {
       } catch (CliRestException e) {
          if (e.getMessage() != null) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  clusterName, Constants.OUTPUT_OP_SET_PARAM,
-                  Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+                    Constants.OUTPUT_OP_SET_PARAM, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          }
       }
    }
@@ -1040,9 +1014,8 @@ public class ClusterCommands implements CommandMarker {
          ClusterRead cluster = restClient.get(clusterName, false);
          if (cluster == null) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  clusterName, Constants.OUTPUT_OP_RESET_PARAM,
-                  Constants.OUTPUT_OP_RESULT_FAIL, "cluster " + clusterName
-                        + " does not exist.");
+                    Constants.OUTPUT_OP_RESET_PARAM, Constants.OUTPUT_OP_RESULT_FAIL,
+                    "cluster " + clusterName + " does not exist.");
             return;
          }
          /* TODO emma: remove validation from client as client does not have knowledge about if it's compute only node group
@@ -1080,11 +1053,10 @@ public class ClusterCommands implements CommandMarker {
          }
          restClient.setParam(cluster, requestBody);
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
-               clusterName, Constants.OUTPUT_OP_RESULT_RESET);
+                 Constants.OUTPUT_OP_RESULT_RESET);
       } catch (CliRestException e) {
          if (e.getMessage() != null) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  clusterName, Constants.OUTPUT_OP_RESET_PARAM,
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, Constants.OUTPUT_OP_RESET_PARAM,
                   Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          }
       }
@@ -1098,10 +1070,9 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "yes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Answer 'yes' to all Y/N questions. ") final boolean alwaysAnswerYes) {
       // validate the name
       if (name.indexOf("-") != -1) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_CONFIG, Constants.OUTPUT_OP_RESULT_FAIL,
-               Constants.PARAM_CLUSTER
-                     + Constants.PARAM_NOT_CONTAIN_HORIZONTAL_LINE);
+               Constants.PARAM_CLUSTER + Constants.PARAM_NOT_CONTAIN_HORIZONTAL_LINE);
          return;
       }
       try {
@@ -1135,10 +1106,10 @@ public class ClusterCommands implements CommandMarker {
          }
 
          restClient.configCluster(clusterConfig);
-         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name,
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_RESULT_CONFIG);
       } catch (Exception e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_CONFIG, Constants.OUTPUT_OP_RESULT_FAIL,
                e.getMessage());
          return;
@@ -1154,10 +1125,8 @@ public class ClusterCommands implements CommandMarker {
       try {
          TaskRead taskRead = null;
          if (!isDiskFailure) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  clusterName, Constants.OUTPUT_OP_FIX,
-                  Constants.OUTPUT_OP_RESULT_FAIL,
-                  Constants.PARAM_SHOULD_SPECIFY_DISK);
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, Constants.OUTPUT_OP_FIX,
+                    Constants.OUTPUT_OP_RESULT_FAIL, Constants.PARAM_SHOULD_SPECIFY_DISK);
             return;
          } else {
             FixDiskRequestBody requestBody = new FixDiskRequestBody();
@@ -1171,13 +1140,12 @@ public class ClusterCommands implements CommandMarker {
             }
          }
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
-               clusterName, Constants.OUTPUT_OP_RESULT_FIX);
+                 Constants.OUTPUT_OP_RESULT_FIX);
          System.out.println();
          printClusterFixReport(taskRead, clusterName);
       } catch (Exception e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-               clusterName, Constants.OUTPUT_OP_FIX,
-               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+                 Constants.OUTPUT_OP_FIX, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          return;
       }
    }
@@ -1187,22 +1155,20 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name) {
       // validate the name
       if (name.indexOf("-") != -1) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
-               Constants.OUTPUT_OP_UPGRADE, Constants.OUTPUT_OP_RESULT_FAIL,
-               Constants.PARAM_CLUSTER
-                     + Constants.PARAM_NOT_CONTAIN_HORIZONTAL_LINE);
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                 Constants.OUTPUT_OP_UPGRADE, Constants.OUTPUT_OP_RESULT_FAIL,
+                 Constants.PARAM_CLUSTER + Constants.PARAM_NOT_CONTAIN_HORIZONTAL_LINE);
          return;
       }
 
       // rest invocation
       try {
          restClient.upgradeCluster(name);
-         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name,
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_RESULT_UPGRADE);
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
-               Constants.OUTPUT_OP_UPGRADE, Constants.OUTPUT_OP_RESULT_FAIL,
-               e.getMessage());
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+               Constants.OUTPUT_OP_UPGRADE, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
       }
    }
 
@@ -1248,12 +1214,11 @@ public class ClusterCommands implements CommandMarker {
 
       try {
          restClient.actionOps(name, queryStrings);
-         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER, name,
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_RESULT_RESUME);
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name,
-               Constants.OUTPUT_OP_RESUME, Constants.OUTPUT_OP_RESULT_FAIL,
-               e.getMessage());
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+               Constants.OUTPUT_OP_RESUME, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
       }
    }
 
@@ -1385,8 +1350,7 @@ public class ClusterCommands implements CommandMarker {
                      Constants.OUTPUT_INDENT);
          } catch (Exception e) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  cluster.getName(), Constants.OUTPUT_OP_LIST,
-                  Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+                  Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          }
 
          if(detail) {
@@ -1408,8 +1372,7 @@ public class ClusterCommands implements CommandMarker {
          }
       } catch (Exception e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-               clusterName, Constants.OUTPUT_OP_LIST,
-               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+                 Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
       }
    }
 
@@ -1515,7 +1478,7 @@ public class ClusterCommands implements CommandMarker {
 
       failedMsg.append(new ListToStringConverter<String>(failedMsgList, '\n'));
 
-      CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, name, op,
+      CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, op,
             Constants.OUTPUT_OP_RESULT_FAIL, failedMsg.toString());
    }
 
@@ -1752,9 +1715,8 @@ public class ClusterCommands implements CommandMarker {
          value = TopologyType.valueOf(topology);
       } catch (IllegalArgumentException ex) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-               clusterName, Constants.OUTPUT_OP_CREATE,
-               Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE + " "
-                     + "topologyType=" + topology);
+                 Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
+                 Constants.INVALID_VALUE + " " + "topologyType=" + topology);
       }
       return value;
    }

@@ -58,9 +58,8 @@ public class DatastoreCommands implements CommandMarker {
 
          if (CommandsUtils.inputsConvert(spec).isEmpty()) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_DATASTORE,
-                  name, Constants.OUTPUT_OP_ADD,
-                  Constants.OUTPUT_OP_RESULT_FAIL, Constants.INPUT_SPEC_PARAM
-                        + Constants.MULTI_INPUTS_CHECK);
+                    Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
+                    Constants.INPUT_SPEC_PARAM + Constants.MULTI_INPUTS_CHECK);
          } else {
             datastoreAdd.setSpec(CommandsUtils.inputsConvert(spec));
             datastoreAdd.setType(DatastoreType.valueOf(type.toUpperCase()));
@@ -69,17 +68,15 @@ public class DatastoreCommands implements CommandMarker {
             }
 
             restClient.add(datastoreAdd);
-            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_DATASTORE,
-                  name, Constants.OUTPUT_OP_RESULT_ADD);
+            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_DATASTORE, Constants.OUTPUT_OP_RESULT_ADD);
          }
       } catch (IllegalArgumentException ex) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_DATASTORE, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_DATASTORE,
                Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.INVALID_VALUE + " " + "type=" + type);
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_DATASTORE, name,
-               Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
-               e.getMessage());
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_DATASTORE,
+               Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
       }
    }
 
@@ -89,12 +86,11 @@ public class DatastoreCommands implements CommandMarker {
 
       try {
          restClient.delete(name);
-         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_DATASTORE, name,
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_DATASTORE,
                Constants.OUTPUT_OP_RESULT_DELETE);
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_DATASTORE, name,
-               Constants.OUTPUT_OP_DELETE, Constants.OUTPUT_OP_RESULT_FAIL,
-               e.getMessage());
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_DATASTORE,
+               Constants.OUTPUT_OP_DELETE, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
       }
    }
 
@@ -127,7 +123,7 @@ public class DatastoreCommands implements CommandMarker {
             }
          }
       } catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_DATASTORE, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_DATASTORE,
                Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL,
                e.getMessage());
       }

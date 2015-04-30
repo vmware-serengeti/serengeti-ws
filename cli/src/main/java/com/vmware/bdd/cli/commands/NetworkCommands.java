@@ -105,7 +105,7 @@ public class NetworkCommands implements CommandMarker {
 
       NetworkType operType = null;
       if (!CommandsUtils.isBlank(ip) && dhcp) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
                Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.PARAMS_EXCLUSION_PAIR_NETWORK_ADD_IP_DHCP
                + Constants.PARAMS_EXCLUSION);
@@ -115,7 +115,7 @@ public class NetworkCommands implements CommandMarker {
       } else if (!CommandsUtils.isBlank(ip)) {
          operType = NetworkType.IP;
       } else {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
                Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.PARAMS_NETWORK_ADD_IP_DHCP_NOT_NULL);
          return;
@@ -125,7 +125,7 @@ public class NetworkCommands implements CommandMarker {
          addNetwork(operType, name, portGroup, ip, dhcp, dns, sedDNS, gateway,
                mask, NetworkDnsType.valueOf(dnsType.toUpperCase()), generateHostname);
       } catch (IllegalArgumentException ex) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
                Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.INVALID_VALUE + " " + "dnsType=" + dnsType);
       }
@@ -146,10 +146,10 @@ public class NetworkCommands implements CommandMarker {
       //rest invocation
       try {
          networkRestClient.delete(name);
-         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NETWORK, name,
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NETWORK,
                Constants.OUTPUT_OP_RESULT_DELETE);
       }catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
                Constants.OUTPUT_OP_DELETE, Constants.OUTPUT_OP_RESULT_FAIL,
                e.getMessage());
       }
@@ -182,8 +182,7 @@ public class NetworkCommands implements CommandMarker {
          }
       }catch (CliRestException e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
-               name, Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL,
-               e.getMessage());
+                 Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
       }
    }
 
@@ -210,16 +209,15 @@ public class NetworkCommands implements CommandMarker {
             networkAdd.setIsGenerateHostname(generateHostname);
          }
          networkRestClient.update(networkAdd);
-         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NETWORK, name,
-               Constants.OUTPUT_OP_RESULT_MODIFY);
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NETWORK,
+                 Constants.OUTPUT_OP_RESULT_MODIFY);
       } catch (IllegalArgumentException ex) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK, name,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
                Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.INVALID_VALUE + " " + "dnsType=" + dnsType);
       } catch (Exception e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK, name,
-               Constants.OUTPUT_OP_MODIFY,
-               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
+                  Constants.OUTPUT_OP_MODIFY, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
       }
    }
 
@@ -234,9 +232,8 @@ public class NetworkCommands implements CommandMarker {
             addNetworkByIPModel(operType, name, portGroup, ip, dns, sedDNS,
                   gateway, mask, dnsType, generateHostname);
          } catch (UnknownHostException e) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
-                  name, Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
-                  Constants.OUTPUT_UNKNOWN_HOST);
+             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
+                     Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL, Constants.OUTPUT_UNKNOWN_HOST);
          }
          break;
       case DHCP:
@@ -245,27 +242,25 @@ public class NetworkCommands implements CommandMarker {
 
    }
 
-   private void addNetworkByDHCPModel(NetworkType operType, final String name,
-         final String portGroup, final boolean dhcp, final NetworkDnsType dnsType, final Boolean generateHostname) {
-      NetworkAdd networkAdd = new NetworkAdd();
-      networkAdd.setName(name);
-      networkAdd.setPortGroup(portGroup);
-      networkAdd.setDhcp(true);
-      networkAdd.setDnsType(dnsType);
-      networkAdd.setIsGenerateHostname(generateHostname);
+    private void addNetworkByDHCPModel(NetworkType operType, final String name,
+                                       final String portGroup, final boolean dhcp, final NetworkDnsType dnsType, final Boolean generateHostname) {
+        NetworkAdd networkAdd = new NetworkAdd();
+        networkAdd.setName(name);
+        networkAdd.setPortGroup(portGroup);
+        networkAdd.setDhcp(true);
+        networkAdd.setDnsType(dnsType);
+        networkAdd.setIsGenerateHostname(generateHostname);
 
-      //rest invocation
-      try {
-      networkRestClient.add(networkAdd);
-      CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NETWORK, name,
-            Constants.OUTPUT_OP_RESULT_ADD);
-      }catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK, name,
-               Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
-               e.getMessage());
-      }
+        //rest invocation
+        try {
+            networkRestClient.add(networkAdd);
+            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NETWORK, Constants.OUTPUT_OP_RESULT_ADD);
+        } catch (CliRestException e) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
+                    Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+        }
 
-   }
+    }
 
    private void addNetworkByIPModel(NetworkType operType, final String name,
          final String portGroup, final String ip, final String dns,
@@ -289,12 +284,11 @@ public class NetworkCommands implements CommandMarker {
          //rest invocation
          try {
             networkRestClient.add(networkAdd);
-            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NETWORK, name,
+            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NETWORK,
                   Constants.OUTPUT_OP_RESULT_ADD);
          }catch (CliRestException e) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK, name,
-                  Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
-                  e.getMessage());
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
+                  Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          }
       }
 
@@ -369,11 +363,9 @@ public class NetworkCommands implements CommandMarker {
 
       if (ipPrarams.size() == 0) {
          StringBuilder errorMessage = new StringBuilder().append(Constants.PARAMS_NETWORK_ADD_FORMAT_ERROR);
-
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
-               networkName, type, Constants.OUTPUT_OP_RESULT_FAIL,
-               Constants.INVALID_VALUE + " " + "ip=" + ipPrarams + errorMessage.toString());
-
+                 type, Constants.OUTPUT_OP_RESULT_FAIL, Constants.INVALID_VALUE + " "
+                         + "ip=" + ipPrarams + errorMessage.toString());
          return false;
       }
 
@@ -382,11 +374,9 @@ public class NetworkCommands implements CommandMarker {
          if (!ipPattern.matcher(ipParam).matches()
                && !ipSegPattern.matcher(ipParam).matches()) {
             StringBuilder errorMessage = new StringBuilder().append(Constants.PARAMS_NETWORK_ADD_FORMAT_ERROR);
-
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
-                  networkName, type, Constants.OUTPUT_OP_RESULT_FAIL,
-                  Constants.INVALID_VALUE + " " + "ip=" + ipPrarams + errorMessage.toString());
-
+                    type, Constants.OUTPUT_OP_RESULT_FAIL,
+                    Constants.INVALID_VALUE + " " + "ip=" + ipPrarams + errorMessage.toString());
             return false;
          }
       }
@@ -401,9 +391,8 @@ public class NetworkCommands implements CommandMarker {
          StringBuilder errorMessage = new StringBuilder().append(Constants.PARAMS_NETWORK_ADD_IP_ERROR);
 
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
-               networkName, Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
+               Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.INVALID_VALUE + " " + "dns=" + dns + errorMessage.toString());
-
          return false;
       } else
          return true;
@@ -420,8 +409,8 @@ public class NetworkCommands implements CommandMarker {
          StringBuilder errorMessage = new StringBuilder().append(Constants.PARAMS_NETWORK_ADD_IP_ERROR);
 
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
-               networkName, Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
-               Constants.INVALID_VALUE + " " + "gateway=" + gateway + errorMessage.toString());
+                 Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
+                 Constants.INVALID_VALUE + " " + "gateway=" + gateway + errorMessage.toString());
          return false;
       }
       return true;
@@ -431,15 +420,15 @@ public class NetworkCommands implements CommandMarker {
       Pattern ipPattern = Pattern.compile(PatternType.IP);
       if (CommandsUtils.isBlank(mask)) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
-               networkName, Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
-               Constants.PARAMS_NETWORK_ADD_MASK + Constants.MULTI_INPUTS_CHECK);
+                 Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
+                 Constants.PARAMS_NETWORK_ADD_MASK + Constants.MULTI_INPUTS_CHECK);
          return false;
       } else if (!ipPattern.matcher(mask).matches()) {
          StringBuilder errorMessage = new StringBuilder().append(Constants.PARAMS_NETWORK_ADD_IP_ERROR);
 
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
-               networkName, Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
-               Constants.INVALID_VALUE + " " + "mask=" + mask + errorMessage.toString());
+                 Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
+                 Constants.INVALID_VALUE + " " + "mask=" + mask + errorMessage.toString());
          return false;
       } else
          return true;

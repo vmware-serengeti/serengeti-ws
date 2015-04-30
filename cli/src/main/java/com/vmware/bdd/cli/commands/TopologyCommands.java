@@ -58,12 +58,12 @@ public class TopologyCommands implements CommandMarker {
                   Constants.OUTPUT_OBJECT_TOPOLOGY, Constants.OUTPUT_OP_UPLOAD,
                   warningMsgList, alwaysAnswerYes, null)) {
                topologyRestClient.upload(racks);
-               CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_TOPOLOGY, null,
+               CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_TOPOLOGY,
                   Constants.OUTPUT_OP_RESULT_UPLOAD);
             }
          }
       } catch (Exception e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_TOPOLOGY, null, Constants.OUTPUT_OP_UPLOAD,
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_TOPOLOGY, Constants.OUTPUT_OP_UPLOAD,
                Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          return;
       }
@@ -74,7 +74,7 @@ public class TopologyCommands implements CommandMarker {
       Set<String> checkHosts = new TreeSet<String>();
       for (RackInfo rack: racks) {
          if (checkRack.contains(rack.getName())) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_TOPOLOGY, null, Constants.OUTPUT_OP_UPLOAD,
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_TOPOLOGY, Constants.OUTPUT_OP_UPLOAD,
                   Constants.OUTPUT_OP_RESULT_FAIL, "Racks cannot be duplicated.");
             return true;
          }
@@ -82,7 +82,7 @@ public class TopologyCommands implements CommandMarker {
 
          for (String hostName: rack.getHosts()) {
             if (checkHosts.contains(hostName)) {
-               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_TOPOLOGY, null, Constants.OUTPUT_OP_UPLOAD,
+               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_TOPOLOGY, Constants.OUTPUT_OP_UPLOAD,
                      Constants.OUTPUT_OP_RESULT_FAIL, "Remove duplicated hosts.");
                return true;
             }
@@ -162,9 +162,8 @@ public class TopologyCommands implements CommandMarker {
          RackInfo[] racksInfo = topologyRestClient.list();
          prettyOutputRackInfo(racksInfo);
       } catch (Exception e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_TOPOLOGY, null,
-               Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL,
-               e.getMessage());
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_TOPOLOGY,
+               Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
       }
    }
 

@@ -55,12 +55,11 @@ public class ResourcePoolCommands implements CommandMarker {
       //rest invocation
       try {
          restClient.add(rpAdd);
-         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_RESOURCEPOOL, name,
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_RESOURCEPOOL,
                Constants.OUTPUT_OP_RESULT_ADD);
       }catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_RESOURCEPOOL, name,
-               Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
-               e.getMessage());
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_RESOURCEPOOL,
+               Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
       }
    }
 
@@ -71,12 +70,11 @@ public class ResourcePoolCommands implements CommandMarker {
       //rest invocation
       try {
          restClient.delete(name);
-         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_RESOURCEPOOL, name,
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_RESOURCEPOOL,
                Constants.OUTPUT_OP_RESULT_DELETE);
       }catch (CliRestException e) {
-         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_RESOURCEPOOL, name,
-               Constants.OUTPUT_OP_DELETE, Constants.OUTPUT_OP_RESULT_FAIL,
-               e.getMessage());
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_RESOURCEPOOL,
+               Constants.OUTPUT_OP_DELETE, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
       }
    }
 
@@ -99,8 +97,7 @@ public class ResourcePoolCommands implements CommandMarker {
          }
       }catch (CliRestException e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_RESOURCEPOOL,
-               name, Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL,
-               e.getMessage());
+                 Constants.OUTPUT_OP_LIST, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
       }
    }
 

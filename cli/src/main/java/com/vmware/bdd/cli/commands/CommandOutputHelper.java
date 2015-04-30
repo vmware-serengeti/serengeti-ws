@@ -35,19 +35,32 @@ public class CommandOutputHelper {
    }
 
    public void printSuccess() {
-      CommandsUtils.printCmdSuccess(type, opName, success);
+      String result = "";
+      switch (opName) {
+         case Constants.OUTPUT_OP_ADD:
+            result = Constants.OUTPUT_OP_RESULT_ADD;
+            break;
+         case Constants.OUTPUT_OP_GET:
+            result = Constants.OUTPUT_OP_RESULT_GET;
+            break;
+         case Constants.OUTPUT_OP_MODIFY:
+            result = Constants.OUTPUT_OP_RESULT_MODIFY;
+            break;
+         default:
+      }
+      CommandsUtils.printCmdSuccess(type, result);
    }
 
-   public void printFailure(String name, String message) {
-      CommandsUtils.printCmdFailure(type, name, opName, failure, message);
+   public void printFailure(String message) {
+      CommandsUtils.printCmdFailure(type, opName, failure, message);
    }
 
-   public void printFailure(String name, Throwable throwable) {
-      CommandsUtils.printCmdFailure(type, name, opName, failure, throwable.getMessage());
+   public void printFailure(Throwable throwable) {
+      CommandsUtils.printCmdFailure(type, opName, failure, throwable.getMessage());
    }
 
-   public void printWarning(String name, String message) {
-      CommandsUtils.printCmdFailure(type, name, opName, warning, message);
+   public void printWarning(String message) {
+      CommandsUtils.printCmdFailure(type, opName, warning, message);
    }
 
    public boolean promptWarning(List<String> warningList, boolean yes, String message) {

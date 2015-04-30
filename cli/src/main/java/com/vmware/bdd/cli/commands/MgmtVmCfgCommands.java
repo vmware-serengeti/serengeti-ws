@@ -55,9 +55,9 @@ public class MgmtVmCfgCommands implements CommandMarker {
          mgmtCfgOnMgmtVMClient.config(mode);
          CommandOutputHelper.MODIFY_MGMTVMCFG_OUTPUT.printSuccess();
       } catch (IllegalArgumentException e) {
-         CommandOutputHelper.MODIFY_MGMTVMCFG_OUTPUT.printFailure(mode, "Invalid User management mode.");
+         CommandOutputHelper.MODIFY_MGMTVMCFG_OUTPUT.printFailure("Invalid User management mode.");
       } catch (CliRestException e) {
-         CommandOutputHelper.MODIFY_MGMTVMCFG_OUTPUT.printFailure(mode, e);
+         CommandOutputHelper.MODIFY_MGMTVMCFG_OUTPUT.printFailure(e);
       }
    }
 
@@ -78,10 +78,10 @@ public class MgmtVmCfgCommands implements CommandMarker {
                   distroColumnNamesWithGetMethodNames, new Object[]{mgmtVmCfgBean},
                   Constants.OUTPUT_INDENT);
          } catch (Exception e) {
-            CommandOutputHelper.GET_MGMTVMCFG_OUTPUT.printFailure("", e);
+            CommandOutputHelper.GET_MGMTVMCFG_OUTPUT.printFailure(e);
          }
       } catch (CliRestException e) {
-         CommandOutputHelper.GET_MGMTVMCFG_OUTPUT.printFailure("", e);
+         CommandOutputHelper.GET_MGMTVMCFG_OUTPUT.printFailure(e);
       }
    }
 
