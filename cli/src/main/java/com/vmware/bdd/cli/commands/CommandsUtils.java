@@ -368,6 +368,7 @@ public class CommandsUtils {
       if (isJansiAvailable() && !isBlank(name)) {
          try {
             name = transferEncoding(name);
+            message = transferEncoding(message);
          } catch (UnsupportedEncodingException|CliException e) {
             logger.warn("failed to transferEncoding: " + e.getMessage());
          }
