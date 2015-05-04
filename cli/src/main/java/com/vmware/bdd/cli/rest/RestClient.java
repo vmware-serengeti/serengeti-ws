@@ -870,7 +870,10 @@ public class RestClient {
                      + dateFormate.format(cert.getNotAfter()));
                System.out.println("Signature:  " + cert.getSignature());
                System.out.println();
-
+               if (checkExpired(cert.getNotBefore(), cert.getNotAfter())) {
+                  throw new CertificateException(
+                          "The security certificate has expired.");
+               }
                ConsoleReader reader = new ConsoleReader();
                // Set prompt message
                reader.setPrompt(Constants.PARAM_PROMPT_ADD_CERTIFICATE_MESSAGE);
@@ -930,6 +933,14 @@ public class RestClient {
                }
             }
          }
+      }
+
+      private boolean checkExpired(Date notBefore, Date notAfter) {
+         Date now = new Date();
+         if (now.before(notBefore) || now.after(notAfter)) {
+            return true;
+         }
+         return false;
       }
 
       private PropertiesConfiguration loadCLIProperty() throws ConfigurationException {
