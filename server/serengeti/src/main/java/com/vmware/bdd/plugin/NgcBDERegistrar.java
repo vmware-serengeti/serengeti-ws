@@ -4,6 +4,7 @@
 package com.vmware.bdd.plugin;
 
 import java.io.IOException;
+import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -14,6 +15,8 @@ import org.apache.log4j.Logger;
 
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.security.CmsKeyStore;
+import com.vmware.aurora.security.JksKeyStoreUtil;
+import com.vmware.aurora.util.AuAssert;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.utils.Constants;
@@ -103,7 +106,7 @@ public class NgcBDERegistrar extends NgcRegistrar {
          serverInfo.setCompany(NgcConstants.NGC_COMPANY);
          serverInfo.setDescription(description);
 
-         String thumbPrint = Configuration.getString("vim.thumbprint", null);
+         String thumbPrint = getCertThumbPrint();
          serverInfo.setServerThumbprint(thumbPrint);
          serverInfo.setType(NgcConstants.NGC_SERVER_TYPE);
          serverInfo.setUrl(pluginUrl);
@@ -135,6 +138,20 @@ public class NgcBDERegistrar extends NgcRegistrar {
       } catch (Exception e) {
          throw new RuntimeException(e);
       }
+   }
+
+   private String getCertThumbPrint(){
+		try {
+			KeyStore store = JksKeyStoreUtil.loadKeyStore(Configuration.getString("ngc.extension.keystore"), Configuration.getString("cms.keystore_pswd"));
+			AuAssert.check(store != null);
+			Certificate cert = store.getCertificate(Configuration.getString("ngc.extension.keystore_alias"));
+			String thumbPrint = CmsKeyStore.parseThumbPrint(cert);
+	        LOGGER.info("Serengeti server thrumb print: "+thumbPrint);
+	        return thumbPrint;
+		} catch (Exception e) {
+			LOGGER.error("fail to retrieve server thrumb print");
+		}
+		return null;
    }
 
    private void packageNgcTarball() throws ZipException, IOException {
