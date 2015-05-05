@@ -5,7 +5,10 @@ package com.vmware.bdd.plugin;
 
 import java.io.IOException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Properties;
@@ -37,15 +40,21 @@ import com.vmware.vim.binding.vim.Extension.ServerInfo;
 public class NgcBDERegistrar extends NgcRegistrar {
 
    private static final Logger LOGGER = Logger.getLogger(NgcBDERegistrar.class);
+   
+   private String packageName = NgcConstants.PLUGIN_ZIP_NAME;
 
    public void initNgcRegistration() {
-	  LOGGER.info("Packaging NGC BDE plugin tarball...");
-	  try{
-		  packageNgcTarball();
-	  } catch (IOException ex) {
-		  LOGGER.error("Packaging NGC BDE plugin tarball fails due to "+ ex.getMessage());
-	  }
-
+	  String vcVersion = VcContext.getVcVersion();
+	  LOGGER.info("Get VC version:"+vcVersion);
+      if("5.1.0".equals(vcVersion)) {
+       	packageName = NgcConstants.PLUGIN_ZIP_NAME + "-5.1.0";
+      }
+      LOGGER.info("Packaging NGC BDE plugin tarball...");
+      try{
+    	  packageNgcTarball();
+      } catch (IOException ex) {
+    	  LOGGER.error("Packaging NGC BDE plugin tarball fails due to "+ ex.getMessage());
+      }
       LOGGER.info("Starting to register NGC BDE plugin...");
       VcContext.inVcSessionDo(new VcSession<Void>() {
          @Override
@@ -79,7 +88,7 @@ public class NgcBDERegistrar extends NgcRegistrar {
       try {
          String pluginUrl =
                NgcConstants.NGC_PLUGIN_URL_PREFIX + getVmIpAddress()
-                     + NgcConstants.NGC_PLUGIN_URL_SUFFIX;
+                     + NgcConstants.NGC_PLUGIN_URL_SUFFIX + packageName + ".zip";
          Extension extension = new ExtensionImpl();
          extension.setKey(NgcConstants.NGC_KEY);
          extension.setVersion(NgcConstants.NGC_VERSION);
@@ -171,7 +180,7 @@ public class NgcBDERegistrar extends NgcRegistrar {
       properties.setProperty("mgmtRefId", mgmtRefId);
       properties.setProperty("serverGuid", serverGuid);
 
-      NgcZipPacker packer = new NgcZipPacker(properties);
+      NgcZipPacker packer = new NgcZipPacker(properties,packageName);
       packer.repack();
    }
 

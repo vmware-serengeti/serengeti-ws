@@ -30,15 +30,14 @@ public class NgcZipPacker {
 
    private static final Logger LOGGER = Logger.getLogger(NgcZipPacker.class);
    private static String pluginPath = NgcConstants.PLUGIN_PATH;
-   private static String pluginZipName = NgcConstants.PLUGIN_ZIP_NAME;
    private static String pluginProperties = NgcConstants.PLUGIN_PROPERTIES;
    private File ngcFile;
    private ZipFile ngcZipFile;
    private Properties properties;
 
-   public NgcZipPacker(Properties properties) {
+   public NgcZipPacker(Properties properties, String packageName) {
       this.properties = properties;
-      String ngcFilePath = pluginPath + pluginZipName;
+      String ngcFilePath = pluginPath + packageName+".zip";
       ngcFile = new File(ngcFilePath);
    }
 
