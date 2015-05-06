@@ -12,35 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model.cluster;
+package com.vmware.bdd.plugin.ambari.api.v1.resource.clusters;
 
-import java.util.List;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+@Consumes({ MediaType.APPLICATION_JSON })
+@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
+public interface ConfigurationsResource {
 
-public class ApiClusterConfigurations {
+   @GET
+   @Path("/")
+   public Response readConfigurationsWithTypeAndTag(@QueryParam("type") String type, @QueryParam("tag") String tag);
 
-   @Expose
-   private String href;
-
-   @Expose
-   @SerializedName("items")
-   private List<ApiClusterConfigurationInfo> configurations;
-
-   public String getHref() {
-      return href;
-   }
-
-   public void setHref(String href) {
-      this.href = href;
-   }
-
-   public List<ApiClusterConfigurationInfo> getConfigurations() {
-      return configurations;
-   }
-
-   public void setConfigurations(List<ApiClusterConfigurationInfo> configurations) {
-      this.configurations = configurations;
-   }
 }

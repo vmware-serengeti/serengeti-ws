@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response;
 
 import com.vmware.bdd.plugin.ambari.api.v1.resource.clusters.ClustersResource;
 import com.vmware.bdd.plugin.ambari.api.v1.resource.clusters.ConfigGroupsResource;
+import com.vmware.bdd.plugin.ambari.api.v1.resource.clusters.ConfigurationsResource;
 import com.vmware.bdd.plugin.ambari.api.v1.resource.clusters.HostComponentsResource;
 import com.vmware.bdd.plugin.ambari.api.v1.resource.clusters.HostsResource;
 import com.vmware.bdd.plugin.ambari.api.v1.resource.clusters.RequestsResource;
@@ -68,6 +69,11 @@ public class FakeClustersResource implements ClustersResource {
    @Override
    public ConfigGroupsResource getConfigGroupsResource(String clusterName) {
       return new FakeConfigureGroupResource();
+   }
+
+   @Override
+   public ConfigurationsResource getConfigurationsResource(String clusterName) {
+      return new FakeConfigurationsResource();
    }
 
 }

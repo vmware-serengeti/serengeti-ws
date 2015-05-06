@@ -14,19 +14,31 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.api.model.cluster;
 
-import java.util.List;
+import java.util.Map;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiClusterConfigurations {
+public class ApiClusterConfigurationInfo {
 
    @Expose
    private String href;
 
    @Expose
-   @SerializedName("items")
-   private List<ApiClusterConfigurationInfo> configurations;
+   private String tag;
+
+   @Expose
+   private String type;
+
+   @Expose
+   private String version;
+
+   @Expose
+   @SerializedName("Config")
+   private Map<String, String> config;
+
+   @Expose
+   private Map<String, String> properties;
 
    public String getHref() {
       return href;
@@ -36,11 +48,44 @@ public class ApiClusterConfigurations {
       this.href = href;
    }
 
-   public List<ApiClusterConfigurationInfo> getConfigurations() {
-      return configurations;
+   public String getTag() {
+      return tag;
    }
 
-   public void setConfigurations(List<ApiClusterConfigurationInfo> configurations) {
-      this.configurations = configurations;
+   public void setTag(String tag) {
+      this.tag = tag;
    }
+
+   public String getType() {
+      return type;
+   }
+
+   public void setType(String type) {
+      this.type = type;
+   }
+
+   public String getVersion() {
+      return version;
+   }
+
+   public void setVersion(String version) {
+      this.version = version;
+   }
+
+   public Map<String, String> getConfig() {
+      return config;
+   }
+
+   public void setConfig(Map<String, String> config) {
+      this.config = config;
+   }
+
+   public Map<String, String> getProperties() {
+      return properties;
+   }
+
+   public void setProperties(Map<String, String> properties) {
+      this.properties = properties;
+   }
+
 }

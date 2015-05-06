@@ -78,4 +78,7 @@ public interface ClustersResource {
 
    @Path("/{clusterName}/config_groups")
    public ConfigGroupsResource getConfigGroupsResource(@PathParam(Parameters.CLUSTER_NAME) String clusterName);
+
+   @Path("/{clusterName}/configurations")
+   public ConfigurationsResource getConfigurationsResource(@PathParam(Parameters.CLUSTER_NAME) String clusterName);
 }

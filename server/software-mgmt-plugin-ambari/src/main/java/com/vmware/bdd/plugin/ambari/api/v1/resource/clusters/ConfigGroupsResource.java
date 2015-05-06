@@ -30,7 +30,7 @@ import com.vmware.bdd.plugin.ambari.api.Parameters;
 
 @Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
-      MediaType.TEXT_PLAIN })
+   MediaType.TEXT_PLAIN })
 public interface ConfigGroupsResource {
 
    @POST
@@ -55,11 +55,10 @@ public interface ConfigGroupsResource {
    @DELETE
    @Path("/{ConfigGroupId}")
    public Response deleteConfigGroup(@PathParam(Parameters.CONFIG_GROUP_ID) String groupId);
-   
 
    @PUT
    @Path("/{ConfigGroupId}")
    @Consumes({ MediaType.APPLICATION_XML })
    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
-   public Response updateConfigGroup(String configGroup);
+   public Response updateConfigGroup(@PathParam(Parameters.CONFIG_GROUP_ID) String groupId, String configGroup);
 }

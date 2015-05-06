@@ -46,6 +46,7 @@ import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiAlert;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterBlueprint;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterConfigurations;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroup;
@@ -1031,6 +1032,17 @@ public class ApiManager implements IApiManager {
       handleAmbariResponse(response);
    }
 
+   public ApiClusterConfigurations getClusterConfigurationsWithTypeAndTag(String clusterName, String type, String tag) throws AmbariApiException {
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource().getConfigurationsResource(clusterName).readConfigurationsWithTypeAndTag(type, tag);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
+      String strConfigurations = handleAmbariResponse(response);
+      ApiClusterConfigurations apiClusterConfigurations = ApiUtils.jsonToObject(ApiClusterConfigurations.class, strConfigurations);
+      return apiClusterConfigurations;
+   }
 
    public ApiRequest startComponents(String clusterName,
          List<String> hostNames, List<String> components)
@@ -1102,7 +1114,7 @@ public class ApiManager implements IApiManager {
       return ApiUtils.jsonToObject(ApiConfigGroup.class, handleAmbariResponse(response));
    }
 
-   public void updateConfigGroup(String clusterName,
+   public void updateConfigGroup(String clusterName, String groupId,
                                   ApiConfigGroup configGroup) throws AmbariApiException {
       String confGroup = ApiUtils.objectToJson(configGroup);
       logger.debug("Updating config group: " + confGroup);
@@ -1110,7 +1122,7 @@ public class ApiManager implements IApiManager {
       try {
          response = apiResourceRootV1.getClustersResource()
                .getConfigGroupsResource(clusterName)
-               .updateConfigGroup(confGroup);
+               .updateConfigGroup(groupId, confGroup);
       } catch (Exception e) {
          throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
       }
@@ -1239,6 +1251,5 @@ public class ApiManager implements IApiManager {
       }
       return result;
    }
-
 
 }

@@ -1,0 +1,17 @@
+{
+  "href" : "http://127.0.0.1:8080/api/v1/clusters/am_1/configurations?type=hdfs-site&tag=version1429860457548",
+  "items" : [
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/am_1/configurations?type=hdfs-site&tag=version1429860457548",
+      "tag" : "version1429860457548",
+      "type" : "hdfs-site",
+      "version" : 18,
+      "Config" : {
+        "cluster_name" : "am_1"
+      },
+      "properties" : {
+        "dfs.datanode.data.dir" : "/mnt/data0/hdfs/data,/mnt/data1/hdfs/data,/mnt/data2/hdfs/data"
+      }
+    }
+  ]
+}

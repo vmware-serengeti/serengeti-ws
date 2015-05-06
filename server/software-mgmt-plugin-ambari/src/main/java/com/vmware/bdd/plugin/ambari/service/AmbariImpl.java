@@ -16,10 +16,9 @@ package com.vmware.bdd.plugin.ambari.service;
 
 import javax.ws.rs.NotFoundException;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -28,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gson.Gson;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
@@ -39,6 +37,8 @@ import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapHostStatus;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.BootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterConfigurationInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterConfigurations;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroup;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroupConfiguration;
@@ -64,7 +64,6 @@ import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceList;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersion;
 import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersionInfo;
-import com.vmware.bdd.plugin.ambari.api.model.support.AvailableConfigurationContainer;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.exception.AmException;
 import com.vmware.bdd.plugin.ambari.model.AmClusterDef;
@@ -86,7 +85,6 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 import com.vmware.bdd.software.mgmt.plugin.monitor.NodeReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
-import com.vmware.bdd.software.mgmt.plugin.utils.SerialUtils;
 import com.vmware.bdd.software.mgmt.plugin.utils.ValidateRolesUtil;
 
 import org.apache.log4j.Logger;
@@ -158,10 +156,10 @@ public class AmbariImpl implements SoftwareManager {
    public boolean echo() {
       try {
          switch (apiManager.healthCheck()) {
-            case Constants.HEALTH_STATUS:
-               return true;
-            default:
-               return false;
+         case Constants.HEALTH_STATUS:
+            return true;
+         default:
+            return false;
          }
       } catch (Exception e) {
          return false;
@@ -215,7 +213,7 @@ public class AmbariImpl implements SoftwareManager {
                hadoopStack.setDistro(apiStackVersionInfo.getStackName(),
                      apiStackVersionInfo.getStackVersion());
                hadoopStack
-                     .setFullVersion(apiStackVersionInfo.getStackVersion());
+               .setFullVersion(apiStackVersionInfo.getStackVersion());
                hadoopStack.setVendor(apiStackVersionInfo.getStackName());
 
                List<String> roles = new ArrayList<String>();
@@ -268,7 +266,7 @@ public class AmbariImpl implements SoftwareManager {
    @Override
    public boolean createCluster(ClusterBlueprint blueprint,
          ClusterReportQueue reportQueue)
-         throws SoftwareManagementPluginException {
+               throws SoftwareManagementPluginException {
       boolean success = false;
       AmClusterDef clusterDef = null;
       try {
@@ -333,7 +331,7 @@ public class AmbariImpl implements SoftwareManager {
 
    private void provisionCluster(final AmClusterDef clusterDef,
          final ClusterReportQueue reportQueue)
-         throws SoftwareManagementPluginException {
+               throws SoftwareManagementPluginException {
       try {
          if (!isProvisioned(clusterDef.getName())) {
             bootstrap(clusterDef, reportQueue);
@@ -380,14 +378,14 @@ public class AmbariImpl implements SoftwareManager {
 
    private void bootstrap(final AmClusterDef clusterDef,
          final ClusterReportQueue reportQueue)
-         throws SoftwareManagementPluginException {
+               throws SoftwareManagementPluginException {
       bootstrap(clusterDef, null, reportQueue);
    }
 
    private void bootstrap(final AmClusterDef clusterDef,
          final List<String> addedHosts,
          final ClusterReportQueue reportQueue)
-         throws SoftwareManagementPluginException {
+               throws SoftwareManagementPluginException {
       try {
          if (addedHosts != null) {
             logger.info("Bootstrapping hosts " + addedHosts);
@@ -480,7 +478,7 @@ public class AmbariImpl implements SoftwareManager {
 
    private void createBlueprint(final AmClusterDef clusterDef,
          final ClusterReportQueue reportQueue)
-         throws SoftwareManagementPluginException {
+               throws SoftwareManagementPluginException {
       String clusterName = clusterDef.getName();
       try {
          logger.info("Creating blueprint of cluster " + clusterName);
@@ -562,7 +560,7 @@ public class AmbariImpl implements SoftwareManager {
 
    private void provisionWithBlueprint(final AmClusterDef clusterDef,
          final ClusterReportQueue reportQueue)
-         throws SoftwareManagementPluginException {
+               throws SoftwareManagementPluginException {
       try {
          logger.info("Provisioning cluster " + clusterDef.getName() + " with blueprint " + clusterDef.getName());
          clusterDef.getCurrentReport().setAction(
@@ -671,45 +669,181 @@ public class AmbariImpl implements SoftwareManager {
       AmClusterDef clusterDef = null;
       try {
          clusterDef = new AmClusterDef(blueprint, privateKey);
-         
-         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName());
-         
-         ApiConfigGroupList apiConfigGroupList = apiManager.getConfigGroupsList(clusterDef.getName());
-         
+
+         String clusterName = clusterDef.getName();
+
+         logger.info("Configuring cluster " + clusterName);
+
+         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterName);
+
+         ApiConfigGroupList apiConfigGroupList = apiManager.getConfigGroupsList(clusterName);
+
          updateConfigGroups(apiConfigGroupList, clusterDef, reports);
          success = true;
-         
-         clusterDef.getCurrentReport().setAction("Successfully Reconfigure Cluster");
+
+         clusterDef.getCurrentReport().setAction("Reconfiguring cluster succeeded");
          clusterDef.getCurrentReport().setProgress(100);
          clusterDef.getCurrentReport().setSuccess(true);
       } catch (Exception e) {
-
+         clusterDef.getCurrentReport().setAction("Reconfiguring Cluster failed");
+         clusterDef.getCurrentReport().setSuccess(false);
+         throw e;
+      } finally {
+         clusterDef.getCurrentReport().setFinished(true);
+         reports.addClusterReport(clusterDef.getCurrentReport().clone());
       }
       return success;
    }
-   
+
    private void updateConfigGroups(ApiConfigGroupList apiConfigGroupList, AmClusterDef clusterDef, ClusterReportQueue reports) {
-      String action = "Configuring cluster services";
-      clusterDef.getCurrentReport().setAction(action);
-      reports.addClusterReport(clusterDef.getCurrentReport().clone());
+      try {
 
-      for (ApiConfigGroup group: apiConfigGroupList.getConfigGroups()) {
-         if (group.getApiConfigGroupInfo() != null && group.getApiConfigGroupInfo().getDesiredConfigs() != null) {
-               for(ApiConfigGroupConfiguration config: group.getApiConfigGroupInfo().getDesiredConfigs()) {
-                  if (config.getType().equalsIgnoreCase(Constants.CONFIG_HDFS_SITE)) {
+         String action = "Reconfiguring cluster";
+         clusterDef.getCurrentReport().setAction(action);
+         reports.addClusterReport(clusterDef.getCurrentReport().clone());
 
+         List<ApiHostGroup> apiHostGroupsFromSpec = clusterDef.toApiClusterBlueprint().getApiHostGroups();
+         logger.info("apiHostGroupsFromSpec: "+ ApiUtils.objectToJson(apiHostGroupsFromSpec));
+
+         logger.info("apiConfigGroupList: "+ ApiUtils.objectToJson(apiConfigGroupList));
+         logger.info("ApiConfigGroups from ambari server: "+ ApiUtils.objectToJson(apiConfigGroupList.getConfigGroups()));
+
+         for (ApiConfigGroup group : apiConfigGroupList.getConfigGroups()) {
+
+            logger.info("ApiConfigGroup from ambari server: "+ ApiUtils.objectToJson(group));
+
+            ApiConfigGroupInfo apiConfigGroupInfo = group.getApiConfigGroupInfo();
+            if (apiConfigGroupInfo != null && apiConfigGroupInfo.getDesiredConfigs() != null) {
+
+               for(ApiHostGroup apiHostGroupFromSpec : apiHostGroupsFromSpec) {
+                  if (apiHostGroupFromSpec.getName().equals(apiConfigGroupInfo.getGroupName())) {
+                     updateConfigGroup(apiConfigGroupInfo, clusterDef.getName(), apiHostGroupFromSpec);
                   }
                }
 
+            }
+
+         }
+      } catch (Exception e) {
+         String errMsg = "Failed to configure services for cluster " + clusterDef.getName() + ((e.getMessage() == null) ? "" : (", " + e.getMessage()));
+         logger.error(errMsg);
+         throw SoftwareManagementPluginException.CONFIGURE_SERVICE_FAILED(e);
+      }
+   }
+
+   private void updateConfigGroup(ApiConfigGroupInfo apiConfigGroupInfo, String clusterName, ApiHostGroup apiHostGroupFromClusterSpec) {
+      try {
+         boolean needUpdate = false;
+
+         ApiConfigGroup newApiConfigGroup = new ApiConfigGroup();
+
+         ApiConfigGroupInfo newApiConfigGroupInfo = new ApiConfigGroupInfo();
+
+         newApiConfigGroupInfo.setId(apiConfigGroupInfo.getId());
+         newApiConfigGroupInfo.setClusterName(apiConfigGroupInfo.getClusterName());
+         newApiConfigGroupInfo.setGroupName(apiConfigGroupInfo.getGroupName());
+         newApiConfigGroupInfo.setTag(apiConfigGroupInfo.getTag());
+         newApiConfigGroupInfo.setDescription(apiConfigGroupInfo.getDescription());
+
+         List<ApiHostInfo> hosts = new ArrayList<ApiHostInfo>();
+         for (ApiHostInfo apiHostInfo : apiConfigGroupInfo.getHosts()) {
+            ApiHostInfo newApiHostInfo = new ApiHostInfo();
+            newApiHostInfo.setHostName(apiHostInfo.getHostName());
+            hosts.add(newApiHostInfo);
+         }
+         newApiConfigGroupInfo.setHosts(hosts);
+
+         List<ApiConfigGroupConfiguration> desiredConfigs = new ArrayList<ApiConfigGroupConfiguration>();
+
+         logger.info("ApiConfigGroupConfiguration: " + ApiUtils.objectToJson(apiConfigGroupInfo.getDesiredConfigs()));
+         logger.info("apiHostGroupFromClusterSpec: " + ApiUtils.objectToJson(apiHostGroupFromClusterSpec));
+
+         String tag = "version" + Calendar.getInstance().getTimeInMillis();
+         for(ApiConfigGroupConfiguration apiConfigGroupConfiguration : apiConfigGroupInfo.getDesiredConfigs()) {
+
+            ApiConfigGroupConfiguration desiredConfig = new ApiConfigGroupConfiguration();
+
+            desiredConfig.setType(apiConfigGroupConfiguration.getType());
+
+            desiredConfig.setTag(tag);
+
+            Map<String, String> properties = new HashMap<String, String>();
+
+            ApiClusterConfigurations apiClusterConfigurations = apiManager.getClusterConfigurationsWithTypeAndTag(clusterName, apiConfigGroupConfiguration.getType(), apiConfigGroupConfiguration.getTag());
+
+            logger.info("ApiClusterConfigurations: "+ ApiUtils.objectToJson(apiClusterConfigurations));
+
+            for(ApiClusterConfigurationInfo apiClusterConfigurationInfo : apiClusterConfigurations.getConfigurations()) {
+
+               Map<String, String> propertiesFromClusterSpec = new HashMap<String, String>();
+               for (Map<String, Object> configurationFromClusterSpec : apiHostGroupFromClusterSpec.getConfigurations()) {
+                  propertiesFromClusterSpec = (Map<String, String>) configurationFromClusterSpec.get(apiClusterConfigurationInfo.getType());
+                  if (propertiesFromClusterSpec != null) {
+                     break;
+                  }
+               }
+
+               logger.info("propertiesFromClusterSpec: "+ ApiUtils.objectToJson(propertiesFromClusterSpec));
+
+               if (propertiesFromClusterSpec.isEmpty()) {
+                  continue;
+               }
+
+               Map<String, String> propertiesFromAmbariServer = apiClusterConfigurationInfo.getProperties();
+               for(String propertyKey : propertiesFromAmbariServer.keySet()) {
+
+                  // TODO sync up configurations from ambari server to BDE server
+
+                  // TODO sync up configurations from BDE server to ambari server
+
+                  String valueOfPropertyFromClusterSpec = propertiesFromClusterSpec.get(propertyKey);
+                  String valueOfPropertyFromAmbariServer = propertiesFromAmbariServer.get(propertyKey);
+
+                  logger.info("Value of property from cluster spec: " + valueOfPropertyFromClusterSpec);
+                  logger.info("Value of property from ambari server: " + valueOfPropertyFromAmbariServer);
+
+                  if (valueOfPropertyFromClusterSpec == null) {
+                     continue;
+                  }
+
+                  // Just update properties which contains mount piont start with /mnt/datax for cluster upgrading
+                  if (valueOfPropertyFromClusterSpec.contains("/mnt/data0")) {
+                     properties.put(propertyKey, valueOfPropertyFromClusterSpec);
+                     needUpdate = true;
+                  } else {
+                     properties.put(propertyKey, valueOfPropertyFromAmbariServer);
+                  }
+
+               }
+
+            }
+
+            desiredConfig.setProperties(properties);
+            desiredConfigs.add(desiredConfig);
+
          }
 
+         newApiConfigGroupInfo.setDesiredConfigs(desiredConfigs);
+
+         newApiConfigGroup.setApiConfigGroupInfo(newApiConfigGroupInfo);
+
+         logger.info("The new config group: " + ApiUtils.objectToJson(newApiConfigGroup));
+
+         if (needUpdate) {
+            apiManager.updateConfigGroup(clusterName, apiConfigGroupInfo.getId(), newApiConfigGroup);
+         }
+
+      } catch (Exception e) {
+         String errMsg = "Failed to configure services for config group " + apiConfigGroupInfo.getId() + ((e.getMessage() == null) ? "" : (", " + e.getMessage()));
+         logger.error(errMsg);
+         throw SoftwareManagementPluginException.CONFIGURE_SERVICE_FAILED(e);
       }
    }
 
    @Override
    public boolean scaleOutCluster(ClusterBlueprint blueprint, List<String> addedNodeNames,
          ClusterReportQueue reports)
-         throws SoftwareManagementPluginException {
+               throws SoftwareManagementPluginException {
       boolean success = false;
       AmClusterDef clusterDef = null;
       try {
@@ -784,7 +918,7 @@ public class AmbariImpl implements SoftwareManager {
 
    private void removeHosts(AmClusterDef clusterDef,
          List<String> targetHostNames, ClusterReportQueue reports)
-         throws Exception {
+               throws Exception {
       List<String> existingHosts =
             apiManager.getExistingHosts(clusterDef.getName(), targetHostNames);
       if (existingHosts.isEmpty()) {
@@ -851,7 +985,7 @@ public class AmbariImpl implements SoftwareManager {
          Map<String, ApiComponentInfo> componentToInfo,
          ApiHostComponentsRequest apiHostComponentsRequest, List<String> targetHostNames,
          ClusterReportQueue reports) 
-         throws Exception {
+               throws Exception {
       List<String> componentNames = new ArrayList<>();
       for (ApiHostComponent hostComponent : apiHostComponentsRequest.getHostComponents()) {
          String componentName = hostComponent.getHostComponent().getComponentName();
@@ -945,7 +1079,7 @@ public class AmbariImpl implements SoftwareManager {
       sameType.setProperties(new HashMap<String, String>());
       i ++;
       confGroup.getApiConfigGroupInfo().getDesiredConfigs()
-            .add(sameType);
+      .add(sameType);
       return sameType;
    }
 
@@ -1063,7 +1197,7 @@ public class AmbariImpl implements SoftwareManager {
       Exception resultException = null;
       try {
          ReflectionUtils.getPreStartServicesHook().preStartServices(clusterName, forceStart);
-            for (int i = 0; i < getRequestMaxRetryTimes() && !success; i++) {
+         for (int i = 0; i < getRequestMaxRetryTimes() && !success; i++) {
             ApiRequest apiRequestSummary;
             try {
                apiRequestSummary = apiManager.startAllServicesInCluster(clusterName);
@@ -1140,7 +1274,7 @@ public class AmbariImpl implements SoftwareManager {
    }
 
    protected boolean doSoftwareOperation(String clusterName, ApiRequest apiRequestSummary,
-                                       ClusterReport clusterReport, ClusterReportQueue reports) throws Exception{
+         ClusterReport clusterReport, ClusterReportQueue reports) throws Exception{
 
       if (apiRequestSummary == null) {
          return true;
@@ -1186,7 +1320,7 @@ public class AmbariImpl implements SoftwareManager {
             }
          }
          String requestErrorMsg = "Failed to execute request: " +
-                  apiRequest.getApiRequestInfo().getRequestStatus() + ". Refer to each node for details.";
+               apiRequest.getApiRequestInfo().getRequestStatus() + ". Refer to each node for details.";
          clusterReport.setErrMsg(requestErrorMsg);
          reportStatus(clusterReport.clone(), reports);
          throw new RuntimeException(requestErrorMsg);

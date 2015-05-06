@@ -64,7 +64,7 @@ public class FakeConfigureGroupResource implements ConfigGroupsResource {
    }
 
    @Override
-   public Response updateConfigGroup(String configGroup) {
+   public Response updateConfigGroup(String groupId, String configGroup) {
       return null;
    }
 }
