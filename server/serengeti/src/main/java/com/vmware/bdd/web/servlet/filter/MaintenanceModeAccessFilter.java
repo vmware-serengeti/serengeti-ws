@@ -41,7 +41,7 @@ public class MaintenanceModeAccessFilter implements Filter {
       HttpServletRequest req = (HttpServletRequest) request;
       HttpServletResponse resp = (HttpServletResponse) response;
 
-      File file = new File(Constants.MAINTENANCE_MODE_FLAG_FILE);
+      File file = getMaintenanceModeFlagFile();
       if (file.exists()) {
          // server is in maintenance mode
          String method = req.getMethod();
@@ -58,4 +58,7 @@ public class MaintenanceModeAccessFilter implements Filter {
       chain.doFilter(request, response);
    }
 
+   protected File getMaintenanceModeFlagFile () {
+      return new File(Constants.MAINTENANCE_MODE_FLAG_FILE);
+   }
 }

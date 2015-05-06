@@ -35,7 +35,6 @@ import com.vmware.bdd.dal.IClusterDAO;
 import com.vmware.bdd.dal.IResourcePoolDAO;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.exception.VcProviderException;
-import com.vmware.bdd.service.resmgmt.IResourcePoolService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
 import com.vmware.bdd.service.utils.MockVcContext;
 import com.vmware.bdd.service.utils.MockVcInventory;
