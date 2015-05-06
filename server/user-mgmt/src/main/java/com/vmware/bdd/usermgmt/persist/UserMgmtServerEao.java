@@ -95,7 +95,7 @@ public class UserMgmtServerEao {
          errors.addError("NAME", validationError);
       }
 
-      if (existingUserMgmtServer.equals(userMgtServer)) {
+      if (existingUserMgmtServer !=null && existingUserMgmtServer.equals(userMgtServer)) {
          ValidationError validationError = new ValidationError("USERMGMTSERVER.NO_CHANGE", "The server info is not changed.");
          errors.addError("USERMGMTSERVER", validationError);
       }

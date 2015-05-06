@@ -52,6 +52,11 @@
          <groupId>org.mockito</groupId>
          <artifactId>mockito-core</artifactId>
       </dependency>
+      <dependency>
+         <groupId>com.googlecode.jmockit</groupId>
+         <artifactId>jmockit</artifactId>
+         <scope>test</scope>
+      </dependency>
    </dependencies>
 
 
