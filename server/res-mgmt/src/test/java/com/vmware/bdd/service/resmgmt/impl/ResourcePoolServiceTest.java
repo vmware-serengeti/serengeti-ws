@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.vmware.bdd.service.utils.MockVcCache;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.Mockit;
@@ -67,6 +68,7 @@ public class ResourcePoolServiceTest extends BaseResourceTest {
       rpSvc = new ResourcePoolService();
       Mockit.setUpMock(MockVcContext.class);
       Mockit.setUpMock(MockVcInventory.class);
+      Mockit.setUpMock(MockVcCache.class);
    }
 
    @Test(groups = { "res-mgmt" })

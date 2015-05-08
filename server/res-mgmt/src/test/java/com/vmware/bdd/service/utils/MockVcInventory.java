@@ -34,6 +34,20 @@ import com.vmware.aurora.vc.VcVirtualMachine;
 public class MockVcInventory {
    @Mock
    static public List<VcCluster> getClusters() {
+      List<VcCluster> clusters = prepareClusters();
+      return clusters;
+   }
+
+   @Mock
+   public static void loadInventory() {}
+
+   @Mock
+   static public List<VcCluster> getClustersInDatacenter(String datacenterName) {
+      List<VcCluster> clusters = prepareClusters();
+      return clusters;
+   }
+
+   private static List<VcCluster> prepareClusters() {
       VcCluster cluster1 = Mockito.mock(VcCluster.class);
       VcDatastore ds1 = Mockito.mock(VcDatastore.class);
       Mockito.when(ds1.getName()).thenReturn("test_1");
@@ -43,7 +57,7 @@ public class MockVcInventory {
       List<VcCluster> clusters = new ArrayList<VcCluster>();
       clusters.add(cluster1);
       Mockito.when(cluster1.getDatastore("test_1")).thenReturn(ds1);
-      
+
       List<VcNetwork> nets = new ArrayList<VcNetwork>();
       VcNetwork net1 = Mockito.mock(VcNetwork.class);
       Mockito.when(net1.getName()).thenReturn("port1");
@@ -61,7 +75,7 @@ public class MockVcInventory {
          Mockito.when(cluster1.searchRP("[cluster1]/rp1")).thenReturn(rp1);
          VcResourcePool clusterRP = Mockito.mock(VcResourcePool.class);
          Mockito.when(cluster1.searchRP("[cluster1]")).thenReturn(clusterRP);
-         
+
          List<VcVirtualMachine> vms = new ArrayList<VcVirtualMachine>();
          VcVirtualMachine vm = Mockito.mock(VcVirtualMachine.class);
          vms.add(vm);
@@ -72,7 +86,4 @@ public class MockVcInventory {
       }
       return clusters;
    }
-
-   @Mock
-   public static void loadInventory() {}
 }

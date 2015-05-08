@@ -35,6 +35,7 @@ public class TestVcResourceUtils {
    public static void setup() {
       Mockit.setUpMock(MockVcInventory.class);
       Mockit.setUpMock(MockVcContext.class);
+      Mockit.setUpMock(MockVcCache.class);
    }
 
    @AfterClass(groups = { "TestVcResourceUtils" })
@@ -42,7 +43,7 @@ public class TestVcResourceUtils {
       Mockit.tearDownMocks();
    }
 
-   @Test
+   @Test(groups = {"TestVcResourceUtils"})
    public void testFindDSInVCByPattern() {
       Collection<VcDatastore> dss = VcResourceUtils.findDSInVCByPattern("line.*");
       Assert.assertNotNull(dss);
@@ -50,7 +51,7 @@ public class TestVcResourceUtils {
       Assert.assertEquals(dss.size(), 1);
    }
 
-   @Test
+   @Test(groups = {"TestVcResourceUtils"})
    public void testFindDSInVcByName() {
       VcDatastore ds = VcResourceUtils.findDSInVcByName("line_1");
       Assert.assertNull(ds);
@@ -58,7 +59,7 @@ public class TestVcResourceUtils {
       Assert.assertEquals(ds.getName(), "test_1");
    }
 
-   @Test
+   @Test(groups = {"TestVcResourceUtils"})
    public void testFindNetworkInVC() {
       VcNetwork net = VcResourceUtils.findNetworkInVC("port2");
       Assert.assertNull(net);
@@ -66,7 +67,7 @@ public class TestVcResourceUtils {
       Assert.assertNotNull(net);
    }
 
-   @Test
+   @Test(groups = {"TestVcResourceUtils"})
    public void testFindAllHostsInVCCluster() {
       List<VcHost> hosts = VcResourceUtils.findAllHostsInVCCluster("cluster2");
       Assert.assertTrue(hosts.isEmpty());
@@ -74,7 +75,7 @@ public class TestVcResourceUtils {
       Assert.assertTrue(hosts.size() > 0);
    }
 
-   @Test
+   @Test(groups = {"TestVcResourceUtils"})
    public void testFindAllHostInVcResourcePool() {
       List<VcHost> host = VcResourceUtils.findAllHostInVcResourcePool("cluster1", "rp1");
       Assert.assertEquals(host.size(), 1);
@@ -82,7 +83,7 @@ public class TestVcResourceUtils {
       Assert.assertEquals(host.size(), 0);
    }
 
-   @Test
+   @Test(groups = {"TestVcResourceUtils"})
    public void testFindRPInVCCluster() {
       VcResourcePool rp = VcResourceUtils.findRPInVCCluster("cluster2", "rp1");
       Assert.assertNull(rp);
@@ -92,7 +93,7 @@ public class TestVcResourceUtils {
       Assert.assertNotNull(rp);
    }
 
-   @Test
+   @Test(groups = {"TestVcResourceUtils"})
    public void testFindVmInVcCluster() {
       VcVirtualMachine vm = VcResourceUtils.findVmInVcCluster("cluster1", "rp1", "vm2");
       Assert.assertNull(vm);
