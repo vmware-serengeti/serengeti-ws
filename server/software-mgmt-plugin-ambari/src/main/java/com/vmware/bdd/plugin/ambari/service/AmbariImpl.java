@@ -785,10 +785,6 @@ public class AmbariImpl implements SoftwareManager {
 
                logger.info("propertiesFromClusterSpec: "+ ApiUtils.objectToJson(propertiesFromClusterSpec));
 
-               if (propertiesFromClusterSpec.isEmpty()) {
-                  continue;
-               }
-
                Map<String, String> propertiesFromAmbariServer = apiClusterConfigurationInfo.getProperties();
                for(String propertyKey : propertiesFromAmbariServer.keySet()) {
 
@@ -796,18 +792,19 @@ public class AmbariImpl implements SoftwareManager {
 
                   // TODO sync up configurations from BDE server to ambari server
 
-                  String valueOfPropertyFromClusterSpec = propertiesFromClusterSpec.get(propertyKey);
+                  String valueOfPropertyFromClusterSpec = null;
+
+                  if (propertiesFromClusterSpec != null) {
+                     valueOfPropertyFromClusterSpec = propertiesFromClusterSpec.get(propertyKey);
+                  }
+
                   String valueOfPropertyFromAmbariServer = propertiesFromAmbariServer.get(propertyKey);
 
                   logger.info("Value of property from cluster spec: " + valueOfPropertyFromClusterSpec);
                   logger.info("Value of property from ambari server: " + valueOfPropertyFromAmbariServer);
 
-                  if (valueOfPropertyFromClusterSpec == null) {
-                     continue;
-                  }
-
                   // Just update properties which contains mount piont start with /mnt/datax for cluster upgrading
-                  if (valueOfPropertyFromClusterSpec.contains("/mnt/data0")) {
+                  if (valueOfPropertyFromClusterSpec != null && valueOfPropertyFromClusterSpec.contains("/mnt/data0")) {
                      properties.put(propertyKey, valueOfPropertyFromClusterSpec);
                      needUpdate = true;
                   } else {
