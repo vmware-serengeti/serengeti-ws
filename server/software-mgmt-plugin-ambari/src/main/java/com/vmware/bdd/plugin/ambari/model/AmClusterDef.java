@@ -358,6 +358,14 @@ public class AmClusterDef implements Serializable {
 
       return needBootstrapHostCount;
    }
+      
+   public String getAmbariServerVersion() {
+      return ambariServerVersion;
+   }
+
+   public void setAmbariServerVersion(String ambariServerVersion) {
+      this.ambariServerVersion = ambariServerVersion;
+   }
 
    public String getAmbariServerVersion() {
       return ambariServerVersion;
