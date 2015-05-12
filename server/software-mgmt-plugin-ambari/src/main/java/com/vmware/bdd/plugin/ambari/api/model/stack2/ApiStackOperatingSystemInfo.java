@@ -12,29 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model.stack;
-
-import java.util.List;
+package com.vmware.bdd.plugin.ambari.api.model.stack2;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiStackServiceInfo {
+public class ApiStackOperatingSystemInfo {
 
    @Expose
-   private String comments;
-
-   @Expose
-   @SerializedName("config_types")
-   private List<String> configTypes;
-
-   @Expose
-   @SerializedName("service_name")
-   private String serviceName;
-
-   @Expose
-   @SerializedName("service_version")
-   private String serviceVersion;
+   @SerializedName("os_type")
+   private String osType;
 
    @Expose
    @SerializedName("stack_name")
@@ -44,40 +31,12 @@ public class ApiStackServiceInfo {
    @SerializedName("stack_version")
    private String stackVersion;
 
-   @Expose
-   @SerializedName("user_name")
-   private String userName;
-
-   public String getComments() {
-      return comments;
+   public String getOsType() {
+      return osType;
    }
 
-   public void setComments(String comments) {
-      this.comments = comments;
-   }
-
-   public List<String> getConfigTypes() {
-      return configTypes;
-   }
-
-   public void setConfigTypes(List<String> configTypes) {
-      this.configTypes = configTypes;
-   }
-
-   public String getServiceName() {
-      return serviceName;
-   }
-
-   public void setServiceName(String serviceName) {
-      this.serviceName = serviceName;
-   }
-
-   public String getServiceVersion() {
-      return serviceVersion;
-   }
-
-   public void setServiceVersion(String serviceVersion) {
-      this.serviceVersion = serviceVersion;
+   public void setOsType(String osType) {
+      this.osType = osType;
    }
 
    public String getStackName() {
@@ -96,11 +55,4 @@ public class ApiStackServiceInfo {
       this.stackVersion = stackVersion;
    }
 
-   public String getUserName() {
-      return userName;
-   }
-
-   public void setUserName(String userName) {
-      this.userName = userName;
-   }
 }

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model.stack;
+package com.vmware.bdd.plugin.ambari.api.model.stack2;
 
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +39,12 @@ public class ApiStackService {
    @SerializedName("configurations")
    private List<ApiConfiguration> apiConfigurations;
 
+   // Just for ambari server 2.0
+   
+   @Expose
+   @SerializedName("components")
+   private List<ApiStackComponent> components;
+   
    public String getHref() {
       return href;
    }
@@ -56,7 +62,11 @@ public class ApiStackService {
    }
 
    public List<ApiStackComponent> getServiceComponents() {
-      return serviceComponents;
+      if (components != null) {
+         return components;
+      } else {
+         return serviceComponents;
+      }
    }
 
    public void setServiceComponents(List<ApiStackComponent> serviceComponents) {
@@ -86,8 +96,8 @@ public class ApiStackService {
 
    public Map<String, ApiComponentInfo> componentToInfo() {
       Map<String, ApiComponentInfo> result = new HashMap<>();
-      if (serviceComponents != null) {
-         for (ApiStackComponent component : serviceComponents) {
+      if (getServiceComponents() != null) {
+         for (ApiStackComponent component : getServiceComponents()) {
             if (!result.containsKey(component.getApiComponent()
                   .getComponentName())) {
                result.put(component.getApiComponent().getComponentName(),

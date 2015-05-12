@@ -12,29 +12,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model.stack;
+package com.vmware.bdd.plugin.ambari.api.model.stack2;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
 
-public class ApiStackVersion {
+public class ApiStackServiceList {
 
    @Expose
    private String href;
 
    @Expose
-   @SerializedName("Versions")
-   private ApiStackVersionInfo apiStackVersionInfo;
-
-   @Expose
-   @SerializedName("stackServices")
+   @SerializedName("items")
    private List<ApiStackService> apiStackServices;
-
-   @Expose
-   @SerializedName("operatingSystems")
-   private List<ApiStackOperatingSystem> ApiStackOperatingSystems;
 
    public String getHref() {
       return href;
@@ -42,14 +37,6 @@ public class ApiStackVersion {
 
    public void setHref(String href) {
       this.href = href;
-   }
-
-   public ApiStackVersionInfo getApiStackVersionInfo() {
-      return apiStackVersionInfo;
-   }
-
-   public void setApiStackVersionInfos(ApiStackVersionInfo apiStackVersionInfo) {
-      this.apiStackVersionInfo = apiStackVersionInfo;
    }
 
    public List<ApiStackService> getApiStackServices() {
@@ -60,13 +47,23 @@ public class ApiStackVersion {
       this.apiStackServices = apiStackServices;
    }
 
-   public List<ApiStackOperatingSystem> getApiStackOperatingSystems() {
-      return ApiStackOperatingSystems;
+   public Map<String, String> configTypeToService() {
+      Map<String, String> result = new HashMap<>();
+      if (apiStackServices != null) {
+         for (ApiStackService service : apiStackServices) {
+            result.putAll(service.configTypeToService());
+         }
+      }
+      return result;
    }
 
-   public void setApiStackOperatingSystems(
-         List<ApiStackOperatingSystem> apiStackOperatingSystems) {
-      ApiStackOperatingSystems = apiStackOperatingSystems;
+   public Map<String, ApiComponentInfo> componentToInfo() {
+      Map<String, ApiComponentInfo> result = new HashMap<>();
+      if (apiStackServices != null) {
+         for (ApiStackService service : apiStackServices) {
+            result.putAll(service.componentToInfo());
+         }
+      }
+      return result;
    }
-
 }

@@ -12,26 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model.stack;
-
-import java.util.List;
+package com.vmware.bdd.plugin.ambari.api.model.stack2;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
 
-public class ApiStackComponent {
+public class ApiConfiguration {
 
    @Expose
    private String href;
 
    @Expose
-   @SerializedName("StackServiceComponents")
-   private ApiComponentInfo apiComponent;
-
-   @Expose
-   @SerializedName("dependencies")
-   private List<ApiComponentDependency> apiComponentDependencies;
+   @SerializedName("StackConfigurations")
+   private ApiConfigurationInfo apiConfigurationInfo;
 
    public String getHref() {
       return href;
@@ -41,21 +34,11 @@ public class ApiStackComponent {
       this.href = href;
    }
 
-   public ApiComponentInfo getApiComponent() {
-      return apiComponent;
+   public ApiConfigurationInfo getApiConfigurationInfo() {
+      return apiConfigurationInfo;
    }
 
-   public void setApiComponent(ApiComponentInfo apiComponent) {
-      this.apiComponent = apiComponent;
+   public void setApiConfigurationInfo(ApiConfigurationInfo apiConfigurationInfo) {
+      this.apiConfigurationInfo = apiConfigurationInfo;
    }
-
-   public List<ApiComponentDependency> getApiComponentDependencies() {
-      return apiComponentDependencies;
-   }
-
-   public void setApiComponentDependencies(
-         List<ApiComponentDependency> apiComponentDependencies) {
-      this.apiComponentDependencies = apiComponentDependencies;
-   }
-
 }

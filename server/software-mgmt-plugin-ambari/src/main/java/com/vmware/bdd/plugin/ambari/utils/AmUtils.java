@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import com.vmware.aurora.util.StringUtil;
 import com.vmware.bdd.plugin.ambari.api.model.ApiHostsRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiHostsRequestInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
@@ -156,5 +157,13 @@ public class AmUtils {
 
    public static String getConfDir() {
       return com.vmware.bdd.utils.CommonUtil.getConfDir() + File.separator + Constants.AMBARI_PLUGIN_NAME;
+   }
+
+   public static boolean isAmbariServerBelow_2_0_0(String ambariServerVersion) {
+      //When server version is invalid, using the 1.x.x api as default
+      if (ambariServerVersion == null || ambariServerVersion.split("\\.").length != 3) {
+         return true;
+      }
+      return Integer.parseInt(ambariServerVersion.split("\\.")[0]) < 2;
    }
 }

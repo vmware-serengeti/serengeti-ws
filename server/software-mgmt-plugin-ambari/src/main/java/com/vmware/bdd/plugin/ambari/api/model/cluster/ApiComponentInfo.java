@@ -14,6 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.api.model.cluster;
 
+import java.util.List;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -56,6 +58,20 @@ public class ApiComponentInfo {
    @Expose
    @SerializedName("state")
    private String state;
+
+   // Just for ambari server 2.0
+
+   @Expose
+   @SerializedName("custom_commands")
+   private List<String> customCommands;
+
+   @Expose
+   @SerializedName("display_name")
+   private String displayName;
+
+   @Expose
+   @SerializedName("advertise_version")
+   private Boolean advertiseVersion;
 
    public String getName() {
       return name;
@@ -135,5 +151,45 @@ public class ApiComponentInfo {
 
    public void setState(String state) {
       this.state = state;
+   }
+
+   public Boolean getIsClient() {
+      return isClient;
+   }
+
+   public void setIsClient(Boolean isClient) {
+      this.isClient = isClient;
+   }
+
+   public Boolean getIsMaster() {
+      return isMaster;
+   }
+
+   public void setIsMaster(Boolean isMaster) {
+      this.isMaster = isMaster;
+   }
+
+   public List<String> getCustomCommands() {
+      return customCommands;
+   }
+
+   public void setCustomCommands(List<String> customCommands) {
+      this.customCommands = customCommands;
+   }
+
+   public String getDisplayName() {
+      return displayName;
+   }
+
+   public void setDisplayName(String displayName) {
+      this.displayName = displayName;
+   }
+
+   public Boolean getAdvertiseVersion() {
+      return advertiseVersion;
+   }
+
+   public void setAdvertiseVersion(Boolean advertiseVersion) {
+      this.advertiseVersion = advertiseVersion;
    }
 }

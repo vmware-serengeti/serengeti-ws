@@ -19,35 +19,26 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.vmware.bdd.plugin.ambari.api.Parameters;
 
 @Consumes({ MediaType.APPLICATION_JSON })
-@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
-public interface ServicesResource {
+@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+      MediaType.TEXT_PLAIN })
+public interface StacksResource {
 
    @GET
    @Path("/")
-   public Response readServices();
+   public Response readStacks();
 
    @GET
-   @Path("/")
-   public Response readServicesWithFilter(@QueryParam("fields") String fields);
+   @Path("/{stackName}")
+   public Response readStack(@PathParam(Parameters.STACK_NAME) String stackName);
 
-   @GET
-   @Path("/{stackServiceName}")
-   public Response readService(@PathParam(Parameters.STACK_SERVICE_NAME) String stackServiceName);
-
-   @GET
-   @Path("/{stackServiceName}")
-   public Response readServiceWithFilter(
-         @PathParam(Parameters.STACK_SERVICE_NAME) String stackServiceName,
-         @QueryParam("fields") String fields);
-
-   @Path("/{stackServiceName}/components")
-   public ComponentsResource getComponentsResource(@PathParam(Parameters.STACK_SERVICE_NAME) String stackServiceName);
+   @Path("/{stackName}/versions")
+   public VersionsResource getStackVersionsResource(
+         @PathParam(Parameters.STACK_NAME) String stackName);
 
 }

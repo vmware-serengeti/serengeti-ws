@@ -26,15 +26,15 @@ import java.util.Set;
 import com.google.gson.Gson;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiComponentDependency;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiComponentDependencyInfo;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiConfiguration;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiConfigurationInfo;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponent;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceList;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ComponentCategory;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ComponentName;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiComponentDependency;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiComponentDependencyInfo;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiConfiguration;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiConfigurationInfo;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackComponent;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackService;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackServiceList;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ComponentCategory;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ComponentName;
 import com.vmware.bdd.plugin.ambari.api.model.support.AvailableConfigurationContainer;
 import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
@@ -42,8 +42,8 @@ import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
-
 import com.vmware.bdd.usermgmt.UserMgmtConstants;
+
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 

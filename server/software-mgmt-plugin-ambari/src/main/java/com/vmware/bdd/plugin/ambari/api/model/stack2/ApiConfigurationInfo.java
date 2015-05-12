@@ -12,20 +12,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model.stack;
+package com.vmware.bdd.plugin.ambari.api.model.stack2;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiStackOperatingSystemRepository {
+public class ApiConfigurationInfo {
 
    @Expose
-   @SerializedName("os_type")
-   private String osType;
+   @SerializedName("property_description")
+   private String propertyDescription;
 
    @Expose
-   @SerializedName("repo_id")
-   private String repoId;
+   @SerializedName("property_name")
+   private String propertyName;
+
+   @Expose
+   @SerializedName("property_value")
+   private String propertyValue;
 
    @Expose
    @SerializedName("stack_name")
@@ -35,20 +39,36 @@ public class ApiStackOperatingSystemRepository {
    @SerializedName("stack_version")
    private String stackVersion;
 
-   public String getOsType() {
-      return osType;
+   @Expose
+   @SerializedName("type")
+   private String Type;
+
+   @Expose
+   @SerializedName("service_name")
+   private String serviceName;
+
+   public String getPropertyDescription() {
+      return propertyDescription;
    }
 
-   public void setOsType(String osType) {
-      this.osType = osType;
+   public void setPropertyDescription(String propertyDescription) {
+      this.propertyDescription = propertyDescription;
    }
 
-   public String getRepoId() {
-      return repoId;
+   public String getPropertyName() {
+      return propertyName;
    }
 
-   public void setRepoId(String repoId) {
-      this.repoId = repoId;
+   public void setPropertyName(String propertyName) {
+      this.propertyName = propertyName;
+   }
+
+   public String getPropertyValue() {
+      return propertyValue;
+   }
+
+   public void setPropertyValue(String propertyValue) {
+      this.propertyValue = propertyValue;
    }
 
    public String getStackName() {
@@ -65,5 +85,21 @@ public class ApiStackOperatingSystemRepository {
 
    public void setStackVersion(String stackVersion) {
       this.stackVersion = stackVersion;
+   }
+
+   public String getType() {
+      return Type;
+   }
+
+   public void setType(String type) {
+      Type = type;
+   }
+
+   public String getServiceName() {
+      return serviceName;
+   }
+
+   public void setServiceName(String serviceName) {
+      this.serviceName = serviceName;
    }
 }
