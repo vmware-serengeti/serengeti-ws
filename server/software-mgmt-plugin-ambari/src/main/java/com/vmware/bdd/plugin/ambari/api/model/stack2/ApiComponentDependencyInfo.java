@@ -12,16 +12,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model.stack;
+package com.vmware.bdd.plugin.ambari.api.model.stack2;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiStackOperatingSystemInfo {
+public class ApiComponentDependencyInfo {
 
    @Expose
-   @SerializedName("os_type")
-   private String osType;
+   @SerializedName("component_name")
+   private String componentName;
+
+   @Expose
+   @SerializedName("dependent_component_name")
+   private String dependentComponentName;
+
+   @Expose
+   @SerializedName("dependent_service_name")
+   private String dependentServiceName;
 
    @Expose
    @SerializedName("stack_name")
@@ -31,12 +39,28 @@ public class ApiStackOperatingSystemInfo {
    @SerializedName("stack_version")
    private String stackVersion;
 
-   public String getOsType() {
-      return osType;
+   public String getComponentName() {
+      return componentName;
    }
 
-   public void setOsType(String osType) {
-      this.osType = osType;
+   public void setComponentName(String componentName) {
+      this.componentName = componentName;
+   }
+
+   public String getDependentComponentName() {
+      return dependentComponentName;
+   }
+
+   public void setDependentComponentName(String dependentComponentName) {
+      this.dependentComponentName = dependentComponentName;
+   }
+
+   public String getDependentServiceName() {
+      return dependentServiceName;
+   }
+
+   public void setDependentServiceName(String dependentServiceName) {
+      this.dependentServiceName = dependentServiceName;
    }
 
    public String getStackName() {

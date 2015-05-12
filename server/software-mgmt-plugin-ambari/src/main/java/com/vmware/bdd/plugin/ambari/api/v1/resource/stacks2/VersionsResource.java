@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2015 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,14 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.v1.resource.stacks;
+package com.vmware.bdd.plugin.ambari.api.v1.resource.stacks2;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -27,27 +26,17 @@ import com.vmware.bdd.plugin.ambari.api.Parameters;
 
 @Consumes({ MediaType.APPLICATION_JSON })
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
-public interface ServicesResource {
+public interface VersionsResource {
 
    @GET
    @Path("/")
-   public Response readServices();
+   public Response readStackVersions();
 
    @GET
-   @Path("/")
-   public Response readServicesWithFilter(@QueryParam("fields") String fields);
+   @Path("/{stackVersion}")
+   public Response readStackVersion(@PathParam(Parameters.STACK_VERSION) String stackVersion);
 
-   @GET
-   @Path("/{stackServiceName}")
-   public Response readService(@PathParam(Parameters.STACK_SERVICE_NAME) String stackServiceName);
-
-   @GET
-   @Path("/{stackServiceName}")
-   public Response readServiceWithFilter(
-         @PathParam(Parameters.STACK_SERVICE_NAME) String stackServiceName,
-         @QueryParam("fields") String fields);
-
-   @Path("/{stackServiceName}/components")
-   public ComponentsResource getComponentsResource(@PathParam(Parameters.STACK_SERVICE_NAME) String stackServiceName);
+   @Path("/{stackVersion}/stackServices")
+   public ServicesResource getStackServicesResource(@PathParam(Parameters.STACK_VERSION) String stackVersion);
 
 }

@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2015 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,16 +11,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ***************************************************************************/
+ ***************************************************************************/   
 package com.vmware.bdd.plugin.ambari.api.model.stack;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiStackVersionInfo {
+public class ApiArtifactInfo {
 
    @Expose
-   private String href;
+   @SerializedName("kerberos_descriptor")
+   private String kerberosDescriptor;
+
+   @Expose
+   @SerializedName("service_name")
+   private String serviceName;
 
    @Expose
    @SerializedName("stack_name")
@@ -28,25 +33,22 @@ public class ApiStackVersionInfo {
 
    @Expose
    @SerializedName("stack_version")
-   private String StackVersion;
+   private String stackVersion;
 
-   @Expose
-   private Boolean active;
-
-   @Expose
-   @SerializedName("min_upgrade_version")
-   private String minUpgradeVersion;
-
-   @Expose
-   @SerializedName("parent_stack_version")
-   private String parentStackVersion;
-
-   public String getHref() {
-      return href;
+   public String getKerberosDescriptor() {
+      return kerberosDescriptor;
    }
 
-   public void setHref(String href) {
-      this.href = href;
+   public void setKerberosDescriptor(String kerberosDescriptor) {
+      this.kerberosDescriptor = kerberosDescriptor;
+   }
+
+   public String getServiceName() {
+      return serviceName;
+   }
+
+   public void setServiceName(String serviceName) {
+      this.serviceName = serviceName;
    }
 
    public String getStackName() {
@@ -58,34 +60,11 @@ public class ApiStackVersionInfo {
    }
 
    public String getStackVersion() {
-      return StackVersion;
+      return stackVersion;
    }
 
    public void setStackVersion(String stackVersion) {
-      StackVersion = stackVersion;
+      this.stackVersion = stackVersion;
    }
 
-   public Boolean isActive() {
-      return active;
-   }
-
-   public void setActive(Boolean active) {
-      this.active = active;
-   }
-
-   public String getMinUpgradeVersion() {
-      return minUpgradeVersion;
-   }
-
-   public void setMinUpgradeVersion(String minUpgradeVersion) {
-      this.minUpgradeVersion = minUpgradeVersion;
-   }
-
-   public String getParentStackVersion() {
-      return parentStackVersion;
-   }
-
-   public void setParentStackVersion(String parentStackVersion) {
-      this.parentStackVersion = parentStackVersion;
-   }
 }

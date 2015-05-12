@@ -12,24 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model.stack;
-
-import java.util.List;
+package com.vmware.bdd.plugin.ambari.api.model.stack2;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiStack {
+public class ApiComponentDependency {
    @Expose
    private String href;
 
    @Expose
-   @SerializedName("Stacks")
-   private ApiStackName apiStackName;
-
-   @Expose
-   @SerializedName("versions")
-   private List<ApiStackVersion> apiStackVersions;
+   @SerializedName("Dependencies")
+   private ApiComponentDependencyInfo apiComponentDependencyInfo;
 
    public String getHref() {
       return href;
@@ -39,19 +33,13 @@ public class ApiStack {
       this.href = href;
    }
 
-   public ApiStackName getApiStackName() {
-      return apiStackName;
+   public ApiComponentDependencyInfo getApiComponentDependencyInfo() {
+      return apiComponentDependencyInfo;
    }
 
-   public void setApiStackName(ApiStackName apiStackName) {
-      this.apiStackName = apiStackName;
+   public void setApiComponentDependencyInfo(
+         ApiComponentDependencyInfo apiComponentDependencyInfo) {
+      this.apiComponentDependencyInfo = apiComponentDependencyInfo;
    }
 
-   public List<ApiStackVersion> getApiStackVersions() {
-      return apiStackVersions;
-   }
-
-   public void setApiStackVersions(List<ApiStackVersion> apiStackVersions) {
-      this.apiStackVersions = apiStackVersions;
-   }
 }

@@ -21,11 +21,13 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiService;
+import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
 import com.vmware.bdd.plugin.ambari.service.am.FakeRootResourceV1;
 
 import junit.framework.Assert;
 import mockit.Mockit;
+
 import org.mockito.Mockito;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -45,7 +47,8 @@ public class TestApiManager {
       Mockito.when(apiRootResource.getRootV1()).thenReturn(rootResourceV1);
       AmbariManagerClientbuilder clientbuilder = Mockito.mock(AmbariManagerClientbuilder.class);
       Mockito.when(clientbuilder.build()).thenReturn(apiRootResource);
-      apiManager = new ApiManager(clientbuilder);
+      //apiManager = new ApiManager(clientbuilder);
+      apiManager = new ApiManager("10.141.72.211", 8080, "admin", "admin");
    }
 
    @AfterMethod
@@ -55,7 +58,24 @@ public class TestApiManager {
 
    @Test
    public void testGetStackList() throws Exception {
-
+      String stackName = "HDP";
+      String stackVersion = "2.2";
+      String stackServiceName = "HDFS";
+      String stackComponentName = "NAMENODE";
+      String filter = "*";
+      
+      //System.out.println(ApiUtils.objectToJson(apiManager.getStackList()));
+      //System.out.println(ApiUtils.objectToJson(apiManager.getStack(stackName)));
+      //System.out.println(ApiUtils.objectToJson(apiManager.getStackVersionList(stackName)));
+      //System.out.println(ApiUtils.objectToJson(apiManager.getStackVersion(stackName, stackVersion)));
+      //System.out.println(ApiUtils.objectToJson(apiManager.getStackServiceList(stackName, stackVersion)));
+      //System.out.println(ApiUtils.objectToJson(apiManager.getStackService(stackName, stackVersion, stackServiceName)));
+      //System.out.println(ApiUtils.objectToJson(apiManager.getStackComponentList(stackName, stackVersion, stackServiceName)));
+      //System.out.println(ApiUtils.objectToJson(apiManager.getStackComponent(stackName, stackVersion, stackServiceName, stackComponentName)));
+      //System.out.println(ApiUtils.objectToJson(apiManager.getServicesWithFilter(stackName, stackVersion, filter)));
+      //System.out.println(ApiUtils.objectToJson(apiManager.getStackServiceListWithComponents(stackName, stackVersion)));
+      //System.out.println(ApiUtils.objectToJson(apiManager.getStackServiceListWithConfigurations(stackName, stackVersion)));
+      System.out.println(ApiUtils.objectToJson(apiManager.getStackServiceWithComponents(stackName, stackVersion, stackServiceName).componentToInfo()));
    }
 
    @Test

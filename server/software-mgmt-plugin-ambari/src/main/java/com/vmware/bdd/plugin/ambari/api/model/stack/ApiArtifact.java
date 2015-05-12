@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2015 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,19 +14,17 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.api.model.stack;
 
-import java.util.List;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiStackOperatingSystemList {
+public class ApiArtifact {
 
    @Expose
    private String href;
 
    @Expose
-   @SerializedName("items")
-   private List<ApiStackOperatingSystem> apiStackOperatingSystems;
+   @SerializedName("Artifacts")
+   private ApiArtifactInfo Artifacts;
 
    public String getHref() {
       return href;
@@ -36,12 +34,12 @@ public class ApiStackOperatingSystemList {
       this.href = href;
    }
 
-   public List<ApiStackOperatingSystem> getApiStackOperatingSystems() {
-      return apiStackOperatingSystems;
+   public ApiArtifactInfo getArtifacts() {
+      return Artifacts;
    }
 
-   public void setApiStackOperatingSystems(
-         List<ApiStackOperatingSystem> apiStackOperatingSystems) {
-      this.apiStackOperatingSystems = apiStackOperatingSystems;
+   public void setArtifacts(ApiArtifactInfo artifacts) {
+      Artifacts = artifacts;
    }
+
 }

@@ -31,14 +31,14 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequestList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiService;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStack;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponent;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponentList;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackList;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceList;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersion;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersionList;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStack;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackComponent;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackComponentList;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackList;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackService;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackServiceList;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackVersion;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackVersionList;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 
@@ -163,4 +163,7 @@ public interface IApiManager {
    public String getVersion() throws AmbariApiException;
 
    public ApiHostList getRegisteredHosts() throws AmbariApiException;
+
+   ApiStackServiceList getServicesWithFilter(String stackName,
+                                             String stackVersion, String filter) throws AmbariApiException;
 }

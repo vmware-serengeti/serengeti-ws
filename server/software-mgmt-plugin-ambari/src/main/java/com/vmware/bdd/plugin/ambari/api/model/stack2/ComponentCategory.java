@@ -12,35 +12,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model.stack;
+package com.vmware.bdd.plugin.ambari.api.model.stack2;
 
-import java.util.List;
+public enum ComponentCategory {
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+   MASTER(0),
+   SLAVE(1),
+   CLIENT(2);
 
-public class ApiStackList {
+   private final int category;
 
-   @Expose
-   private String href;
-
-   @Expose
-   @SerializedName("items")
-   private List<ApiStack> apiStacks;
-
-   public String getHref() {
-      return href;
+   private ComponentCategory(int category) {
+      this.category = category;
    }
 
-   public void setHref(String href) {
-      this.href = href;
+   public boolean isMaster() {
+      switch (ComponentCategory.values()[this.category]) {
+      case MASTER:
+         return true;
+      default:
+         return false;
+      }
    }
 
-   public List<ApiStack> getApiStacks() {
-      return apiStacks;
+   public boolean isSlave() {
+      switch (ComponentCategory.values()[this.category]) {
+      case SLAVE:
+         return true;
+      default:
+         return false;
+      }
    }
 
-   public void setApiStacks(List<ApiStack> apiStacks) {
-      this.apiStacks = apiStacks;
+   public boolean isClient() {
+      switch (ComponentCategory.values()[this.category]) {
+      case CLIENT:
+         return true;
+      default:
+         return false;
+      }
    }
+
 }

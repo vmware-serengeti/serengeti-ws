@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gson.annotations.Expose;
+import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprintInfo;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
@@ -60,6 +61,8 @@ public class AmClusterDef implements Serializable {
 
    private ClusterReport currentReport;
 
+   private String ambariServerVersion;
+
    @Expose
    private List<Map<String, Object>> configurations;
 
@@ -74,6 +77,7 @@ public class AmClusterDef implements Serializable {
       this.sshKey = privateKey;
       this.user = Constants.AMBARI_SSH_USER;
       this.currentReport = new ClusterReport(blueprint);
+      this.ambariServerVersion = ambariServerVersion;
 
       this.nodes = new ArrayList<AmNodeDef>();
       HdfsVersion hdfs = getDefaultHdfsVersion(this.version);
@@ -193,6 +197,9 @@ public class AmClusterDef implements Serializable {
       apiBootstrap.setHosts(hosts);
       apiBootstrap.setSshKey(sshKey);
       apiBootstrap.setUser(user);
+      if (!AmUtils.isAmbariServerBelow_2_0_0(ambariServerVersion)) {
+         apiBootstrap.setUserRunAs(Configuration.getString("ambari.user_run_as"));
+      }
       return apiBootstrap;
    }
 
@@ -212,6 +219,14 @@ public class AmClusterDef implements Serializable {
       }
       apiBlueprint.setApiHostGroups(apiHostGroups);
       return apiBlueprint;
+   }
+
+   public String getAmbariServerVersion() {
+      return ambariServerVersion;
+   }
+
+   public void setAmbariServerVersion(String ambariServerVersion) {
+      this.ambariServerVersion = ambariServerVersion;
    }
 
    public ApiClusterBlueprint toApiClusterBlueprint() {

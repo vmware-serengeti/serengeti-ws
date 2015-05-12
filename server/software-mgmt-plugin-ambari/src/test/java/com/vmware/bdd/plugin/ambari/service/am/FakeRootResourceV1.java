@@ -22,7 +22,8 @@ import com.vmware.bdd.plugin.ambari.api.v1.PersistResource;
 import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
 import com.vmware.bdd.plugin.ambari.api.v1.RootServicesResource;
 import com.vmware.bdd.plugin.ambari.api.v1.resource.clusters.ClustersResource;
-import com.vmware.bdd.plugin.ambari.api.v1.resource.stacks.Stacks2Resource;
+import com.vmware.bdd.plugin.ambari.api.v1.resource.stacks.StacksResource;
+import com.vmware.bdd.plugin.ambari.api.v1.resource.stacks2.Stacks2Resource;
 
 public class FakeRootResourceV1 implements RootResourceV1 {
 
@@ -84,6 +85,12 @@ public class FakeRootResourceV1 implements RootResourceV1 {
    @Override
    public HostsResource getHostsResource() {
       return hostsResource;
+   }
+
+   @Override
+   public StacksResource getStacksResource() {
+      // TODO Auto-generated method stub
+      return null;
    }
 
 }
