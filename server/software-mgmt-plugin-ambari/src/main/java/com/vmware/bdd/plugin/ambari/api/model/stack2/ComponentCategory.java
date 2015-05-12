@@ -12,33 +12,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model.stack;
+package com.vmware.bdd.plugin.ambari.api.model.stack2;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+public enum ComponentCategory {
 
-public class ApiConfiguration {
+   MASTER(0),
+   SLAVE(1),
+   CLIENT(2);
 
-   @Expose
-   private String href;
+   private final int category;
 
-   @Expose
-   @SerializedName("StackConfigurations")
-   private ApiConfigurationInfo apiConfigurationInfo;
-
-   public String getHref() {
-      return href;
+   private ComponentCategory(int category) {
+      this.category = category;
    }
 
-   public void setHref(String href) {
-      this.href = href;
+   public boolean isMaster() {
+      switch (ComponentCategory.values()[this.category]) {
+      case MASTER:
+         return true;
+      default:
+         return false;
+      }
    }
 
-   public ApiConfigurationInfo getApiConfigurationInfo() {
-      return apiConfigurationInfo;
+   public boolean isSlave() {
+      switch (ComponentCategory.values()[this.category]) {
+      case SLAVE:
+         return true;
+      default:
+         return false;
+      }
    }
 
-   public void setApiConfigurationInfo(ApiConfigurationInfo apiConfigurationInfo) {
-      this.apiConfigurationInfo = apiConfigurationInfo;
+   public boolean isClient() {
+      switch (ComponentCategory.values()[this.category]) {
+      case CLIENT:
+         return true;
+      default:
+         return false;
+      }
    }
+
 }

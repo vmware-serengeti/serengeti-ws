@@ -16,8 +16,8 @@ package com.vmware.bdd.plugin.ambari.service.am;
 
 import javax.ws.rs.core.Response;
 
-import com.vmware.bdd.plugin.ambari.api.v1.resource.stacks.ComponentsResource;
-import com.vmware.bdd.plugin.ambari.api.v1.resource.stacks.ServicesResource;
+import com.vmware.bdd.plugin.ambari.api.v1.resource.stacks2.ComponentsResource;
+import com.vmware.bdd.plugin.ambari.api.v1.resource.stacks2.ServicesResource;
 
 public class FakeStackServicesResource implements ServicesResource {
 

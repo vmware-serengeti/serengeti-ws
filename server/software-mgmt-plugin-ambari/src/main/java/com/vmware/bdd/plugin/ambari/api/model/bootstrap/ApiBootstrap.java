@@ -41,6 +41,10 @@ public class ApiBootstrap {
    @Expose
    private Long requestId;
 
+   // Just for ambari server 2.0
+   @Expose
+   private String userRunAs;
+
    public String getStatus() {
       return status;
    }
@@ -95,6 +99,14 @@ public class ApiBootstrap {
 
    public void setUser(String user) {
       this.user = user;
+   }
+
+   public String getUserRunAs() {
+      return userRunAs;
+   }
+
+   public void setUserRunAs(String userRunAs) {
+      this.userRunAs = userRunAs;
    }
 
 }

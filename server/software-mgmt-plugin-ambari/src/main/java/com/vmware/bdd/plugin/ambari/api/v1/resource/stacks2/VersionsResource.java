@@ -12,28 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.service.am;
+package com.vmware.bdd.plugin.ambari.api.v1.resource.stacks2;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.vmware.bdd.plugin.ambari.api.v1.resource.stacks2.Stacks2Resource;
-import com.vmware.bdd.plugin.ambari.api.v1.resource.stacks2.VersionsResource;
+import com.vmware.bdd.plugin.ambari.api.Parameters;
 
-public class FakeStacks2Resource implements Stacks2Resource {
+@Consumes({ MediaType.APPLICATION_JSON })
+@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
+public interface VersionsResource {
 
-   @Override
-   public Response readStacks() {
-      return BuildResponse.buildResponse("stacks/simple_stacks.json");
-   }
+   @GET
+   @Path("/")
+   public Response readStackVersions();
 
-   @Override
-   public Response readStack(String stackName) {
-      return BuildResponse.buildResponse("stacks/HDP_stack.json");
-   }
+   @GET
+   @Path("/{stackVersion}")
+   public Response readStackVersion(@PathParam(Parameters.STACK_VERSION) String stackVersion);
 
-   @Override
-   public VersionsResource getStackVersionsResource(String stackName) {
-      return new FakeVersionsResource();
-   }
+   @Path("/{stackVersion}/stackServices")
+   public ServicesResource getStackServicesResource(@PathParam(Parameters.STACK_VERSION) String stackVersion);
 
 }

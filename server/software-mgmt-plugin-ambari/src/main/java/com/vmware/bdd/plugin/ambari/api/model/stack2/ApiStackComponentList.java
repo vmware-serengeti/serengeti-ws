@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2015 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,24 +12,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model.stack;
+package com.vmware.bdd.plugin.ambari.api.model.stack2;
 
-public class ComponentName {
+import java.util.List;
 
-   public static boolean isNamenode(String componentName) {
-       return "NAMENODE".equals(componentName);
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+public class ApiStackComponentList {
+
+   @Expose
+   private String href;
+
+   @Expose
+   @SerializedName("items")
+   private List<ApiStackService> apiStackServices;
+
+   public String getHref() {
+      return href;
    }
 
-   public static boolean isSecondaryNamenode(String componentName) {
-      return "SECONDARY_NAMENODE".equals(componentName);
+   public void setHref(String href) {
+      this.href = href;
    }
 
-   public static boolean isJournalnode(String componentName) {
-      return "JOURNALNODE".equals(componentName);
+   public List<ApiStackService> getApiStackServices() {
+      return apiStackServices;
    }
 
-   public static boolean isZkfc(String componentName) {
-      return "ZKFC".equals(componentName);
+   public void setApiStackServices(List<ApiStackService> apiStackServices) {
+      this.apiStackServices = apiStackServices;
    }
 
 }

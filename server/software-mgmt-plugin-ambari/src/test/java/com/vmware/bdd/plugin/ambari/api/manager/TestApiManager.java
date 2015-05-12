@@ -71,6 +71,24 @@ public class TestApiManager {
    @Test
    public void testGetStackList() throws Exception {
       Assert.assertTrue(apiManager.getStackList().getApiStacks().size() != 0);
+      String stackName = "HDP";
+      String stackVersion = "2.2";
+      String stackServiceName = "HDFS";
+      String stackComponentName = "NAMENODE";
+      String filter = "*";
+      
+      //System.out.println(ApiUtils.objectToJson(apiManager.getStackList()));
+      //System.out.println(ApiUtils.objectToJson(apiManager.getStack(stackName)));
+      //System.out.println(ApiUtils.objectToJson(apiManager.getStackVersionList(stackName)));
+      //System.out.println(ApiUtils.objectToJson(apiManager.getStackVersion(stackName, stackVersion)));
+      //System.out.println(ApiUtils.objectToJson(apiManager.getStackServiceList(stackName, stackVersion)));
+      //System.out.println(ApiUtils.objectToJson(apiManager.getStackService(stackName, stackVersion, stackServiceName)));
+      //System.out.println(ApiUtils.objectToJson(apiManager.getStackComponentList(stackName, stackVersion, stackServiceName)));
+      //System.out.println(ApiUtils.objectToJson(apiManager.getStackComponent(stackName, stackVersion, stackServiceName, stackComponentName)));
+      //System.out.println(ApiUtils.objectToJson(apiManager.getServicesWithFilter(stackName, stackVersion, filter)));
+      //System.out.println(ApiUtils.objectToJson(apiManager.getStackServiceListWithComponents(stackName, stackVersion)));
+      //System.out.println(ApiUtils.objectToJson(apiManager.getStackServiceListWithConfigurations(stackName, stackVersion)));
+      System.out.println(ApiUtils.objectToJson(apiManager.getStackServiceWithComponents(stackName, stackVersion, stackServiceName).componentToInfo()));
    }
 
    @Test

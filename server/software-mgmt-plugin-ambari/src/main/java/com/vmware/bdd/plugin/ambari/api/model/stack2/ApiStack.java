@@ -12,25 +12,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model.stack;
+package com.vmware.bdd.plugin.ambari.api.model.stack2;
 
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiStackOperatingSystem {
-
+public class ApiStack {
    @Expose
    private String href;
 
    @Expose
-   @SerializedName("OperatingSystems")
-   private ApiStackOperatingSystemInfo apiStackOperatingSysteminfo;
+   @SerializedName("Stacks")
+   private ApiStackName apiStackName;
 
    @Expose
-   @SerializedName("repositories")
-   private List<ApiStackOperatingSystemRepository> apiStackOperatingSystemRepositories;
+   @SerializedName("versions")
+   private List<ApiStackVersion> apiStackVersions;
 
    public String getHref() {
       return href;
@@ -40,22 +39,19 @@ public class ApiStackOperatingSystem {
       this.href = href;
    }
 
-   public ApiStackOperatingSystemInfo getApiStackOperatingSysteminfo() {
-      return apiStackOperatingSysteminfo;
+   public ApiStackName getApiStackName() {
+      return apiStackName;
    }
 
-   public void setApiStackOperatingSysteminfo(
-         ApiStackOperatingSystemInfo apiStackOperatingSysteminfo) {
-      this.apiStackOperatingSysteminfo = apiStackOperatingSysteminfo;
+   public void setApiStackName(ApiStackName apiStackName) {
+      this.apiStackName = apiStackName;
    }
 
-   public List<ApiStackOperatingSystemRepository> getApiStackOperatingSystemRepositories() {
-      return apiStackOperatingSystemRepositories;
+   public List<ApiStackVersion> getApiStackVersions() {
+      return apiStackVersions;
    }
 
-   public void setApiStackOperatingSystemRepositories(
-         List<ApiStackOperatingSystemRepository> apiStackOperatingSystemRepositories) {
-      this.apiStackOperatingSystemRepositories =
-            apiStackOperatingSystemRepositories;
+   public void setApiStackVersions(List<ApiStackVersion> apiStackVersions) {
+      this.apiStackVersions = apiStackVersions;
    }
 }

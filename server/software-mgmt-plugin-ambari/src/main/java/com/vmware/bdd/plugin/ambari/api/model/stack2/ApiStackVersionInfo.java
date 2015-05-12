@@ -12,24 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model.stack;
+package com.vmware.bdd.plugin.ambari.api.model.stack2;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiComponentDependencyInfo {
+public class ApiStackVersionInfo {
 
    @Expose
-   @SerializedName("component_name")
-   private String componentName;
-
-   @Expose
-   @SerializedName("dependent_component_name")
-   private String dependentComponentName;
-
-   @Expose
-   @SerializedName("dependent_service_name")
-   private String dependentServiceName;
+   private String href;
 
    @Expose
    @SerializedName("stack_name")
@@ -37,30 +28,25 @@ public class ApiComponentDependencyInfo {
 
    @Expose
    @SerializedName("stack_version")
-   private String stackVersion;
+   private String StackVersion;
 
-   public String getComponentName() {
-      return componentName;
+   @Expose
+   private Boolean active;
+
+   @Expose
+   @SerializedName("min_upgrade_version")
+   private String minUpgradeVersion;
+
+   @Expose
+   @SerializedName("parent_stack_version")
+   private String parentStackVersion;
+
+   public String getHref() {
+      return href;
    }
 
-   public void setComponentName(String componentName) {
-      this.componentName = componentName;
-   }
-
-   public String getDependentComponentName() {
-      return dependentComponentName;
-   }
-
-   public void setDependentComponentName(String dependentComponentName) {
-      this.dependentComponentName = dependentComponentName;
-   }
-
-   public String getDependentServiceName() {
-      return dependentServiceName;
-   }
-
-   public void setDependentServiceName(String dependentServiceName) {
-      this.dependentServiceName = dependentServiceName;
+   public void setHref(String href) {
+      this.href = href;
    }
 
    public String getStackName() {
@@ -72,11 +58,34 @@ public class ApiComponentDependencyInfo {
    }
 
    public String getStackVersion() {
-      return stackVersion;
+      return StackVersion;
    }
 
    public void setStackVersion(String stackVersion) {
-      this.stackVersion = stackVersion;
+      StackVersion = stackVersion;
    }
 
+   public Boolean isActive() {
+      return active;
+   }
+
+   public void setActive(Boolean active) {
+      this.active = active;
+   }
+
+   public String getMinUpgradeVersion() {
+      return minUpgradeVersion;
+   }
+
+   public void setMinUpgradeVersion(String minUpgradeVersion) {
+      this.minUpgradeVersion = minUpgradeVersion;
+   }
+
+   public String getParentStackVersion() {
+      return parentStackVersion;
+   }
+
+   public void setParentStackVersion(String parentStackVersion) {
+      this.parentStackVersion = parentStackVersion;
+   }
 }

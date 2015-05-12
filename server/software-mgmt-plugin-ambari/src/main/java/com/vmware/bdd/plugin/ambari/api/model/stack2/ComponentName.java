@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2015 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,22 +12,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model.stack;
+package com.vmware.bdd.plugin.ambari.api.model.stack2;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+public class ComponentName {
 
-public class ApiStackName {
-
-   @Expose
-   @SerializedName("stack_name")
-   private String stackName;
-
-   public String getStackName() {
-      return stackName;
+   public static boolean isNamenode(String componentName) {
+       return "NAMENODE".equals(componentName);
    }
 
-   public void setStackName(String stackName) {
-      this.stackName = stackName;
+   public static boolean isSecondaryNamenode(String componentName) {
+      return "SECONDARY_NAMENODE".equals(componentName);
    }
+
+   public static boolean isJournalnode(String componentName) {
+      return "JOURNALNODE".equals(componentName);
+   }
+
+   public static boolean isZkfc(String componentName) {
+      return "ZKFC".equals(componentName);
+   }
+
 }
