@@ -29,7 +29,6 @@ import jline.console.ConsoleReader;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -424,6 +423,21 @@ public class ClusterCommands implements CommandMarker {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
                CommandsUtils.getExceptionMessage(e));
+      }
+
+      // check the instant clone type and the HA configuration for node groups
+      // currently there are limitations on HA support with instant clone, so we will
+      // display a warning message for instant clone with HA function
+      ClusterRead cluster = restClient.get(name, false);
+      if (cluster != null) {
+         String cloneType = cluster.getClusterCloneType();
+         String INSTANT_CLONE = com.vmware.bdd.utils.Constants.CLUSTER_CLONE_TYPE_INSTANT_CLONE;
+         if ( null != cloneType && cloneType.equals(INSTANT_CLONE) ) {
+            String warningMsg = validateInstantCloneWithHA(specFilePath, clusterCreate);
+            if ( !CommonUtil.isBlank(warningMsg) ) {
+               System.out.println(warningMsg);
+            }
+         }
       }
    }
 
@@ -1754,4 +1768,30 @@ public class ClusterCommands implements CommandMarker {
       }
       CommandsUtils.prettyOutputStrings(list, filename, delimeter);
    }
+
+   private String validateInstantCloneWithHA(String specFilePath, ClusterCreate cluster) {
+      String warningMsg = null;
+      ArrayList<String> ngs = new ArrayList<String>();
+      if ( null != specFilePath ) {
+         NodeGroupCreate[] nodeGroups = cluster.getNodeGroups();
+         if ( null != nodeGroups ) {
+            for ( NodeGroupCreate ngc : nodeGroups ) {
+               String haFlag = ngc.getHaFlag();
+               if ( null != haFlag && !haFlag.equals(com.vmware.bdd.utils.Constants.HA_FLAG_OFF) ) {
+                  ngs.add(ngc.getName());
+               }
+            }
+         }
+      } else {
+         // currently if user does not provide spec file, the default HA option for master group is
+         // set to 'on'
+         ngs.add("master");
+      }
+
+      if ( ngs.size() > 0 ) {
+         warningMsg = String.format(Constants.WARNING_INSTANT_CLONE_WITH_HA, ngs.toString());
+      }
+      return warningMsg;
+   }
+
 }

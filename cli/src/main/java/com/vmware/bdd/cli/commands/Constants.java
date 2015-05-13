@@ -284,6 +284,10 @@ public class Constants {
    public static final String OUTPUT_OBJECT_MGMTVMCFG = "Management VM configuration";
    public static final String OUTPUT_OP_GET = "get";
 
+   public static final String WARNING_INSTANT_CLONE_WITH_HA = "Warning: you are using instant clone with HA function "
+         + "for node group %s. Currently the instant clone does not support HA function well, so the cluster creation "
+         + "might fail or the HA function might not work.";
+
    enum YES_NO {
       yes, no
    }
