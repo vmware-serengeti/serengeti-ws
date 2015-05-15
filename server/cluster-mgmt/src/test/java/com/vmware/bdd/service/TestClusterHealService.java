@@ -35,6 +35,7 @@ import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcHost;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.entity.DiskEntity;
@@ -86,6 +87,14 @@ public class TestClusterHealService {
       }
    }
 
+   @MockClass(realClass = ClusterHealService.class)
+   public static class MockClusterHealService {
+      @Mock
+      public boolean isBadVmdkPath(final DiskEntity disk) {
+         return false;
+      }
+   }
+
    @AfterMethod(groups = { "TestClusterHealService" })
    public void cleanFlag() {
       Mockit.tearDownMocks();
@@ -97,6 +106,7 @@ public class TestClusterHealService {
       Mockit.setUpMock(MockVcVmUtil.class);
 
       Mockit.setUpMock(MockVcResourceUtilsForHeal.class);
+      Mockit.setUpMock(MockClusterHealService.class);
    }
 
    @BeforeClass(groups = { "TestClusterHealService" })
@@ -107,6 +117,16 @@ public class TestClusterHealService {
       // mock cluster entity manager
       IClusterEntityManager entityMgr = Mockito.mock(IClusterEntityManager.class);
 
+      // mock findByName(String, String, String)
+      NodeEntity node = new NodeEntity();
+      node.setVmName(NODE_1_NAME);
+      node.setHostName(HOST_NAME);
+      node.setStatus(NodeStatus.VM_READY);
+      Mockito.when(
+            entityMgr.findByName(CLUSTER_NAME, NODE_GROUP_NAME, NODE_1_NAME))
+            .thenReturn(node);
+      service.setClusterEntityMgr(entityMgr);
+
       // mock getDisks
       List<DiskEntity> disks = new ArrayList<DiskEntity>();
       for (int i = 0; i < 3; i++) {
@@ -116,20 +136,12 @@ public class TestClusterHealService {
          disk.setDatastoreMoId(LOCAL_DS_MOID_PREFIX + i);
          disk.setSizeInMB(20 * 1024);
          disk.setDiskType(DiskType.SYSTEM_DISK.type);
+         disk.setNodeEntity(node);
          DiskEntity spy = Mockito.spy(disk);
          Mockito.when(spy.getId()).thenReturn(new Long(1));
          disks.add(spy);
       }
-      Mockito.when(entityMgr.getDisks("bj-worker-1")).thenReturn(disks);
-
-      // mock findByName(String, String, String)
-      NodeEntity node = new NodeEntity();
-      node.setVmName(NODE_1_NAME);
-      node.setHostName(HOST_NAME);
-      Mockito.when(
-            entityMgr.findByName(CLUSTER_NAME, NODE_GROUP_NAME, NODE_1_NAME))
-            .thenReturn(node);
-      service.setClusterEntityMgr(entityMgr);
+      Mockito.when(entityMgr.getDisks(NODE_1_NAME)).thenReturn(disks);
 
       // mock cluster config manager
       ClusterConfigManager configMgr = Mockito.mock(ClusterConfigManager.class);
@@ -155,7 +167,7 @@ public class TestClusterHealService {
    public void testGetBadDisks() {
       logger.info("test getBadDisks");
       List<DiskSpec> badDisks = service.getBadDisks(NODE_1_NAME);
-      Assert.assertTrue(badDisks.size() == 1, "disk 0 on local-datastore-0 should be bad");
+      Assert.assertEquals(badDisks.size(), 1, "disk 0 on local-datastore-0 should be bad");
    }
 
    @Test(groups = { "TestClusterHealService" }, dependsOnMethods = { "testGetBadDisks" })

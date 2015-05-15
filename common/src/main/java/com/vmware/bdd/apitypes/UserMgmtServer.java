@@ -210,8 +210,9 @@ public class UserMgmtServer {
       return equalsBuilder.isEquals();
    }
 
-   //We regard the first cn of mgmtVMUserGroupDn as its admin group name
-   public String getAdminGroupName() {
+   // We regard the first cn of mgmtVMUserGroupDn as its admin group name.
+   // Do not use 'getAdminGroupName()' as it will be detected by ObjectMapper and cause unknown field error.
+   public String findAdminGroupName() {
       String[] configs = mgmtVMUserGroupDn.split(",");
       return configs[0].split("=")[1];
    }
