@@ -65,6 +65,24 @@ public class ClusterCommandsTest extends MockRestServer {
       return ipconfigs;
    }
 
+   private ClusterRead getClusterResponseForCreate() {
+      ClusterRead cluster = new ClusterRead();
+      List<NodeGroupRead> nodeGroups = new ArrayList<NodeGroupRead>();
+      NodeGroupRead workerGroup = new NodeGroupRead();
+      workerGroup.setName("worker");
+      workerGroup.setInstanceNum(1);
+      List<NodeRead> instances = new ArrayList<NodeRead>();
+      NodeRead instance1 = new NodeRead();
+      instance1.setName("worker1");
+      instance1.setStatus("PoweredOn");
+      instance1.setAction("Getting IP...");
+      instances.add(instance1);
+      workerGroup.setInstances(instances);
+      nodeGroups.add(workerGroup);
+      cluster.setNodeGroups(nodeGroups);
+      return cluster;
+   }
+
     @Test
     public void testClusterResize() throws Exception {
         CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
@@ -273,7 +291,9 @@ public class ClusterCommandsTest extends MockRestServer {
 
     @Test
     public void testCreateCluster() throws Exception {
+       ObjectMapper mapper = new ObjectMapper();
        CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
+
        DistroRead[] distros = new DistroRead[1];
        DistroRead distro = new DistroRead();
        distro.setName(Constants.DEFAULT_DISTRO);
@@ -285,7 +305,6 @@ public class ClusterCommandsTest extends MockRestServer {
        network.setPortGroup("pg1");
        networks[0] = network;
 
-       ObjectMapper mapper = new ObjectMapper();
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Default/defaultdistro", HttpMethod.GET, HttpStatus.OK,
              mapper.writeValueAsString(distros[0]));
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/networks", HttpMethod.GET, HttpStatus.OK,
@@ -293,6 +312,8 @@ public class ClusterCommandsTest extends MockRestServer {
 
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST,
              HttpStatus.NO_CONTENT, "");
+       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1", HttpMethod.GET,
+             HttpStatus.OK, mapper.writeValueAsString(getClusterResponseForCreate()));
 
        clusterCommands.createCluster("cluster1", null, "HADOOP", null, null, null, null, null, null, null, null, false, false, true, false, "", null, null, null);
 
@@ -324,6 +345,8 @@ public class ClusterCommandsTest extends MockRestServer {
 
         buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST,
                 HttpStatus.NO_CONTENT, "");
+        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1", HttpMethod.GET,
+              HttpStatus.OK, mapper.writeValueAsString(getClusterResponseForCreate()));
 
         clusterCommands.createCluster("cluster1", null, "HADOOP", Constants.DEFAULT_DISTRO, null, null, null, null, null, null, null, false, false, true, false, "", null, null, null);
 
@@ -356,6 +379,8 @@ public class ClusterCommandsTest extends MockRestServer {
 
         buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST,
                 HttpStatus.BAD_REQUEST, mapper.writeValueAsString(errorMsg));
+        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1", HttpMethod.GET,
+              HttpStatus.OK, mapper.writeValueAsString(getClusterResponseForCreate()));
 
         clusterCommands.createCluster("cluster1", null, "HADOOP", null, null, null, null, null, null, null, null, false, false, true, false, "", null, null, null);
         CookieCache.clear();
@@ -403,7 +428,8 @@ public class ClusterCommandsTest extends MockRestServer {
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1WithHadoopSpec/validate", HttpMethod.POST,
              HttpStatus.OK, mapper.writeValueAsString(vr));
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST, HttpStatus.NO_CONTENT, "");
-
+       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1WithHadoopSpec", HttpMethod.GET,
+             HttpStatus.OK, mapper.writeValueAsString(getClusterResponseForCreate()));
        clusterCommands.createCluster("cluster1WithHadoopSpec", null, null, null, "src/test/resources/hadoop_cluster.json", null, null, null, null, null, null, false, false, true, false, "", null, null, null);
 
        setup();
@@ -414,7 +440,10 @@ public class ClusterCommandsTest extends MockRestServer {
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1WithHBaseSpec/validate", HttpMethod.POST,
              HttpStatus.OK, mapper.writeValueAsString(vr));
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST, HttpStatus.NO_CONTENT, "");
+       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1WithHBaseSpec", HttpMethod.GET,
+             HttpStatus.OK, mapper.writeValueAsString(getClusterResponseForCreate()));
        clusterCommands.createCluster("cluster1WithHBaseSpec", null, null, null, "src/test/resources/hbase_cluster.json", null, null, null, null, null, null, false, false, true, false, "", null, null, null);
+
 
        setup();
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/appmanager/Default/defaultdistro", HttpMethod.GET, HttpStatus.OK,
@@ -424,6 +453,8 @@ public class ClusterCommandsTest extends MockRestServer {
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1WithDCSeperationSpec/validate", HttpMethod.POST,
              HttpStatus.OK, mapper.writeValueAsString(vr));
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST, HttpStatus.NO_CONTENT, "");
+       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1WithDCSeperationSpec", HttpMethod.GET,
+             HttpStatus.OK, mapper.writeValueAsString(getClusterResponseForCreate()));
        clusterCommands.createCluster("cluster1WithDCSeperationSpec", null, null, null, "src/test/resources/data_compute_separation_cluster.json", null, null, null, null, null, null, false, false, true, false, "", null, null, null);
 
        setup();
@@ -434,7 +465,10 @@ public class ClusterCommandsTest extends MockRestServer {
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1WithNameNodeHASpec/validate", HttpMethod.POST,
              HttpStatus.OK, mapper.writeValueAsString(vr));
        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST, HttpStatus.NO_CONTENT, "");
+       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1WithNameNodeHASpec", HttpMethod.GET,
+             HttpStatus.OK, mapper.writeValueAsString(getClusterResponseForCreate()));
        clusterCommands.createCluster("cluster1WithNameNodeHASpec", null, null, null, "src/test/resources/namenode_ha_cluster.json", null, null, null, null, null, null, false, false, true, false, "", null, null, null);
+
        CookieCache.clear();
     }
 
@@ -482,7 +516,9 @@ public class ClusterCommandsTest extends MockRestServer {
                 mapper.writeValueAsString(networks));
 
         buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters", HttpMethod.POST,
-                HttpStatus.ACCEPTED, "", "https://127.0.0.1:8443/serengeti/api/task/12");
+                HttpStatus.ACCEPTED, "");
+        buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1", HttpMethod.GET,
+              HttpStatus.OK, mapper.writeValueAsString(getClusterResponseForCreate()), "https://127.0.0.1:8443/serengeti/api/task/12");
 
         TaskRead task = new TaskRead();
         task.setId(12l);

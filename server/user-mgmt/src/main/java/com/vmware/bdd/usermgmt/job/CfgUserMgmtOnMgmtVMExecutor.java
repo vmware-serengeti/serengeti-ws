@@ -61,7 +61,7 @@ public class CfgUserMgmtOnMgmtVMExecutor {
 
       try {
          execChefClient(specFilePath);
-         enableSudo(userMgmtServer.getAdminGroupName());
+         enableSudo(userMgmtServer.findAdminGroupName());
          LOGGER.info("execute ChefClient for enable_LDAP is finished.");
       } finally {
          workDir.delete();

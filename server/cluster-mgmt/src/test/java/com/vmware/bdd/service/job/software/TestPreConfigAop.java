@@ -17,6 +17,8 @@ package com.vmware.bdd.service.job.software;
 import java.util.HashMap;
 import java.util.Map;
 
+import mockit.Mock;
+import mockit.MockUp;
 import mockit.Mockit;
 
 import org.apache.log4j.Logger;
@@ -38,9 +40,11 @@ import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.manager.TestClusterEntityManager;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.MockVcCache;
+import com.vmware.bdd.service.MockVcVmUtil;
 import com.vmware.bdd.service.sp.MockVcContext;
 import com.vmware.bdd.software.mgmt.plugin.exception.InfrastructureException;
 import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.VcVmUtil;
 
 @ContextConfiguration(locations = { "classpath:/spring/*-context.xml",
       "classpath:/spring/preconfig-context.xml" })
@@ -67,6 +71,12 @@ public class TestPreConfigAop extends AbstractTestNGSpringContextTests {
    public void setUp() {
       Mockit.setUpMock(MockVcContext.class);
       Mockit.setUpMock(MockVcCache.class);
+      new MockUp<VcVmUtil>(){
+         @Mock
+         public String getMgtHostName(VcVirtualMachine vcVm, String primaryMgtIpV4) {
+            return vcVm.getName();
+         }
+      };
       ClusterEntity cluster = clusterEntityMgr.findByName(TEST_CLUSTER_NAME);
       if (cluster != null) {
          clusterEntityMgr.delete(cluster);
@@ -159,11 +169,11 @@ public class TestPreConfigAop extends AbstractTestNGSpringContextTests {
          Assert.assertTrue(result, "Should get true");
          updator.join();
       } catch (InfrastructureException e) {
-         logger.error("Got exception " + e.getFailedMsgList());
+         logger.error("Got exception: " + e.getFailedMsgList());
          Assert.assertTrue(false,
                      "Should get success result.");
       } catch (Exception e) {
-         Assert.assertTrue(false, "Unexpected exception" + e.getMessage());
+         Assert.assertTrue(false, "Unexpected exception: " + e.getMessage());
       }
    }
 
@@ -192,13 +202,17 @@ public class TestPreConfigAop extends AbstractTestNGSpringContextTests {
             case 0:
                if (flag) {
                   map.put(Constants.VM_DISK_FORMAT_STATUS_KEY, "1");
+                  map.put(Constants.VM_FQDN_REGISTER_STATUS_KEY, "1");
                }
                break;
             case 1:
                if (flag) {
                   map.put(Constants.VM_DISK_FORMAT_STATUS_KEY, "0");
+                  map.put(Constants.VM_FQDN_REGISTER_STATUS_KEY, "0");
+                  map.put("guestinfo.network_info", "{'nics': [{'device': 'eth0', 'ipaddr': '192.168.1.100', 'fqdn': 'vmname.eng.vmware.com', 'portgroup': 'test_portgroup'}]}");
                } else {
                   map.put(Constants.VM_DISK_FORMAT_STATUS_KEY, "1");
+                  map.put(Constants.VM_FQDN_REGISTER_STATUS_KEY, "1");
                }
                break;
             default:
