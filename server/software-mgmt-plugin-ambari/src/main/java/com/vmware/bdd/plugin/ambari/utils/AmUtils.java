@@ -30,6 +30,7 @@ import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.usermgmt.UserMgmtConstants;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 
 public class AmUtils {
    public static List<Map<String, Object>> toAmConfigurations(
@@ -165,5 +166,14 @@ public class AmUtils {
          return true;
       }
       return Integer.parseInt(ambariServerVersion.split("\\.")[0]) < 2;
+   }
+
+   public static boolean containsRole(ClusterBlueprint blueprint, String role) {
+      for (NodeGroupInfo info : blueprint.getNodeGroups()) {
+         if (info.getRoles().contains(role)) {
+            return true;
+         }
+      }
+      return false;
    }
 }
