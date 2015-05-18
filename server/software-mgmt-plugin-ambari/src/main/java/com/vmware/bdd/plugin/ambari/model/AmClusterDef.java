@@ -84,8 +84,8 @@ public class AmClusterDef implements Serializable {
       if (blueprint.hasTopologyPolicy()) {
          setRackTopologyFileName(blueprint);
       }
-      this.configurations =
-            AmUtils.toAmConfigurations(blueprint.getConfiguration());
+      setAdditionalConfigurations(blueprint, ambariServerVersion);
+      this.configurations = AmUtils.toAmConfigurations(blueprint.getConfiguration());
       for (NodeGroupInfo group : blueprint.getNodeGroups()) {
          for (NodeInfo node : group.getNodes()) {
             AmNodeDef nodeDef = new AmNodeDef();
@@ -269,5 +269,51 @@ public class AmClusterDef implements Serializable {
       if (confCoreSite.get("topology.script.file.name") == null) {
          confCoreSite.put("topology.script.file.name", rackTopologyFileName);
       }
+   }
+
+   private void setAdditionalConfigurations(ClusterBlueprint blueprint, String ambariServerVersion) {
+      if (AmUtils.isAmbariServerBelow_2_0_0(ambariServerVersion) ||
+            !AmUtils.containsRole(blueprint, "RESOURCEMANAGER")) {
+         return;
+      }
+
+      Map<String, Object> conf = blueprint.getConfiguration();
+      if (conf == null) {
+         conf = new HashMap<String, Object>();
+         blueprint.setConfiguration(conf);
+      }
+
+      Map<String, Object> confYarnSite = (Map<String, Object>) conf.get("yarn-site");
+      if (confYarnSite == null) {
+         confYarnSite = new HashMap<String, Object>();
+         conf.put("yarn-site", confYarnSite);
+      }
+
+      if (confYarnSite.get("yarn.resourcemanager.webapp.https.address") == null) {
+         List<String> fqdnsOfRoleResourcemanager = getFqdnsWithRole(blueprint, "RESOURCEMANAGER");
+         if (!fqdnsOfRoleResourcemanager.isEmpty()) {
+            confYarnSite.put("yarn.resourcemanager.webapp.https.address", fqdnsOfRoleResourcemanager.get(0) + ":8090");
+         }
+      }
+      if (confYarnSite.get("yarn.resourcemanager.zk-address") == null) {
+         List<String> fqdnsOfRoleZookeeperServer = getFqdnsWithRole(blueprint, "ZOOKEEPER_SERVER");
+         if (!fqdnsOfRoleZookeeperServer.isEmpty()) {
+            confYarnSite.put("yarn.resourcemanager.zk-address", fqdnsOfRoleZookeeperServer.get(0) + ":2181");
+         }
+      }
+   }
+
+   private List<String> getFqdnsWithRole(ClusterBlueprint blueprint, String role) {
+      List<String> fqdns = new ArrayList<String>();
+
+      for (NodeGroupInfo group : blueprint.getNodeGroups()) {
+         if (group.getRoles().contains(role)) {
+            for (NodeInfo node : group.getNodes()) {
+               fqdns.add(node.getHostname());
+            }
+         }
+      }
+
+      return fqdns;
    }
 }
