@@ -200,12 +200,13 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
+   
 =======================================================================
 
-Serengeti 2.1.0:
 
-Serengeti 2.1.0: includes a number of subcomponents with
+Serengeti 2.2.0:
+
+Serengeti 2.2.0: includes a number of subcomponents with
 separate copyright notices and license terms.  The product that 
 includes this file does not necessarily use all the open source 
 subcomponents referred to below. Your use of the source
@@ -227,6 +228,7 @@ SECTION 2: Apache License, V2.0
    >>> rubygem-ironfan-3.1.4
 
 
+   
 --------------- SECTION 1:  BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES ----------
 
 BSD-STYLE, MIT-STYLE, OR SIMILAR STYLE LICENSES are applicable to the following component(s).
@@ -317,21 +319,20 @@ limitations under the License.
 
 ===========================================================================
 
-To the extent any open source components are licensed under the
-GPL and/or LGPL, or other similar licenses that require the
-source code and/or modifications to source code to be made
-available (as would be noted above), you may obtain a copy of
-the source code corresponding to the binaries for such open
-source components and modifications thereto, if any, (the
-"Source Files"), by downloading the Source Files from VMware's website at
-http://www.vmware.com/download/open_source.html, or by sending a request, 
-with your name and address to: VMware, Inc., 3401 Hillview Avenue,
-Palo Alto, CA 94304,United States of America. All such 
-requests should clearly specify: OPEN SOURCE FILES REQUEST,
-Attention General Counsel. VMware shall mail a copy of the
-Source Files to you on a CD or equivalent physical medium. This
-offer to obtain a copy of the Source Files is valid for three
-years from the date you acquired this Software product. Alternatively, 
-the Source Files may accompany the VMware product.
+To the extent any open source components are licensed under the GPL
+and/or LGPL, or other similar licenses that require the source code
+and/or modifications to source code to be made available (as would be
+noted above), you may obtain a copy of the source code corresponding to
+the binaries for such open source components and modifications thereto,
+if any, (the "Source Files"), by downloading the Source Files from
+VMware's website at http://www.vmware.com/download/open_source.html, or
+by sending a request, with your name and address to: VMware, Inc., 3401
+Hillview Avenue, Palo Alto, CA 94304, United States of America. All such
+requests should clearly specify: OPEN SOURCE FILES REQUEST, Attention
+General Counsel. VMware shall mail a copy of the Source Files to you on
+a CD or equivalent physical medium. This offer to obtain a copy of the
+Source Files is valid for three years from the date you acquired this
+Software product. Alternatively, the Source Files may accompany the
+VMware product.
 
-[SERENGETIENT210SS092214]
+[SERENGETIENT220NV052215]
