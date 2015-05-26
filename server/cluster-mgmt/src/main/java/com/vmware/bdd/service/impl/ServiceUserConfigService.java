@@ -57,7 +57,7 @@ public class ServiceUserConfigService {
       if (!MapUtils.isEmpty(serviceUserConfigs)) {
          serviceUserGroups = new HashSet<>();
          for (Map<String, String> serviceUserConfig : serviceUserConfigs.values()) {
-            serviceUserGroups.add(serviceUserConfig.get(UserMgmtConstants.USER_GROUP_NAME));
+            serviceUserGroups.add(serviceUserConfig.get(UserMgmtConstants.SERVICE_USER_GROUP));
          }
          LOGGER.info("Service user groups are " + new Gson().toJson(serviceUserGroups));
       }
