@@ -80,6 +80,7 @@ public class ClusterCommandsTest extends MockRestServer {
       workerGroup.setInstances(instances);
       nodeGroups.add(workerGroup);
       cluster.setNodeGroups(nodeGroups);
+      cluster.setClusterCloneType(com.vmware.bdd.utils.Constants.CLUSTER_CLONE_TYPE_INSTANT_CLONE);
       return cluster;
    }
 
@@ -649,6 +650,13 @@ public class ClusterCommandsTest extends MockRestServer {
         buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters?details=true", HttpMethod.GET, HttpStatus.OK,
               mapper.writeValueAsString(new ClusterRead[] { cr1, cr2 }));
         clusterCommands.getCluster(null, true);
+
+       cr1.setClusterCloneType(com.vmware.bdd.utils.Constants.CLUSTER_CLONE_TYPE_INSTANT_CLONE);
+       cr2.setClusterCloneType(com.vmware.bdd.utils.Constants.CLUSTER_CLONE_TYPE_FAST_CLONE);
+       setup();
+       buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/clusters?details=true", HttpMethod.GET, HttpStatus.OK,
+             mapper.writeValueAsString(new ClusterRead[] { cr1, cr2 }));
+       clusterCommands.getCluster(null, true);
 
         CookieCache.clear();
     }
