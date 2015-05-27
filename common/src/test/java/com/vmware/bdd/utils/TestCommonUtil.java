@@ -37,7 +37,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.testng.Assert;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class TestCommonUtil {
@@ -314,5 +313,4 @@ public class TestCommonUtil {
       Assert.assertFalse(valid);
       Assert.assertEquals(errorMsgs.get(0), "URL should starts with http or https");
    }
-
 }

@@ -9,7 +9,6 @@ import com.vmware.bdd.utils.ValidationUtils;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,7 +49,7 @@ public class ShrinkManager {
       }
    }
 
-   private List<JobParameters> buildJobParameters(String clusterName, String nodeGroupName, int newInstanceNum) {
+   protected List<JobParameters> buildJobParameters(String clusterName, String nodeGroupName, int newInstanceNum) {
       List<NodeEntity> nodes =
             clusterEntityMgr.findAllNodes(clusterName, nodeGroupName);
       List<JobParameters> jobParametersList = new ArrayList<JobParameters>();
