@@ -2081,7 +2081,13 @@ public class ClouderaManagerImpl implements SoftwareManager {
             .readService(serviceDef.getName()).getServiceState().equals(ApiServiceState.STARTED)) {
          return;
       }
-      executeAndReport("Starting Service " + serviceDef.getType().getDisplayName(), apiResourceRootV6.getClustersResource()
+      String serviceDisplayName = serviceDef.getType().getDisplayName();
+      // in compute only usecase, we don't need to start service for isilon
+      if (serviceDisplayName.equalsIgnoreCase("ISILON")) {
+         return;
+      }
+      logger.info("Cloudera manager is starting service: " + serviceDisplayName);
+      executeAndReport("Starting Service " + serviceDisplayName, apiResourceRootV6.getClustersResource()
             .getServicesResource(cluster.getName()).startCommand(serviceDef.getName()),
             toProgress, cluster.getCurrentReport(), reportQueue, true);
    }
