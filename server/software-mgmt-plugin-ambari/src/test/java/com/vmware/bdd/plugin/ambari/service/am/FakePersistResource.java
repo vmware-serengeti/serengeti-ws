@@ -22,8 +22,7 @@ public class FakePersistResource implements PersistResource {
 
    @Override
    public Response updatePersist(String persist) {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("");
    }
 
 }

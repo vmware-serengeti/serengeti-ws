@@ -52,19 +52,18 @@ public class FakeConfigureGroupResource implements ConfigGroupsResource {
 
    @Override
    public Response readConfigGroup(String groupId) {
-      return null;
+      return BuildResponse.buildResponse("clusters/config_groups/2.json");
    }
 
    @Override
    @DELETE
    @Path("/{ConfigGroupId}")
    public Response deleteConfigGroup(@PathParam("ConfigGroupId") String groupId) {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("");
    }
 
    @Override
    public Response updateConfigGroup(String groupId, String configGroup) {
-      return null;
+      return BuildResponse.buildResponse("clusters/config_groups/updated_2.json");
    }
 }

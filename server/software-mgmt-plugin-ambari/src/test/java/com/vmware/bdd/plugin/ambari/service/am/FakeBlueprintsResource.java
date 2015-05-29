@@ -32,8 +32,7 @@ public class FakeBlueprintsResource implements BlueprintsResource {
 
    @Override
    public Response deleteBlueprint(String blueprintName) {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("");
    }
 
    @Override

@@ -16,11 +16,18 @@ package com.vmware.bdd.plugin.ambari.api.manager;
 
 import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
 import com.vmware.bdd.plugin.ambari.api.ApiRootResource;
+import com.vmware.bdd.plugin.ambari.api.exception.AmbariApiException;
+import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterList;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroup;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponent;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponentsRequest;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiService;
+import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
 import com.vmware.bdd.plugin.ambari.service.am.FakeRootResourceV1;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
@@ -33,12 +40,14 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TestApiManager {
    private ApiManager apiManager;
    private ApiClusterBlueprint apiClusterBlueprint = new ApiClusterBlueprint();
    private String clusterName = "cluster01";
+   private List<String> hostNames = null;
 
    @BeforeMethod
    public void setUp() throws Exception {
@@ -48,6 +57,10 @@ public class TestApiManager {
       AmbariManagerClientbuilder clientbuilder = Mockito.mock(AmbariManagerClientbuilder.class);
       Mockito.when(clientbuilder.build()).thenReturn(apiRootResource);
       apiManager = new ApiManager(clientbuilder);
+      hostNames = new ArrayList<String>();
+      hostNames.add("host01");
+      hostNames.add("host02");
+      hostNames.add("host03");
    }
 
    @AfterMethod
@@ -72,7 +85,7 @@ public class TestApiManager {
 
    @Test
    public void testIsServiceStarted() throws Exception {
-
+      Assert.assertTrue(apiManager.isServiceStarted("cluster_01", "HDFS"));
    }
 
    @Test
@@ -152,6 +165,12 @@ public class TestApiManager {
    }
 
    @Test
+   public void testDecommissionComponent() {
+      ApiRequest apiRequest = apiManager.decommissionComponent(clusterName, "127.0.0.1", "YARN", "RESOURCEMANAGER", "NODEMANAGER");
+      Assert.assertNotNull(apiRequest);
+   }
+
+   @Test
    public void testGetClusterServicesNames() throws Exception {
       List<String> serviceNames = apiManager.getClusterServicesNames(clusterName);
       Assert.assertTrue(!serviceNames.isEmpty());
@@ -181,22 +200,23 @@ public class TestApiManager {
 
    @Test
    public void testUpdatePersist() throws Exception {
-
+      ApiPersist persist = new ApiPersist("");
+      Assert.assertTrue(apiManager.updatePersist(persist));
    }
 
    @Test
    public void testDeleteHost() throws Exception {
-
+      Assert.assertNotNull(apiManager.deleteHost(clusterName, "host03"));
    }
 
    @Test
    public void testDeleteBlueprint() throws Exception {
-
+      Assert.assertTrue(apiManager.deleteBlueprint("cluster01"));
    }
 
    @Test
    public void testDeleteCluster() throws Exception {
-
+      Assert.assertTrue(apiManager.deleteCluster(clusterName));
    }
 
    @Test
@@ -234,12 +254,17 @@ public class TestApiManager {
 
    @Test
    public void testGetHostStatus() throws Exception {
-
+      Assert.assertNotNull(apiManager.getHostStatus(clusterName));
    }
 
    @Test
    public void testGetHostsSummaryInfo() throws Exception {
+      Assert.assertNotNull(apiManager.getHostsSummaryInfo(clusterName));
+   }
 
+   @Test
+   public void testGetHostComponents() throws AmbariApiException {
+      Assert.assertNotNull(apiManager.getHostComponents(clusterName, "host03"));
    }
 
    @Test
@@ -254,71 +279,105 @@ public class TestApiManager {
 
    @Test
    public void testDeleteService() throws Exception {
-
+      apiManager.deleteService(clusterName, "HDFS");
    }
 
    @Test
    public void testGetExistingHosts() throws Exception {
-
+      Assert.assertTrue(apiManager.getExistingHosts(clusterName, hostNames).containsAll(hostNames));
    }
 
    @Test
    public void testAddHostsToCluster() throws Exception {
-
+      apiManager.addHostsToCluster(clusterName, hostNames);
    }
 
    @Test
    public void testGetClusterHostsList() throws Exception {
-
+      Assert.assertNotNull(apiManager.getClusterHostsList(clusterName));
    }
 
    @Test
    public void testStopAllComponentsInHosts() throws Exception {
-
+      Assert.assertNotNull(apiManager.stopAllComponentsInHosts(clusterName, hostNames));
    }
 
    @Test
    public void testDeleteAllComponents() throws Exception {
-
+      apiManager.deleteAllComponents(clusterName, "host02");
    }
 
    @Test
    public void testGetAssociatedConfigGroups() throws Exception {
+      Assert.assertNotNull(apiManager.getAssociatedConfigGroups(clusterName, "host01"));
+   }
 
+   @Test
+   public void testGetConfigGroupsList() throws Exception {
+      Assert.assertNotNull(apiManager.getConfigGroupsList(clusterName));
    }
 
    @Test
    public void testDeleteConfigGroup() throws Exception {
+      apiManager.deleteConfigGroup(clusterName, "2");
+   }
 
+   @Test
+   public void testGetClusterConfigurationsWithTypeAndTag() throws Exception {
+      Assert.assertNotNull(apiManager.getClusterConfigurationsWithTypeAndTag(clusterName, "core-site", "1"));
    }
 
    @Test
    public void testStartComponents() throws Exception {
-
+      List<String> components = new ArrayList<String> ();
+      components.add("ZOOKEEPER");
+      components.add("NAMENDOE");
+      components.add("DATANODE");
+      Assert.assertNotNull(apiManager.startComponents(clusterName, hostNames, components));
    }
 
    @Test
    public void testCreateConfigGroups() throws Exception {
+      List<ApiConfigGroup> configGroups = new ArrayList<ApiConfigGroup>();
+      apiManager.createConfigGroups(clusterName, configGroups);
+   }
 
+   @Test
+   public void testReadConfigGroup() {
+      Assert.assertNotNull(apiManager.readConfigGroup(clusterName, "1"));
+   }
+
+   @Test
+   public void testUpdateConfigGroup() {
+      ApiConfigGroup configGroup = new ApiConfigGroup();
+      apiManager.updateConfigGroup(clusterName, "2", configGroup);
    }
 
    @Test
    public void testAddComponents() throws Exception {
-
+      ApiHostComponentsRequest apiHostComponentsRequest = new ApiHostComponentsRequest();
+      List<ApiHostComponent> hostComponents = new ArrayList<>();
+      apiHostComponentsRequest.setHostComponents(hostComponents);
+      ApiHostComponent component = new ApiHostComponent();
+      hostComponents.add(component);
+      ApiComponentInfo componentInfo = new ApiComponentInfo();
+      componentInfo.setComponentName("DATANODE");
+      component.setHostComponent(componentInfo);
+      apiManager.addComponents(clusterName, hostNames, apiHostComponentsRequest);
    }
 
    @Test
    public void testInstallComponents() throws Exception {
-
+      Assert.assertNotNull(apiManager.installComponents(clusterName));
    }
 
    @Test
    public void testGetStackWithCompAndConfigs() throws Exception {
-
+      Assert.assertNotNull(apiManager.getStackWithCompAndConfigs("HDP", "2.1"));
    }
 
    @Test
    public void testGetRegisteredHosts() throws Exception {
-
+      Assert.assertNotNull(apiManager.getRegisteredHosts());
    }
 }

@@ -95,7 +95,7 @@ public class FakeClusterHostsResource implements HostsResource {
 
    @Override
    public Response getHostComponents(String hostFQDN) {
-      return null;
+      return BuildResponse.buildResponse("cluster/hosts/host_components.json");
    }
 
 }

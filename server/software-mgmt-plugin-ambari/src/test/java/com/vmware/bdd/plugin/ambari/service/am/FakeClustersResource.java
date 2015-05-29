@@ -43,7 +43,7 @@ public class FakeClustersResource implements ClustersResource {
 
    @Override
    public Response deleteCluster(String clusterName) {
-      return null;
+      return BuildResponse.buildResponse("");
    }
 
    @Override

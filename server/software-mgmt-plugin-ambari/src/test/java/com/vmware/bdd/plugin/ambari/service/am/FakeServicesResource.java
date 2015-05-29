@@ -79,8 +79,7 @@ public class FakeServicesResource implements ServicesResource {
    @DELETE
    @Path("/{serviceName}")
    public Response deleteService(@PathParam("serviceName") String serviceName) {
-      // TODO Auto-generated method stub
-      return null;
+      return BuildResponse.buildResponse("");
    }
 
    @Override

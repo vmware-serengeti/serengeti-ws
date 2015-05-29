@@ -1,0 +1,23 @@
+{
+  "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/config_groups/2",
+  "ConfigGroup" : {
+    "cluster_name" : "cluster01",
+    "description" : "Host Group Configuration",
+    "desired_configs" : [
+      {
+        "tag" : "cluster01-master-0",
+        "type" : "hdfs-site",
+        "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/configurations?type=hdfs-site&tag=cluster01-master-0"
+      }
+    ],
+    "group_name" : "cluster01-master-0",
+    "hosts" : [
+      {
+        "host_name" : "host01",
+        "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/hosts/host01"
+      }
+    ],
+    "id" : 2,
+    "tag" : "HDFS"
+  }
+}

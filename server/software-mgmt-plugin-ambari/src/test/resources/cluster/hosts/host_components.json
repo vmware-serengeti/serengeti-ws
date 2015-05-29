@@ -1,0 +1,16 @@
+{
+  "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/hosts/host03/host_components",
+  "items" : [
+    {
+      "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/hosts/host03/host_components/ZOOKEEPER_SERVER",
+      "HostRoles" : {
+        "cluster_name" : "cluster01",
+        "component_name" : "ZOOKEEPER_SERVER",
+        "host_name" : "host03"
+      },
+      "host" : {
+        "href" : "http://127.0.0.1:8080/api/v1/clusters/cluster01/hosts/host03"
+      }
+    }
+  ]
+}
