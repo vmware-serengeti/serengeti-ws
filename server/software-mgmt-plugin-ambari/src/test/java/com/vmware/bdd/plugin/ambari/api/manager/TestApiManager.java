@@ -56,6 +56,7 @@ public class TestApiManager {
       Mockito.when(apiRootResource.getRootV1()).thenReturn(rootResourceV1);
       AmbariManagerClientbuilder clientbuilder = Mockito.mock(AmbariManagerClientbuilder.class);
       Mockito.when(clientbuilder.build()).thenReturn(apiRootResource);
+      //apiManager = new ApiManager("10.141.72.211", 8080, "admin", "admin");
       apiManager = new ApiManager(clientbuilder);
       hostNames = new ArrayList<String>();
       hostNames.add("host01");
