@@ -141,7 +141,7 @@ public interface SoftwareManager {
     * time
     */
    boolean scaleOutCluster(ClusterBlueprint blueprint, List<String> addedNodeNames,
-         ClusterReportQueue reports)
+         ClusterReportQueue reports, boolean forceScaleOut)
          throws SoftwareManagementPluginException; // for resize node group instance number
 
    /**

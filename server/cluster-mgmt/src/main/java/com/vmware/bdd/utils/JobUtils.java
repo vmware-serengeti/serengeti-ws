@@ -400,19 +400,20 @@ public class JobUtils {
       return verifyNodesStatus(nodes, NodeStatus.VM_READY, false);
    }
 
+   public static void recordErrorInClusterOperation(ChunkContext chunkContext, String errMsg) {
+      logger.error(errMsg);
+      boolean forceOperation = getJobParameterForceClusterOperation(chunkContext);
+      if (forceOperation) {
+         logger.warn(JobConstants.FORCE_CLUSTER_OPERATION_IGNORE_EXCEPTION);
+      }
+   }
+
    public static String getJobParameter(ChunkContext context, String parameterKey) {
       return context.getStepContext().getStepExecution().getJobParameters().getString(parameterKey);
    }
 
    public static boolean getJobParameterForceClusterOperation(ChunkContext chunkContext) {
-      String forceStartString = JobUtils.getJobParameter(chunkContext, JobConstants.FORCE_CLUSTER_OPERATION_JOB_PARAM);
+      String forceStartString = getJobParameter(chunkContext, Constants.FORCE_CLUSTER_OPERATION_JOB_PARAM);
       return CommonUtil.getBooleanFromString(forceStartString, false);
    }
-
-   public static void forceClusterOperationRecordError(boolean force, Logger logger) {
-      if(force) {
-         logger.warn(Constants.FORCE_CLUSTER_OPERATION_IGNORE_EXCEPTION);
-      }
-   }
-
 }

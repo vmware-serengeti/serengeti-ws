@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.utils.JobUtils;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -82,6 +83,11 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
 
       boolean success = false;
 
+      boolean force = false;
+      if (chunkContext != null) {
+         force = JobUtils.getJobParameterForceClusterOperation(chunkContext);
+      }
+
       try {
          switch(managementOperation) {
             case CREATE:
@@ -110,11 +116,7 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
                success = softwareManager.deleteCluster(clusterBlueprint, queue);
                break;
             case START:
-               boolean forceStart = false;
-               if (chunkContext != null) {
-                  forceStart = JobUtils.getJobParameterForceClusterOperation(chunkContext);
-               }
-               success = softwareManager.startCluster(clusterBlueprint, queue, forceStart);
+               success = softwareManager.startCluster(clusterBlueprint, queue, force);
                break;
             case STOP:
                success = softwareManager.onStopCluster(clusterBlueprint,queue);
@@ -144,7 +146,7 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
             case RESIZE:
                AuAssert.check(chunkContext != null);
                List<String> addedNodes = getResizedVmNames(chunkContext, clusterBlueprint);
-               success = softwareManager.scaleOutCluster(clusterBlueprint, addedNodes, queue);
+               success = softwareManager.scaleOutCluster(clusterBlueprint, addedNodes, queue, force);
                break;
             default:
                success = true;
@@ -170,7 +172,7 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
       return result;
    }
 
-   private List<String> getResizedVmNames(ChunkContext chunkContext, 
+   private List<String> getResizedVmNames(ChunkContext chunkContext,
          ClusterBlueprint clusterBlueprint) {
       String groupName =
             TrackableTasklet.getJobParameters(chunkContext).getString(
@@ -186,6 +188,12 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
                long index = CommonUtil.getVmIndex(node.getName());
                if (index < oldInstanceNum) {
                   continue;
+               }
+               if (JobUtils.getJobParameterForceClusterOperation(chunkContext)) {
+                  NodeStatus status = lockedClusterEntityManager.getClusterEntityMgr().findNodeByName(node.getName()).getStatus();
+                  if (status != NodeStatus.VM_READY) {
+                     continue;
+                  }
                }
                addedNodeNames.add(node.getName());
             }

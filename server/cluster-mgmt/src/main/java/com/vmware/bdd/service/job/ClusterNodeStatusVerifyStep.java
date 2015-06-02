@@ -38,13 +38,20 @@ public class ClusterNodeStatusVerifyStep extends TrackableTasklet {
             getFromJobExecutionContext(chunkContext,
                   JobConstants.CLUSTER_CREATE_VM_OPERATION_SUCCESS,
                   Boolean.class);
+      boolean force = JobUtils.getJobParameterForceClusterOperation(chunkContext);
       if (deleted != null && !deleted) {
-         logger.error("Failed to delete nodes violating placement policy.");
-         throw ClusteringServiceException.DELETE_CLUSTER_VM_FAILED(clusterName);
+         JobUtils.recordErrorInClusterOperation(chunkContext, "Failed to delete nodes violating placement policy.");
+         if (!force) {
+            throw ClusteringServiceException.DELETE_CLUSTER_VM_FAILED(clusterName);
+         }
       }
       if (created != null && !created) {
-         // vm creation is finished, and with error happens, throw exception here to stop following steps
-         throw ClusteringServiceException.VM_CREATION_FAILED(clusterName);
+         // vm creation is finished, and with error happens. If forceClusterOperation enabled, ignore the failure here,
+         // Otherwise,throw exceptions and stop following steps
+         JobUtils.recordErrorInClusterOperation(chunkContext, "Failed to create VMs.");
+         if (!force) {
+            throw ClusteringServiceException.VM_CREATION_FAILED(clusterName);
+         }
       }
       Boolean verifyStatus =
          getFromJobExecutionContext(chunkContext,
@@ -52,20 +59,22 @@ public class ClusterNodeStatusVerifyStep extends TrackableTasklet {
                Boolean.class);
       if (created != null && (verifyStatus == null || !verifyStatus)) {
          // throw creation exception here, and query detail node error message from node entity
-         throw ClusteringServiceException.VM_CREATION_FAILED(clusterName);
+         JobUtils.recordErrorInClusterOperation(chunkContext, "Failed to verify VM status.");
+         if (!force) {
+            throw ClusteringServiceException.VM_CREATION_FAILED(clusterName);
+         }
       }
-      boolean forceStart = JobUtils.getJobParameterForceClusterOperation(chunkContext);
       if (managementOperation != null) {
          Boolean success =
-            getFromJobExecutionContext(chunkContext,
-                  JobConstants.CLUSTER_OPERATION_SUCCESS, Boolean.class);
+               getFromJobExecutionContext(chunkContext,
+                     JobConstants.CLUSTER_OPERATION_SUCCESS, Boolean.class);
          if ((success != null && !success)
                || (verifyStatus == null || !verifyStatus)) {
-            logger.error("operation is " + managementOperation + " forceStart is: " + forceStart);
             // throw creation exception here, and query detail node error message from node entity
-            JobUtils.forceClusterOperationRecordError(forceStart, logger);
-            if (!forceStart || !managementOperation.equals(ManagementOperation.START)) {
-               //if is start custer, force to start the cluster even met failures
+            //if is start custer, force to start the cluster even met failures
+            String errMsg = "Failed to " + managementOperation + " cluster " + clusterName;
+            JobUtils.recordErrorInClusterOperation(chunkContext, errMsg);
+            if (!force) {
                throw ClusteringServiceException.CLUSTER_OPERATION_FAILED(clusterName);
             }
          }

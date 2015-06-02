@@ -372,12 +372,12 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
    @Override
    public boolean scaleOutCluster(ClusterBlueprint blueprint, List<String> addedNodeNames,
-         ClusterReportQueue reportQueue) throws SoftwareManagementPluginException {
+         ClusterReportQueue reportQueue, boolean forceScaleOut) throws SoftwareManagementPluginException {
       boolean success = false;
       CmClusterDef clusterDef = null;
       try {
          clusterDef = new CmClusterDef(blueprint);
-         ReflectionUtils.getPreStartServicesHook().preStartServices(blueprint.getName());
+         ReflectionUtils.getPreStartServicesHook().preStartServices(blueprint.getName(), forceScaleOut);
 
          provisionCluster(clusterDef, addedNodeNames, reportQueue, true);
          provisionParcels(clusterDef, addedNodeNames, reportQueue);

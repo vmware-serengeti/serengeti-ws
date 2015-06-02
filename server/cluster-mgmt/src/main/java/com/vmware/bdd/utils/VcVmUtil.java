@@ -492,6 +492,8 @@ public class VcVmUtil {
    public static VirtualDisk findVirtualDisk(String vmMobId, String externalAddr) {
       VcVirtualMachine vm = VcCache.getIgnoreMissing(vmMobId);
 
+      if (vm == null) return null;
+
       DeviceId diskId = new DeviceId(externalAddr);
       VirtualDevice device = vm.getVirtualDevice(diskId);
       if (device == null)

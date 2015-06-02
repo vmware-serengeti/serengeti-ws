@@ -163,7 +163,7 @@ public class DefaultSoftwareManagerImpl implements SoftwareManager {
 
    @Override
    public boolean scaleOutCluster(ClusterBlueprint blueprint, List<String> addedNodeNames,
-         ClusterReportQueue reports) throws SoftwareManagementPluginException {
+         ClusterReportQueue reports, boolean force) throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;
    }

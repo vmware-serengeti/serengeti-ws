@@ -139,7 +139,7 @@ public class ClusterRestClient {
       actionOps(id, id, queryStrings);
    }
 
-   public void resize(String clusterName, String nodeGroup, int instanceNum) {
+   public void resize(String clusterName, String nodeGroup, int instanceNum, Map<String, String> queryStrings) {
       final String path =
             Constants.REST_PATH_CLUSTER + "/" + clusterName + "/"
                   + Constants.REST_PATH_NODEGROUP + "/" + nodeGroup
@@ -148,7 +148,7 @@ public class ClusterRestClient {
 
       PrettyOutput outputCallBack =
             getClusterPrettyOutputCallBack(this, clusterName);
-      restClient.update(Integer.valueOf(instanceNum), path, httpverb,
+      restClient.updateWithQueryStrings(Integer.valueOf(instanceNum), path, queryStrings, httpverb,
             outputCallBack);
    }
 

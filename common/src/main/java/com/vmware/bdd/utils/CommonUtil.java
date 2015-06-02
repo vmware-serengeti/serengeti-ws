@@ -52,6 +52,7 @@ import org.apache.log4j.Logger;
 
 import com.vmware.bdd.apitypes.NetworkDnsType;
 import com.vmware.bdd.exception.BddException;
+import org.springframework.batch.core.scope.context.ChunkContext;
 
 public class CommonUtil {
 

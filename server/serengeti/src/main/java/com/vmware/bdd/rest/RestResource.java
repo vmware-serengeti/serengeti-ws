@@ -278,7 +278,7 @@ public class RestResource {
    public void startStopResumeCluster(
          @PathVariable("clusterName") String clusterName,
          @RequestParam(value = "state", required = true) String state,
-         @RequestParam(value = "force", required = false, defaultValue = "false") String force,
+         @RequestParam(value = "force", required = false, defaultValue = "false") Boolean force,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
 
@@ -294,7 +294,7 @@ public class RestResource {
          taskId = clusterMgr.stopCluster(clusterName);
          redirectRequest(taskId, request, response);
       } else if (state.equals("start")) {
-         taskId = clusterMgr.startCluster(clusterName, Boolean.valueOf(force));
+         taskId = clusterMgr.startCluster(clusterName, force);
          redirectRequest(taskId, request, response);
       } else if (state.equals("resume")) {
          taskId = clusterMgr.resumeClusterCreation(clusterName);
@@ -316,7 +316,9 @@ public class RestResource {
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void resizeCluster(@PathVariable("clusterName") String clusterName,
          @PathVariable("groupName") String groupName,
-         @RequestBody Integer instanceNum, HttpServletRequest request,
+         @RequestBody Integer instanceNum,
+         @RequestParam(value = "force", required = false, defaultValue = "false") Boolean force,
+         HttpServletRequest request,
          HttpServletResponse response) throws Exception {
 
       verifyInitialized();
@@ -336,7 +338,7 @@ public class RestResource {
                String.valueOf(instanceNum));
       }
       Long taskId =
-            clusterMgr.resizeCluster(clusterName, groupName, instanceNum);
+            clusterMgr.resizeCluster(clusterName, groupName, instanceNum, force);
       redirectRequest(taskId, request, response);
    }
 

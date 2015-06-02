@@ -708,12 +708,12 @@ public class ClusterCommands implements CommandMarker {
    @CliCommand(value = "cluster start", help = "Start a cluster")
    public void startCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
-         @CliOption(key = { "force" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Force start cluster") final String forceStart) {
+         @CliOption(key = { "force" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Force start cluster") final Boolean forceStart) {
 
       Map<String, String> queryStrings = new HashMap<String, String>();
       queryStrings
             .put(Constants.QUERY_ACTION_KEY, Constants.QUERY_ACTION_START);
-      queryStrings.put(Constants.FORCE_CLUSTER_OPERATION_KEY, forceStart);
+      queryStrings.put(Constants.FORCE_CLUSTER_OPERATION_KEY, forceStart.toString());
       // rest invocation
       try {
          restClient.actionOps(clusterName, queryStrings);
@@ -752,7 +752,8 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "nodeGroup" }, mandatory = true, help = "The node group name") final String nodeGroup,
          @CliOption(key = { "instanceNum" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The new instance number, should be larger than 0") final int instanceNum,
          @CliOption(key = { "cpuNumPerNode" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The number of vCPU for the nodes in this group") final int cpuNumber,
-         @CliOption(key = { "memCapacityMbPerNode" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The number of memory size in Mb for the nodes in this group") final long memory) {
+         @CliOption(key = { "memCapacityMbPerNode" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The number of memory size in Mb for the nodes in this group") final long memory,
+         @CliOption(key = { "force" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Ignore errors during resizing cluster") final Boolean force) {
 
       if ((instanceNum > 0 && cpuNumber == 0 && memory == 0)
             || (instanceNum == 0 && (cpuNumber > 0 || memory > 0))) {
@@ -793,7 +794,9 @@ public class ClusterCommands implements CommandMarker {
             }
             TaskRead taskRead = null;
             if (instanceNum > 0) {
-               restClient.resize(name, nodeGroup, instanceNum);
+               Map<String, String> queryStrings = new HashMap<String, String>();
+               queryStrings.put(Constants.FORCE_CLUSTER_OPERATION_KEY, force.toString());
+               restClient.resize(name, nodeGroup, instanceNum, queryStrings);
             } else if (cpuNumber > 0 || memory > 0) {
                if (!cluster.getStatus().isActiveServiceStatus()) {
                   CommandsUtils.printCmdFailure(

@@ -416,12 +416,12 @@ public class AmbariImpl implements SoftwareManager {
    private void bootstrap(final AmClusterDef clusterDef,
          final ClusterReportQueue reportQueue)
                throws SoftwareManagementPluginException {
-      bootstrap(clusterDef, null, reportQueue);
+      bootstrap(clusterDef, null, reportQueue, false);
    }
 
    private void bootstrap(final AmClusterDef clusterDef,
-         final List<String> addedHosts,
-         final ClusterReportQueue reportQueue)
+                          final List<String> addedHosts,
+                          final ClusterReportQueue reportQueue, boolean force)
                throws SoftwareManagementPluginException {
       try {
          if (addedHosts != null) {
@@ -487,7 +487,11 @@ public class AmbariImpl implements SoftwareManager {
                }
             }
             setBootstrapNodeError(clusterDef, addedHosts);
-            throw AmException.BOOTSTRAP_FAILED(notBootstrapNodes != null? notBootstrapNodes.toArray() : null);
+            if (!force ||
+                  //if use force, but all nodes failed to boostrap, throw exception
+                  (force && (bootstrapedHostCount == 0))) {
+               throw AmException.BOOTSTRAP_FAILED(notBootstrapNodes != null? notBootstrapNodes.toArray() : null);
+            }
          }
       } catch (Exception e) {
          setBootstrapNodeError(clusterDef, addedHosts);
@@ -872,8 +876,8 @@ public class AmbariImpl implements SoftwareManager {
 
    @Override
    public boolean scaleOutCluster(ClusterBlueprint blueprint, List<String> addedNodeNames,
-         ClusterReportQueue reports)
-               throws SoftwareManagementPluginException {
+                                  ClusterReportQueue reports, boolean forceScaleOut)
+         throws SoftwareManagementPluginException {
       boolean success = false;
       AmClusterDef clusterDef = null;
       try {
@@ -882,9 +886,9 @@ public class AmbariImpl implements SoftwareManager {
          logger.info("Start cluster " + blueprint.getName() + " scale out.");
          clusterDef = new AmClusterDef(blueprint, privateKey, getVersion());
 
-         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName());
+         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName(), forceScaleOut);
 
-         bootstrap(clusterDef, addedNodeNames, reports);
+         bootstrap(clusterDef, addedNodeNames, reports, forceScaleOut);
          provisionComponents(clusterDef, addedNodeNames, reports);
          success = true;
 
@@ -902,12 +906,19 @@ public class AmbariImpl implements SoftwareManager {
          clusterDef.getCurrentReport().setSuccess(false);
          String errorMessage = errorMessage("Failed to scale out cluster " + blueprint.getName(), e);
          logger.error(errorMessage, e);
+
          throw SoftwareManagementPluginException.SCALE_OUT_CLUSTER_FAILED(e, Constants.AMBARI_PLUGIN_NAME, blueprint.getName());
       } finally {
          clusterDef.getCurrentReport().setFinished(true);
          reportStatus(clusterDef.getCurrentReport(), reports);
       }
       return success;
+   }
+
+   public boolean scaleOutCluster(ClusterBlueprint blueprint, List<String> addedNodeNames,
+         ClusterReportQueue reports)
+               throws SoftwareManagementPluginException {
+      return scaleOutCluster(blueprint, addedNodeNames, reports, false);
    }
 
    private boolean provisionComponents(AmClusterDef clusterDef, List<String> addedNodeNames,

@@ -152,11 +152,11 @@ public class ClusterCommandsTest extends MockRestServer {
                 HttpMethod.PUT, HttpStatus.NO_CONTENT, "5");
 
         //invalid instance num
-        clusterCommands.resizeCluster("cluster1", "NodeGroup1", -1,0,0);
-        clusterCommands.resizeCluster("cluster1", "NodeGroup1", 0,0,0);
+       clusterCommands.resizeCluster("cluster1", "NodeGroup1", -1,0,0, false);
+       clusterCommands.resizeCluster("cluster1", "NodeGroup1", 0,0,0, false);
 
-       //normal case
-        clusterCommands.resizeCluster("cluster1", "NodeGroup1", 5,0,0);
+        //normal case
+        clusterCommands.resizeCluster("cluster1", "NodeGroup1", 5,0,0, false);
 
         //zookeeper resize case
         setup();
@@ -164,7 +164,7 @@ public class ClusterCommandsTest extends MockRestServer {
               mapper.writeValueAsString(cr1));
         this.buildReqRespWithoutRespBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1/nodegroup/NodeGroup2/instancenum",
                 HttpMethod.PUT, HttpStatus.NO_CONTENT, "5");
-        clusterCommands.resizeCluster("cluster1", "NodeGroup2", 5,0,0);
+        clusterCommands.resizeCluster("cluster1", "NodeGroup2", 5,0,0, false);
 
         CookieCache.clear();
     }
@@ -241,7 +241,7 @@ public class ClusterCommandsTest extends MockRestServer {
         this.buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1/nodegroup/ng1/instancenum",
                 HttpMethod.PUT, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
-        clusterCommands.resizeCluster("cluster1", "ng1", 5,0,0);
+        clusterCommands.resizeCluster("cluster1", "ng1", 5, 0, 0, false);
         CookieCache.clear();
     }
 
@@ -250,7 +250,7 @@ public class ClusterCommandsTest extends MockRestServer {
         CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
         this.buildReqRespWithoutRespBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1?state=start&force=false",
                 HttpMethod.PUT, HttpStatus.NO_CONTENT, "");
-        clusterCommands.startCluster("cluster1", "false");
+        clusterCommands.startCluster("cluster1", false);
         CookieCache.clear();
     }
 
@@ -264,7 +264,7 @@ public class ClusterCommandsTest extends MockRestServer {
         this.buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1?state=start&force=false",
                 HttpMethod.PUT, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
-        clusterCommands.startCluster("cluster1", "false");
+        clusterCommands.startCluster("cluster1", false);
         CookieCache.clear();
     }
 
