@@ -21,7 +21,7 @@ import com.vmware.bdd.entity.NodeEntity;
 
 public interface ISetLocalRepoService {
    /**
-    * Set password for nodes in cluster
+    * Set local repo for nodes in cluster
     *
     * @param clusterName
     * @param nodes
@@ -31,7 +31,7 @@ public interface ISetLocalRepoService {
    public boolean setLocalRepoForNodes(String clusterName, List<NodeEntity> nodes, String repoId, String localRepoURL);
 
    /**
-    * Set password for node in cluster
+    * Set local repo for node in cluster
     *
     * @param clusterName
     * @param fixedNodeIP

@@ -140,7 +140,7 @@ public class TestClouderaManagerImpl {
       public static PreStartServices getPreStartServicesHook() {
          return new PreStartServices() {
             @Override
-            public void preStartServices(String clusterName, boolean forceStart) throws SoftwareManagementPluginException {
+            public void preStartServices(String clusterName, boolean force) throws SoftwareManagementPluginException {
             }
             @Override
             public void preStartServices(String clusterName) throws SoftwareManagementPluginException {
@@ -278,7 +278,7 @@ public class TestClouderaManagerImpl {
             addedNodeNames.add(groupInfo.getNodes().get(instanceNum - 1).getName());
          }
       }
-      provider.scaleOutCluster(blueprint, addedNodeNames, reportQueue);
+      provider.scaleOutCluster(blueprint, addedNodeNames, reportQueue, false);
       List<ClusterReport> reports = reportQueue.pollClusterReport();
       for (ClusterReport report : reports) {
          System.out.println("Action: " + report.getAction() + ", Progress: " + report.getProgress());

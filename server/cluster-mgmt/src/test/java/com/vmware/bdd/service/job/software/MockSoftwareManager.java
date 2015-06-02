@@ -130,7 +130,7 @@ public class MockSoftwareManager extends AbstractSoftwareManager implements Soft
 
    @Override
    public boolean scaleOutCluster(ClusterBlueprint blueprint, List<String> addedNodeNames,
-         ClusterReportQueue reports)
+         ClusterReportQueue reports, boolean froce)
          throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;

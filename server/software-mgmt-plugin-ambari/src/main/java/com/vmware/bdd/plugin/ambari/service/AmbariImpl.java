@@ -34,8 +34,6 @@ import com.vmware.bdd.plugin.ambari.api.manager.ApiManager_2_0_0;
 import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 import org.apache.log4j.Logger;
 
-import javax.ws.rs.NotFoundException;
-
 import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
 import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
@@ -80,7 +78,6 @@ import com.vmware.bdd.plugin.ambari.poller.ClusterOperationPoller;
 import com.vmware.bdd.plugin.ambari.poller.ExternalNodesRegisterPoller;
 import com.vmware.bdd.plugin.ambari.poller.HostBootstrapPoller;
 import com.vmware.bdd.plugin.ambari.spectypes.HadoopRole;
-import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 import com.vmware.bdd.plugin.ambari.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
@@ -97,7 +94,6 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
 import com.vmware.bdd.software.mgmt.plugin.utils.ValidateRolesUtil;
 
-import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManager {
@@ -421,12 +417,12 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
    private void bootstrap(final AmClusterDef clusterDef,
          final ClusterReportQueue reportQueue)
                throws SoftwareManagementPluginException {
-      bootstrap(clusterDef, null, reportQueue);
+      bootstrap(clusterDef, null, reportQueue, false);
    }
 
    private void bootstrap(final AmClusterDef clusterDef,
-         final List<String> addedHosts,
-         final ClusterReportQueue reportQueue)
+                          final List<String> addedHosts,
+                          final ClusterReportQueue reportQueue, boolean force)
                throws SoftwareManagementPluginException {
       try {
          if (addedHosts != null) {
@@ -492,7 +488,11 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
                }
             }
             setBootstrapNodeError(clusterDef, addedHosts);
-            throw AmException.BOOTSTRAP_FAILED(notBootstrapNodes != null? notBootstrapNodes.toArray() : null);
+            if (!force ||
+                  //if use force, but all nodes failed to boostrap, throw exception
+                  (force && (bootstrapedHostCount == 0))) {
+               throw AmException.BOOTSTRAP_FAILED(notBootstrapNodes != null? notBootstrapNodes.toArray() : null);
+            }
          }
       } catch (Exception e) {
          setBootstrapNodeError(clusterDef, addedHosts);
@@ -879,8 +879,8 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
 
    @Override
    public boolean scaleOutCluster(ClusterBlueprint blueprint, List<String> addedNodeNames,
-         ClusterReportQueue reports)
-               throws SoftwareManagementPluginException {
+                                  ClusterReportQueue reports, boolean forceScaleOut)
+         throws SoftwareManagementPluginException {
       boolean success = false;
       AmClusterDef clusterDef = null;
       try {
@@ -889,9 +889,9 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
          logger.info("Start cluster " + blueprint.getName() + " scale out.");
          clusterDef = new AmClusterDef(blueprint, privateKey, getVersion());
 
-         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName());
+         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName(), forceScaleOut);
 
-         bootstrap(clusterDef, addedNodeNames, reports);
+         bootstrap(clusterDef, addedNodeNames, reports, forceScaleOut);
          provisionComponents(clusterDef, addedNodeNames, reports);
          success = true;
 
@@ -909,12 +909,19 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
          clusterDef.getCurrentReport().setSuccess(false);
          String errorMessage = errorMessage("Failed to scale out cluster " + blueprint.getName(), e);
          logger.error(errorMessage, e);
+
          throw SoftwareManagementPluginException.SCALE_OUT_CLUSTER_FAILED(e, Constants.AMBARI_PLUGIN_NAME, blueprint.getName());
       } finally {
          clusterDef.getCurrentReport().setFinished(true);
          reportStatus(clusterDef.getCurrentReport(), reports);
       }
       return success;
+   }
+
+   public boolean scaleOutCluster(ClusterBlueprint blueprint, List<String> addedNodeNames,
+         ClusterReportQueue reports)
+               throws SoftwareManagementPluginException {
+      return scaleOutCluster(blueprint, addedNodeNames, reports, false);
    }
 
    private boolean provisionComponents(AmClusterDef clusterDef, List<String> addedNodeNames,

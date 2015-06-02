@@ -65,8 +65,8 @@ public class ClusterOperationCallbackStep extends TrackableTasklet {
                CommonUtil.gracefulRackTopologyOutput(rackTopology, filename, System.lineSeparator());
             } catch (Exception e) {
                String errorMessage = msg + " failed. " + e.getLocalizedMessage();
-               boolean forceStart = JobUtils.getJobParameterForceClusterOperation(chunkContext);
-               if (!forceStart) {
+               boolean force = JobUtils.getJobParameterForceClusterOperation(chunkContext);
+               if (!force || (managementOperation == ManagementOperation.RESIZE)) {
                   throw TaskException.EXECUTION_FAILED(errorMessage);
                }
             }

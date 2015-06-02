@@ -622,7 +622,7 @@ public class TestClusteringJobs extends
    @Transactional(propagation = Propagation.NEVER)
    public void testClusterResizeFailed() throws Exception {
       long jobExecutionId =
-            clusterMgr.resizeCluster(TEST_DHCP_CLUSTER_NAME, "worker", 2);
+            clusterMgr.resizeCluster(TEST_DHCP_CLUSTER_NAME, "worker", 2, false);
       ClusterRead cluster =
             clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
       Assert.assertTrue(
@@ -657,7 +657,7 @@ public class TestClusteringJobs extends
       stopVcVm(vcRP + "/" + ConfigInfo.getSerengetiUUID() + "-"
             + TEST_DHCP_CLUSTER_NAME + "/" + "worker",
             TEST_DHCP_CLUSTER_NAME + "-worker-0");
-      long jobExecutionId = clusterMgr.resizeCluster(TEST_DHCP_CLUSTER_NAME, "worker", 2);
+      long jobExecutionId = clusterMgr.resizeCluster(TEST_DHCP_CLUSTER_NAME, "worker", 2, false);
       ClusterRead cluster =
             clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
       Assert.assertTrue(cluster.getStatus() == ClusterStatus.UPDATING,

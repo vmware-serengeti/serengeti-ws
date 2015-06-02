@@ -18,10 +18,6 @@ package com.vmware.bdd.utils;
 public class Constants {
    public static final String CLUSTER_CONFIG_FORMAT_ERROR =
          "The format of configuration is invalid !";
-   /*public static final String CLUSTER_CONFIG_TYPE_NOT_RAGULARLY_BEFORE =
-         "Warning: The configuration ";
-   public static final String CLUSTER_CONFIG_TYPE_NOT_RAGULARLY_AFTER =
-         "not regular configuration type.";*/
 
    public final static String CLUSTER_CONFIG_TYPE_NOT_REGULAR = "Warning: The type %1s is not a regular cluster configuration.";
 
@@ -29,19 +25,14 @@ public class Constants {
 
    public static final String LIST_CONFIG_ERROR =
          "The blacklist or whitelist config error!";
-   public static final String PRACK_NO_TOPOLOGY_TYPE_SPECIFIED =
-         "Rack Policy in spec file will not benefit Hadoop running when not specify topology through CLI. By default, Hadoop cluster will use NONE topology.";
    public static final String FAIR_SCHEDULER_FILE_NAME = "fair-scheduler.xml";
    public static final String FAIR_SCHEDULER_FILE_ATTRIBUTE = "text";
 
    public static final int VHM_PROTOCOL_VERSION = 3;
    public static final String SET_MANUAL_ELASTICITY_INFO_VERSION = "version";
    public static final String SET_MANUAL_ELASTICITY_INFO_CLUSTER_NAME = "cluster_name";
-   public static final String SET_MANUAL_ELASTICITY_INFO_JOBTRACKER = "jobtracker";
    public static final String SET_MANUAL_ELASTICITY_INFO_INSTANCE_NUM = "instance_num";
-   public static final String SET_MANUAL_ELASTICITY_INFO_NODE_GROUPS = "node_groups";
-   public static final String SET_MANUAL_ELASTICITY_INFO_SERENGETI_INSTANCE =
-         "serengeti_instance";
+
    public static final String SET_MANUAL_ELASTICITY_INFO_RECEIVE_ROUTE_KEY =
          "route_key";
    public static final String SET_MANUAL_ELASTICITY_INFO_ACTION = "action";
@@ -54,7 +45,6 @@ public class Constants {
    public static final String SERENGETI_SERVER_VM_MOBID = "vim.cms_moref";
    public static final String GUEST_VARIABLE_DNS_KEY_1 = "dnsserver1";
    public static final String GUEST_VARIABLE_DNS_KEY_0 = "dnsserver0";
-   public static final String GUEST_VARIABLE_HOSTNAME_KEY = "hostname";
    public static final String GUEST_VARIABLE_GATEWAY_KEY = "gateway";
    public static final String GUEST_VARIABLE_NETMASK_KEY = "netmask";
    public static final String GUEST_VARIABLE_IP_KEY = "ipaddr";
@@ -108,10 +98,7 @@ public class Constants {
          "The number of ZooKeepers is recommended to be an odd number.";
    public static final String WORKER_CLIENT_HA_FLAG =
          "The worker or client node group has vSphere High Availability enabled.";
-   public static final String REGISONSERVER_DATANODE_SEPERATION =
-         "RegionServer and DataNode are separated, which might degrade performance.";
-   public static final String NOT_DEFINED_ROLE =
-         "Some roles are unidentified.";
+
    public static final String WRONG_NUM_OF_JOURNALNODE =
          "The number of journal nodes must be three or more.";
    public static final String ODD_NUM_OF_JOURNALNODE =
@@ -148,21 +135,12 @@ public class Constants {
    public static final String AMBARI_HBASE_DEPEND_ON_MAPREDUCE = "ambari.hbase_depend_on_mapreduce";
 
    // rabbitMQ message format
-   public static final String ERROR_CODE_FIELD = "error_code";
    public static final String ERROR_MSG_FIELD = "error_msg";
    public static final String FINISH_FIELD = "finished";
    public static final String SUCCEED_FIELD = "succeed";
    public static final String PROGRESS_FIELD = "progress";
-   public static final String PROGRESS_MESSAGE_FIELD = "progress_msg";
    public static final String CLUSTER_DATA_FIELD = "cluster_data";
    public static final String CLUSTER_NAME_FIELD = "name";
-   public static final String GROUP_FIELD = "groups";
-   public static final String GROUP_NAME_FIELD = "name";
-   public static final String INSTANCE_FIELD = "instances";
-   public static final String INSTANCE_NAME_FIELD = "name";
-   public static final String INSTANCE_STATUS_FIELD = "status";
-   public static final String INSTANCE_ACTION_FIELD = "action";
-   public static final String INSTANCE_IP_FIELD = "ip_address";
 
    // cloud provider
    public static final String CLOUD_PROVIDER_NAME_FIELD = "name";
@@ -173,7 +151,6 @@ public class Constants {
    public static final String HA_FLAG_FT = "ft";
    public static final String HA_FLAG_OFF = "off";
 
-   public static final String ELASTIC_RUNTIME_AUTOMATION_ENABLE = "elastic_runtime.automation.enable";
    public static final String MUST_CONFIGURE_FQDN =
          "The CDH 4.2.1+ cluster deployed in a network without FQDN/IP forward and reverse resolution will not work properly.";
    public static final String CONVERTED_MEMORY_DIVISIBLE_BY_4 =
@@ -237,8 +214,6 @@ public class Constants {
    public static final int DEFAULT_SSH_SLEEP_TIME_BEFORE_RETRY = 3000;
    public static final String SSH_SLEEP_TIME_BEFORE_RETRY = "serengeti.ssh.sleep.time.before.retry";
    public static final String SSH_MAX_RETRY_TIMES = "serengeti.ssh.max.retry.times";
-   public static final String NODE_APPMANAGER_YUM_REPO_DIR = "/etc/yum.repos.d";
-   public static final String NODE_APPMANAGER_YUM_LOCAL_REPO_FILE = "/etc/yum.repos.d/aaa-local-app-manager.repo";
    public static final String NODE_APPMANAGER_YUM_CLOUDERA_MANAGER_REPO_ID = "cloudera-manager";
    public static final String NODE_APPMANAGER_YUM_AMBARI_REPO_ID = "ambari";
    public static final String NODE_APPMANAGER_SETUP_LOCAL_REPO_SCRIPT = "node.appmgr.setup.local.repo.script";
@@ -262,7 +237,6 @@ public class Constants {
    public static final int PASSWORD_MAX_LENGTH = 20;
    public static final String PASSWORD_REQUIREMENT = "Password must be from " + PASSWORD_MIN_LENGTH + " to " + PASSWORD_MAX_LENGTH + " characters and must contain at least one uppercase character, one lowercase character, one digit and one of the following special characters: _, @, #, $, %, ^, &, *";
    public static final String BDE_SERVER_VM_MOBID = "vim.cms_moref";
-   public static final String VC_EXT_PREFIX = "ext.prefix";
 
    public static final String RESPONSE_HEADER_LOCATION = "Location";
 
@@ -283,11 +257,11 @@ public class Constants {
    public static final String VCENTER_VERSION_6 = "6";
    public static final String CLUSTER_CLONE_TYPE_FAST_CLONE = "fast";
    public static final String CLUSTER_CLONE_TYPE_INSTANT_CLONE = "instant";
-   public static final String FORCE_CLUSTER_OPERATION_IGNORE_EXCEPTION = "The above error is ignored because the force flag is set.";
    public static final String SERENGETI_DISABLE_SWAPDISK = "serengeti.disable.vm.swap.disk";
 
    public static final String BDE_SERVER_VERSION_2_2 = "2.2.0";
    public static final String SUDO_COMMAND = "serengeti.sudo.command";
    public static final String DEFAULT_SUDO_COMMAND = "sudo";
    public static final String SYSTEM_AND_SWAP_DISK_CONTROLLER_TYPE = "storage.system_swap.disk.controller.type";
+   public static final String FORCE_CLUSTER_OPERATION_JOB_PARAM = "force.cluster.operation";
 }

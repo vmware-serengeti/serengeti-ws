@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job;
 
+import com.vmware.bdd.utils.JobUtils;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 
@@ -32,7 +33,11 @@ public class GenerateHostnameFailedStep extends TrackableTasklet {
       String clusterName = getJobParameters(chunkContext).getString(JobConstants.CLUSTER_NAME_JOB_PARAM);
       boolean generateHostnameForNodesFailed = generateHostnameSerivce.generateHostnameForNodesFailed(clusterName, statusUpdator);
       if (generateHostnameForNodesFailed) {
-         throw TaskException.EXECUTION_FAILED("Failed to generate hostname for cluster " + clusterName);
+         String errMsg = "Failed to generate hostname for cluster " + clusterName;
+         JobUtils.recordErrorInClusterOperation(chunkContext, errMsg);
+         if (!JobUtils.getJobParameterForceClusterOperation(chunkContext)) {
+            throw TaskException.EXECUTION_FAILED(errMsg);
+         }
       }
       return RepeatStatus.FINISHED;
    }

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.bdd.exception.BddException;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,8 +82,17 @@ public class ResizeClusterRemoveBadNodeStep extends TrackableTasklet {
       deleteServices(getClusterEntityMgr(),
             softwareMgrs.getSoftwareManagerByClusterName(clusterName),
             deletedNodes);
-      boolean deleted = clusteringService.syncDeleteVMs(deletedNodes, 
-            statusUpdator, false);
+      boolean deleted = false;
+      try {
+         deleted = clusteringService.syncDeleteVMs(deletedNodes,
+               statusUpdator, false);
+      } catch (BddException e) {
+         String errMsg = "Failed to remove bad nodes for resizing cluster " + clusterName + ": " + e.getMessage();
+         JobUtils.recordErrorInClusterOperation(chunkContext, errMsg);
+         if (!JobUtils.getJobParameterForceClusterOperation(chunkContext)) {
+            throw e;
+         }
+      }
       putIntoJobExecutionContext(chunkContext, 
             JobConstants.CLUSTER_EXISTING_NODES_JOB_PARAM, existingNodes);
       putIntoJobExecutionContext(chunkContext, 

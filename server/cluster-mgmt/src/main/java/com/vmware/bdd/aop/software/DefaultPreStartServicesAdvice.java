@@ -19,10 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.software.mgmt.exception.SoftwareManagementException;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.intf.PreStartServices;
-import com.vmware.bdd.utils.JobUtils;
+import com.vmware.bdd.utils.CommonUtil;
 
 import org.apache.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -98,7 +99,7 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
    }
 
    @Override
-   public void preStartServices(String clusterName, boolean forceStart) throws SoftwareManagementPluginException {
+   public void preStartServices(String clusterName, boolean force) throws SoftwareManagementPluginException {
       logger.info("Pre configuration for cluster " + clusterName);
       synchronized(this) {
          if (clusterEntityMgr == null) {
@@ -107,12 +108,12 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
          }
       }
 
-      waitVmBootup(clusterName, forceStart);
+      waitVmBootup(clusterName, force);
 
-      updateNodes(clusterName, forceStart);
+      updateNodes(clusterName, force);
    }
 
-   private void waitVmBootup(String clusterName, boolean forceStart) {
+   private void waitVmBootup(String clusterName, boolean force) {
       List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(clusterName);
       Callable<Void>[] callables = new Callable[nodes.size()];
       int i = 0;
@@ -135,27 +136,29 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
          for (i = 0; i < callables.length; i++) {
             if (result[i].throwable != null) {
                errorMsgList.add(result[i].throwable.getMessage());
+               logger.error(result[i].throwable.getMessage());
             }
          }
          if (!errorMsgList.isEmpty()) {
-            logger.error(errorMsgList);
-            JobUtils.forceClusterOperationRecordError(forceStart, logger);
-            if (!forceStart) {
+            if (force) {
+               logger.warn(JobConstants.FORCE_CLUSTER_OPERATION_IGNORE_EXCEPTION);
+            } else {
                throw InfrastructureException.WAIT_VM_STATUS_FAIL(clusterName, errorMsgList);
             }
          }
       }  catch (InterruptedException e) {
          String errorMessage = "error when waiting for nodes bootup";
-         logger.error(errorMessage, e);
-         JobUtils.forceClusterOperationRecordError(forceStart, logger);
-         if (!forceStart) {
+         logger.error(errorMessage);
+         if (force) {
+            logger.warn(JobConstants.FORCE_CLUSTER_OPERATION_IGNORE_EXCEPTION);
+         } else {
             throw BddException.INTERNAL(e, e.getMessage());
          }
       }
    }
 
    @Transactional
-   private Void updateNodes(final String clusterName, final boolean forceStart) {
+   private Void updateNodes(final String clusterName, final boolean force) {
 
       return VcContext.inVcSessionDo(new VcSession<Void>() {
          @Override
@@ -170,9 +173,11 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
                VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
                String hostname = VcVmUtil.getMgtHostName(vm, node.getPrimaryMgtIpV4());
                if (hostname == null || hostname.isEmpty()) {
-                  logger.error("Failed to get FQDN from vm " + vm.getName());
-                  JobUtils.forceClusterOperationRecordError(forceStart, logger);
-                  if (!forceStart) {
+                  String errMsg = "Failed to get FQDN from vm " + vm.getName();
+                  logger.error(errMsg);
+                  if (force) {
+                     logger.warn(JobConstants.FORCE_CLUSTER_OPERATION_IGNORE_EXCEPTION);
+                  } else {
                      throw SoftwareManagementException.FAILED_TO_GET_FQDN(vm.getName());
                   }
                }

@@ -735,6 +735,15 @@ public class RestClient {
       }
    }
 
+   public void updateWithQueryStrings(Object entity, final String path, Map<String, String> queryStrings,
+                                      final HttpMethod verb, PrettyOutput... prettyOutput) {
+      String queryString = "";
+      if (queryStrings != null && !queryStrings.isEmpty()) {
+         queryString = buildQueryStrings(queryStrings);
+      }
+      update(entity, path + queryString, verb, prettyOutput);
+   }
+
    private ResponseEntity<String> restUpdate(String path, Object entityName) {
       String targetUri = hostUri + Constants.HTTPS_CONNECTION_API + path;
 

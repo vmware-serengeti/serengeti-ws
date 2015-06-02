@@ -79,5 +79,5 @@ public interface JobConstants {
    public static final String IS_VM_POWER_ON = "vm.power.on";
    public static final String CLUSTER_EXCLUSIVE_WRITE_LOCKED = "exclusiveWriteLocked";
    public static final String SET_PASSWORD_SUCCEED_JOB_PARAM = "set.password.succeed";
-   public static final String FORCE_CLUSTER_OPERATION_JOB_PARAM = "force.cluster.operation";
+   String FORCE_CLUSTER_OPERATION_IGNORE_EXCEPTION = "The above error is ignored because the force flag is set.";
 }

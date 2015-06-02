@@ -870,7 +870,7 @@ public class ClusterManager {
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
             clusterName));
-      param.put(JobConstants.FORCE_CLUSTER_OPERATION_JOB_PARAM, new JobParameter(String.valueOf(force)));
+      param.put(Constants.FORCE_CLUSTER_OPERATION_JOB_PARAM, new JobParameter(String.valueOf(force)));
       param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(new Date()));
       param.put(JobConstants.CLUSTER_SUCCESS_STATUS_JOB_PARAM,
             new JobParameter(ClusterStatus.RUNNING.name()));
@@ -938,7 +938,7 @@ public class ClusterManager {
 
    @ClusterManagerPointcut
    public Long resizeCluster(String clusterName, String nodeGroupName,
-         int instanceNum) throws Exception {
+         int instanceNum, boolean force) throws Exception {
       logger.info("ClusterManager, updating node group " + nodeGroupName
             + " in cluster " + clusterName + " reset instance number to "
             + instanceNum);
@@ -953,12 +953,12 @@ public class ClusterManager {
 
       List<String> dsNames = getUsedDS(cluster.getVcDatastoreNameList());
       if (dsNames.isEmpty()) {
-         throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
+         throw ClusterConfigException.NO_DATASTORE_ADDED();
       }
 
       List<VcCluster> vcClusters = getUsedVcClusters(cluster.getVcRpNameList());
       if (vcClusters.isEmpty()) {
-         throw ClusterConfigException.NO_DATASTORE_ADDED();
+         throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
       }
 
       this.resMgr.refreshVcResources();
@@ -1049,6 +1049,7 @@ public class ClusterManager {
             new JobParameter(ClusterStatus.RUNNING.name()));
       param.put(JobConstants.VERIFY_NODE_STATUS_SCOPE_PARAM, new JobParameter(
             JobConstants.GROUP_NODE_SCOPE_VALUE));
+      param.put(Constants.FORCE_CLUSTER_OPERATION_JOB_PARAM, new JobParameter(String.valueOf(force)));
       JobParameters jobParameters = new JobParameters(param);
       clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.UPDATING);
       try {

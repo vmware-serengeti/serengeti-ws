@@ -62,7 +62,7 @@ public class TestAmbariImpl {
       public static PreStartServices getPreStartServicesHook() {
          return new PreStartServices() {
             @Override
-            public void preStartServices(String clusterName, boolean forceStart) throws SoftwareManagementPluginException {
+            public void preStartServices(String clusterName, boolean force) throws SoftwareManagementPluginException {
             }
             @Override
             public void preStartServices(String clusterName) throws SoftwareManagementPluginException {
