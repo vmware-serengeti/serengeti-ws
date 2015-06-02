@@ -56,14 +56,6 @@
       </dependency>
       <dependency>
          <groupId>com.vmware.bdd</groupId>
-         <artifactId>software-mgmt-plugin-clouderamgr</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>com.vmware.bdd</groupId>
-         <artifactId>software-mgmt-plugin-ambari</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>com.vmware.bdd</groupId>
          <artifactId>user-mgmt</artifactId>
       </dependency>
       <dependency>
@@ -176,6 +168,10 @@
       <dependency>
          <groupId>com.jcraft</groupId>
          <artifactId>jsch</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
       </dependency>
    </dependencies>
 </project>

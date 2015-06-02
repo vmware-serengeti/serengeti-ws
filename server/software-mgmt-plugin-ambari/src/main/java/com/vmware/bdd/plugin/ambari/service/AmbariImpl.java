@@ -293,8 +293,7 @@ public class AmbariImpl implements SoftwareManager {
          clusterDef.getCurrentReport().setSuccess(success);
       } catch (Exception e) {
          clusterDef.getCurrentReport().setSuccess(success);
-         String errorMessage = errorMessage("Failed to create cluster " + blueprint.getName(), e);
-         logger.error(errorMessage);
+         logger.error("Failed to create cluster " + blueprint.getName(), e);
 
          throw SoftwareManagementPluginException.CREATE_CLUSTER_EXCEPTION(e, Constants.AMBARI_PLUGIN_NAME, blueprint.getName());
       } finally {

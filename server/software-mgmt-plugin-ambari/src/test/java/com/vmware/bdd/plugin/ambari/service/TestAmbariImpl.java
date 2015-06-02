@@ -33,8 +33,8 @@ import mockit.Mockit;
 
 import org.mockito.Mockito;
 import org.testng.Assert;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -71,12 +71,15 @@ public class TestAmbariImpl {
       }
    }
 
-   private  AmbariImpl provider;
-   private  ClusterBlueprint blueprint;
-   private  ClusterReportQueue reportQueue;
+   private static AmbariImpl provider;
+   private static ClusterBlueprint blueprint;
+   private static ClusterReportQueue reportQueue;
 
-   @BeforeTest(groups = { "TestAmbariImpl" }, dependsOnGroups = { "TestClusterDef" })
-   public void setup() throws IOException {
+   @BeforeClass(groups = { "TestAmbariImpl" })
+   public static void setup() throws IOException {
+      //Mock static utility using Mockit.
+      Mockit.setUpMock(MockReflectionUtils.class);
+
       ApiRootResource apiRootResource = Mockito.mock(ApiRootResource.class);
       RootResourceV1 rootResourceV1 = new FakeRootResourceV1();
       Mockito.when(apiRootResource.getRootV1()).thenReturn(rootResourceV1);
@@ -87,9 +90,6 @@ public class TestAmbariImpl {
       AmClusterValidator validator = Mockito.mock(AmClusterValidator.class);
       Mockito.when(validator.validateBlueprint(blueprint)).thenReturn(true);
 
-      //Mock static utility using Mockit.
-      Mockit.setUpMock(MockReflectionUtils.class);
-
       provider = new AmbariImpl(clientbuilder, "RSA_CERT");
       blueprint = SerialUtils.getObjectByJsonString(ClusterBlueprint.class,
             CommonUtil.readJsonFile("simple_blueprint.json"));
@@ -97,10 +97,10 @@ public class TestAmbariImpl {
       reportQueue = new ClusterReportQueue();
    }
 
-   @AfterTest
-   public void tearDown() {
+   @AfterClass(groups = { "TestAmbariImpl" })
+   public static void tearDown() {
       //clean mock static utility using Mockit.
-      Mockit.tearDownMocks(ReflectionUtils.class);
+      Mockit.tearDownMocks();
    }
 
    @Test(groups = { "TestAmbariImpl" })
