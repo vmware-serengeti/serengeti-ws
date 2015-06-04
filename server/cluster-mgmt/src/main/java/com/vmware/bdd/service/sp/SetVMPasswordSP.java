@@ -42,6 +42,7 @@ public class SetVMPasswordSP implements Callable<Void> {
    private String privateKeyFile;
    private String sshUser;
    private int sshPort;
+   private String sudoCmd = CommonUtil.getCustomizedSudoCmd();
    private final static int SETUP_PASSWORDLESS_LOGIN_TIMEOUT = 120; //in seconds
    private int setupPasswordLessLoginTimeout;
 
@@ -94,7 +95,7 @@ public class SetVMPasswordSP implements Callable<Void> {
    private boolean removeSSHLimit() throws Exception {
       String scriptFileName = Configuration.getString(Constants.REMOVE_SSH_LIMIT_SCRIPT, Constants.DEFAULT_REMOVE_SSH_LIMIT_SCRIPT);
       String script = getScriptName(scriptFileName);
-      String cmd = "sudo " + script;
+      String cmd = sudoCmd + " " + script;
       boolean succeed = false;
       SSHUtil sshUtil = new SSHUtil();
       for (int i = 0; i < Constants.SET_PASSWORD_MAX_RETRY_TIMES; i++) {
@@ -115,7 +116,7 @@ public class SetVMPasswordSP implements Callable<Void> {
       logger.info("Setting random password for " + nodeIP);
       String scriptFileName = Configuration.getString(Constants.SET_PASSWORD_SCRIPT_CONFIG_NAME, Constants.DEFAULT_SET_PASSWORD_SCRIPT);
       String script = getScriptName(scriptFileName);
-      String cmd = "sudo " + script + " -a";
+      String cmd = sudoCmd + " " + script + " -a";
       return setPassword(cmd, null);
    }
 
@@ -210,7 +211,7 @@ public class SetVMPasswordSP implements Callable<Void> {
 
    private void refreshTty() {
       String ttyName = Configuration.getString(Constants.SERENGETI_TTY_NAME, Constants.SERENGETI_DEFAULT_TTY_NAME);
-      String cmd = "ps aux | grep " + ttyName + " | grep -v \"grep\" | awk '{print $2}' | sudo xargs kill -9";
+      String cmd = "ps aux | grep " + ttyName + " | grep -v \"grep\" | awk '{print $2}' | " + sudoCmd + " xargs kill -9";
       SSHUtil sshUtil = new SSHUtil();
       //if refresh failed, user still can manually refresh tty by Ctrl+C, so don't need to check whether
       //it succeed or not
@@ -225,7 +226,7 @@ public class SetVMPasswordSP implements Callable<Void> {
    private void setupLoginTty() throws Exception {
       String setupTtyScriptName = Configuration.getString(Constants.SERENGETI_SETUP_LOGIN_TTY_SCRIPT, Constants.SERENGETI_DEFAULT_SETUP_LOGIN_TTY_SCRIPT);
       String setupTtyScript = getScriptName(setupTtyScriptName);
-      String cmd = "sudo " + setupTtyScript;
+      String cmd = sudoCmd + " " + setupTtyScript;
       String action = "Setup login tty for " + nodeIP;
       logger.info(action + " command is: " + cmd);
       SSHUtil sshUtil = new SSHUtil();
@@ -260,7 +261,7 @@ public class SetVMPasswordSP implements Callable<Void> {
    private String generateSetPasswdCommand(String setPasswdScriptConfig) {
       String scriptFileName = Configuration.getString(setPasswdScriptConfig, Constants.DEFAULT_SET_PASSWORD_SCRIPT);
       String script = getScriptName(scriptFileName);
-      return "sudo " + script + " -u";
+      return sudoCmd + " " + script + " -u";
    }
 
    private String getScriptName(String scriptFileName) {

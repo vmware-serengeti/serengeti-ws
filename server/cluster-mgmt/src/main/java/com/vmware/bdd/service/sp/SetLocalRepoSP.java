@@ -16,6 +16,7 @@ package com.vmware.bdd.service.sp;
 
 import java.util.concurrent.Callable;
 
+import com.vmware.bdd.utils.CommonUtil;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.global.Configuration;
@@ -68,8 +69,8 @@ public class SetLocalRepoSP implements Callable<Void> {
                   Constants.DEFAULT_SERENGETI_SBIN_DIR);
 
       String setupLocalRepoScript = sbinDir + "/" + setupLocalRepoScriptName;
-      String cmd =
-            "sudo " + setupLocalRepoScript + " " + repoId + " " + localRepoURL;
+      String sudoCmd = CommonUtil.getCustomizedSudoCmd();
+      String cmd = sudoCmd + " " + setupLocalRepoScript + " " + repoId + " " + localRepoURL;
       String action = "Setup local repo for " + nodeIP;
 
       logger.info(action + " command is: " + cmd);

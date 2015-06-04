@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import com.vmware.bdd.ssh.SshExecService;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ShellCommandExecutor;
 import org.apache.log4j.Logger;
 import com.vmware.aurora.global.Configuration;
@@ -104,7 +105,8 @@ public class NodeUpgradeSP implements Callable<Void> {
                connTimeoutInSec, Constants.NODE_ACTION_DOWNLOAD_PACKAGES);
 
          // Upgrade cluster node
-         String upgradeNodeCommand = "ssh -tt " + sshUser + "@" + nodeIp + " 'sudo bash /tmp/" + Constants.NODE_UPGRADE_SCRIPT_FILE_NAME + "'";
+         String sudoCmd = CommonUtil.getCustomizedSudoCmd();
+         String upgradeNodeCommand = "ssh -tt " + sshUser + "@" + nodeIp + " '" + sudoCmd + " bash /tmp/" + Constants.NODE_UPGRADE_SCRIPT_FILE_NAME + "'";
          ShellCommandExecutor.execCmd(upgradeNodeCommand, null, null,
                0, Constants.NODE_ACTION_INSTALL_PACKAGES);
 
