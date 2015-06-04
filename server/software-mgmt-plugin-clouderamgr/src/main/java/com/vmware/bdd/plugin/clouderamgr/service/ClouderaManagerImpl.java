@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gson.Gson;
+import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.software.mgmt.plugin.utils.SerialUtils;
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -116,7 +117,10 @@ public class ClouderaManagerImpl implements SoftwareManager {
    public final String MIN_SUPPORTED_VERSION = "5.0.0";
    private final String usernameForHosts = "serengeti";
    private final int sshPort = 22;
-   private final String stopAgentCmd = "sudo service cloudera-scm-agent stop";
+   private final String  sudoCmd = Configuration
+         .getString(com.vmware.bdd.utils.Constants.SUDO_COMMAND, com.vmware.bdd.utils.Constants.DEFAULT_SUDO_COMMAND);
+
+   private final String stopAgentCmd = sudoCmd + " service cloudera-scm-agent stop";
    private final String privateKeyFile = "/home/serengeti/.ssh/id_rsa";
    private String privateKey;
    private RootResourceV6 apiResourceRootV6;

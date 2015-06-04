@@ -68,8 +68,8 @@ public class SetLocalRepoSP implements Callable<Void> {
                   Constants.DEFAULT_SERENGETI_SBIN_DIR);
 
       String setupLocalRepoScript = sbinDir + "/" + setupLocalRepoScriptName;
-      String cmd =
-            "sudo " + setupLocalRepoScript + " " + repoId + " " + localRepoURL;
+      String sudoCmd = Configuration.getString(Constants.SUDO_COMMAND, Constants.DEFAULT_SUDO_COMMAND);
+      String cmd = sudoCmd + " " + setupLocalRepoScript + " " + repoId + " " + localRepoURL;
       String action = "Setup local repo for " + nodeIP;
 
       logger.info(action + " command is: " + cmd);

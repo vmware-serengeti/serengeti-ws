@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.aurora.global.Configuration;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -102,10 +103,11 @@ public class NodePowerOnRequest extends SimpleRequest {
                   + " failed", e);
             nodeEntity.setStatus(NodeStatus.BOOTSTRAP_FAILED);
             nodeEntity.setActionFailed(true);
+            String sudoCmd = Configuration.getString(Constants.SUDO_COMMAND, Constants.DEFAULT_SUDO_COMMAND);
             nodeEntity
                   .setErrMessage("Bootstrapping node "
                         + nodeEntity.getVmName()
-                        + " failed. Please ssh to this node and run 'sudo chef-client' to get error details.");
+                        + " failed. Please ssh to this node and run '" + sudoCmd + " chef-client' to get error details.");
             lockClusterEntityMgr.getClusterEntityMgr().update(nodeEntity);
          }
       }

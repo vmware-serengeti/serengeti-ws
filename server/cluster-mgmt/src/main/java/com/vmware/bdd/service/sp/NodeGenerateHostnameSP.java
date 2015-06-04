@@ -67,7 +67,8 @@ public class NodeGenerateHostnameSP implements Callable<Void> {
          ShellCommandExecutor.execCmd(uploadScriptFileCommand, null, null, connTimeoutInSec, Constants.NODE_ACTION_GENERATE_HOSTNAME);
 
          // Run script file on node
-         String generateHostnameCmd = "ssh -tt " + sshUser + "@" + nodeMgtIp + " 'set -e; chmod +x " + targetFilePath + "; sudo bash " + targetFilePath + "; rm -rf " + targetFilePath + "; set +e;'";
+         String sudoCmd = Configuration.getString(Constants.SUDO_COMMAND, Constants.DEFAULT_SUDO_COMMAND);
+         String generateHostnameCmd = "ssh -tt " + sshUser + "@" + nodeMgtIp + " 'set -e; chmod +x " + targetFilePath + "; " + sudoCmd + " bash " + targetFilePath + "; rm -rf " + targetFilePath + "; set +e;'";
          ShellCommandExecutor.execCmd(generateHostnameCmd, null, null, connTimeoutInSec, Constants.NODE_ACTION_GENERATE_HOSTNAME);
       } catch (Exception e) {
          logger.error("Failed to generate hostname of cluster node " + node.getVmName());

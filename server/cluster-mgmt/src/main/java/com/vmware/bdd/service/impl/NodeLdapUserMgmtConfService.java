@@ -58,9 +58,10 @@ public class NodeLdapUserMgmtConfService {
    }
 
    public void disableLocalUsers(List<NodeEntity> nodeEntityList) {
+      String sudoCmd = Configuration.getString(Constants.SUDO_COMMAND, Constants.DEFAULT_SUDO_COMMAND);
       String[] remoteCmds = new String[]{
-            "sudo usermod -L serengeti",
-            "sudo usermod -L root"
+            sudoCmd + " usermod -L serengeti",
+            sudoCmd + " usermod -L root"
       };
 
       for(NodeEntity nodeEntity : nodeEntityList) {
@@ -80,12 +81,13 @@ public class NodeLdapUserMgmtConfService {
 
    public void configureLdap(List<NodeEntity> nodeEntityList, String localSssdConfFile, String adminGroupName) {
       String uploadedSssdConfFilePath = "/tmp/sssd.conf." + System.currentTimeMillis();
+      String sudoCmd = Configuration.getString(Constants.SUDO_COMMAND, Constants.DEFAULT_SUDO_COMMAND);
       String[] remoteCmds = new String[]{
-            "sudo " + UserMgmtConstants.CONFIG_LDAP_SCRIPT + " " + uploadedSssdConfFilePath
+            sudoCmd + " " + UserMgmtConstants.CONFIG_LDAP_SCRIPT + " " + uploadedSssdConfFilePath
       };
       String enableSudoCmd = "echo 'Do not need to enable sudo'";
       if (adminGroupName != null) {
-         enableSudoCmd = "sudo " + UserMgmtConstants.ENABLE_SUDO_SCRIPT  + " " + adminGroupName;
+         enableSudoCmd = sudoCmd + " " + UserMgmtConstants.ENABLE_SUDO_SCRIPT  + " " + adminGroupName;
       }
       String[] enableSudoCmds = new String[] {enableSudoCmd};
 

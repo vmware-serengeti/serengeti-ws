@@ -559,6 +559,8 @@ public class ClusteringService implements IClusteringService {
       JSch jsch = new JSch();
       String sshUser = Configuration.getString("mapr.ssh.user", "serengeti");
       int sshPort = Configuration.getInt("mapr.ssh.port", 22);
+      String sudoCmd = Configuration.getString(Constants.SUDO_COMMAND, Constants.DEFAULT_SUDO_COMMAND);
+
       String prvKeyFile =
             Configuration.getString("serengeti.ssh.private.key.file",
                   "/home/serengeti/.ssh/id_rsa");
@@ -582,7 +584,7 @@ public class ClusteringService implements IClusteringService {
                   "maprcli node list -filter \"[rp==/*]and[svc==jobtracker]\" -columns ip";
             logger.debug("exec command is: " + cmd);
             channel.setPty(true); //to enable sudo
-            channel.setCommand("sudo " + cmd);
+            channel.setCommand(sudoCmd + " " + cmd);
             in =
                   new BufferedReader(new InputStreamReader(
                         channel.getInputStream()));

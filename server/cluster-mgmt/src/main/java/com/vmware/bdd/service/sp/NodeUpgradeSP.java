@@ -104,7 +104,8 @@ public class NodeUpgradeSP implements Callable<Void> {
                connTimeoutInSec, Constants.NODE_ACTION_DOWNLOAD_PACKAGES);
 
          // Upgrade cluster node
-         String upgradeNodeCommand = "ssh -tt " + sshUser + "@" + nodeIp + " 'sudo bash /tmp/" + Constants.NODE_UPGRADE_SCRIPT_FILE_NAME + "'";
+         String sudoCmd = Configuration.getString(Constants.SUDO_COMMAND, Constants.DEFAULT_SUDO_COMMAND);
+         String upgradeNodeCommand = "ssh -tt " + sshUser + "@" + nodeIp + " '" + sudoCmd + " bash /tmp/" + Constants.NODE_UPGRADE_SCRIPT_FILE_NAME + "'";
          ShellCommandExecutor.execCmd(upgradeNodeCommand, null, null,
                0, Constants.NODE_ACTION_INSTALL_PACKAGES);
 

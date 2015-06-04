@@ -288,4 +288,6 @@ public class Constants {
 
    public static final String BDE_SERVER_VERSION_2_2 = "2.2.0";
    public static final String BDE_SERVER_VERSION_2_1 = "2.1.0";
+   public static final java.lang.String SUDO_COMMAND = "serengeti.sudo.command";
+   public static final String DEFAULT_SUDO_COMMAND = "sudo";
 }

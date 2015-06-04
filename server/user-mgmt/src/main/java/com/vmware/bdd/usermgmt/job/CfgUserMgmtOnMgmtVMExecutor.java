@@ -27,6 +27,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.aurora.util.AuAssert;
 import com.vmware.bdd.usermgmt.UserMgmtConstants;
+import com.vmware.bdd.utils.Constants;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
@@ -46,6 +47,7 @@ public class CfgUserMgmtOnMgmtVMExecutor {
    private final static Logger LOGGER = Logger.getLogger(CfgUserMgmtOnMgmtVMExecutor.class);
 
    private final static int TIMEOUT = Configuration.getInt("usermgmt.command.exec.timeout", 120);
+   private final String sudoCmd = Configuration.getString(Constants.SUDO_COMMAND, Constants.DEFAULT_SUDO_COMMAND);
 
    public void execute(UserMgmtServer userMgmtServer, SssdConfigurationGenerator sssdLdapConstantMappings) {
 
@@ -90,14 +92,14 @@ public class CfgUserMgmtOnMgmtVMExecutor {
    }
 
    private void enableSudo(String adminGroupName) {
-      CommandLine cmdLine = new CommandLine("sudo")
+      CommandLine cmdLine = new CommandLine(sudoCmd)
             .addArgument(UserMgmtConstants.ENABLE_SUDO_SCRIPT)
             .addArgument(adminGroupName);
       execCommand(cmdLine);
    }
 
    private void execChefClient(String specFilePath) {
-      CommandLine cmdLine = new CommandLine("sudo")
+      CommandLine cmdLine = new CommandLine(sudoCmd)
             .addArgument("chef-client")
             .addArgument("-z")
             .addArgument("-j")

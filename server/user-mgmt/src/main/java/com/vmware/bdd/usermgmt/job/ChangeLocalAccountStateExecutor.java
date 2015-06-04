@@ -17,6 +17,7 @@ package com.vmware.bdd.usermgmt.job;
 import java.io.File;
 import java.io.IOException;
 
+import com.vmware.bdd.utils.Constants;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
@@ -47,7 +48,8 @@ public class ChangeLocalAccountStateExecutor {
 
    private void changeLocalAccountState(String argument) {
       //String chefCmd = "sudo /opt/serengeti/sbin/set-password L";
-      CommandLine cmdLine = new CommandLine("sudo")
+      String sudoCmd = Configuration.getString(Constants.SUDO_COMMAND, Constants.DEFAULT_SUDO_COMMAND);
+      CommandLine cmdLine = new CommandLine(sudoCmd)
             .addArgument(SET_PASSWORD_COMMAND)
             .addArgument(argument);
 
