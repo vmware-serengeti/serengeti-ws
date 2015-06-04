@@ -102,10 +102,11 @@ public class NodePowerOnRequest extends SimpleRequest {
                   + " failed", e);
             nodeEntity.setStatus(NodeStatus.BOOTSTRAP_FAILED);
             nodeEntity.setActionFailed(true);
+            String sudoCmd = CommonUtil.getCustomizedSudoCmd();
             nodeEntity
                   .setErrMessage("Bootstrapping node "
                         + nodeEntity.getVmName()
-                        + " failed. Please ssh to this node and run 'sudo chef-client' to get error details.");
+                        + " failed. Please ssh to this node and run '" + sudoCmd + " chef-client' to get error details.");
             lockClusterEntityMgr.getClusterEntityMgr().update(nodeEntity);
          }
       }

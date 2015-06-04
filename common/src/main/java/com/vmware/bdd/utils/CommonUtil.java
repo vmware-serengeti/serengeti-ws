@@ -41,6 +41,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
+import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.util.StringUtil;
 import org.apache.commons.configuration.ConfigurationUtils;
 import org.apache.commons.lang.RandomStringUtils;
@@ -648,5 +649,9 @@ public class CommonUtil {
      }
      return ret;
   }
+
+   public static String getCustomizedSudoCmd() {
+      return Configuration.getString(Constants.SUDO_COMMAND, Constants.DEFAULT_SUDO_COMMAND);
+   }
 
 }

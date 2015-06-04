@@ -25,15 +25,13 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vmware.aurora.util.AuAssert;
 import com.vmware.bdd.usermgmt.UserMgmtConstants;
+import com.vmware.bdd.utils.CommonUtil;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.log4j.Logger;
-import org.codehaus.plexus.util.cli.Commandline;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.UserMgmtServer;
@@ -46,6 +44,7 @@ public class CfgUserMgmtOnMgmtVMExecutor {
    private final static Logger LOGGER = Logger.getLogger(CfgUserMgmtOnMgmtVMExecutor.class);
 
    private final static int TIMEOUT = Configuration.getInt("usermgmt.command.exec.timeout", 120);
+   private final String sudoCmd = CommonUtil.getCustomizedSudoCmd();
 
    public void execute(UserMgmtServer userMgmtServer, SssdConfigurationGenerator sssdLdapConstantMappings) {
 
@@ -90,14 +89,14 @@ public class CfgUserMgmtOnMgmtVMExecutor {
    }
 
    private void enableSudo(String adminGroupName) {
-      CommandLine cmdLine = new CommandLine("sudo")
+      CommandLine cmdLine = new CommandLine(sudoCmd)
             .addArgument(UserMgmtConstants.ENABLE_SUDO_SCRIPT)
             .addArgument(adminGroupName);
       execCommand(cmdLine);
    }
 
    private void execChefClient(String specFilePath) {
-      CommandLine cmdLine = new CommandLine("sudo")
+      CommandLine cmdLine = new CommandLine(sudoCmd)
             .addArgument("chef-client")
             .addArgument("-z")
             .addArgument("-j")

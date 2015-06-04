@@ -14,24 +14,16 @@
  ***************************************************************************/
 package com.vmware.bdd.service.sp;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
 
+import com.vmware.bdd.utils.CommonUtil;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.global.Configuration;
-import com.vmware.bdd.apitypes.ClusterNetConfigInfo;
-import com.vmware.bdd.apitypes.NetworkDnsType;
-import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
-import com.vmware.bdd.entity.NicEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.spectypes.NicSpec;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.ShellCommandExecutor;
-import com.vmware.bdd.utils.ScriptForUpdatingEtcHostsGenerator;
 
 public class NodeGenerateHostnameSP implements Callable<Void> {
 
@@ -67,7 +59,8 @@ public class NodeGenerateHostnameSP implements Callable<Void> {
          ShellCommandExecutor.execCmd(uploadScriptFileCommand, null, null, connTimeoutInSec, Constants.NODE_ACTION_GENERATE_HOSTNAME);
 
          // Run script file on node
-         String generateHostnameCmd = "ssh -tt " + sshUser + "@" + nodeMgtIp + " 'set -e; chmod +x " + targetFilePath + "; sudo bash " + targetFilePath + "; rm -rf " + targetFilePath + "; set +e;'";
+         String sudoCmd = CommonUtil.getCustomizedSudoCmd();
+         String generateHostnameCmd = "ssh -tt " + sshUser + "@" + nodeMgtIp + " 'set -e; chmod +x " + targetFilePath + "; " + sudoCmd + " bash " + targetFilePath + "; rm -rf " + targetFilePath + "; set +e;'";
          ShellCommandExecutor.execCmd(generateHostnameCmd, null, null, connTimeoutInSec, Constants.NODE_ACTION_GENERATE_HOSTNAME);
       } catch (Exception e) {
          logger.error("Failed to generate hostname of cluster node " + node.getVmName());
