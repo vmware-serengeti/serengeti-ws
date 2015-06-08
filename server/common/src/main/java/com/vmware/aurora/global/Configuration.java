@@ -22,10 +22,12 @@ import java.io.OutputStream;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.URL;
 import java.util.Enumeration;
 import java.util.Iterator;
 
 import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.ConfigurationUtils;
 import org.apache.commons.configuration.ConversionException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.log4j.Logger;
@@ -73,7 +75,8 @@ public class Configuration {
       }
 
       try {
-         logger.info("Reading properties file serengeti.properties");
+         URL url = ConfigurationUtils.locate(null, configFileName);
+         logger.info("Reading properties file serengeti.properties from " + url.getPath());
          serengetiCfg = new PropertiesConfiguration();
          serengetiCfg.setEncoding("UTF-8");
          serengetiCfg.setFileName(configFileName);
