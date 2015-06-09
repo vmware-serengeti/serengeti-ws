@@ -20,6 +20,7 @@ import mockit.MockClass;
 
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
+import com.vmware.bdd.software.mgmt.plugin.intf.AbstractSoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
@@ -29,7 +30,7 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 
 @MockClass(realClass = SoftwareManager.class)
-public class MockSoftwareManager implements SoftwareManager {
+public class MockSoftwareManager extends AbstractSoftwareManager implements SoftwareManager {
    @Mock
    public boolean createCluster(ClusterBlueprint blueprint,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {

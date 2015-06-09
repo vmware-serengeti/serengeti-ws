@@ -29,10 +29,6 @@
          <artifactId>validation-api</artifactId>
       </dependency>
       <dependency>
-         <groupId>com.vmware.bdd</groupId>
-         <artifactId>software-mgmt-plugin-common</artifactId>
-      </dependency>
-      <dependency>
          <groupId>com.google.code.gson</groupId>
          <artifactId>gson</artifactId>
       </dependency>
@@ -73,6 +69,10 @@
       <dependency>
          <groupId>net.schmizz</groupId>
          <artifactId>sshj</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-artifact</artifactId>
       </dependency>
    </dependencies>
 

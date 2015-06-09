@@ -54,6 +54,10 @@
          <groupId>com.fasterxml.jackson.jaxrs</groupId>
          <artifactId>jackson-jaxrs-json-provider</artifactId>
         </dependency>
+        <dependency>
+          <groupId>com.vmware.bdd</groupId>
+          <artifactId>commons-serengeti</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

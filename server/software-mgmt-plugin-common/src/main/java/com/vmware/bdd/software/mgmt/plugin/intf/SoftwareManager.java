@@ -299,6 +299,11 @@ public interface SoftwareManager {
    boolean hasComputeMasterGroup(ClusterBlueprint blueprint);
 
    /**
+    * Check if any compute only node group exists.
+    */
+   boolean containsComputeOnlyNodeGroups(ClusterBlueprint blueprint);
+
+   /**
     * This is the infrastructure requirement comes from software manager for one
     * specific node group. It generally happens for some special roles
     * supported. E.g. if only zookeeper role is installed in one node group,

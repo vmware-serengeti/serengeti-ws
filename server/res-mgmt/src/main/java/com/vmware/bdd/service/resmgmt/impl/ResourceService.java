@@ -395,8 +395,7 @@ public class ResourceService implements IResourceService {
                maxWait -= timeSlice;
             }
             noConcurrentCreation = reservedResource.isEmpty();
-            logger.info("check if current reservation state: " + noConcurrentCreation);
-
+            logger.info("concurrent reservation state: " + noConcurrentCreation);
          }
 
          if(!noConcurrentCreation) {

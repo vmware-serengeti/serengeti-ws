@@ -179,16 +179,16 @@ public class DefaultSoftwareManagerImplTest {
       compute.setRoles(Arrays.asList(HadoopRole.HADOOP_TASKTRACKER.toString()));
       data.setRoles(Arrays.asList(HadoopRole.HADOOP_DATANODE.toString()));
       cluster.setNodeGroups(new NodeGroupCreate[] { compute, data });
-      assertEquals(true, cluster.containsComputeOnlyNodeGroups(defaultSoftwareManager));
+      assertEquals(true, defaultSoftwareManager.containsComputeOnlyNodeGroups(cluster.toBlueprint()));
       compute.setRoles(Arrays.asList(HadoopRole.HADOOP_TASKTRACKER.toString(),
             HadoopRole.TEMPFS_CLIENT_ROLE.toString()));
       cluster.setNodeGroups(new NodeGroupCreate[] { compute, data });
-      assertEquals(true, cluster.containsComputeOnlyNodeGroups(defaultSoftwareManager));
+      assertEquals(true, defaultSoftwareManager.containsComputeOnlyNodeGroups(cluster.toBlueprint()));
       NodeGroupCreate worker = new NodeGroupCreate();
       worker.setRoles(Arrays.asList(HadoopRole.HADOOP_TASKTRACKER.toString(),
             HadoopRole.HADOOP_DATANODE.toString()));
       cluster.setNodeGroups(new NodeGroupCreate[] { worker });
-      assertEquals(false, cluster.containsComputeOnlyNodeGroups(defaultSoftwareManager));
+      assertEquals(false, defaultSoftwareManager.containsComputeOnlyNodeGroups(cluster.toBlueprint()));
    }
 
    @SuppressWarnings("unchecked")

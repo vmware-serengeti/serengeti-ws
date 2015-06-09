@@ -32,7 +32,6 @@ import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.exception.ClusterConfigException;
-import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
@@ -599,18 +598,6 @@ public class ClusterCreate implements Serializable {
          }
       }
       return null;
-   }
-
-   /**
-    * Check if any compute only node group exists.
-    */
-   public boolean containsComputeOnlyNodeGroups(SoftwareManager softwareManager) {
-      for (NodeGroupCreate nodeGroup : this.getNodeGroups()) {
-         if (softwareManager.isComputeOnlyRoles(nodeGroup.getRoles())) {
-            return true;
-         }
-      }
-      return false;
    }
 
    /**

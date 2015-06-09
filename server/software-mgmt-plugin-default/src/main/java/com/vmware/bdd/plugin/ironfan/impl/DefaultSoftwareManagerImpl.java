@@ -22,9 +22,11 @@ import java.util.Map;
 
 import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.DistroRead;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.plugin.ironfan.utils.DefaultUtils;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
+import com.vmware.bdd.software.mgmt.plugin.intf.AbstractSoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
@@ -38,7 +40,7 @@ import com.vmware.bdd.spectypes.IronfanStack;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
-public class DefaultSoftwareManagerImpl implements SoftwareManager {
+public class DefaultSoftwareManagerImpl extends AbstractSoftwareManager implements SoftwareManager {
    private ClusterValidator validator;
    private InfrastructureUpdator updator;
    private DistroManager distroManager;

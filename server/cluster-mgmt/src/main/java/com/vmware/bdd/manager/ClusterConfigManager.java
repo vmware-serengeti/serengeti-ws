@@ -253,7 +253,7 @@ public class ClusterConfigManager {
          // set cluster version
          clusterEntity.setVersion(clusterEntityMgr.getServerVersion());
 
-         if (cluster.containsComputeOnlyNodeGroups(softwareManager)) {
+         if (softwareManager.containsComputeOnlyNodeGroups(blueprint)) {
             clusterEntity.setAutomationEnable(automationEnable);
          } else {
             clusterEntity.setAutomationEnable(null);

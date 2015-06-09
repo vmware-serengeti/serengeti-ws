@@ -75,6 +75,7 @@ import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 import com.vmware.bdd.plugin.ambari.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
+import com.vmware.bdd.software.mgmt.plugin.intf.AbstractSoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
@@ -90,7 +91,7 @@ import com.vmware.bdd.software.mgmt.plugin.utils.ValidateRolesUtil;
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
-public class AmbariImpl implements SoftwareManager {
+public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManager {
 
    private static final Logger logger = Logger.getLogger(AmbariImpl.class);
 
@@ -239,6 +240,7 @@ public class AmbariImpl implements SoftwareManager {
       return hadoopStacks;
    }
 
+   @SuppressWarnings("unchecked")
    @Override
    public String getSupportedConfigs(HadoopStack stack) {
       Map<String, Object> configs = new HashMap<String, Object>();
@@ -534,18 +536,19 @@ public class AmbariImpl implements SoftwareManager {
       String clusterName = clusterDef.getName();
       ApiBlueprint apiBlueprint = apiManager.getBlueprint(clusterName);
 
-      Map<String, Set> GroupNamesWithComponents = new HashMap<String, Set>();
+      Map<String, Set> groupNamesWithComponents = new HashMap<String, Set>();
       for (AmNodeDef node : clusterDef.getNodes()) {
-         Set<String> components = new HashSet<String>();
-         GroupNamesWithComponents.put(node.getName(), components);
+         HashSet<String> components = new HashSet<String>();
+         groupNamesWithComponents.put(node.getName(), components);
       }
 
       for (ApiHostGroup apiHostGroup : apiBlueprint.getApiHostGroups()) {
          String groupName = apiHostGroup.getName();
-         if (!GroupNamesWithComponents.containsKey(groupName)) {
+         if (!groupNamesWithComponents.containsKey(groupName)) {
             throw AmException.BLUEPRINT_ALREADY_EXIST(clusterName);
          }
-         Set<String> components = GroupNamesWithComponents.get(groupName);
+         @SuppressWarnings("unchecked")
+         Set<String> components = groupNamesWithComponents.get(groupName);
          if (components != null && !components.isEmpty()) {
             for (ApiComponentInfo apiComponent : apiHostGroup.getApiComponents()) {
                if (!components.contains(apiComponent.getName())) {
@@ -730,6 +733,7 @@ public class AmbariImpl implements SoftwareManager {
       }
    }
 
+   @SuppressWarnings("unchecked")
    private void updateConfigGroup(ApiConfigGroupInfo apiConfigGroupInfo, String clusterName, ApiHostGroup apiHostGroupFromClusterSpec) {
       try {
          boolean needUpdate = false;
@@ -1053,6 +1057,7 @@ public class AmbariImpl implements SoftwareManager {
                         createApiConfigGroupConf(i, type, serviceName,
                               confGroup);
                }
+               @SuppressWarnings("unchecked")
                Map<String, String> property = (Map<String, String>)map.get(type);
                sameType.getProperties().putAll(property);
             }
@@ -1240,7 +1245,6 @@ public class AmbariImpl implements SoftwareManager {
       String clusterName = clusterBlueprint.getName();
       AmClusterDef clusterDef = new AmClusterDef(clusterBlueprint, null);
       ClusterReport clusterReport = clusterDef.getCurrentReport();
-      boolean success = false;
       try {
          if (!isProvisioned(clusterName)) {
             return true;
@@ -1676,4 +1680,5 @@ public class AmbariImpl implements SoftwareManager {
 
       return hasMountPointStartwithDatax;
    }
+
 }

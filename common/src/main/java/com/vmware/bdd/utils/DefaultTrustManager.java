@@ -25,7 +25,8 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.log4j.Logger;
 
-import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
+import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 
 public class DefaultTrustManager implements X509TrustManager {
 
@@ -69,8 +70,7 @@ public class DefaultTrustManager implements X509TrustManager {
             }
             logger.error("md5 finger print: " + md5Fingerprint);
             logger.error("Unknown certificate: " + cert);
-            throw SoftwareManagementPluginException.UNKNOWN_CERTIFICATE(
-                  cert.getSubjectDN().toString());
+            throw SoftwareManagerCollectorException.BAD_CERT(null);
          }
       } catch (NoSuchAlgorithmException e) {
          logger.error("SSL Algorithm error: " + e.getMessage(), e);

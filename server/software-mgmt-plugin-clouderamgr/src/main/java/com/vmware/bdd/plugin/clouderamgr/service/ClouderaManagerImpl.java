@@ -16,7 +16,6 @@ package com.vmware.bdd.plugin.clouderamgr.service;
 
 import javax.ws.rs.NotFoundException;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -87,6 +86,7 @@ import com.vmware.bdd.plugin.clouderamgr.utils.CmUtils;
 import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
+import com.vmware.bdd.software.mgmt.plugin.intf.AbstractSoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
@@ -108,7 +108,7 @@ import com.vmware.bdd.utils.Version;
  * Date: 6/11/14
  * Time: 5:57 PM
  */
-public class ClouderaManagerImpl implements SoftwareManager {
+public class ClouderaManagerImpl extends AbstractSoftwareManager implements SoftwareManager {
 
    private static final Logger logger = Logger.getLogger(ClouderaManagerImpl.class);
 
