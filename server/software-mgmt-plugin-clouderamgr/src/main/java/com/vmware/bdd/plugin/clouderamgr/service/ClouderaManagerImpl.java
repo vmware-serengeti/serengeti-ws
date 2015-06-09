@@ -282,9 +282,9 @@ public class ClouderaManagerImpl implements SoftwareManager {
       boolean success = false;
       CmClusterDef clusterDef = null;
       try {
+         clusterDef = new CmClusterDef(blueprint);
          ReflectionUtils.getPreStartServicesHook().preStartServices(blueprint.getName());
 
-         clusterDef = new CmClusterDef(blueprint);
          validateBlueprint(blueprint);
          provisionCluster(clusterDef, null, reportQueue);
          provisionParcels(clusterDef, null, reportQueue);
@@ -355,9 +355,9 @@ public class ClouderaManagerImpl implements SoftwareManager {
       boolean success = false;
       CmClusterDef clusterDef = null;
       try {
+         clusterDef = new CmClusterDef(blueprint);
          ReflectionUtils.getPreStartServicesHook().preStartServices(blueprint.getName());
 
-         clusterDef = new CmClusterDef(blueprint);
          provisionCluster(clusterDef, addedNodeNames, reportQueue, true);
          provisionParcels(clusterDef, addedNodeNames, reportQueue);
          Map<String, List<ApiRole>> roles = configureNodeServices(
