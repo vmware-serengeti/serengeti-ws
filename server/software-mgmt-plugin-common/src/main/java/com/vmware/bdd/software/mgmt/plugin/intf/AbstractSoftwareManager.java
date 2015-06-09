@@ -15,4 +15,16 @@ public abstract class AbstractSoftwareManager implements SoftwareManager {
       return false;
    }
 
+   @Override
+   public boolean twoDataDisksRequired(NodeGroupInfo group) {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   @Override
+   public boolean hasMountPointStartwithDatax(String clusterName) {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
 }
