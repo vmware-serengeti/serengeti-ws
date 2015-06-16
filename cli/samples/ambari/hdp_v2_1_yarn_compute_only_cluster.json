@@ -1,10 +1,6 @@
 {
   "externalNamenode": "FQDN-of-namenode",
   "externalSecondaryNamenode": "FQDN-of-secondarynamenode",
-  "externalDatanodes": [
-    "FQDN-of-datanode",
-    "FQDN-of-datanode"
-  ],
   "nodeGroups": [
     {
       "name" : "zookeeper",
