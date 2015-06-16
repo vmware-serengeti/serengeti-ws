@@ -253,14 +253,13 @@ public class AmClusterValidator {
          ComponentCategory targetComponentCategory =
                ComponentCategory.valueOf(apiTargetComponentInfo
                      .getComponentCategory());
-         ComponentName componentName =
-               ComponentName.valueOf(apiTargetComponentInfo.getComponentName());
+         String componentName = apiTargetComponentInfo.getComponentName();
          if (isNamenodeHa(allRoles, unRecogRoles)) {
-            if (componentName.isSecondaryNamenode()) {
+            if (ComponentName.isSecondaryNamenode(componentName)) {
                continue;
             }
          } else {
-            if (componentName.isJournalnode() || componentName.isZkfc()) {
+            if (ComponentName.isJournalnode(componentName) || ComponentName.isZkfc(componentName)) {
                continue;
             }
          }
@@ -306,8 +305,7 @@ public class AmClusterValidator {
          if (unRecogRoles != null && unRecogRoles.contains(role)) {
             continue;
          }
-         ComponentName componentName = ComponentName.valueOf(role);
-         if (componentName.isNamenode()) {
+         if (ComponentName.isNamenode(role)) {
             nameNodesCount++;
          }
       }
@@ -401,7 +399,7 @@ public class AmClusterValidator {
 
          boolean isSupportedType = false;
          for (String configType : supportedConfigs.keySet()) {
-            if (configType.equals(key + ".xml")) {
+        	if (configType.equals(key + ".xml")) {
                isSupportedType = true;
                if (isSupportedType) {
                   continue;
@@ -409,7 +407,7 @@ public class AmClusterValidator {
             }
          }
          if (!isSupportedType) {
-            unRecogConfigTypes.add(key);
+        	unRecogConfigTypes.add(key);
          }
 
          try {

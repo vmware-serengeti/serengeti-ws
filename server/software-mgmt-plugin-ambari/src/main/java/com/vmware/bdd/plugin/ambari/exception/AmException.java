@@ -17,7 +17,6 @@ package com.vmware.bdd.plugin.ambari.exception;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 public class AmException extends SoftwareManagementPluginException {
 
@@ -66,5 +65,9 @@ public class AmException extends SoftwareManagementPluginException {
 
    public static AmException CLUSTER_NOT_PROVISIONED(String clusterName) {
       return new AmException("AMBARI.CLUSTER_NOT_PROVISIONED", null, clusterName);
+   }
+
+   public static AmException REGISTER_HOSTS_FAILED_EXCEPTION(Throwable cause, String failedExternalHosts, String clusterName) {
+      return new AmException("AMBARI.REGISTER_HOSTS_FAILED_EXCEPTION", cause, failedExternalHosts, clusterName);
    }
 }

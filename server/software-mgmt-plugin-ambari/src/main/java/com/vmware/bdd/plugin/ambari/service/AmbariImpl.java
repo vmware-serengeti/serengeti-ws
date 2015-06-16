@@ -69,6 +69,7 @@ import com.vmware.bdd.plugin.ambari.exception.AmException;
 import com.vmware.bdd.plugin.ambari.model.AmClusterDef;
 import com.vmware.bdd.plugin.ambari.model.AmNodeDef;
 import com.vmware.bdd.plugin.ambari.poller.ClusterOperationPoller;
+import com.vmware.bdd.plugin.ambari.poller.ExternalNodesRegisterPoller;
 import com.vmware.bdd.plugin.ambari.poller.HostBootstrapPoller;
 import com.vmware.bdd.plugin.ambari.spectypes.HadoopRole;
 import com.vmware.bdd.plugin.ambari.utils.AmUtils;
@@ -333,20 +334,14 @@ public class AmbariImpl implements SoftwareManager {
          final ClusterReportQueue reportQueue)
                throws SoftwareManagementPluginException {
       try {
-         if (!isProvisioned(clusterDef.getName())) {
+         if (!isProvisioned(clusterDef.getName()) || isClusterProvisionedByBDE(clusterDef)) {
             bootstrap(clusterDef, reportQueue);
+
+            registerExternalNodes(clusterDef);
 
             createBlueprint(clusterDef, reportQueue);
 
             provisionWithBlueprint(clusterDef, reportQueue);
-         } else {
-            if (isClusterProvisionedByBDE(clusterDef)) {
-               bootstrap(clusterDef, reportQueue);
-
-               createBlueprint(clusterDef, reportQueue);
-
-               provisionWithBlueprint(clusterDef, reportQueue);
-            }
          }
 
       } catch (Exception e) {
@@ -374,6 +369,36 @@ public class AmbariImpl implements SoftwareManager {
          }
       }
       return true;
+   }
+
+   private void registerExternalNodes(final AmClusterDef clusterDef) throws SoftwareManagementPluginException {
+
+      String failedExternalHosts = null;
+
+      try {
+         List<String> externalNodes = new ArrayList<String> ();
+
+         if (clusterDef.isValidExternalNamenode()) {
+            externalNodes.add(clusterDef.getExternalNamenode());
+         }
+
+         if(clusterDef.isValidExternalSecondaryNamenode()) {
+            externalNodes.add(clusterDef.getExternalSecondaryNamenode());
+         }
+
+         if (!externalNodes.isEmpty()) {
+            ExternalNodesRegisterPoller poller = new ExternalNodesRegisterPoller(apiManager, externalNodes);
+            poller.waitForComplete();
+            if (poller.getRegisterFailedHosts() != null && !poller.getRegisterFailedHosts().isEmpty()) {
+               failedExternalHosts = poller.getRegisterFailedHosts().toString();
+               throw AmException.REGISTER_HOSTS_FAILED_EXCEPTION(null, failedExternalHosts, clusterDef.getName());
+            }
+         }
+      } catch (Exception e) {
+         String errorMessage = errorMessage("Failed to register external hosts of cluster " + clusterDef.getName(), e);
+         logger.error(errorMessage);
+         throw AmException.REGISTER_HOSTS_FAILED_EXCEPTION(e, failedExternalHosts, clusterDef.getName());
+      }
    }
 
    private void bootstrap(final AmClusterDef clusterDef,
@@ -421,14 +446,10 @@ public class AmbariImpl implements SoftwareManager {
             success = true;
          }
 
-         int bootstrapedHostCount =
-               apiBootstrapStatus.getApiBootstrapHostStatus().size();
-         int needBootstrapHostCount = -1;
-         if (addedHosts == null) {
-            needBootstrapHostCount = clusterDef.getNodes().size();
-         } else {
-            needBootstrapHostCount = addedHosts.size();
-         }
+         int bootstrapedHostCount = apiBootstrapStatus.getApiBootstrapHostStatus().size();
+
+         int needBootstrapHostCount = clusterDef.getNeedBootstrapHostCount(addedHosts);
+
          logger.debug("Need to bootstrap host number: " + needBootstrapHostCount);
          logger.debug("Got bootstrap status number: " + bootstrapedHostCount);
          if (needBootstrapHostCount != bootstrapedHostCount) {

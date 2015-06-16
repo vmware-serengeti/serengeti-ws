@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.google.gson.annotations.Expose;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
@@ -33,9 +32,6 @@ import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
-import com.vmware.bdd.usermgmt.UserMgmtConstants;
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.StringUtils;
 
 public class AmClusterDef implements Serializable {
    private static final long serialVersionUID = 5585914268769234047L;
@@ -71,8 +67,6 @@ public class AmClusterDef implements Serializable {
    private String externalNamenode;
 
    private String externalSecondaryNamenode;
-
-   private Set<String> externalDatanodes;
 
    private static final Map<String, String> serviceName2ServiceUserConfigName;
 
@@ -115,25 +109,24 @@ public class AmClusterDef implements Serializable {
             this.nodes.add(nodeDef);
          }
       }
-      if (blueprint.getExternalNamenode() != null && blueprint.getExternalDatanodes() != null) {
+      if (blueprint.getExternalNamenode() != null) {
          this.isComputeOnly = true;
 
          this.externalNamenode = blueprint.getExternalNamenode();
          this.externalSecondaryNamenode = blueprint.getExternalSecondaryNamenode();
-         this.externalDatanodes = blueprint.getExternalDatanodes();
 
          AmNodeDef namenodeDef = new AmNodeDef();
          namenodeDef.setName(name+"-external-namenode");
          namenodeDef.setFqdn(externalNamenode);
          List<String> namenodeRoles = new ArrayList<String>();
          namenodeRoles.add("NAMENODE");
-         if (externalSecondaryNamenode == null || externalNamenode.equals(externalSecondaryNamenode)) {
+         if (!isValidExternalSecondaryNamenode()) {
             namenodeRoles.add("SECONDARY_NAMENODE");
          }
          namenodeDef.setComponents(namenodeRoles);
          this.nodes.add(namenodeDef);
 
-         if (externalSecondaryNamenode !=  null && !externalNamenode.equals(externalSecondaryNamenode)) {
+         if (isValidExternalSecondaryNamenode()) {
             AmNodeDef secondaryNamenodeDef = new AmNodeDef();
             secondaryNamenodeDef.setName(name+"-external-secondaryNamenode");
             secondaryNamenodeDef.setFqdn(externalSecondaryNamenode);
@@ -143,17 +136,6 @@ public class AmClusterDef implements Serializable {
             this.nodes.add(secondaryNamenodeDef);
          }
 
-         int datanodeIndex = 0;
-         for (String externalDatanode : externalDatanodes) {
-            AmNodeDef datanodeDef = new AmNodeDef();
-            datanodeDef.setName(name + "-external-datanode-" + datanodeIndex);
-            datanodeDef.setFqdn(externalDatanode);
-            List<String> datanodeDefRoles = new ArrayList<String>();
-            datanodeDefRoles.add("DATANODE");
-            datanodeDef.setComponents(datanodeDefRoles);
-            this.nodes.add(datanodeDef);
-            datanodeIndex ++;
-         }
       }
 
       AmStackDef stackDef = new AmStackDef();
@@ -258,14 +240,6 @@ public class AmClusterDef implements Serializable {
       this.externalSecondaryNamenode = externalSecondaryNamenode;
    }
 
-   public Set<String> getExternalDatanodes() {
-      return externalDatanodes;
-   }
-
-   public void setExternalDatanodes(Set<String> externalDatanodes) {
-      this.externalDatanodes = externalDatanodes;
-   }
-
    public ApiBootstrap toApiBootStrap() {
       return toApiBootStrap(null);
    }
@@ -275,6 +249,16 @@ public class AmClusterDef implements Serializable {
       apiBootstrap.setVerbose(verbose);
       List<String> hosts = new ArrayList<String>();
       for (AmNodeDef node : getNodes()) {
+
+         // Generate all hosts for bootstrap except external namenode and secondary namenode
+         if (isNodeGenerateFromExternalNamenode(node)) {
+            continue;
+         }
+
+         if (isNodeGenerateFromExternalSecondaryNamenode(node)) {
+            continue;
+         }
+
          if (hostNames == null) {
             hosts.add(node.getFqdn());
          } else if (hostNames.contains(node.getName())) {
@@ -305,6 +289,26 @@ public class AmClusterDef implements Serializable {
       return apiBlueprint;
    }
 
+   public int getNeedBootstrapHostCount(List<String> addedHosts) {
+      int needBootstrapHostCount = -1;
+
+      if (addedHosts == null) {
+         needBootstrapHostCount = nodes.size();
+
+         if (isValidExternalNamenode()) {
+            needBootstrapHostCount -= 1;
+         }
+
+         if (isValidExternalSecondaryNamenode()) {
+            needBootstrapHostCount -= 1;
+         }
+      } else {
+         needBootstrapHostCount = addedHosts.size();
+      }
+
+      return needBootstrapHostCount;
+   }
+
    public ApiClusterBlueprint toApiClusterBlueprint() {
       ApiClusterBlueprint apiClusterBlueprint = new ApiClusterBlueprint();
       apiClusterBlueprint.setBlueprint(name);
@@ -315,6 +319,22 @@ public class AmClusterDef implements Serializable {
       }
       apiClusterBlueprint.setApiHostGroups(apiHostGroups);
       return apiClusterBlueprint;
+   }
+
+   public boolean isValidExternalNamenode() {
+      return this.externalNamenode != null && !this.externalNamenode.isEmpty();
+   }
+
+   public boolean isValidExternalSecondaryNamenode() {
+      return this.externalSecondaryNamenode != null && !this.externalSecondaryNamenode.isEmpty() && !this.externalSecondaryNamenode.equals(this.externalNamenode);
+   }
+
+   private boolean isNodeGenerateFromExternalNamenode(AmNodeDef node) {
+      return isValidExternalNamenode() && this.externalNamenode.equals(node.getFqdn());
+   }
+
+   private boolean isNodeGenerateFromExternalSecondaryNamenode(AmNodeDef node) {
+      return isValidExternalSecondaryNamenode() && this.externalSecondaryNamenode.equals(node.getFqdn());
    }
 
    private static HdfsVersion getDefaultHdfsVersion(String distroVersion) {
