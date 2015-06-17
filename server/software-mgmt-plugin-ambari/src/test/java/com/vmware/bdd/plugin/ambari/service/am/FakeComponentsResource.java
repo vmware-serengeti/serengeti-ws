@@ -2,7 +2,7 @@ package com.vmware.bdd.plugin.ambari.service.am;
 
 import javax.ws.rs.core.Response;
 
-import com.vmware.bdd.plugin.ambari.api.v1.resource.stacks.ComponentsResource;
+import com.vmware.bdd.plugin.ambari.api.v1.resource.stacks2.ComponentsResource;
 
 public class FakeComponentsResource implements ComponentsResource {
 
