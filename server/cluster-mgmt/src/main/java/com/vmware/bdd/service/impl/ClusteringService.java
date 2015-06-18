@@ -383,7 +383,7 @@ public class ClusteringService implements IClusteringService {
          DiskSpec spec = new DiskSpec();
          spec.setSize((int) (vmdk.getCapacityInKB() / (1024 * 1024)));
          spec.setDiskType(DiskType.SYSTEM_DISK);
-         spec.setController(DiskScsiControllerType.LSI_CONTROLLER);
+         spec.setController(CommonUtil.getSystemAndSwapControllerType());
          diskSpecs.add(spec);
       }
       templateNode.setDisks(diskSpecs);

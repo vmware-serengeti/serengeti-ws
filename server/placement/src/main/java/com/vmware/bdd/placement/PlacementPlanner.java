@@ -28,6 +28,7 @@ import java.util.Set;
 
 import com.google.gson.Gson;
 import com.vmware.aurora.global.Configuration;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import org.apache.log4j.Logger;
 
@@ -215,7 +216,7 @@ public class PlacementPlanner implements IPlacementPlanner {
                   * nodeGroup.getSwapRatio()) + 1023) / 1024);
       disks.add(new DiskSpec(DiskType.SWAP_DISK.getDiskName(), swapDisk, node
             .getVmName(), false, DiskType.SWAP_DISK,
-            DiskScsiControllerType.LSI_CONTROLLER, null, diskAllocType
+            CommonUtil.getSystemAndSwapControllerType(), null, diskAllocType
                   .toString(), null, null, null));
 
       // data disks
