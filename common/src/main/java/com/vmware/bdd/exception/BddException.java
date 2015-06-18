@@ -244,4 +244,8 @@ public class BddException extends RuntimeException {
    public static BddException ACCESS_NOT_ALLOWED_IN_MAINTENANCE_MODE() {
       return new BddException(null, "BDD", "ACCESS_NOT_ALLOWED_IN_MAINTENANCE_MODE");
    }
+
+   public static BddException SYSTEM_DISK_NOT_FOUND_ON_NODE(String nodeName) {
+      return new BddException(null, "BDD", "SYSTEM_DISK_NOT_FOUND_ON_NODE", nodeName);
+   }
 }

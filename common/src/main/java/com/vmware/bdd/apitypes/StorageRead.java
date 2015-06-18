@@ -24,7 +24,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class StorageRead {
 
    public enum DiskScsiControllerType {
-      LSI_CONTROLLER, PARA_VIRTUAL_CONTROLLER
+      LSI_CONTROLLER("VirtualLsiLogicController"), PARA_VIRTUAL_CONTROLLER("ParaVirtualSCSIController");
+      private String displayName;
+      private DiskScsiControllerType(String name) {
+         this.displayName = name;
+      }
+      public String getDisplayName() {
+         return displayName;
+      }
    }
 
    public enum DiskType {

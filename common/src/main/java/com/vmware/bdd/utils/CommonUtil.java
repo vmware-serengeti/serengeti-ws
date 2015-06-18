@@ -32,6 +32,7 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
 import java.util.Map.Entry;
@@ -43,6 +44,7 @@ import java.util.regex.Pattern;
 
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.util.StringUtil;
+import com.vmware.bdd.apitypes.StorageRead;
 import org.apache.commons.configuration.ConfigurationUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
@@ -652,6 +654,22 @@ public class CommonUtil {
 
    public static String getCustomizedSudoCmd() {
       return Configuration.getString(Constants.SUDO_COMMAND, Constants.DEFAULT_SUDO_COMMAND);
+   }
+
+   public static StorageRead.DiskScsiControllerType getSystemAndSwapControllerType() {
+      String controllerType;
+      try {
+         controllerType = Configuration.getString(Constants.SYSTEM_AND_SWAP_DISK_CONTROLLER_TYPE);
+      } catch (NoSuchElementException e) {
+         controllerType = null;
+      }
+      if (controllerType == null || controllerType.equalsIgnoreCase(StorageRead.DiskScsiControllerType.LSI_CONTROLLER.getDisplayName())) {
+         return StorageRead.DiskScsiControllerType.LSI_CONTROLLER;
+      } else if (controllerType.equalsIgnoreCase(StorageRead.DiskScsiControllerType.PARA_VIRTUAL_CONTROLLER.getDisplayName())) {
+         return StorageRead.DiskScsiControllerType.PARA_VIRTUAL_CONTROLLER;
+      } else {
+         throw BddException.INVALID_PARAMETER(Constants.SYSTEM_AND_SWAP_DISK_CONTROLLER_TYPE, controllerType);
+      }
    }
 
 }
