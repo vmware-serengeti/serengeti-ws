@@ -1463,11 +1463,6 @@ public class AmbariImpl implements SoftwareManager {
       try {
          clusterDef = new AmClusterDef(blueprint, privateKey);
 
-         logger.info("validating computing only cluster");
-
-         //check if it is compute only cluster
-         validateComputeOnlyCluster(blueprint);
-
          //decommission components
          logger.info("decommission components");
          updateNodeAction(clusterDef, "Decommission components", nodeName, reportQueue);
@@ -1515,14 +1510,6 @@ public class AmbariImpl implements SoftwareManager {
       }
       deleteAssociatedConfGroups(clusterDef, existingHosts);
       stopAllComponents(clusterDef, existingHosts, reportQueue);
-   }
-
-   private void validateComputeOnlyCluster(ClusterBlueprint blueprint) {
-      String externalNamenode = blueprint.getExternalNamenode();
-      Set<String> externalDatanodes = blueprint.getExternalDatanodes();
-      if (externalNamenode == null || externalDatanodes == null) {
-         throw SoftwareManagementPluginException.CLUSTER_IS_NOT_COMPUTE_ONLY_CLUSTER(blueprint.getName());
-      }
    }
 
    private String getNodeFQDN(AmClusterDef clusterDef, String nodeName) {
