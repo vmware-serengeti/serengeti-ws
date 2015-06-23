@@ -41,8 +41,8 @@
     {
       "name": "worker",
       "roles": [
-        "DATANODE",
-        "NODEMANAGER"
+        "NODEMANAGER",
+        "HDFS_CLIENT"
       ],
       "instanceType":"SMALL",
       "instanceNum":3,
