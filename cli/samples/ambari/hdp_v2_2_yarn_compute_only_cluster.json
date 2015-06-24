@@ -57,6 +57,7 @@
     {
       "name": "client",
       "roles": [
+        "DATANODE",
         "HDFS_CLIENT",
         "YARN_CLIENT",
         "MAPREDUCE2_CLIENT",
