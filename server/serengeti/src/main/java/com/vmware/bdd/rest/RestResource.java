@@ -800,9 +800,6 @@ public class RestResource {
       if (!CommonUtil.validateResourceName(na.getName())) {
          throw BddException.INVALID_PARAMETER("name", na.getName());
       }
-      if (!CommonUtil.validateVcResourceName(na.getPortGroup())) {
-         throw BddException.INVALID_PARAMETER("portGroup", na.getPortGroup());
-      }
 
       if (!CommonUtil.validateDnsType(na.getDnsType())) {
          throw BddException.INVALID_DNS_TYPE(na.getDnsType());
