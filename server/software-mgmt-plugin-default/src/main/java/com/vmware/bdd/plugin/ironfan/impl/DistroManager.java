@@ -15,6 +15,7 @@
 package com.vmware.bdd.plugin.ironfan.impl;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -30,6 +31,7 @@ import java.util.TreeSet;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -171,10 +173,13 @@ class Distro {
 }
 
 public class DistroManager {
-   private static String distroRootUrl = "http://localhost/distros/";
+   private static String DISTRO_MANIFEST_FILE_PATH = "/opt/serengeti/www/distros/manifest";
    private static String VENDOR = "serengeti.distro_vendor";
+   private static String distroRootUrl = "http://localhost/distros/";
    private static String distrosManifestUrl;
    private static final Logger logger = Logger.getLogger(DistroManager.class);
+   private static String eTag = null;
+   private static long lastModified = 0L;
 
    static {
       distroRootUrl = Configuration.getString("serengeti.distro_root", distroRootUrl);
@@ -189,7 +194,7 @@ public class DistroManager {
 
    public DistroManager() {
       try {
-         loadManifest(false);
+         loadManifest();
       } catch (BddException ex) {
          logger.error("failed to load distro manifest");
       }
@@ -218,10 +223,26 @@ public class DistroManager {
       return null;
    }*/
 
+   /*
+    * Return the content of distro manifest file.
+    * Return null if the content is not changed since last visit.
+    */
+   @SuppressWarnings("deprecation")
    private String readDistroManifest() throws Exception {
+      File manifestFile = new File(DISTRO_MANIFEST_FILE_PATH);
+      if (manifestFile.exists()) {
+         // The manifest file is on the local server.
+         // No need to reload the file if it's not modified.
+         if (lastModified != manifestFile.lastModified()) {
+            lastModified = manifestFile.lastModified();
+            logger.debug("last modified date of manifest file changed. Reloading manifest.");
+         } else {
+            return null;
+         }
+      }
+
       BufferedReader in = null;
       DefaultHttpClient httpclient = new DefaultHttpClient();
-
       try {
          TrustStrategy trustStrategy = new TrustStrategy() {
             @Override
@@ -237,10 +258,20 @@ public class DistroManager {
          httpclient.getConnectionManager().getSchemeRegistry().register(sch);
 
          HttpGet httpget = new HttpGet(new URI(distrosManifestUrl));
+         if (eTag != null) {
+            httpget.addHeader("If-None-Match", eTag);
+         }
 
          logger.info("executing request: " + httpget.getRequestLine());
-
          HttpResponse response = httpclient.execute(httpget);
+         if (!manifestFile.exists()) {
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_MODIFIED) {
+               return null;
+            } else {
+               logger.debug("ETag of manifest file changed. Reloading manifest.");
+               eTag = response.getFirstHeader("ETag").getValue();;
+            }
+         }
          HttpEntity entity = response.getEntity();
 
          in = new BufferedReader(new InputStreamReader(entity.getContent()));
@@ -260,34 +291,36 @@ public class DistroManager {
       }
    }
 
-   private void loadManifest(boolean reload) {
-      if (distros == null || reload) {
-         Map<String, Distro> distrosLoading = new HashMap<String, Distro>();
-         Gson gson = new Gson();
-         try {
-            Type type = new TypeToken<ArrayList<Distro>>() {
-            }.getType();
-            List<Distro> distrosList = gson.fromJson(readDistroManifest(), type);
-            if (distrosList != null) {
-               for (Distro d : distrosList) {
-                  distrosLoading.put(d.getName(), d);
-               }
-            }
-         } catch (JsonSyntaxException e) {
-            logger.error("failed to parse manifest: " + distrosManifestUrl, e);
-            throw BddException.INTERNAL(e, "Cannot parse manifest "
-                  + distrosManifestUrl + ".");
-         } catch (Exception e) {
-            logger.error("failed to read manifest: " + distrosManifestUrl, e);
-            throw BddException.INTERNAL(e, "Cannot read manifest "
-                  + distrosManifestUrl + ".");
+   private void loadManifest() {
+      Map<String, Distro> distrosLoading = new HashMap<String, Distro>();
+      Gson gson = new Gson();
+      try {
+         Type type = new TypeToken<ArrayList<Distro>>() {}.getType();
+         String content = readDistroManifest();
+         if (content == null) {
+            // the manifest file is not modified since last load
+            return;
          }
-         distros = distrosLoading;
+         List<Distro> distrosList = gson.fromJson(content, type);
+         if (distrosList != null) {
+            for (Distro d : distrosList) {
+               distrosLoading.put(d.getName(), d);
+            }
+         }
+      } catch (JsonSyntaxException e) {
+         logger.error("failed to parse manifest: " + distrosManifestUrl, e);
+         throw BddException.INTERNAL(e, "Cannot parse manifest "
+               + distrosManifestUrl + ".");
+      } catch (Exception e) {
+         logger.error("failed to read manifest: " + distrosManifestUrl, e);
+         throw BddException.INTERNAL(e, "Cannot read manifest "
+               + distrosManifestUrl + ".");
       }
+      distros = distrosLoading;
    }
 
    public String getPackageUrlByDistroRole(String distroName, String role) {
-      loadManifest(false);
+      loadManifest();
       Distro distro = distros.get(distroName);
       if (distro != null) {
          for (RolePackageMapping pkg : distro.getPackages()) {
@@ -302,7 +335,7 @@ public class DistroManager {
    }
 
    public PackagesExistStatus checkPackagesExistStatus(final String distroName) {
-      loadManifest(false);
+      loadManifest();
       Distro distro = distros.get(distroName);
       boolean hasPackageRepo = false, hasTarball = false;
       for (RolePackageMapping pkg : distro.getPackages()) {
@@ -336,7 +369,7 @@ public class DistroManager {
    }
 
    public List<DistroRead> getDistros() {
-      loadManifest(false);
+      loadManifest();
       List<DistroRead> drs = new ArrayList<DistroRead>();
       List<String> vendors = getSupportedVendors();
       List<String> errorVendors = new ArrayList<String> ();
@@ -369,7 +402,7 @@ public class DistroManager {
    }
 
    public DistroRead getDistroByName(String name) {
-      loadManifest(false);
+      loadManifest();
       DistroRead dr = null;
       Distro distro = distros.get(name);
       if (distro != null) {
@@ -394,7 +427,7 @@ public class DistroManager {
    }*/
 
    public List<String> getPackageRepos(String distroName) {
-      loadManifest(true);
+      loadManifest();
       Distro distro = distros.get(distroName);
       List<String> packageRepos = new ArrayList<String> ();
       for (RolePackageMapping pkg : distro.getPackages()) {

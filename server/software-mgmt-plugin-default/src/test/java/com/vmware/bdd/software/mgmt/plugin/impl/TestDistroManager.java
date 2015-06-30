@@ -34,8 +34,9 @@ public class TestDistroManager {
       List<String> vendors = distroManager.getSupportedVendors();
       List<DistroRead> distros = distroManager.getDistros();
       System.out.println(vendors.toString());
+      assertTrue("manifest file should not be emtpy", !distros.isEmpty());
       for (DistroRead dr : distros) {
-         System.out.println(dr.getName());
+         System.out.println("distro name is " + dr.getName());
          String vendor = dr.getVendor().toLowerCase();
          assertTrue("The vendor name " + vendor + " is not supported.", vendors.contains(vendor));
       }
