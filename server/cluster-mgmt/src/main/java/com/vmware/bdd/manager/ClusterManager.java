@@ -450,6 +450,9 @@ public class ClusterManager {
       if (vcClusters == null || vcClusters.isEmpty()) {
          throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
       }
+
+      this.resMgr.refreshVcResources();
+
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
       validateNetworkAccessibility(createSpec.getName(), createSpec.getNetworkNames(), vcClusters);
@@ -719,6 +722,9 @@ public class ClusterManager {
       if (vcClusters.isEmpty()) {
          throw ClusterConfigException.NO_DATASTORE_ADDED();
       }
+
+      this.resMgr.refreshVcResources();
+
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
       validateNetworkAccessibility(cluster.getName(), cluster.fetchNetworkNameList(), vcClusters);
@@ -954,6 +960,8 @@ public class ClusterManager {
       if (vcClusters.isEmpty()) {
          throw ClusterConfigException.NO_DATASTORE_ADDED();
       }
+
+      this.resMgr.refreshVcResources();
 
       // validate accessibility
       validateDatastore(dsNames, vcClusters);

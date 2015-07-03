@@ -204,6 +204,10 @@ public class ResourceService implements IResourceService {
       return findDSInVC(datastores);
    }
 
+   public void refreshVcResources() {
+      VcResourceUtils.refreshVcResources();
+   }
+
    @Override
    public void refreshDatastore() {
       List<VcCluster> vcClusters = VcResourceUtils.getClusters();
@@ -447,38 +451,24 @@ public class ResourceService implements IResourceService {
     */
    @Override
    public List<VcCluster> getAvailableClusters() throws VcProviderException {
-      final List<VcResourcePoolEntity> allRPEntities =
-            rpDao.findAllOrderByClusterName();
-      List<VcCluster> clusters =
-            VcContext.inVcSessionDo(new VcSession<List<VcCluster>>() {
-               List<VcCluster> result = new ArrayList<VcCluster>();
+      final HashSet<String> clusterNameFromRps = new HashSet<>(rpDao.findAllClusterName());
 
-               @Override
-               protected List<VcCluster> body() throws Exception {
-                  List<VcCluster> vcClusters = VcResourceUtils.getClusters();
-                  for (VcResourcePoolEntity rpEntity : allRPEntities) {
-                     boolean added = false;
-                     for (VcCluster vcCluster : result) {
-                        if (rpEntity.getVcCluster().equals(vcCluster.getName())) {
-                           added = true;
-                           break;
-                        }
-                     }
-                     if (added) {
-                        continue;
-                     }
-                     for (VcCluster vcCluster : vcClusters) {
-                        if (rpEntity.getVcCluster().equals(vcCluster.getName())) {
-                           result.add(vcCluster);
-                           break;
-                        }
-                     }
-                  }
-                  return result;
+      return VcContext.inVcSessionDo(new VcSession<List<VcCluster>>() {
+
+         @Override
+         protected List<VcCluster> body() throws Exception {
+            List<VcCluster> results = new ArrayList<>();
+
+            for (VcCluster vcCluster : VcResourceUtils.getClusters()) {
+               if (clusterNameFromRps.contains(vcCluster.getName())) {
+                  results.add(vcCluster);
                }
+            }
 
-            });
-      return clusters;
+            return results;
+         }
+
+      });
    }
 
 
@@ -527,7 +517,8 @@ public class ResourceService implements IResourceService {
    @Override
    public List<String> filterHostsByNetwork(List<String> networkList,
          List<com.vmware.bdd.spectypes.VcCluster> clusters) {
-      refreshNetwork();
+      // refresh all resource when at beginning of creating/resizing/resuming cluster
+      //refreshNetwork();
       Set<String> networkNames = new HashSet<String>();
       networkNames.addAll(networkList);
       Set<String> portGroupNames = new HashSet<String>();
@@ -566,7 +557,8 @@ public class ResourceService implements IResourceService {
    @Override
    public boolean isNetworkAccessibleByCluster(List<String> networkList,
          List<com.vmware.bdd.spectypes.VcCluster> clusters) {
-      refreshNetwork();
+      // refresh all resource when at beginning of creating/resizing/resuming cluster
+//      refreshNetwork();
 
       Set<String> portGroupNames = new HashSet<String>();
       for (String networkName : networkList) {

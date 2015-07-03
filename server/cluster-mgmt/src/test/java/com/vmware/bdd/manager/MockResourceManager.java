@@ -181,6 +181,11 @@ public class MockResourceManager implements IResourceService {
       return false;
    }
 
+   @Override
+   public void refreshVcResources() {
+
+   }
+
    @Mock
    @Override
    public void refreshResourcePool() {
