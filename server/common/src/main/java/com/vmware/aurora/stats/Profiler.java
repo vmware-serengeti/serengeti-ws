@@ -14,10 +14,8 @@
  ***************************************************************************/
 package com.vmware.aurora.stats;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.log4j.Logger;
 
@@ -42,9 +40,8 @@ public final class Profiler {
     */
    private static ThreadLocal<StatsType> tStatsSrc = new ThreadLocal<StatsType>();
 
-   private static Map<String, StatsEntry> countMap =
-      new HashMap<String, StatsEntry>();
-   private static Set<StatsEntry> sortedSet = new TreeSet<StatsEntry>();
+   private static final ConcurrentMap<String, StatsEntry> countMap =
+      new ConcurrentHashMap<>();
 
    /**
     * Find or create a matching STATS entry.
@@ -58,15 +55,12 @@ public final class Profiler {
     */
    public static StatsEntry getStatsEntry(StatsType type, Object... objs) {
       String key = StatsEntry.getKey(getStatsSrc(), type, objs);
-      synchronized (countMap) {
-         StatsEntry val = countMap.get(key);
-         if (val == null) {
-            val = new StatsEntry(getStatsSrc(), type, objs);
-            countMap.put(key, val);
-            sortedSet.add(val);
-         }
-         return val;
+      StatsEntry val = countMap.get(key);
+      if (val == null) {
+         val = new StatsEntry(getStatsSrc(), type, objs);
+         countMap.put(key, val);
       }
+      return val;
    }
 
    /**
@@ -119,7 +113,6 @@ public final class Profiler {
 
    /**
     * Increment the Stats counter and push stats type.
-    * @param stats entry
     * @return the old Stats type
     */
    public static StatsType pushInc(StatsEntry entry) {
@@ -133,7 +126,6 @@ public final class Profiler {
 
    /**
     * Increment the Stats counter.
-    * @param dest
     * @param objs
     */
    public static void inc(StatsType type, Object... objs) {
@@ -144,7 +136,7 @@ public final class Profiler {
     * Log all STATS during the interval.
     */
    public static void logInterval(long interval) {
-      for (StatsEntry e : sortedSet) {
+      for (StatsEntry e : countMap.values()) {
          long count = e.getCount();
          long diff = e.updateLastCount(count);
          // Only output the items that change.
