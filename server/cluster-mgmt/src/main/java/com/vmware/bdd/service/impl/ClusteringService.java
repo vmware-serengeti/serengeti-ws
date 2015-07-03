@@ -1383,7 +1383,8 @@ public class ClusteringService implements IClusteringService {
       List<VcCluster> clusters = resMgr.getAvailableClusters();
       AuAssert.check(clusters != null && clusters.size() != 0);
       for (VcCluster cl : clusters) {
-         VcResourceUtils.refreshDatastore(cl);
+         //refresh once at beginning of cluster create/resume/resize
+//         VcResourceUtils.refreshDatastore(cl);
          container.addResource(cl);
       }
 

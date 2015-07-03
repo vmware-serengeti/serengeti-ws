@@ -22,9 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.global.Configuration;
+import com.vmware.aurora.util.AuAssert;
 import com.vmware.aurora.vc.MoUtil;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcCluster;
@@ -416,6 +418,68 @@ public class VcResourceUtils {
             return null;
          }
       });
+   }
+
+
+   public static void refreshVcResources() {
+      List<VcCluster> vcClusters = getClusters();
+      AuAssert.check(CollectionUtils.isNotEmpty(vcClusters), "no VC clusters found.");
+
+      for (final VcCluster vcCluster : vcClusters) {
+         VcContext.inVcSessionDo(new VcSession<Void>() {
+            @Override
+            protected Void body() {
+               try {
+                  vcCluster.update();
+               } catch (Exception e) {
+                  logger.info("failed to update cluster " + vcCluster.getName()
+                        + ", ignore this error.", e);
+               }
+
+               List<VcNetwork> networks = vcCluster.getAllNetworks();
+               if (networks != null) {
+                  for (VcNetwork network : networks) {
+                     try {
+                        network.update();
+                     } catch (Exception e) {
+                        logger.info(
+                              "failed to update network " + network.getName()
+                                    + ", ignore this error.", e);
+                     }
+                  }
+               }
+
+               List<VcDatastore> dss = vcCluster.getAllDatastores();
+               if (dss != null) {
+                  for (VcDatastore ds : dss) {
+                     try {
+                        ds.update();
+                     } catch (Exception e) {
+                        logger.info("failed to update datastore " + ds.getName()
+                              + ", ignore this error.", e);
+                     }
+                  }
+               }
+               try {
+                  List<VcHost> hosts = vcCluster.getHosts();
+                  if (hosts != null) {
+                     for (VcHost host : hosts) {
+                        try {
+                           host.update();
+                        } catch (Exception e) {
+                           logger.info("failed to update host " + host.getName()
+                                 + ", ignore this error.", e);
+                        }
+                     }
+                  }
+               } catch (Exception e) {
+                  logger.info("failed to get host list on cluster " + vcCluster.getName()
+                        + ", ignore this error.", e);
+               }
+               return null;
+            }
+         });
+      }
    }
 
    public static void refreshResourcePool(final VcCluster cl) {

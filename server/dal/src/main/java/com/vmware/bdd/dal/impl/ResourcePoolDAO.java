@@ -19,12 +19,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vmware.bdd.dal.IResourcePoolDAO;
+import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.exception.BddException;
 
@@ -58,6 +62,17 @@ public class ResourcePoolDAO extends BaseDAO<VcResourcePoolEntity> implements
    public List<VcResourcePoolEntity> findAllOrderByClusterName() {
       Order order = Order.asc("vcCluster");
       return this.findByCriteria(new Order[] { order }, null, null);
+   }
+
+   @Override
+   public List<String> findAllClusterName() {
+      Session session = getSessionFactory().getCurrentSession();
+
+      Criteria criteria = session.createCriteria(VcResourcePoolEntity.class);
+
+      criteria.setProjection(Projections.distinct(Projections.property("vcCluster")));
+
+      return criteria.list();
    }
 
    @Override
