@@ -22,27 +22,21 @@ import org.apache.log4j.Logger;
  * A thread that dumps stats & runtime info periodically.
  */
 public class StatsLogger extends Thread {
-   // Use another logger to do non-stats log.
-   protected static Logger logger = Logger.getLogger(StatsLogger.class);
-
+   // Use this logger to do non-stats log.
    // The statsLogger is configured to write log into aurora-cms-stats.log.
-   static protected Logger statsLogger;
-   static final long REPORT_INTERVAL = TimeUnit.MINUTES.toNanos(2); // every 2 min
-   static final int THREADS_LIMIT = 2000;          // limit of total number of threads
-   static private StatsLogger loggerThread;
-   static private boolean shutdown = false;
+   private static Logger logger = Logger.getLogger(StatsLogger.class);
 
-   private final Thread[] tarray;       // buffer to enumerate all threads
 
-   static {
-      statsLogger = Logger.getLogger("aurora-cms-stats");
-      // XXX Can we put the following line in log4j.properties?
-      statsLogger.setAdditivity(false);
-   }
+   private static long REPORT_INTERVAL = TimeUnit.MINUTES.toNanos(2); // every 2 min
+   private static StatsLogger loggerThread;
+   private static boolean shutdown = false;
 
-   static public void init() {
+
+   static public void init(int intervalMinutes) {
       loggerThread = new StatsLogger();
       loggerThread.start();
+
+      REPORT_INTERVAL = TimeUnit.MINUTES.toNanos(intervalMinutes);
    }
 
    static public void shutdown() {
@@ -50,14 +44,12 @@ public class StatsLogger extends Thread {
    }
 
    final static void logStats(Object obj) {
-      statsLogger.info(obj);
+      logger.info(obj);
    }
 
    private StatsLogger() {
       setName("StatsLogger");
       setDaemon(true);
-      // enough to report on threads double the limit
-      tarray = new Thread[THREADS_LIMIT * 2];
    }
 
    private void checkThreadLimit() {
