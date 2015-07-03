@@ -24,6 +24,8 @@ import org.apache.log4j.Logger;
 
 import com.vmware.aurora.exception.AuroraException;
 import com.vmware.aurora.exception.VcException;
+import com.vmware.aurora.global.Configuration;
+import com.vmware.aurora.stats.StatsLogger;
 import com.vmware.aurora.util.AuAssert;
 import com.vmware.aurora.vc.MoUtil;
 import com.vmware.aurora.vc.VcTask;
@@ -331,6 +333,10 @@ public class VcContext {
     * we will attempt to re-initialize again at a later time on VC use.
     */
    public static synchronized void initVcContext() {
+      if(Configuration.getBoolean("vc_service_profiler.log.enabled", false)){
+         StatsLogger.init(Configuration.getInt("vc_service_profiler.log.interval", 2));
+      }
+
       AboutInfo info = null;
       genCount++;
       if (initialized) {
