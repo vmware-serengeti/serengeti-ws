@@ -378,7 +378,7 @@ public class ClusterManager {
       createSpec.verifyClusterNameLength();
       clusterSpec.validateNodeGroupNames();
       //Check the cpu, memory max configuration according vm hardware version
-      if (clusterSpec != null && clusterSpec.getNodeGroups() != null) {
+      /*if (clusterSpec != null && clusterSpec.getNodeGroups() != null) {
          for (NodeGroupCreate ng : clusterSpec.getNodeGroups()) {
             String templateVmId = clusteringService.getTemplateVmId();
             if (templateVmId != null) {
@@ -387,7 +387,7 @@ public class ClusterManager {
                      ng.getMemCapacityMB() == null ? 0 : ng.getMemCapacityMB());
             }
          }
-      }
+      }*/
       String name = clusterSpec.getName();
       logger.info("ClusteringService, creating cluster " + name);
 
