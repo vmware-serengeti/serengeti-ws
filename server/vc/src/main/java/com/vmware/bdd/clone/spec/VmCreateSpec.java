@@ -18,10 +18,9 @@ import java.util.Map;
 
 import com.vmware.aurora.composition.IPrePostPowerOn;
 import com.vmware.aurora.composition.VmSchema;
-import com.vmware.aurora.vc.VcDatastore;
-import com.vmware.aurora.vc.VcHost;
-import com.vmware.aurora.vc.VcResourcePool;
+import com.vmware.aurora.vc.*;
 import com.vmware.vim.binding.vim.Folder;
+import com.vmware.vim.binding.vim.vm.ConfigSpec;
 
 /**
  * vm spec
@@ -148,5 +147,14 @@ public class VmCreateSpec implements Location {
    @Override
    public String getLocation() {
       return targetHost.getName();
+   }
+
+   public VcVirtualMachine.CreateSpec toCreateSpec(VcSnapshot snapshot, ConfigSpec configSpec) {
+      return new VcVirtualMachine.CreateSpec(
+            getVmName(), snapshot,
+            getTargetRp(), getTargetDs(),
+            getTargetFolder(), getTargetHost(),
+            getCloneType(), isPersisted(), configSpec
+      );
    }
 }

@@ -116,10 +116,10 @@ public class RestClient {
          hostProperties.load(hostFileReader);
 
          if (hostProperties != null
-               && hostProperties.get(Constants.PROPERTY_HOST) != null) {
+               && hostProperties.get("host") != null) {
             hostUri =
                   Constants.HTTPS_CONNECTION_PREFIX
-                        + (String) hostProperties.get(Constants.PROPERTY_HOST)
+                        + (String) hostProperties.get("host")
                         + Constants.HTTPS_CONNECTION_LOGIN_SUFFIX;
          }
       } catch (Exception e) {//not set yet; or read io error
@@ -135,7 +135,6 @@ public class RestClient {
 
       return hostUri;
    }
-
    /**
     * connect to a Serengeti server
     * 

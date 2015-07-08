@@ -13,18 +13,15 @@
  * limitations under the License.
  ***************************************************************************/
 
-package com.vmware.aurora.composition;
+package com.vmware.aurora.vc;
 
 import org.testng.annotations.BeforeClass;
 
 import com.google.gson.internal.Pair;
+
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.util.CmsWorker;
 
-import com.vmware.aurora.vc.VcDatacenter;
-import com.vmware.aurora.vc.VcDatastore;
-import com.vmware.aurora.vc.VcInventory;
-import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.vcevent.VcEventRouter;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcService;
@@ -57,7 +54,7 @@ abstract public class AbstractTmTest {
          e.printStackTrace();
       }
 
-      vmName = "PlatformTestVM";
+      vmName = "DC0_C0_RP0_VM0";
       Pair<VcDatacenter, VcResourcePool> pair = VcTestConfig.getTestRPAndDC();
       dc = pair.first;
       rp = pair.second;

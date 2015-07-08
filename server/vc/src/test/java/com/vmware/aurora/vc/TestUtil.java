@@ -13,15 +13,13 @@
  * limitations under the License.
  ***************************************************************************/
 
-package com.vmware.aurora.composition;
+package com.vmware.aurora.vc;
 
-import com.vmware.aurora.composition.TestSP.CleanUpSP;
-import com.vmware.aurora.composition.TestSP.CloneVmSP;
-import com.vmware.aurora.composition.TestSP.RemoveSnapshotSP;
-import com.vmware.aurora.composition.TestSP.TakeSnapshotSP;
-import com.vmware.aurora.vc.DeviceId;
-import com.vmware.aurora.vc.VcDatastore;
-import com.vmware.aurora.vc.VcResourcePool;
+import com.vmware.aurora.composition.ImportVmSP;
+import com.vmware.aurora.vc.TestSP.CleanUpSP;
+import com.vmware.aurora.vc.TestSP.CloneVmSP;
+import com.vmware.aurora.vc.TestSP.RemoveSnapshotSP;
+import com.vmware.aurora.vc.TestSP.TakeSnapshotSP;
 import com.vmware.aurora.vc.VcVirtualMachine.DiskCreateSpec;
 
 /**

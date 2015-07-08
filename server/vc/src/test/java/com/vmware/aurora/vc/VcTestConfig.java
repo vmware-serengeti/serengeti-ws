@@ -13,17 +13,11 @@
  * limitations under the License.
  ***************************************************************************/
 
-package com.vmware.aurora.composition;
+package com.vmware.aurora.vc;
 
-import java.io.FileInputStream;
 import java.util.Properties;
 
 import com.google.gson.internal.Pair;
-import com.vmware.aurora.vc.VcCluster;
-import com.vmware.aurora.vc.VcDatacenter;
-import com.vmware.aurora.vc.VcDatastore;
-import com.vmware.aurora.vc.VcInventory;
-import com.vmware.aurora.vc.VcResourcePool;
 
 /**
  * Configurations for junit testing. The global variables are setup by settings
@@ -81,7 +75,7 @@ public class VcTestConfig {
 
    public static VcDatastore getTestDS() throws Exception {
       for (VcCluster cluster : VcInventory.getClusters()) {
-         for (VcDatastore ds : cluster.getSharedDatastores()) {
+         for (VcDatastore ds : cluster.getAllDatastores()) {
             if (ds.getName().equals(testDsName)) {
                return ds;
             }

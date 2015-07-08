@@ -13,16 +13,10 @@
  * limitations under the License.
  ***************************************************************************/
 
-package com.vmware.aurora.composition;
+package com.vmware.aurora.vc;
 
 import java.util.concurrent.Callable;
 
-import com.vmware.aurora.vc.DeviceId;
-import com.vmware.aurora.vc.VcCache;
-import com.vmware.aurora.vc.VcDatastore;
-import com.vmware.aurora.vc.VcResourcePool;
-import com.vmware.aurora.vc.VcSnapshot;
-import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.VcVirtualMachine.CreateSpec;
 import com.vmware.aurora.vc.VcVirtualMachine.DiskCreateSpec;
 import com.vmware.aurora.vc.vcservice.VcContext;

@@ -13,7 +13,7 @@
  * limitations under the License.
  ***************************************************************************/
 
-package com.vmware.aurora.composition;
+package com.vmware.aurora.vc;
 
 import java.io.File;
 import java.util.Arrays;
@@ -21,7 +21,13 @@ import java.util.Arrays;
 import org.apache.log4j.Logger;
 import org.testng.annotations.Test;
 
-import com.vmware.aurora.composition.TestSP.TakeSnapshotSP;
+import com.vmware.aurora.composition.CreateVMFolderSP;
+import com.vmware.aurora.composition.CreateVmSP;
+import com.vmware.aurora.composition.ImportVmSP;
+import com.vmware.aurora.composition.QueryGuestInfo;
+import com.vmware.aurora.composition.SchemaUtil;
+import com.vmware.aurora.composition.VmSchema;
+import com.vmware.aurora.vc.TestSP.TakeSnapshotSP;
 import com.vmware.vim.binding.vim.Folder;
 
 /**

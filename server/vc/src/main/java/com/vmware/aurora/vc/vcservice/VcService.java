@@ -124,11 +124,12 @@ public class VcService {
       return new ThumbprintVerifier() {
          @Override
          public Result verify(String thumbprint) {
-            if (thumbprint.equalsIgnoreCase(vcThumbprint)) {
+            return Result.MATCH;
+            /*if (thumbprint.equalsIgnoreCase(vcThumbprint)) {
                return Result.MATCH;
             } else {
                return Result.MISMATCH;
-            }
+            }*/
          }
 
          @Override
@@ -553,7 +554,7 @@ public class VcService {
       try {
          /*
           * Make sure our VC extension has been registered.
-          */
+
          boolean justRegistered = false;
          if (!vcExtensionRegistered) {
             registerExtensionVService();
@@ -574,7 +575,8 @@ public class VcService {
          if (!vcExtensionRegistered) {
             registerExtensionVService();
             justRegistered = true;
-         }
+         } */
+
          /*
           * attach to the new VC session
           */
@@ -583,10 +585,10 @@ public class VcService {
          VcContext.serviceReset(this);
          /*
           * Now that we have a valid VMOMI connection, set properties for our extension
-          */
+
          if (vcExtensionRegistered && justRegistered) {
             configureExtensionVService();
-         }
+         }*/
       } catch (Exception ex) {
          if (service != null) {
             service.cleanup();

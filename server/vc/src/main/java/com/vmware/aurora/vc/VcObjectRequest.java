@@ -52,6 +52,9 @@ public class VcObjectRequest extends Request implements IVcCacheObject {
    // set the flag to request fetch data from VC again
    private boolean renewRequested = false;
 
+   public String toString() {
+      return String.format("VcObjectRequest[%1s]", moRef);
+   }
    /**
     * Request to create a new VcObject.
     * @param map
