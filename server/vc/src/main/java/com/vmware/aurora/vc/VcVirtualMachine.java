@@ -2364,7 +2364,7 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
          safeExecVmOp(new VmOp<Void>() {
             public Void exec() throws Exception {
                if (removeSnapShot) {
-                  removeAllSnapshots(); // PR 878822
+//                  removeAllSnapshots(); // PR 878822
                }
                destroyInt();
                return null;

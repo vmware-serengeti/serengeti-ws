@@ -1395,8 +1395,8 @@ public class ClusteringService implements IClusteringService {
 
       List<String> outOfSyncHosts = new ArrayList<String>();
       for (AbstractHost host : container.getAllHosts()) {
-         int hostTimeDiffInSec =
-               VcResourceUtils.getHostTimeDiffInSec(host.getName());
+         int hostTimeDiffInSec = 0;
+               /*VcResourceUtils.getHostTimeDiffInSec(host.getName())*/;
          if (Math.abs(hostTimeDiffInSec) > maxTimeDiffInSec) {
             logger.info("Host " + host.getName() + " has a time difference of "
                   + hostTimeDiffInSec

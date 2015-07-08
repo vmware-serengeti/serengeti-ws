@@ -103,6 +103,7 @@ public class RestClient {
 
    private RestClient() {
       hostUri = getHostUriProperty();
+      CookieCache.put(CookieCache.COOKIE, "dump");
    }
 
    /*
@@ -137,6 +138,7 @@ public class RestClient {
 
       return hostUri;
    }
+
    /**
     * connect to a Serengeti server
     * 
