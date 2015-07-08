@@ -102,8 +102,41 @@ public class RestClient {
    }
 
    private RestClient() {
+      hostUri = getHostUriProperty();
    }
 
+   /*
+    *  Get Serengeti host from cli property file
+    */
+   private String getHostUriProperty() {
+      String hostUri = null;
+      FileReader hostFileReader = null;
+
+      try {
+         hostFileReader = new FileReader(Constants.PROPERTY_FILE);
+         Properties hostProperties = new Properties();
+         hostProperties.load(hostFileReader);
+
+         if (hostProperties != null
+               && hostProperties.get("host") != null) {
+            hostUri =
+                  Constants.HTTPS_CONNECTION_PREFIX
+                        + (String) hostProperties.get("host")
+                        + Constants.HTTPS_CONNECTION_LOGIN_SUFFIX;
+         }
+      } catch (Exception e) {//not set yet; or read io error
+      } finally {
+         if (hostFileReader != null) {
+            try {
+               hostFileReader.close();
+            } catch (IOException e) {
+               //nothing to do
+            }
+         }
+      }
+
+      return hostUri;
+   }
    /**
     * connect to a Serengeti server
     * 

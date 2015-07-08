@@ -13,7 +13,7 @@
  * limitations under the License.
  ***************************************************************************/
 
-package com.vmware.aurora.composition;
+package com.vmware.aurora.vc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +22,9 @@ import java.util.List;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.vmware.aurora.composition.CreateVMFolderSP;
+import com.vmware.aurora.composition.DeleteVMFolderSP;
+import com.vmware.aurora.vc.AbstractTmTest;
 import com.vmware.aurora.vc.VcDatacenter;
 import com.vmware.aurora.vc.VcInventory;
 import com.vmware.vim.binding.vim.Folder;

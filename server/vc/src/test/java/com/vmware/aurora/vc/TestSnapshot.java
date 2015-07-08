@@ -13,21 +13,32 @@
  * limitations under the License.
  ***************************************************************************/
 
-package com.vmware.aurora.composition;
+package com.vmware.aurora.vc;
 
 import org.testng.annotations.Test;
 
+import com.vmware.aurora.composition.CreateSnapshotSP;
+import com.vmware.aurora.composition.RestoreVmSp;
+import com.vmware.aurora.vc.AbstractTmTest;
+import com.vmware.aurora.vc.VcSnapshot;
 import com.vmware.aurora.vc.VcVirtualMachine;
 
-public class TestDeleteVmSP extends AbstractTmTest {
+public class TestSnapshot extends AbstractTmTest {
+   private VcSnapshot snapshot;
 
    @Test
-   public void testDeleteVm() throws Exception {
-      String vmName = "clonedVM1";
-      // Need to import the VM first, since TM layer doesn't persist data.
+   public void takeSnapshot() throws Exception {
       VcVirtualMachine vm = util.testImportVM(vmName, rp).getResult();
-
-      DeleteVmSP sp = new DeleteVmSP(vm);
+      CreateSnapshotSP sp = new CreateSnapshotSP(vm, "name", "TestSnpshot");
       sp.call();
+      snapshot = sp.getResult();
+   }
+
+   @Test(dependsOnMethods = {"takeSnapshot"})
+   public void revertSnapshot() throws Exception {
+      Thread.sleep(1000L * 60 * 10); // Power on the VM, make some changes, and power off
+      RestoreVmSp sp = new RestoreVmSp(snapshot);
+      sp.call();
+      Thread.sleep(1000L * 60 * 10); // Power on VM again, check the changes, the changes should be gone
    }
 }

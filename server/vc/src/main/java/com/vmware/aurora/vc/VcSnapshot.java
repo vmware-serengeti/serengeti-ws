@@ -110,7 +110,8 @@ class VcSnapshotImpl extends VcVmBaseImpl implements VcSnapshot {
    @Override
    protected void update(ManagedObject mo) {
       final Snapshot snap = (Snapshot)mo;
-      config = snap.getConfig();
+      /* VCSIM_NOT_SUPPORTED
+      * config = snap.getConfig();*/
       updateSize();
    }
 
