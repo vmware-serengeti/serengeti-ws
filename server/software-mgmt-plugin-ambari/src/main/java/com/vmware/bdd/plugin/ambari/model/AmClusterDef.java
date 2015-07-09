@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2014-2015 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,7 +53,7 @@ public class AmClusterDef implements Serializable {
    private String user;
 
    @Expose
-   private List<AmNodeDef> nodes;
+   private List<AmNodeGroupDef> nodeGroups;
 
    @Expose
    private AmStackDef amStack;
@@ -92,14 +92,23 @@ public class AmClusterDef implements Serializable {
       this.currentReport = new ClusterReport(blueprint);
       this.ambariServerVersion = ambariServerVersion;
 
-      this.nodes = new ArrayList<AmNodeDef>();
       HdfsVersion hdfs = getDefaultHdfsVersion(this.version);
       if (blueprint.hasTopologyPolicy()) {
          setRackTopologyFileName(blueprint);
       }
       setAdditionalConfigurations(blueprint, ambariServerVersion);
       this.configurations = AmUtils.toAmConfigurations(blueprint.getConfiguration());
+
+      this.nodeGroups = new ArrayList<AmNodeGroupDef>();
       for (NodeGroupInfo group : blueprint.getNodeGroups()) {
+
+         AmNodeGroupDef nodeGroupDef = new AmNodeGroupDef();
+         nodeGroupDef.setName(group.getName());
+         nodeGroupDef.setInstanceNum(group.getInstanceNum());
+         nodeGroupDef.setRoles(group.getRoles());
+         nodeGroupDef.setConfigurations(AmUtils.toAmConfigurations(group.getConfiguration()));
+
+         List<AmNodeDef> nodes = new ArrayList<AmNodeDef>();
          for (NodeInfo node : group.getNodes()) {
             AmNodeDef nodeDef = new AmNodeDef();
             nodeDef.setName(node.getName());
@@ -109,9 +118,13 @@ public class AmClusterDef implements Serializable {
             nodeDef.setConfigurations(AmUtils.toAmConfigurations(group
                   .getConfiguration()));
             nodeDef.setComponents(group.getRoles());
-            nodeDef.setVolumns(node.getVolumes(), hdfs, ambariServerVersion);
-            this.nodes.add(nodeDef);
+            nodeDef.setVolumes(node.getVolumes());
+            nodeDef.setDirsConfig(hdfs, ambariServerVersion);
+            nodes.add(nodeDef);
          }
+         nodeGroupDef.setNodes(nodes);
+
+         this.nodeGroups.add(nodeGroupDef);
       }
       if (blueprint.getExternalNamenode() != null) {
          this.isComputeOnly = true;
@@ -119,8 +132,9 @@ public class AmClusterDef implements Serializable {
          this.externalNamenode = blueprint.getExternalNamenode();
          this.externalSecondaryNamenode = blueprint.getExternalSecondaryNamenode();
 
+         String externalNameNodeGroupName = "external_namenode";
          AmNodeDef namenodeDef = new AmNodeDef();
-         namenodeDef.setName(name+"-external-namenode");
+         namenodeDef.setName(name + "-" + externalNameNodeGroupName + "-0");
          namenodeDef.setFqdn(externalNamenode);
          List<String> namenodeRoles = new ArrayList<String>();
          namenodeRoles.add("NAMENODE");
@@ -128,16 +142,44 @@ public class AmClusterDef implements Serializable {
             namenodeRoles.add("SECONDARY_NAMENODE");
          }
          namenodeDef.setComponents(namenodeRoles);
-         this.nodes.add(namenodeDef);
+         namenodeDef.setVolumes(new ArrayList<String>());
+         namenodeDef.setConfigurations(AmUtils.toAmConfigurations(null));
+
+         AmNodeGroupDef externalNameNodeGroup = new AmNodeGroupDef();
+         externalNameNodeGroup.setName(externalNameNodeGroupName);
+         externalNameNodeGroup.setConfigurations(AmUtils.toAmConfigurations(null));
+         externalNameNodeGroup.setRoles(namenodeRoles);
+         externalNameNodeGroup.setInstanceNum(1);
+
+         List<AmNodeDef> externalNameNodes = new ArrayList<AmNodeDef>();
+         externalNameNodes.add(namenodeDef);
+         externalNameNodeGroup.setNodes(externalNameNodes);
+
+         this.nodeGroups.add(externalNameNodeGroup);
 
          if (isValidExternalSecondaryNamenode()) {
+            String externalSecondaryNameNodeGroupName = "external_secondaryNamenode";
+
             AmNodeDef secondaryNamenodeDef = new AmNodeDef();
-            secondaryNamenodeDef.setName(name+"-external-secondaryNamenode");
+            secondaryNamenodeDef.setName(name + "-" + externalSecondaryNameNodeGroupName + "-0");
             secondaryNamenodeDef.setFqdn(externalSecondaryNamenode);
             List<String> secondaryNamenodeRoles = new ArrayList<String>();
             secondaryNamenodeRoles.add("SECONDARY_NAMENODE");
             secondaryNamenodeDef.setComponents(secondaryNamenodeRoles);
-            this.nodes.add(secondaryNamenodeDef);
+            secondaryNamenodeDef.setVolumes(new ArrayList<String>());
+            secondaryNamenodeDef.setConfigurations(AmUtils.toAmConfigurations(null));
+
+            AmNodeGroupDef externalSecondaryNameNodeGroup = new AmNodeGroupDef();
+            externalSecondaryNameNodeGroup.setName(externalSecondaryNameNodeGroupName);
+            externalSecondaryNameNodeGroup.setConfigurations(AmUtils.toAmConfigurations(null));
+            externalSecondaryNameNodeGroup.setRoles(secondaryNamenodeRoles);
+            externalSecondaryNameNodeGroup.setInstanceNum(1);
+
+            List<AmNodeDef> externalSecondaryNameNodes = new ArrayList<AmNodeDef>();
+            externalSecondaryNameNodes.add(secondaryNamenodeDef);
+            externalSecondaryNameNodeGroup.setNodes(externalSecondaryNameNodes);
+
+            this.nodeGroups.add(externalSecondaryNameNodeGroup);
          }
 
       }
@@ -186,14 +228,6 @@ public class AmClusterDef implements Serializable {
 
    public void setUser(String user) {
       this.user = user;
-   }
-
-   public List<AmNodeDef> getNodes() {
-      return nodes;
-   }
-
-   public void setNodes(List<AmNodeDef> nodes) {
-      this.nodes = nodes;
    }
 
    public AmStackDef getAmStack() {
@@ -289,8 +323,8 @@ public class AmClusterDef implements Serializable {
       apiBlueprint.setApiBlueprintInfo(apiBlueprintInfo);
 
       List<ApiHostGroup> apiHostGroups = new ArrayList<ApiHostGroup>();
-      for (AmNodeDef node : nodes) {
-         apiHostGroups.add(node.toApiHostGroupForBlueprint());
+      for (AmNodeGroupDef nodeGroup : nodeGroups) {
+         apiHostGroups.addAll(nodeGroup.toApiHostGroupsForBlueprint());
       }
       apiBlueprint.setApiHostGroups(apiHostGroups);
       return apiBlueprint;
@@ -300,7 +334,8 @@ public class AmClusterDef implements Serializable {
       int needBootstrapHostCount = -1;
 
       if (addedHosts == null) {
-         needBootstrapHostCount = nodes.size();
+
+         needBootstrapHostCount = getNodes().size();
 
          if (isValidExternalNamenode()) {
             needBootstrapHostCount -= 1;
@@ -315,7 +350,7 @@ public class AmClusterDef implements Serializable {
 
       return needBootstrapHostCount;
    }
-      
+
    public String getAmbariServerVersion() {
       return ambariServerVersion;
    }
@@ -329,8 +364,8 @@ public class AmClusterDef implements Serializable {
       apiClusterBlueprint.setBlueprint(name);
 
       List<ApiHostGroup> apiHostGroups = new ArrayList<ApiHostGroup>();
-      for (AmNodeDef node : nodes) {
-         apiHostGroups.add(node.toApiHostGroupForClusterBlueprint());
+      for (AmNodeGroupDef nodeGroup : nodeGroups) {
+         apiHostGroups.addAll(nodeGroup.toApiHostGroupForClusterBlueprint());
       }
       apiClusterBlueprint.setApiHostGroups(apiHostGroups);
       return apiClusterBlueprint;
@@ -342,6 +377,14 @@ public class AmClusterDef implements Serializable {
 
    public boolean isValidExternalSecondaryNamenode() {
       return this.externalSecondaryNamenode != null && !this.externalSecondaryNamenode.isEmpty() && !this.externalSecondaryNamenode.equals(this.externalNamenode);
+   }
+
+   public List<AmNodeDef> getNodes() {
+      List<AmNodeDef> nodes = new ArrayList<AmNodeDef>();
+      for (AmNodeGroupDef nodeGroup : nodeGroups) {
+         nodes.addAll(nodeGroup.getNodes());
+      }
+      return nodes;
    }
 
    private boolean isNodeGenerateFromExternalNamenode(AmNodeDef node) {
