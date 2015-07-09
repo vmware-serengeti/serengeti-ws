@@ -24,7 +24,6 @@ import org.apache.commons.lang.StringUtils;
 
 import com.google.gson.annotations.Expose;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHost;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostGroup;
 import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 import com.vmware.bdd.plugin.ambari.utils.Constants;
@@ -50,6 +49,8 @@ public class AmNodeDef implements Serializable {
 
    @Expose
    private List<String> components;
+
+   private List<String> volumes;
 
    public String getName() {
       return name;
@@ -99,8 +100,16 @@ public class AmNodeDef implements Serializable {
       this.components = components;
    }
 
-   public void setVolumns(List<String> volumns, HdfsVersion hdfsVersion, String ambariServerVersion) {
-      if (volumns.isEmpty()) {
+   public List<String> getVolumes() {
+      return volumes;
+   }
+
+   public void setVolumes(List<String> volumes) {
+      this.volumes = volumes;
+   }
+
+   public void setDirsConfig(HdfsVersion hdfsVersion, String ambariServerVersion) {
+      if (volumes.isEmpty()) {
          return;
       }
       for (String component : components) {
@@ -111,7 +120,7 @@ public class AmNodeDef implements Serializable {
                dfsNameDir = Constants.CONFIG_DFS_NAME_DIR;
             }
             addConfiguration(Constants.CONFIG_HDFS_SITE, dfsNameDir,
-                  dataDirs(volumns, "/hdfs/namenode"));
+                  dataDirs(volumes, "/hdfs/namenode"));
             break;
          case "SECONDARY_NAMENODE":
             String dfsCheckpointDir = Constants.CONFIG_DFS_NAMENODE_CHECKPOINT_DIR;
@@ -119,12 +128,12 @@ public class AmNodeDef implements Serializable {
                dfsCheckpointDir = Constants.CONFIG_DFS_CHECKPOINT_DIR;
             }
             addConfiguration(Constants.CONFIG_HDFS_SITE, dfsCheckpointDir,
-                  volumns.get(0) + "/hdfs/namesecondary");
+                  volumes.get(0) + "/hdfs/namesecondary");
             break;
          case "APP_TIMELINE_SERVER":
             if (ambariServerVersion !=  null && !ambariServerVersion.equals(Constants.AMBARI_SERVER_VERSION_1_6_0)) {
                String timelineStorePath = Constants.CONFIG_LEVELDB_TIMELINE_STORE_PATH;
-               addConfiguration(Constants.CONFIG_YARN_SITE, timelineStorePath, volumns.get(0) + "/hadoop/yarn/timeline");
+               addConfiguration(Constants.CONFIG_YARN_SITE, timelineStorePath, volumes.get(0) + "/hadoop/yarn/timeline");
             }
             break;
          case "DATANODE":
@@ -133,22 +142,22 @@ public class AmNodeDef implements Serializable {
                dfsDataDir = Constants.CONFIG_DFS_DATA_DIR;
             }
             addConfiguration(Constants.CONFIG_HDFS_SITE, dfsDataDir,
-                  dataDirs(volumns, "/hdfs/data"));
+                  dataDirs(volumes, "/hdfs/data"));
             break;
          case "NODEMANAGER":
             addConfiguration(Constants.CONFIG_YARN_SITE,
                   Constants.CONFIG_YARN_NODEMANAGER_LOCAL_DIRS,
-                  dataDirs(volumns, "/yarn/local"));
+                  dataDirs(volumes, "/yarn/local"));
             break;
          case "JOURNALNODE":
             addConfiguration(Constants.CONFIG_HDFS_SITE,
                   Constants.CONFIG_JOURNALNODE_EDITS_DIR,
-                  volumns.get(0) + "/hdfs/journalnode");
+                  volumes.get(0) + "/hdfs/journalnode");
             break;
          case "TASKTRACKER":
             addConfiguration(Constants.CONFIG_MAPRED_SITE,
                   Constants.CONFIG_MAPRED_LOCAL_DIR,
-                  dataDirs(volumns, "/hadoop/mapred"));
+                  dataDirs(volumes, "/hadoop/mapred"));
             break;
          default:
             break;
@@ -197,23 +206,8 @@ public class AmNodeDef implements Serializable {
       return apiHostGroup;
    }
 
-   public ApiHostGroup toApiHostGroupForClusterBlueprint() {
-      ApiHostGroup apiHostGroup = new ApiHostGroup();
-
-      apiHostGroup.setName(name);
-
-      List<Map<String, Object>> apiConfigurations =
-            new ArrayList<Map<String, Object>>();
-      if (configurations != null) {
-         apiConfigurations = configurations;
-      }
-      apiHostGroup.setConfigurations(apiConfigurations);
-
-      List<ApiHost> apiHosts = new ArrayList<ApiHost>();
-      ApiHost apiHost = new ApiHost();
-      apiHost.setFqdn(fqdn);
-      apiHosts.add(apiHost);
-      apiHostGroup.setApiHosts(apiHosts);
-      return apiHostGroup;
+   public int getVolumesCount() {
+      return this.volumes.size();
    }
+
 }
