@@ -49,11 +49,11 @@ public class ResumeClusterRemoveBadNodeStep extends TrackableTasklet {
             getJobExecutionId(chunkContext));
       String clusterName = getJobParameters(chunkContext).getString(JobConstants.CLUSTER_NAME_JOB_PARAM);
       ClusterCreate clusterSpec = configMgr.getClusterConfig(clusterName);
-      List<BaseNode> existingNodes = JobUtils.getExistingNodes(clusterSpec, getClusterEntityMgr());
+      List<BaseNode> existingNodes = new ArrayList<BaseNode>();
       List<BaseNode> deletedNodes = new ArrayList<BaseNode>();
       // portgroupName -> Set<ipAddress>
       Map<String, Set<String>> occupiedIpSets = new HashMap<String, Set<String>>();
-      JobUtils.separateVcUnreachableNodes(existingNodes, deletedNodes, occupiedIpSets);
+      JobUtils.separateVcUnreachableNodes(existingNodes, deletedNodes, occupiedIpSets, getClusterEntityMgr(), clusterSpec);
       ResizeClusterRemoveBadNodeStep.deleteServices(getClusterEntityMgr(),
             softwareMgrs.getSoftwareManagerByClusterName(clusterName),
             deletedNodes);

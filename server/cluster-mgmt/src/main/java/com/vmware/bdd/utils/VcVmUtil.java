@@ -141,7 +141,49 @@ public class VcVmUtil {
          throw BddException.wrapIfNeeded(e, e.getLocalizedMessage());
       }
    }
+   
+   /**
+    * Returns all ip addresses
+    */
+   public static List<String> listAllIpAddresses(final VcVirtualMachine vcVm) {
+      try {
+         List<String> ipAddresses = VcContext.inVcSessionDo(new VcSession<List<String>>() {
+            @Override
+            protected boolean isTaskSession() {
+               return true;
+            }
 
+            @Override
+            public List<String> body() throws Exception {
+               List<String> ips = new ArrayList<String>();
+               GuestInfo guestInfo = vcVm.queryGuest();
+               NicInfo[] nicInfos = guestInfo.getNet();
+
+               if (nicInfos == null || nicInfos.length == 0) {
+                  return ips;
+               }
+
+               for (NicInfo nicInfo : nicInfos) {
+                  if (nicInfo.getNetwork() == null
+                        || nicInfo.getIpConfig() == null
+                        || nicInfo.getIpConfig().getIpAddress() == null
+                        || nicInfo.getIpConfig().getIpAddress().length == 0) {
+                     continue;
+                  }
+
+                  for (IpAddress info : nicInfo.getIpConfig().getIpAddress()) {
+                     ips.add(info.getIpAddress());
+                  }
+               }
+               return ips;
+            }
+         });
+         return ipAddresses;
+      } catch (Exception e) {
+         throw BddException.wrapIfNeeded(e, e.getLocalizedMessage());
+      }
+   }
+   
    public static Set<String> getAllIpAddresses(final VcVirtualMachine vcVm,
          final Set<String> portGroups, boolean inSession) {
       Set<String> allIpAddresses = new HashSet<String>();
