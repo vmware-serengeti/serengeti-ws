@@ -185,32 +185,76 @@ public class JobUtils {
     * @param occupiedIpSets
     */
    public static void separateVcUnreachableNodes(List<BaseNode> existingNodes,
-         List<BaseNode> deletedNodes, Map<String, Set<String>> occupiedIpSets) {
-      for (BaseNode node : existingNodes) {
-         if (node.getVmMobId() == null) {
-            deletedNodes.add(node);
+         List<BaseNode> deletedNodes, Map<String, Set<String>> occupiedIpSets,
+         IClusterEntityManager entityMgr, ClusterCreate cluster) {
+      ClusterEntity clusterEntity = entityMgr.findByName(cluster.getName());
+      for (NodeGroupCreate group : cluster.getNodeGroups()) {
+         NodeGroupEntity groupEntity =
+               entityMgr.findByName(clusterEntity, group.getName());
+         List<NodeEntity> nodeEntities = groupEntity.getNodes();
+         if (nodeEntities == null) {
             continue;
          }
-         VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getVmMobId());
-         if (vm == null || (!vm.isPoweredOn())
-               || !VcVmUtil.checkIpAddresses(vm)) {
-            deletedNodes.add(node);
-            continue;
-         }
-         String haFlag = node.getNodeGroup().getHaFlag();
-         if (haFlag != null
-               && Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {
-            if (!VcVmUtil.verifyFTState(vm)) {
-               logger.info("FT secondary VM state incorrect for node "
-                     + vm.getName() + ", " + "FT state " + vm.getFTState()
-                     + " is unexpected.");
+         for (NodeEntity nodeEntity : nodeEntities) {
+            BaseNode node = convertNode(cluster, group, nodeEntity);
+            VcVirtualMachine vm = null;
+            if (node.getVmMobId() != null) {
+               vm = VcCache.getIgnoreMissing(node.getVmMobId());
+            } else
+               logger.warn("Node " + node.getVmName() + " mobid is null.");
+            if (vm == null) {
+               logger.warn("Cannot find VM in VcCache for node "
+                     + node.getVmName() + " whose mobid is "
+                     + node.getVmMobId() + ".");
+               vm =
+                     ClusterUtil.findAndUpdateNodeVmByName(entityMgr,
+                           nodeEntity);
+               if (vm == null) {
+                  logger.warn("Cannot find VM by VM path " + node.getVmName()
+                        + " whose mobid is " + node.getVmMobId() + ".");
+               } else {
+                  node.setVmMobId(vm.getId());
+               }
+            }
+            if (vm == null || (!vm.isPoweredOn())
+                  || !VcVmUtil.checkIpAddresses(vm)) {
+               if (vm == null) {
+                  logger.warn("Node " + node.getVmName()
+                        + " will be deleted because cannot find VM.");
+               } else if (!vm.isPoweredOn()) {
+                  logger.warn("Node " + node.getVmName()
+                        + " will be deleted because it's not powered on.");
+               } else {
+                  logger.warn("Node " + node.getVmName()
+                        + " will be deleted because no valid ip address.");
+                  List<String> ips = VcVmUtil.listAllIpAddresses(vm);
+                  if (ips == null || ips.size() == 0) {
+                     logger.warn("Cannot get any ip address from Node "
+                           + node.getVmName());
+                  } else {
+                     for (String ipAddress : VcVmUtil.listAllIpAddresses(vm))
+                        logger.warn("Get IP from Node " + node.getVmName()
+                              + ": " + ipAddress);
+                  }
+               }
                deletedNodes.add(node);
                continue;
             }
+            String haFlag = node.getNodeGroup().getHaFlag();
+            if (haFlag != null
+                  && Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {
+               if (!VcVmUtil.verifyFTState(vm)) {
+                  logger.warn("FT secondary VM state incorrect for node "
+                        + vm.getName() + ", " + "FT state " + vm.getFTState()
+                        + " is unexpected.");
+                  deletedNodes.add(node);
+                  continue;
+               }
+            }
+            existingNodes.add(node);
+            adjustOccupiedIpSets(occupiedIpSets, node, true);
          }
-         adjustOccupiedIpSets(occupiedIpSets, node, true);
       }
-      existingNodes.removeAll(deletedNodes);
    }
 
    public static void verifyNodeStatus(NodeEntity node,
