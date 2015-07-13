@@ -41,7 +41,6 @@ import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.IExecutionService;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.spectypes.NicSpec;
-import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.scope.context.ChunkContext;
 
 public class JobUtils {
@@ -228,15 +227,9 @@ public class JobUtils {
                } else {
                   logger.warn("Node " + node.getVmName()
                         + " will be deleted because no valid ip address.");
-                  List<String> ips = VcVmUtil.listAllIpAddresses(vm);
-                  if (ips == null || ips.size() == 0) {
-                     logger.warn("Cannot get any ip address from Node "
-                           + node.getVmName());
-                  } else {
-                     for (String ipAddress : VcVmUtil.listAllIpAddresses(vm))
-                        logger.warn("Get IP from Node " + node.getVmName()
-                              + ": " + ipAddress);
-                  }
+                  List<String> ips = VcVmUtil.getAllIpAddresses(vm);
+                  logger.warn("ip addresses for node " + node.getVmName()
+                              + ": " + (ips == null ? "None" : ips.toString()));
                }
                deletedNodes.add(node);
                continue;
@@ -245,8 +238,8 @@ public class JobUtils {
             if (haFlag != null
                   && Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {
                if (!VcVmUtil.verifyFTState(vm)) {
-                  logger.warn("FT secondary VM state incorrect for node "
-                        + vm.getName() + ", " + "FT state " + vm.getFTState()
+                  logger.warn("FT secondary VM status is incorrect for node "
+                        + vm.getName() + ". " + "FT status " + vm.getFTState().toString()
                         + " is unexpected.");
                   deletedNodes.add(node);
                   continue;
