@@ -145,7 +145,7 @@ public class VcVmUtil {
    /**
     * Returns all ip addresses
     */
-   public static List<String> listAllIpAddresses(final VcVirtualMachine vcVm) {
+   public static List<String> getAllIpAddresses(final VcVirtualMachine vcVm) {
       try {
          List<String> ipAddresses = VcContext.inVcSessionDo(new VcSession<List<String>>() {
             @Override
@@ -172,7 +172,9 @@ public class VcVmUtil {
                   }
 
                   for (IpAddress info : nicInfo.getIpConfig().getIpAddress()) {
-                     ips.add(info.getIpAddress());
+                     if (info != null && !CommonUtil.isBlank(info.getIpAddress())) {
+                        ips.add(info.getIpAddress());
+                     }
                   }
                }
                return ips;
