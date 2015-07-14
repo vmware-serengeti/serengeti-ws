@@ -84,13 +84,13 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="nodeStatusVerifyStep" next="setPasswordForCreateNodesStep">
+		<step id="nodeStatusVerifyStep" > <!--next="setPasswordForCreateNodesStep"-->
 			<tasklet ref="clusterNodeStatusVerifyTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="setPasswordForCreateNodesStep" next="postSetPasswordForCreateNodesStep">
+		<!--step id="setPasswordForCreateNodesStep" next="postSetPasswordForCreateNodesStep">
 			<tasklet ref="setPasswordForClusterCreateTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
@@ -149,7 +149,7 @@
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
-		</step>
+		</step-->
 		<!-- <step id="cmCreateClusterStep"> <tasklet ref="cmCreateClusterTasklet" 
 			/> <listeners> <listener ref="stepListener" /> </listeners> </step> -->
 		<listeners>
