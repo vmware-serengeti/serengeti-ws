@@ -454,6 +454,7 @@ public class ClusterManager {
       validateDatastore(dsNames, vcClusters);
       validateNetworkAccessibility(createSpec.getName(), createSpec.getNetworkNames(), vcClusters);
 
+      logger.info("finish validate accessibilities");
       // get the current cluster clone type from the configuration file
       // if it is not set in configuration file, then use INSTANT clone for VC6/ESXi6
       String type = getClusterCloneType();

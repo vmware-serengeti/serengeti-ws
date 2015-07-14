@@ -240,6 +240,7 @@ public class ResourceService implements IResourceService {
    @Override
    public boolean isDatastoreAccessibleByCluster(String datastoreSpec,
          String cluster) throws VcProviderException {
+      logger.info("start check ds accessible by cluster");
       boolean result = false;
       List<VcDatastore> availableDatastores = getDatastoreByName(datastoreSpec);
       List<VcHost> hosts = getHostsByClusterName(cluster);

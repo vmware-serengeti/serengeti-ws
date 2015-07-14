@@ -31,6 +31,7 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1378,13 +1379,17 @@ public class ClusteringService implements IClusteringService {
       logger.info("Calling resource manager to get available vc hosts");
       Container container = new Container();
 
+
       List<VcCluster> clusters = resMgr.getAvailableClusters();
-      AuAssert.check(clusters != null && clusters.size() != 0);
+      logger.info(String.format("get %1s clusters.", clusters.size()));
+      AuAssert.check(CollectionUtils.isNotEmpty(clusters));
       for (VcCluster cl : clusters) {
          VcResourceUtils.refreshDatastore(cl);
+         logger.info(String.format("Refresh all datastores in cluster[%1s] is finished.", cl.getName()));
          container.addResource(cl);
       }
 
+      logger.info("check time on hosts");
       // check time on hosts
       int maxTimeDiffInSec = Constants.MAX_TIME_DIFF_IN_SEC;
       SoftwareManager softMgr =
@@ -1408,9 +1413,10 @@ public class ClusteringService implements IClusteringService {
          container.removeHost(host);
       }
 
+      logger.info("filter hosts by networks");
       // filter hosts by networks
       List<com.vmware.bdd.spectypes.VcCluster> usedClusters = clusterSpec.getVcClusters();
-      List<String> noNetworkHosts = new ArrayList<String>();
+      List<String> noNetworkHosts;
       noNetworkHosts = resMgr.filterHostsByNetwork(clusterSpec.getNetworkNames(), usedClusters);
 
       for (String host : noNetworkHosts) {
@@ -1430,6 +1436,7 @@ public class ClusteringService implements IClusteringService {
          container.addRackMap(clusterSpec.getHostToRackMap());
       }
 
+      logger.info("rack topology file validation");
       // rack topology file validation
       Set<String> validRacks = new HashSet<String>();
       List<AbstractHost> hosts = container.getAllHosts();
@@ -1449,6 +1456,7 @@ public class ClusteringService implements IClusteringService {
          }
       }
 
+      logger.info("get cloner type from existing node");
       // for instant clone, we need check if the target hosts are with version 6 or higher
       // if user does not set the clone type in serengeti.properties, the default type
       // should still be FAST clone for hosts with 5.x version
@@ -1457,10 +1465,12 @@ public class ClusteringService implements IClusteringService {
          checkAndUpdateClusterCloneType(clusterSpec, container);
       }
 
+      logger.info("pre-placement task, especially for cloners that will affect placement");
       //pre-placement task
       String clusterCloneType = clusterSpec.getClusterCloneType();
       chooseClusterCloneService(clusterCloneType).preCalculatePlacements(container, clusterSpec, existedNodes);
 
+      logger.info("start placement calculation");
       List<BaseNode> baseNodes =
             placementService.getPlacementPlan(container, clusterSpec,
                   existedNodes, filteredHosts);
