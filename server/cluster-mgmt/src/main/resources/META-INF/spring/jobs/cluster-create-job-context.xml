@@ -57,44 +57,12 @@
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="nodeStatusVerifyStep" next="setPasswordForCreateNodesStep">
+		<step id="nodeStatusVerifyStep" > <!--next="setPasswordForCreateNodesStep"-->
 			<tasklet ref="clusterNodeStatusVerifyTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
 		</step>
-		<step id="setPasswordForCreateNodesStep" next="postSetPasswordForCreateNodesStep">
-			<tasklet ref="setPasswordForClusterCreateTasklet" />
-			<listeners>
-				<listener ref="stepListener" />
-			</listeners>
-		</step>
-		<step id="postSetPasswordForCreateNodesStep" next="configLocalRepoStep">
-			<tasklet ref="postSetPasswordTasklet" />
-			<listeners>
-				<listener ref="stepListener" />
-			</listeners>
-		</step>
-		<step id="configLocalRepoStep" next="softwareCreateClusterStep">
-			<tasklet ref="configLocalRepoForClusterCreateTasklet" />
-			<listeners>
-				<listener ref="stepListener" />
-			</listeners>
-		</step>
-		<step id="softwareCreateClusterStep" next="setAutoElasticityStep">
-			<tasklet ref="softwareCreateClusterTasklet" />
-			<listeners>
-				<listener ref="stepListener" />
-			</listeners>
-		</step>
-		<step id="setAutoElasticityStep">
-			<tasklet ref="setAutoElasticityTaskletRefreshAllNodes" />
-			<listeners>
-				<listener ref="stepListener" />
-			</listeners>
-		</step>
-		<!-- <step id="cmCreateClusterStep"> <tasklet ref="cmCreateClusterTasklet" 
-			/> <listeners> <listener ref="stepListener" /> </listeners> </step> -->
 		<listeners>
 			<listener ref="createClusterJobListener" />
 		</listeners>
