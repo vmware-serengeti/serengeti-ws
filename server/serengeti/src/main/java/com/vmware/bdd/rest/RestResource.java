@@ -1240,4 +1240,29 @@ public class RestResource {
          throw BddException.INIT_VC_FAIL();
       }
    }
+
+   /**
+    * Recover clusters for disaster recovery from a data center to another
+    * @param resMap: vc resource name mapping from one data center to another
+    * @param request
+    */
+   @RequestMapping(value = "/recover", method = RequestMethod.PUT, consumes = "application/json")
+   @ResponseStatus(HttpStatus.OK)
+   public void recoverClusters(@RequestBody Map<String, String> resMap,
+         HttpServletRequest request, HttpServletResponse response)
+         throws Exception {
+      // update all the resource pools on the vc cluster info from name mapping
+      List<ResourcePoolRead> allRps = vcRpSvc.getAllResourcePoolForRest();
+      for ( ResourcePoolRead rp : allRps ) {
+         String rpName = rp.getRpName();
+         String srcVcCluster = rp.getVcCluster();
+         String tgtVcCluster = resMap.get(srcVcCluster);
+         if ( null != tgtVcCluster ) {
+            vcRpSvc.updateResourcePool(rpName, tgtVcCluster, null);
+         }
+      }
+
+      // update all the nodes on vm moid and guest_host_name
+      clusterMgr.recoverClusters(resMap);
+   }
 }

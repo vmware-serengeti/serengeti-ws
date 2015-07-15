@@ -292,4 +292,9 @@ public class Constants {
       yes, no
    }
    public static final String FORCE_CLUSTER_OPERATION_KEY = "force";
+
+   public static final String REST_PATH_CLUSTER_RECOVER = "recover";
+   public static final String OUTPUT_OBJECT_CLUSTER_ALL = "All clusters";
+   public static final String OUTPUT_OP_RESULT_RECOVER_SUCC = "are recovered";
+   public static final String OUTPUT_OP_RESULT_RECOVER = "recover";
 }

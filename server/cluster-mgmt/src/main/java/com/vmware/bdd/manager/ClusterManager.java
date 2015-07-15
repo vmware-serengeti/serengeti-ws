@@ -47,6 +47,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vmware.aurora.global.Configuration;
+import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.bdd.aop.annotation.ClusterManagerPointcut;
 import com.vmware.bdd.apitypes.ClusterCreate;
@@ -79,6 +80,7 @@ import com.vmware.bdd.spectypes.IronfanStack;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.usermgmt.UserMgmtConstants;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.ClusterUtil;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.JobUtils;
@@ -1663,5 +1665,39 @@ public class ClusterManager {
          }
       }
       return type;
+   }
+
+   public void recoverClusters(Map<String, String> resMap) throws Exception {
+      List<String> nodesNotFound = new ArrayList<String>();
+      List<ClusterEntity> clusters = clusterEntityMgr.findAllClusters();
+      for ( ClusterEntity cluster : clusters ) {
+         List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(cluster.getName());
+         for ( NodeEntity node : nodes ) {
+            VcVirtualMachine vcVm = ClusterUtil.getVcVm(clusterEntityMgr, node);
+            if ( null == vcVm ) {
+               logger.info("The cluster node vm " + node.getVmName() + " is not found.");
+               nodesNotFound.add(node.getVmName());
+            } else {
+               // the moid has been updated during the getVcVm() method, we need to update
+               // the esxi host name here, sine the esxi host name are generally different
+               // between 2 data centers
+               String srcHostName = node.getHostName();
+               String tgtHostName = resMap.get(srcHostName);
+               if ( tgtHostName != null ) {
+                  node.setHostName(tgtHostName);
+                  clusterEntityMgr.update(node);
+               }
+               if ( node.isNotExist() ) {
+                  clusterEntityMgr.refreshNodeByMobId(vcVm.getId(), false);
+               }
+            }
+         }
+      }
+      if ( nodesNotFound.size() > 0 ) {
+         String errMsg = "The following cluster node vms " + nodesNotFound.toString()
+               + " cannot be found in vCenter Server.";
+         logger.info(errMsg);
+         throw BddException.CLUSTER_RECOVER_FAILED(nodesNotFound.toString());
+      }
    }
 }

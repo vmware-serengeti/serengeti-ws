@@ -320,4 +320,10 @@ public class ClusterRestClient {
       };
    }
 
+   public void recover(Map<String, String> resMap) {
+      final String path = "/" + Constants.REST_PATH_CLUSTER_RECOVER;
+      final HttpMethod httpverb = HttpMethod.PUT;
+      restClient.update(resMap, path, httpverb);
+   }
+
 }
