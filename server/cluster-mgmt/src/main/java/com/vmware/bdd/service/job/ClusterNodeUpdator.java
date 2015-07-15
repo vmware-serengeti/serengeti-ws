@@ -33,7 +33,7 @@ public class ClusterNodeUpdator extends PeriodicRequest {
       this.entityMgr = lockMgr.getClusterEntityMgr();
    }
 
-   protected boolean executeOnce() {
+   public boolean executeOnce() {
       List<ClusterEntity> clusters = entityMgr.findAllClusters();
       for (ClusterEntity cluster : clusters) {
          if (cluster.getStatus().isStableStatus()) {

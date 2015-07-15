@@ -67,6 +67,7 @@ import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 import com.vmware.bdd.software.mgmt.thrift.ServerData;
 import com.vmware.bdd.usermgmt.UserMgmtConstants;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.ClusterUtil;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.InfrastructureConfigUtils;
@@ -564,12 +565,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
    }
 
    private void refreshNodeStatus(NodeEntity node, boolean inSession) {
-      String mobId = node.getMoId();
-      if (mobId == null) {
-         setNotExist(node);
-         return;
-      }
-      VcVirtualMachine vcVm = VcCache.getIgnoreMissing(mobId);
+      VcVirtualMachine vcVm = ClusterUtil.getVcVm(this, node);
       if (vcVm == null) {
          // vm is deleted
          setNotExist(node);

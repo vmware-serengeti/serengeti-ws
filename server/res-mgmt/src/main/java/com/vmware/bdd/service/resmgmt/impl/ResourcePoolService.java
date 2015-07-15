@@ -343,4 +343,30 @@ public class ResourcePoolService implements IResourcePoolService {
       addResourcePool(name, vcCluster.getName(), vcRp);
       rpNames.add(name);
    }
+
+   /* (non-Javadoc)
+    * @see com.vmware.bdd.service.impl.IResourcePoolService#addResourcePool(java.lang.String, java.lang.String, java.lang.String)
+    */
+   @Override
+   public synchronized void updateResourcePool(String rpName,
+         String vcClusterName, String vcResourcePool) {
+      VcResourcePoolEntity rp = rpDao.findByName(rpName);
+      if (null == rp) {
+         logger.debug("resource pool " + vcResourcePool + " in cluster "
+               + vcClusterName + " is not existed.");
+         throw VcProviderException.RESOURCE_POOL_NOT_FOUND(rpName);
+      }
+      resService.refreshResourcePool();
+      if (!resService.isRPExistInVc(vcClusterName, vcResourcePool)) {
+         throw VcProviderException.RESOURCE_POOL_NOT_FOUND(vcResourcePool);
+      }
+
+      if ( null != vcClusterName ) {
+         rp.setVcCluster(vcClusterName);
+      }
+      if ( null != vcResourcePool ) {
+         rp.setVcResourcePool(vcResourcePool);
+      }
+      rpDao.update(rp);
+   }
 }

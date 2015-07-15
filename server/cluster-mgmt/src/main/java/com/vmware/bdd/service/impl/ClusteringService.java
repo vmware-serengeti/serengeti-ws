@@ -119,6 +119,7 @@ import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.ClusterUtil;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
@@ -312,8 +313,14 @@ public class ClusteringService implements IClusteringService {
             cloneConcurrency = 1;
          }
 
-         CmsWorker
-               .addPeriodic(new ClusterNodeUpdator(getLockClusterEntityMgr()));
+         ClusterNodeUpdator nodeUpdator = new ClusterNodeUpdator(getLockClusterEntityMgr());
+         // refresh the cluster nodes once on bde startup, till now the vc cache has
+         // been loaded, so it should be fast to do it
+         logger.info("refresh the cluster nodes once on bde startup...");
+         nodeUpdator.executeOnce();
+         // then add the periodic processing with default 5 minute interval
+         CmsWorker.addPeriodic(nodeUpdator);
+
          prepareTemplateVM();
          loadTemplateNetworkLable();
          convertTemplateVm();

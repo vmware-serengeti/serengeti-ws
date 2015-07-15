@@ -14,7 +14,11 @@
  ****************************************************************************/
 package com.vmware.bdd.cli.commands;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1867,4 +1871,65 @@ public class ClusterCommands implements CommandMarker {
       return warningMsg;
    }
 
+   @CliCommand(value = "cluster recover", help = "Recover clusters")
+   public void recoverCluster(
+         @CliOption(key = { "resMapFile" }, mandatory = false, help = "The resource map file name path") final String mapFilePath) {
+      try {
+         Map<String, String> resMap = readResMapFromFile(mapFilePath);
+         restClient.recover(resMap);
+         CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER_ALL,
+               Constants.OUTPUT_OP_RESULT_RECOVER_SUCC);
+      } catch (CliRestException | IOException | CliException e) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+               Constants.OUTPUT_OP_RESULT_RECOVER, Constants.OUTPUT_OP_RESULT_FAIL,
+               e.getMessage());
+      }
+   }
+
+   private Map<String, String> readResMapFromFile(String filePath) throws IOException,
+   FileNotFoundException, CliException {
+      FileInputStream fis = null;
+      InputStreamReader inputStreamReader = null;
+      BufferedReader bufferedReader = null;
+      HashMap<String, String> vcResMap = new HashMap<String, String>();
+
+      try {
+         fis = new FileInputStream(filePath);
+         inputStreamReader = new InputStreamReader(fis, "UTF-8");
+         bufferedReader = new BufferedReader(inputStreamReader);
+         String line = "";
+         int lineNum = 1;
+         while ((line = bufferedReader.readLine()) != null) {
+            line = line.trim();
+            if ( !line.isEmpty() ) {
+               String formatErrMsg = "Bad file format at line " + lineNum
+                     + ". It should be like res1 : res2.\n";
+               String[] mapstr = line.split(":");
+               String key = "";
+               String value = "";
+               if ( null != mapstr && mapstr.length == 2 ) {
+                  key = mapstr[0].trim();
+                  value = mapstr[1].trim();
+               }
+               if ( key.isEmpty() || value.isEmpty() ) {
+                  throw new CliException(formatErrMsg);
+               }
+               vcResMap.put(key, value);
+            }
+            lineNum++;
+         }
+      } finally {
+         if (fis != null) {
+            fis.close();
+         }
+         if (inputStreamReader != null) {
+            inputStreamReader.close();
+         }
+         if (bufferedReader != null) {
+            bufferedReader.close();
+         }
+      }
+
+      return vcResMap;
+   }
 }

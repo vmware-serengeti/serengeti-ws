@@ -258,4 +258,8 @@ public class BddException extends RuntimeException {
    public static BddException SYSTEM_DISK_NOT_FOUND_ON_NODE(String nodeName) {
       return new BddException(null, "BDD", "SYSTEM_DISK_NOT_FOUND_ON_NODE", nodeName);
    }
+
+   public static BddException CLUSTER_RECOVER_FAILED(String vmNames) {
+      return new BddException(null, "CLUSTER", "RECOVER_FAILED", vmNames);
+   }
 }
