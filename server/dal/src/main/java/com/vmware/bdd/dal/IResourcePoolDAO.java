@@ -31,6 +31,8 @@ public interface IResourcePoolDAO extends IBaseDAO<VcResourcePoolEntity> {
 
    List<VcResourcePoolEntity> findAllOrderByClusterName();
 
+   List<String> findAllClusterName();
+
    String getNameByClusterAndRp(String vcCluster, String vcRp);
 
    VcResourcePoolEntity findByClusterAndRp(String vcCluster, String vcRp);

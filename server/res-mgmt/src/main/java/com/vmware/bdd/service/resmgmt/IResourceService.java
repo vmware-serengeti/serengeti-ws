@@ -234,4 +234,8 @@ public interface IResourceService {
    boolean isNetworkAccessibleByCluster(List<String> networkList,
          List<com.vmware.bdd.spectypes.VcCluster> clusters);
 
+   /**
+    * refresh host, datastores, networks
+    */
+   void refreshVcResources();
 }

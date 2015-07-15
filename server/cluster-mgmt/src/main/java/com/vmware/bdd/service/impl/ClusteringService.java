@@ -1384,9 +1384,9 @@ public class ClusteringService implements IClusteringService {
       logger.info(String.format("get %1s clusters.", clusters.size()));
       AuAssert.check(CollectionUtils.isNotEmpty(clusters));
       for (VcCluster cl : clusters) {
-         VcResourceUtils.refreshDatastore(cl);
-         logger.info(String.format("Refresh all datastores in cluster[%1s] is finished.", cl.getName()));
+         //refresh once at beginning of cluster create/resume/resize
          container.addResource(cl);
+         logger.info(String.format("Adding hosts and datastores of cluster[%1s] is done.", cl.getName()));
       }
 
       logger.info("check time on hosts");
