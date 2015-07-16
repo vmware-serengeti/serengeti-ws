@@ -39,7 +39,7 @@ public class CmsWorker {
    @SuppressWarnings("serial")
    public static class DelayedReqQueue extends LinkedBlockingQueue<Request> {
       // Delay between each scan in nanoseconds.
-      private final long scanInterval;
+      private long scanInterval;
       // Number of requests to scan in an interval.
       private final int numReqToScan;
       // Number of request left to be scanned during the current interval.
@@ -50,6 +50,10 @@ public class CmsWorker {
          super(capacity);
          scanInterval = TimeUnit.SECONDS.toNanos(scanIntervalSec);
          this.numReqToScan = numReqToScan;
+      }
+
+      public void setScanInterval(int scanIntervalSec) {
+         this.scanInterval = TimeUnit.SECONDS.toNanos(scanIntervalSec);;
       }
 
       /**
