@@ -119,8 +119,18 @@ public class BddException extends RuntimeException {
       return NOT_FOUND(null, object, objectName);
    }
 
-   public static BddException NOT_ALLOWED_SCALING(String object,
+   public static BddException NOT_CONTAIN(Throwable ex, String object,
          String objectName) {
+      return new BddException(ex, "CLUSTER", "FAILED_TO_UPDATE", object,
+            objectName);
+   }
+
+   public static BddException NOT_CONTAIN(String object, String objectName) {
+      return NOT_CONTAIN(null, object, objectName);
+   }
+
+   public static BddException NOT_ALLOWED_SCALING(String object,
+      String objectName) {
       return new BddException(null, "BDD", "NOT_ALLOWED_SCALING", object,
             objectName);
    }

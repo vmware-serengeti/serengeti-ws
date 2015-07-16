@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.vmware.bdd.exception.WarningMessageException;
 import jline.console.ConsoleReader;
 
 import org.apache.commons.collections.MapUtils;
@@ -851,6 +852,75 @@ public class ClusterCommands implements CommandMarker {
                     Constants.OUTPUT_OP_RESIZE, Constants.OUTPUT_OP_RESULT_FAIL,
                     Constants.INVALID_VALUE + " " + StringUtils.join(invalidParams, ", "));
          }
+      }
+   }
+
+   @CliCommand(value = "cluster update", help = "Update resourcepools or datastores used by cluster")
+   public void modifyCluster(
+         @CliOption(key = { "name" }, mandatory = true, help = "the cluster name") final String name,
+         @CliOption(key = { "rpNames" }, mandatory = false, help = "Resource Pools for the cluster: use \",\" among names.") final String rpNames,
+         @CliOption(key = { "dsNames" }, mandatory = false, help = "Datastores for the cluster: use \",\" among names.") final String dsNames,
+         @CliOption(key = { "yes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Answer 'yes' to all Y/N questions. ") final boolean alwaysAnswerYes) {
+
+      ClusterRead cluster = null;
+      try {
+         cluster = restClient.get(name, false);
+         if (cluster == null) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                  Constants.OUTPUT_OP_MODIFY, Constants.OUTPUT_OP_RESULT_FAIL,
+                  "cluster " + name + " does not exist.");
+            return;
+         }
+      }catch (CliRestException e) {
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+               Constants.OUTPUT_OP_MODIFY,
+               Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+         return;
+      }
+      boolean isContinued = alwaysAnswerYes;
+      List<String> rpNamesList = new ArrayList<String>();
+      List<String> dsNamesList = new ArrayList<String>();
+      List<String> warningMsgList = new ArrayList<String>();
+      ClusterCreate clusterModify = new ClusterCreate();
+      clusterModify.setName(name);
+
+      //Check whether input rpNames include all resourcepools which cluster already uses
+      if(!CommonUtil.isBlank(rpNames)){
+         rpNamesList.addAll(CommandsUtils.inputsConvertSet(rpNames));
+         clusterModify.setRpNames(rpNamesList);
+      }
+
+      //Check whether input dsNames include all datastores which cluster already uses
+      if(!CommonUtil.isBlank(dsNames)){
+         dsNamesList.addAll(CommandsUtils.inputsConvertSet(dsNames));
+         clusterModify.setDsNames(dsNamesList);
+      }
+
+      if(!CommonUtil.isBlank(rpNames) || !CommonUtil.isBlank(dsNames)) {
+         try {
+            restClient.modifyCluster(clusterModify, isContinued);
+            CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
+                  Constants.OUTPUT_OP_RESULT_MODIFY);
+         }catch (WarningMessageException e){
+            warningMsgList = e.getWarningMsgList();
+            if(!CommandsUtils.showWarningMsg(cluster.getName(),
+                  Constants.OUTPUT_OBJECT_CLUSTER, Constants.OUTPUT_OP_MODIFY,
+                  warningMsgList, isContinued, null))
+               return;
+            else{
+               isContinued = true;
+               restClient.modifyCluster(clusterModify, isContinued);
+               CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
+                     Constants.OUTPUT_OP_RESULT_MODIFY);
+            }
+         }catch (CliRestException e) {
+            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                  Constants.OUTPUT_OP_MODIFY, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+         }
+      }else{
+         CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+               Constants.OUTPUT_OP_MODIFY, Constants.OUTPUT_OP_RESULT_FAIL,
+               Constants.PARAM_SHOULD_SPECIFY_RP_DS);
       }
    }
 

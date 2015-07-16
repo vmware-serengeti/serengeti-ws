@@ -33,6 +33,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
+import com.vmware.bdd.entity.*;
+import com.vmware.bdd.exception.*;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -58,15 +61,6 @@ import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.TaskRead;
-import com.vmware.bdd.entity.ClusterEntity;
-import com.vmware.bdd.entity.NetworkEntity;
-import com.vmware.bdd.entity.NodeEntity;
-import com.vmware.bdd.entity.NodeGroupEntity;
-import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.exception.ClusterConfigException;
-import com.vmware.bdd.exception.ClusterHealServiceException;
-import com.vmware.bdd.exception.ClusterManagerException;
-import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.IClusterHealService;
 import com.vmware.bdd.service.IClusteringService;
@@ -90,6 +84,7 @@ import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.JobUtils;
 import com.vmware.bdd.utils.ValidationUtils;
 import com.vmware.bdd.utils.Version;
+import org.springframework.transaction.annotation.Transactional;
 
 public class ClusterManager {
    static final Logger logger = Logger.getLogger(ClusterManager.class);
@@ -1250,6 +1245,126 @@ public class ClusterManager {
          throw e;
       }
    }
+
+   @ClusterManagerPointcut
+   @Transactional
+   public void modifyCluster(ClusterCreate clusterModify, boolean warningforce) throws Exception {
+      String clusterName = clusterModify.getName();
+      ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
+      if (cluster == null) {
+         logger.error("cluster " + clusterName + " does not exist");
+         throw BddException.NOT_FOUND("Cluster", clusterName);
+      }
+      ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
+
+      List<String> updatingRpList = clusterModify.getRpNames();
+
+      if (!CollectionUtils.isEmpty(updatingRpList)){
+         //Check whehter the updating resourcepools are valid in vc_resource_pool
+         List<String> existRPs =
+               validateGivenRp(updatingRpList);
+         if (CollectionUtils.isEmpty(existRPs)) {
+            throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
+         }
+
+         //Check whether the the updating resourcepools are contains these resourcepools which are used by cluster
+         Set<VcResourcePoolEntity> usedVCRps = cluster.getUsedRps();
+         List<String> usedRpList =
+               new ArrayList<String>(usedVCRps.size());
+         for (VcResourcePoolEntity rp : usedVCRps) {
+            usedRpList.add(rp.getName());
+         }
+
+         if (!updatingRpList.containsAll(usedRpList)) {
+            throw BddException.NOT_CONTAIN(usedRpList.toString(),
+                  updatingRpList.toString());
+         }
+
+         logger.info("Update resourcepools cluster " + clusterName + " from " + usedRpList.toString() + "to " + updatingRpList.toString());
+         cluster.setVcRpNameList(updatingRpList);
+      }
+
+      List<String> updatingDsList = clusterModify.getDsNames();
+      if (!CollectionUtils.isEmpty(updatingDsList)) {
+         //Check whether the updating datastores are valid vc_data_store
+         List<String> exitDS = validateGivenDS(updatingDsList);
+         if (CollectionUtils.isEmpty(exitDS)) {
+            throw ClusterConfigException.NO_DATASTORE_ADDED();
+         }
+
+         //Check whether input dsNames include all datastores which cluster already uses
+         List<String> usedDsList = cluster.getVcDatastoreNameList();
+         List<String> warningMsgList = new ArrayList<String>();
+         if(!warningforce) {
+            if (usedDsList == null) {
+               warningMsgList.add(String
+                     .format(
+                           Constants.WARNING_CLUSTER_UPDATING_ALLDATASTORES,
+                           updatingDsList.toString()));
+            } else if (!updatingDsList.containsAll(usedDsList)) {
+               warningMsgList.add(String
+                     .format(Constants.WARNING_CLUSTER_UPDATING_DATASTORES,
+                           usedDsList.toString(), updatingDsList.toString()));
+            }
+
+            if (warningMsgList.size() > 0 ) {
+               throw new WarningMessageException(warningMsgList);
+            }
+         }
+
+         logger.info("Update  cluster " + clusterName + " from " + usedDsList.toString()
+               + "to " + updatingDsList.toString());
+         cluster.setVcDatastoreNameList(clusterModify.getDsNames());
+      }
+
+      clusterEntityMgr.update(cluster);
+   }
+
+   private List<String> validateGivenDS(List<String> specifiedDsNames) {
+      List<String> exitsDs = new ArrayList<String>();
+      Set<String> allDs = clusterConfigMgr.getDatastoreMgr().getAllDatastoreNames();
+      StringBuffer nonexistentDsNames = new StringBuffer();
+
+      for(String dsName : specifiedDsNames){
+         if(!allDs.contains(dsName)){
+            nonexistentDsNames.append(dsName).append(",");
+         }
+         exitsDs.add(dsName);
+      }
+
+      if (nonexistentDsNames.length() > 0) {
+         nonexistentDsNames.delete(nonexistentDsNames.length() - 1,
+               nonexistentDsNames.length());
+         throw VcProviderException
+               .DATASTORE_NOT_FOUND(nonexistentDsNames.toString());
+      }
+
+      return exitsDs;
+   }
+
+   private List<String> validateGivenRp(List<String> specifiedRpNames) {
+      List<String> exitsRps = new ArrayList<String>();
+      Set<String> allRps = clusterConfigMgr.getDatastoreMgr().getAllDatastoreNames();
+      StringBuffer nonexistentDsNames = new StringBuffer();
+
+      for(String dsName : specifiedRpNames){
+         if(!allRps.contains(dsName)){
+            nonexistentDsNames.append(dsName).append(",");
+         }
+         exitsRps.add(dsName);
+      }
+
+      if (nonexistentDsNames.length() > 0) {
+         nonexistentDsNames.delete(nonexistentDsNames.length() - 1,
+               nonexistentDsNames.length());
+         throw VcProviderException
+               .RESOURCE_POOL_NOT_FOUND(nonexistentDsNames.toString());
+      }
+
+      return exitsRps;
+   }
+
+
 
    /*
     * Change the disk I/O priority of the cluster or a node group

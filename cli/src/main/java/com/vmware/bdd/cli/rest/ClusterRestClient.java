@@ -139,6 +139,14 @@ public class ClusterRestClient {
       actionOps(id, id, queryStrings);
    }
 
+   public void modifyCluster(ClusterCreate clusterModify, boolean warningforce) {
+      StringBuilder path = new StringBuilder(Constants.REST_PATH_CLUSTER)
+            .append("/").append(clusterModify.getName())
+            .append("?").append("warningforce").append('=').append(warningforce);
+      final HttpMethod httpverb = HttpMethod.PUT;
+      restClient.update(clusterModify, path.toString(), httpverb);
+   }
+
    public void resize(String clusterName, String nodeGroup, int instanceNum, Map<String, String> queryStrings) {
       final String path =
             Constants.REST_PATH_CLUSTER + "/" + clusterName + "/"

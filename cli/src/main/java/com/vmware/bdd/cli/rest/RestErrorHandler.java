@@ -24,6 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vmware.bdd.exception.WarningMessageException;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatus.Series;
@@ -72,6 +73,9 @@ public class RestErrorHandler implements ResponseErrorHandler {
          }
          if(errorMessage.getCertInfo() != null) {
             throw new UntrustedCertificateException(errorMessage.getCertInfo());
+         }
+         if(errorMessage.getWarningMsgList() != null){
+            throw new WarningMessageException(errorMessage.getWarningMsgList());
          }
          throw new CliRestException(errorMessage.getMessage());
       } else {
