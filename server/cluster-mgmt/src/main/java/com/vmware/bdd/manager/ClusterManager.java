@@ -1280,7 +1280,8 @@ public class ClusterManager {
                   updatingRpList.toString());
          }
 
-         logger.info("Update resourcepools cluster " + clusterName + " from " + usedRpList.toString() + "to " + updatingRpList.toString());
+         logger.info("Update resourcepools cluster " + clusterName + " from "
+               + usedRpList.toString() + "to " + updatingRpList.toString());
          cluster.setVcRpNameList(updatingRpList);
       }
 
@@ -1295,8 +1296,8 @@ public class ClusterManager {
          //Check whether input dsNames include all datastores which cluster already uses
          List<String> usedDsList = cluster.getVcDatastoreNameList();
          List<String> warningMsgList = new ArrayList<String>();
-         if(!warningforce) {
-            if (usedDsList == null) {
+         if (!warningforce) {
+            if (CollectionUtils.isEmpty(usedDsList)) {
                warningMsgList.add(String
                      .format(
                            Constants.WARNING_CLUSTER_UPDATING_ALLDATASTORES,
@@ -1307,12 +1308,13 @@ public class ClusterManager {
                            usedDsList.toString(), updatingDsList.toString()));
             }
 
-            if (warningMsgList.size() > 0 ) {
+            if (warningMsgList.size() > 0) {
                throw new WarningMessageException(warningMsgList);
             }
          }
 
-         logger.info("Update  cluster " + clusterName + " from " + usedDsList.toString()
+         logger.info("Update  cluster " + clusterName + " from " + usedDsList
+               .toString()
                + "to " + updatingDsList.toString());
          cluster.setVcDatastoreNameList(clusterModify.getDsNames());
       }
@@ -1322,14 +1324,15 @@ public class ClusterManager {
 
    private List<String> validateGivenDS(List<String> specifiedDsNames) {
       List<String> exitsDs = new ArrayList<String>();
-      Set<String> allDs = clusterConfigMgr.getDatastoreMgr().getAllDatastoreNames();
+      Set<String> allDs =
+            clusterConfigMgr.getDatastoreMgr().getAllDatastoreNames();
       StringBuffer nonexistentDsNames = new StringBuffer();
 
-      for(String dsName : specifiedDsNames){
-         if(!allDs.contains(dsName)){
+      for (String dsName : specifiedDsNames) {
+         if (!allDs.contains(dsName))
             nonexistentDsNames.append(dsName).append(",");
-         }
-         exitsDs.add(dsName);
+         else
+            exitsDs.add(dsName);
       }
 
       if (nonexistentDsNames.length() > 0) {
@@ -1344,21 +1347,21 @@ public class ClusterManager {
 
    private List<String> validateGivenRp(List<String> specifiedRpNames) {
       List<String> exitsRps = new ArrayList<String>();
-      Set<String> allRps = clusterConfigMgr.getDatastoreMgr().getAllDatastoreNames();
-      StringBuffer nonexistentDsNames = new StringBuffer();
+      Set<String> allRps = clusterConfigMgr.getRpMgr().getAllRPNames();
+      StringBuffer nonexistentRpNames = new StringBuffer();
 
-      for(String dsName : specifiedRpNames){
-         if(!allRps.contains(dsName)){
-            nonexistentDsNames.append(dsName).append(",");
-         }
-         exitsRps.add(dsName);
+      for (String rpName : specifiedRpNames) {
+         if (!allRps.contains(rpName))
+            nonexistentRpNames.append(rpName).append(",");
+         else
+            exitsRps.add(rpName);
       }
 
-      if (nonexistentDsNames.length() > 0) {
-         nonexistentDsNames.delete(nonexistentDsNames.length() - 1,
-               nonexistentDsNames.length());
+      if (nonexistentRpNames.length() > 0) {
+         nonexistentRpNames.delete(nonexistentRpNames.length() - 1,
+               nonexistentRpNames.length());
          throw VcProviderException
-               .RESOURCE_POOL_NOT_FOUND(nonexistentDsNames.toString());
+               .RESOURCE_POOL_NOT_FOUND(nonexistentRpNames.toString());
       }
 
       return exitsRps;

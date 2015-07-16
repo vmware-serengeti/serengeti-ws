@@ -141,8 +141,9 @@ public class ClusterRestClient {
 
    public void modifyCluster(ClusterCreate clusterModify, boolean warningforce) {
       StringBuilder path = new StringBuilder(Constants.REST_PATH_CLUSTER)
-            .append("/").append(clusterModify.getName())
-            .append("?").append("warningforce").append('=').append(warningforce);
+            .append("/").append(clusterModify.getName()).append("/update")
+            .append("?").append("warningforce").append('=')
+            .append(warningforce);
       final HttpMethod httpverb = HttpMethod.PUT;
       restClient.update(clusterModify, path.toString(), httpverb);
    }

@@ -18,6 +18,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.vmware.bdd.exception.WarningMessageException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -71,6 +72,15 @@ public class RestValidationErrorHandler {
       return validationErrMsg;
    }
 
+   @ExceptionHandler(WarningMessageException.class)
+   @ResponseStatus(HttpStatus.BAD_REQUEST)
+   @ResponseBody
+   public BddErrorMessage processWarningMessage(WarningMessageException ex) {
+      BddErrorMessage validationErrMsg = new BddErrorMessage(ex.getFullErrorId(),ex.getMessage());
+      validationErrMsg.setWarningMsgList(ex.getWarningMsgList());
+      return validationErrMsg;
+   }
+
    @ExceptionHandler(UntrustedCertificateException.class)
    @ResponseStatus(HttpStatus.BAD_REQUEST)
    @ResponseBody
@@ -87,6 +97,10 @@ public class RestValidationErrorHandler {
    public BddErrorMessage processBddException(BddException ex) {
       if(ex instanceof UntrustedCertificateException) {
          return processUntrustedCertificate((UntrustedCertificateException)ex);
+      }
+
+      if(ex instanceof WarningMessageException) {
+         return processWarningMessage((WarningMessageException)ex);
       }
 
       if(ex instanceof ValidationException) {

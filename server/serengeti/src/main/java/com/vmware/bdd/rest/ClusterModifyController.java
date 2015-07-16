@@ -35,7 +35,7 @@ public class ClusterModifyController {
    @Autowired
    private ClusterManager clusterMgr;
 
-   @RequestMapping(value = "/cluster/{clusterName}", method = RequestMethod.PUT, consumes = "application/json", produces = "application/json")
+   @RequestMapping(value = "/cluster/{clusterName}/update", method = RequestMethod.PUT, consumes = "application/json", produces = "application/json")
    @ResponseStatus(HttpStatus.OK)
    @RestCallPointcut
    public void modifyCluster(@PathVariable("clusterName") String clusterName, @RequestBody ClusterCreate clusterModify,
