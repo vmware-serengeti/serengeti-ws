@@ -264,4 +264,8 @@ public class Constants {
    public static final String DEFAULT_SUDO_COMMAND = "sudo";
    public static final String SYSTEM_AND_SWAP_DISK_CONTROLLER_TYPE = "storage.system_swap.disk.controller.type";
    public static final String FORCE_CLUSTER_OPERATION_JOB_PARAM = "force.cluster.operation";
+
+   public static final String WARNING_CLUSTER_UPDATING_DATASTORES = "Warning: Cluster now uses datastores %s, While the new datastores are %s, and this might cause error.";
+   public static final String WARNING_CLUSTER_UPDATING_ALLDATASTORES = "Warning:Cluster now uses all existing datastores, While the new datastores are %s, and this might cause error.";
+
 }

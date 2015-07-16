@@ -58,6 +58,10 @@ public class CommandsUtils {
       return CommonUtil.inputsConvert(inputs);
    }
 
+   public static Set<String> inputsConvertSet(String inputs) {
+      return CommonUtil.inputsConvertSet(inputs);
+   }
+
    public static String prettyRoleOutput(List<String> roles,
          final String delimiter) {
       StringBuilder roleStr = new StringBuilder();

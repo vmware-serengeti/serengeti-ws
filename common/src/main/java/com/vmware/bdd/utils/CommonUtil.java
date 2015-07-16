@@ -26,15 +26,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -236,6 +228,16 @@ public class CommonUtil {
 
    public static List<String> inputsConvert(String inputs) {
       List<String> names = new ArrayList<String>();
+      for (String s : inputs.split(",")) {
+         if (!s.trim().isEmpty()) {
+            names.add(s.trim());
+         }
+      }
+      return names;
+   }
+
+   public static Set<String> inputsConvertSet(String inputs) {
+      Set<String> names = new HashSet<String>();
       for (String s : inputs.split(",")) {
          if (!s.trim().isEmpty()) {
             names.add(s.trim());
