@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
+import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.stats.Profiler;
 import com.vmware.aurora.stats.StatsType;
 import com.vmware.aurora.util.CmsWorker;
@@ -27,11 +28,15 @@ import com.vmware.aurora.util.CmsWorker.WorkQueue;
 import com.vmware.aurora.vc.VcObject.VcObjectType;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
+import com.vmware.bdd.utils.Constants;
 import com.vmware.vim.binding.vim.Datacenter;
 import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
+import org.apache.log4j.Logger;
 
 public class VcInventory {
+   private final static Logger LOGGER = Logger.getLogger(VcInventory.class);
+
    static List<ManagedObjectReference> dcList = new ArrayList<ManagedObjectReference>();
 
    /**
@@ -104,6 +109,9 @@ public class VcInventory {
 
       @Override
       protected boolean execute() {
+         if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("execute all datacenters sync.");
+         }
          VcContext.inVcSessionDo(new VcSession<Void>() {
             public Void body() throws Exception {
                VcInventory.update();
@@ -122,19 +130,33 @@ public class VcInventory {
     * We don't need to sync RPs as they are updated when we receive RP VcEvents.
     */
    public static class SyncInventoryRequest extends PeriodicRequest {
+      private final static WorkQueue SYNC_INVENTORY_WORK_QUEUE = WorkQueue.VC_CACHE_TWO_MIN_DELAY;
+
       public SyncInventoryRequest() {
          super(Profiler.getStatsEntry(StatsType.VCSYNC_INVENTORY_PERIOD),
-               WorkQueue.VC_CACHE_TWO_MIN_DELAY);
+               SYNC_INVENTORY_WORK_QUEUE);
+
+         int sync_interval = Configuration.getInt(Constants.VC_INVENTORY_SYNC_INTERVAL_IN_SECOND, 120);
+
+         if(sync_interval > 0) {
+            if(LOGGER.isInfoEnabled()) {
+               LOGGER.info("reset vc inventory sync's interval to " + sync_interval);
+            }
+
+            SYNC_INVENTORY_WORK_QUEUE.getQ().setScanInterval(sync_interval);
+         }
       }
 
       @Override
       protected boolean executeOnce() {
+         if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("execute vc inventory sync.");
+         }
          EnumSet<VcObjectType> syncSet = EnumSet.of(
                VcObjectType.VC_DATACENTER, VcObjectType.VC_CLUSTER,
                VcObjectType.VC_DATASTORE, VcObjectType.VC_NETWORK,
                VcObjectType.VC_DVPORTGROUP);
-         queueRequest(new SyncRootRequest(WorkQueue.VC_CACHE_TWO_MIN_DELAY, false,
-                                          syncSet));
+         queueRequest(new SyncRootRequest(SYNC_INVENTORY_WORK_QUEUE, false, syncSet));
          return true;
       }
    }
