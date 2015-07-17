@@ -760,6 +760,26 @@ public class PlacementPlanner implements IPlacementPlanner {
          for (DiskSpec disk : node.getDisks()) {
             if (DiskType.DATA_DISK == disk.getDiskType()) {
                if (disk.isSeparable()) {
+                  String storageType = node.getNodeGroup().getStorage().getType();
+                  int disksNum = node.getNodeGroup().getStorage().getDiskNum();
+                  logger.info(String.format("%1$s disks number per node for node %2$s is %3$d", storageType, node.getVmName(), disksNum));
+                  if (disksNum > 0) {
+                     int subdiskSize = disk.getSize() / disksNum;
+                     logger.info(String.format("%1$dGB storage for node %2$s is splited into %3$d disks and each single disk size is %4$dGB", disk.getSize(), node.getVmName(), disksNum, subdiskSize));
+                     for (int i = 0; i < disksNum; i++) {
+                        if (i == disksNum - 1) {
+                           // in case disk.getSize() can not be divided by disksNum
+                           // the last disk will have a little bigger size than other disks
+                           subdiskSize = disk.getSize() - subdiskSize * i;
+                        }
+                        String subdiskName = disk.getName().split("\\.")[0] + i + ".vmdk";
+                        logger.info(String.format("Add an unseparable disk %1$s (%2$dGB) for node %3$s", subdiskName, subdiskSize, node.getVmName()));
+                        unseparable.add(new DiskSpec(subdiskName, subdiskSize, node
+                              .getVmName(), false, disk.getDiskType(), disk.getController(), null, disk.getAllocType(),
+                              null, null, null));
+                     }
+                     continue;
+                  }
                   separable.add(disk);
                } else {
                   unseparable.add(disk);

@@ -52,6 +52,7 @@ import com.vmware.bdd.exception.ClusterConfigException;
 import com.vmware.bdd.exception.UniqueConstraintViolationException;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
@@ -720,6 +721,8 @@ public class ClusterConfigManager {
          NodeGroupEntity groupEntity, Set<String> roles) {
       if (group.getStorage() != null) {
          groupEntity.setStorageSize(group.getStorage().getSizeGB());
+         groupEntity.setDiskNum(getDiskNumberForNodeGroup(group));
+         groupEntity.setShareDatastore(isShareDatastoreForNodeGroup(group));
          //currently, ignore input from CLI and hard code here
          String storageType = group.getStorage().getType();
          if (storageType != null) {
@@ -1031,6 +1034,7 @@ public class ClusterConfigManager {
       List<String> dataDiskStoreNames = ngEntity.getDdDatastoreNameList();
       List<String> systemDiskStoreNames = ngEntity.getSdDatastoreNameList();
 
+      logger.debug("expanding group storage for cluster " + ngEntity.getCluster().getName());
       if (storageSize <= 0 && storageType == null
             && (storeNames == null || storeNames.isEmpty())) {
          logger.debug("no storage specified for node group "
@@ -1041,6 +1045,10 @@ public class ClusterConfigManager {
             + ngEntity.getName());
       logger.debug("storage type is " + storageType + " for node group "
             + ngEntity.getName());
+      logger.debug("diskNum is " + ngEntity.getDiskNum() + " for node group "
+            + ngEntity.getName());
+      logger.debug("shareDatastore is " + ngEntity.isShareDatastore() + " for node group "
+            + ngEntity.getName());
       logger.debug("storage name pattern is " + storeNames + " for node group "
             + ngEntity.getName());
       logger.debug("system disk storage name pattern is "
@@ -1050,6 +1058,8 @@ public class ClusterConfigManager {
       StorageRead storage = new StorageRead();
       group.setStorage(storage);
       storage.setSizeGB(storageSize);
+      storage.setDiskNum(ngEntity.getDiskNum());
+      storage.setShareDatastore(ngEntity.isShareDatastore());
       if (storageType != null) {
          storage.setType(storageType.toString().toLowerCase());
       }
@@ -1342,6 +1352,49 @@ public class ClusterConfigManager {
       String cloneType = clusterCreate.getClusterCloneType();
       if (CommonUtil.isBlank(cloneType)) {
          clusterCreate.setClusterCloneType(Constants.CLUSTER_CLONE_TYPE_FAST_CLONE);
+      }
+   }
+
+   /*
+    * Get the disks number for each node group specified in cluster spec file or in global settings.
+    * The total storage of a node splits into the specified number of disks.
+    * 0 by default which means using the default storage split policy defined in PlacementPlanner#placeDisk().
+    */
+   private int getDiskNumberForNodeGroup(NodeGroupCreate group) {
+      String storageType = null;
+      Integer diskNumber = null;
+      if (group.getStorage() != null) {
+         storageType = group.getStorage().getType();
+         diskNumber = group.getStorage().getDiskNum();
+      }
+      if (storageType == null) {
+         storageType = DatastoreType.LOCAL.name();
+      }
+      if (diskNumber != null) {
+         return diskNumber;
+      } else {
+         return Configuration.getInt(String.format("storage.%1$s.disk_number_per_node", storageType.toLowerCase()), 0);
+      }
+   }
+
+   /*
+    * Get the shareDatastore setting for each node group specified in cluster spec file or in global settings.
+    * true by default which means sharing a datastore with other disks rather than allocating the whole datastore to a single disk.
+    */
+   private boolean isShareDatastoreForNodeGroup(NodeGroupCreate group) {
+      String storageType = null;
+      Boolean isShareDatastore = null;
+      if (group.getStorage() != null) {
+         storageType = group.getStorage().getType();
+         isShareDatastore = group.getStorage().isShareDatastore();
+      }
+      if (storageType == null) {
+         storageType = DatastoreType.LOCAL.name();
+      }
+      if (isShareDatastore != null) {
+         return isShareDatastore;
+      } else {
+         return Configuration.getBoolean(String.format("storage.%1$s.is_share_datastore", storageType.toLowerCase()), true);
       }
    }
 }

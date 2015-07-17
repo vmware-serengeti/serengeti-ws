@@ -127,6 +127,8 @@ create table node_group (
    ha_flag                varchar(10),
    storage_type           varchar(255),
    storage_size           integer,
+   disk_number            integer,
+   is_share_datastore     boolean,
    vc_datastore_names     text,
    sd_datastore_names     text,
    dd_datastore_names     text,

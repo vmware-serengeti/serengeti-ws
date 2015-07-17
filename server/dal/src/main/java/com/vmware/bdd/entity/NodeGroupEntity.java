@@ -78,6 +78,12 @@ public class NodeGroupEntity extends EntityBase {
    @Column(name = "storage_size")
    private int storageSize;
 
+   @Column(name = "disk_number")
+   private Integer diskNum = 0;
+
+   @Column(name = "is_share_datastore")
+   private Boolean shareDatastore = true;
+
    @ManyToOne
    @JoinColumn(name = "cluster_id")
    private ClusterEntity cluster;
@@ -428,6 +434,8 @@ public class NodeGroupEntity extends EntityBase {
       StorageRead storage = new StorageRead();
       storage.setType(this.storageType.toString());
       storage.setSizeGB(this.storageSize);
+      storage.setDiskNum(this.diskNum);
+      storage.setShareDatastore(this.shareDatastore);
 
       // set dsNames/dsNames4Data/dsNames4System
       List<String> datastoreNameList = getVcDatastoreNameList();
@@ -489,5 +497,21 @@ public class NodeGroupEntity extends EntityBase {
                && this.name.equals(group.getName());
       }
       return this.name.equals(group.getName());
+   }
+
+   public Integer getDiskNum() {
+      return diskNum;
+   }
+
+   public void setDiskNum(Integer diskNum) {
+      this.diskNum = diskNum;
+   }
+
+   public Boolean isShareDatastore() {
+      return shareDatastore;
+   }
+
+   public void setShareDatastore(Boolean shareDatastore) {
+      this.shareDatastore = shareDatastore;
    }
 }
