@@ -74,7 +74,7 @@ public class InfrastructureUpdator {
             throw ClusterConfigException.NO_HADOOP_ROLE_SPECIFIED(nodeGroup.getName());
          }
          if (!enumRoles.contains(HadoopRole.CUSTOMIZED_ROLE)) {
-            logger.info("Soring roles based on role dependency and relationship with HDFS");
+            logger.info("Sorting roles name based on role dependency and relationship with HDFS");
             Collections.sort(roles, new RoleComparactor());
             nodeGroup.setRoles(roles);
          }

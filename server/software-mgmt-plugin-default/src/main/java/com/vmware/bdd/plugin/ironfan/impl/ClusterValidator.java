@@ -41,7 +41,7 @@ public class ClusterValidator {
 
    public boolean validateBlueprint(ClusterBlueprint blueprint, List<String> distroRoles)
          throws ValidationException {
-      logger.info("Start to validate bludprint for cluster " + blueprint.getName());
+      logger.info("Start to validate blueprint for cluster " + blueprint.getName());
       return validateDistros(blueprint, distroRoles);
    }
 

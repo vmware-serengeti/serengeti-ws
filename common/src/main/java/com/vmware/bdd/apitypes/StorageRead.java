@@ -17,6 +17,7 @@ package com.vmware.bdd.apitypes;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.gson.annotations.Expose;
 
 /**
  * Storage get output
@@ -66,18 +67,30 @@ public class StorageRead {
       }
    }
 
+   @Expose
    private String type;
 
+   @Expose
    private Priority shares;
 
+   @Expose
    private int sizeGB;
 
+   @Expose
    private List<String> dsNames;
-   
+
+   @Expose
    private List<String> dsNames4System;
-   
+
+   @Expose
    private List<String> dsNames4Data;
-   
+
+   @Expose
+   private Integer diskNum;
+
+   @Expose
+   private Boolean shareDatastore;
+
    // internal used, data disk store name patterns
    private List<String> diskstoreNamePattern;
 
@@ -183,5 +196,21 @@ public class StorageRead {
 
    public void setAllocType(String allocType) {
       this.allocType = allocType;
+   }
+
+   public Integer getDiskNum() {
+      return diskNum;
+   }
+
+   public void setDiskNum(Integer diskNum) {
+      this.diskNum = diskNum;
+   }
+
+   public Boolean isShareDatastore() {
+      return shareDatastore;
+   }
+
+   public void setShareDatastore(Boolean shareDatastore) {
+      this.shareDatastore = shareDatastore;
    }
 }

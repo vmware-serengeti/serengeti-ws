@@ -1085,10 +1085,13 @@ public class TestClusterConfigManager {
       //            manifest.indexOf("{\"name\":\"my-cluster4\",\"groups\":[{\"name\":\"master\",\"roles\":[\"hadoop_namenode\",\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-null/my-cluster4/master\"},{\"name\":\"worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-null/my-cluster4/worker\"},{\"name\":\"client\",\"roles\":[\"hadoop_client\",\"pig\",\"hive\",\"hive_server\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-null/my-cluster4/client\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1);
    }
 
+   @Test(groups = { "TestClusterConfigManager" })
    public void testClusterConfigWithGroupStorage() {
       ClusterCreate spec = new ClusterCreate();
       spec.setNetworkConfig(createNetConfigs());
       spec.setName("my-cluster5");
+      spec.setDistro("bigtop");
+      spec.setDistroVendor(Constants.DEFAULT_VENDOR);
       List<String> rps = new ArrayList<String>();
       rps.add("myRp2");
       rps.add("myRp3");
@@ -1106,10 +1109,15 @@ public class TestClusterConfigManager {
       group.setName("main_group");
       List<String> roles = new ArrayList<String>();
       roles.add("hadoop_namenode");
+      roles.add("hadoop_resourcemanager");
+      roles.add("hadoop_datanode");
+      roles.add("hadoop_nodemanager");
       group.setRoles(roles);
       StorageRead storage = new StorageRead();
       storage.setSizeGB(50);
       storage.setType(DatastoreType.LOCAL.toString());
+      storage.setDiskNum(2);
+      storage.setShareDatastore(false);
       group.setStorage(storage);
       spec.setNodeGroups(nodegroups);
       clusterConfigMgr.createClusterConfig(spec);
@@ -1121,20 +1129,18 @@ public class TestClusterConfigManager {
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
       Assert.assertTrue(
-            manifest.indexOf("main_group") != -1
-                  && manifest.indexOf("expanded_master") != -1
-                  && manifest.indexOf("expanded_worker") != -1,
-            "manifest should contains nodegroups");
-      Assert.assertTrue(
             manifest
-                  .indexOf("{\"name\":\"my-cluster5\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\"],\"instance_num\":1,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":3,\"memory\":15000,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-null/my-cluster5/main_group\"},{\"name\":\"expanded_master\",\"roles\":[\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-null/my-cluster5/expanded_master\"},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-null/my-cluster5/expanded_worker\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1,
+                  .indexOf("{\"name\":\"my-cluster5\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\",\"hadoop_resourcemanager\",\"hadoop_datanode\",\"hadoop_nodemanager\"],\"instance_num\":1,\"storage\":{\"type\":\"local\",\"shares\":\"NORMAL\",\"sizeGB\":50,\"diskNum\":2,\"shareDatastore\":false},\"cpu\":3,\"memory\":15000,\"swap_ratio\":1.0,\"ha\":\"off\"") == 0,
             "manifest is inconsistent");
    }
 
+   @Test(groups = { "TestClusterConfigManager" })
    public void testClusterConfigWithGroupStoragePattern() {
       ClusterCreate spec = new ClusterCreate();
       spec.setNetworkConfig(createNetConfigs());
       spec.setName("my-cluster6");
+      spec.setDistro("bigtop");
+      spec.setDistroVendor(Constants.DEFAULT_VENDOR);
       List<String> rps = new ArrayList<String>();
       rps.add("myRp2");
       rps.add("myRp3");
@@ -1152,6 +1158,9 @@ public class TestClusterConfigManager {
       group.setName("main_group");
       List<String> roles = new ArrayList<String>();
       roles.add("hadoop_namenode");
+      roles.add("hadoop_resourcemanager");
+      roles.add("hadoop_datanode");
+      roles.add("hadoop_nodemanager");
       group.setRoles(roles);
       StorageRead storage = new StorageRead();
       storage.setType(DatastoreType.LOCAL.toString());
@@ -1169,15 +1178,8 @@ public class TestClusterConfigManager {
       ClusterCreate attrs = clusterConfigMgr.getClusterConfig("my-cluster6");
       String manifest = gson.toJson(attrs);
       System.out.println(manifest);
-      Assert.assertTrue(
-            manifest.indexOf("main_group") != -1
-                  && manifest.indexOf("expanded_master") != -1
-                  && manifest.indexOf("expanded_worker") != -1,
-            "manifest should contains nodegroups");
-      Assert.assertTrue(
-            manifest
-                  .indexOf("{\"name\":\"my-cluster6\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\"],\"instance_num\":1,\"storage\":{\"type\":\"local\",\"size\":100,\"name_pattern\":[\"vmfs*\",\"local1\"]},\"cpu\":3,\"memory\":15000,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-null/my-cluster6/main_group\"},{\"name\":\"expanded_master\",\"roles\":[\"hadoop_jobtracker\"],\"instance_num\":1,\"storage\":{\"type\":\"shared\",\"size\":50},\"cpu\":2,\"memory\":7500,\"ha\":\"on\",\"vm_folder_path\":\"SERENGETI-null/my-cluster6/expanded_master\"},{\"name\":\"expanded_worker\",\"roles\":[\"hadoop_datanode\",\"hadoop_tasktracker\"],\"instance_num\":3,\"storage\":{\"type\":\"local\",\"size\":50},\"cpu\":1,\"memory\":3748,\"ha\":\"off\",\"vm_folder_path\":\"SERENGETI-null/my-cluster6/expanded_worker\"}],\"distro\":\"apache\",\"vc_clusters\":[{\"name\":\"cluster1\",\"vc_rps\":[\"rp2\"]},{\"name\":\"cluster2\",\"vc_rps\":[\"rp1\",\"rp2\"]},{\"name\":\"cluster4\",\"vc_rps\":[\"rp1\"]}],\"template_id\":\"vm-001\",\"networking\":[{\"port_group\":\"CFNetwork\",\"type\":\"dhcp\"}]") != -1,
-            "manifest is inconsistent");
+      Assert.assertEquals(attrs.getNodeGroup("main_group").getStorage().getDiskstoreNamePattern().toString(),
+            "[share1, share2, local1, vmfs.*]");
    }
 
    public void testClusterConfigWithNoSlave() {

@@ -70,7 +70,7 @@ public class AmClusterValidator {
    }
 
    public boolean validateBlueprint(ClusterBlueprint blueprint) {
-      logger.info("Start to validate bludprint for cluster "
+      logger.info("Start to validate blueprint for cluster "
             + blueprint.getName());
       HadoopStack hadoopStack = blueprint.getHadoopStack();
       String distro = hadoopStack.getDistro();
