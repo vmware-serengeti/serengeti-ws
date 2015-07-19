@@ -860,7 +860,7 @@ public class ClusterCommands implements CommandMarker {
    }
 
    @CliCommand(value = "cluster update", help = "Update resourcepools or datastores used by cluster")
-   public void modifyCluster(
+   public void updateCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "the cluster name") final String name,
          @CliOption(key = { "rpNames" }, mandatory = false, help = "Resource Pools for the cluster: use \",\" among names.") final String rpNames,
          @CliOption(key = { "dsNames" }, mandatory = false, help = "Datastores for the cluster: use \",\" among names.") final String dsNames,
@@ -871,59 +871,59 @@ public class ClusterCommands implements CommandMarker {
          cluster = restClient.get(name, false);
          if (cluster == null) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  Constants.OUTPUT_OP_MODIFY, Constants.OUTPUT_OP_RESULT_FAIL,
+                  Constants.OUTPUT_OP_UPDATE, Constants.OUTPUT_OP_RESULT_FAIL,
                   "cluster " + name + " does not exist.");
             return;
          }
       }catch (CliRestException e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-               Constants.OUTPUT_OP_MODIFY,
+               Constants.OUTPUT_OP_UPDATE,
                Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          return;
       }
-      boolean isContinued = alwaysAnswerYes;
+      boolean ignoreWarning = alwaysAnswerYes;
       List<String> rpNamesList = new ArrayList<String>();
       List<String> dsNamesList = new ArrayList<String>();
       List<String> warningMsgList = new ArrayList<String>();
-      ClusterCreate clusterModify = new ClusterCreate();
-      clusterModify.setName(name);
+      ClusterCreate clusterUpdate = new ClusterCreate();
+      clusterUpdate.setName(name);
 
-      //Check whether input rpNames include all resourcepools which cluster already uses
+      //Check whether the new rpNames include all resourcepools which cluster already uses
       if(!CommonUtil.isBlank(rpNames)){
          rpNamesList.addAll(CommandsUtils.inputsConvertSet(rpNames));
-         clusterModify.setRpNames(rpNamesList);
+         clusterUpdate.setRpNames(rpNamesList);
       }
 
-      //Check whether input dsNames include all datastores which cluster already uses
+      //Check whether the new dsNames include all datastores which cluster already uses
       if(!CommonUtil.isBlank(dsNames)){
          dsNamesList.addAll(CommandsUtils.inputsConvertSet(dsNames));
-         clusterModify.setDsNames(dsNamesList);
+         clusterUpdate.setDsNames(dsNamesList);
       }
 
       if(!CommonUtil.isBlank(rpNames) || !CommonUtil.isBlank(dsNames)) {
          try {
-            restClient.modifyCluster(clusterModify, isContinued);
+            restClient.updateCluster(clusterUpdate, ignoreWarning);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
-                  Constants.OUTPUT_OP_RESULT_MODIFY);
-         }catch (WarningMessageException e){
-            warningMsgList = e.getWarningMsgList();
+                  Constants.OUTPUT_OP_RESULT_UPDATE);
+         } catch (WarningMessageException e){
+            warningMsgList.add(CommonUtil.formatWarningMsg(e.getMessage()));
             if(!CommandsUtils.showWarningMsg(cluster.getName(),
-                  Constants.OUTPUT_OBJECT_CLUSTER, Constants.OUTPUT_OP_MODIFY,
-                  warningMsgList, isContinued, null))
+                  Constants.OUTPUT_OBJECT_CLUSTER, Constants.OUTPUT_OP_UPDATE,
+                  warningMsgList, ignoreWarning, null)) {
                return;
-            else{
-               isContinued = true;
-               restClient.modifyCluster(clusterModify, isContinued);
+            } else {
+               ignoreWarning = true;
+               restClient.updateCluster(clusterUpdate, ignoreWarning);
                CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
-                     Constants.OUTPUT_OP_RESULT_MODIFY);
+                     Constants.OUTPUT_OP_RESULT_UPDATE);
             }
-         }catch (CliRestException e) {
+         } catch (CliRestException e) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  Constants.OUTPUT_OP_MODIFY, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+                  Constants.OUTPUT_OP_UPDATE, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
          }
-      }else{
+      } else {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-               Constants.OUTPUT_OP_MODIFY, Constants.OUTPUT_OP_RESULT_FAIL,
+               Constants.OUTPUT_OP_UPDATE, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.PARAM_SHOULD_SPECIFY_RP_DS);
       }
    }

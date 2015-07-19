@@ -550,6 +550,16 @@ public class CommonUtil {
       return errorMsg.substring(0, errorMsg.length() - 2);
    }
 
+   public static String formatWarningMsg(String warningMsg) {
+      String msg;
+      if (warningMsg != null && !warningMsg.startsWith("Warning:")) {
+         msg = "Warning: " + warningMsg;
+      } else {
+         msg = warningMsg;
+      }
+      return msg;
+   }
+
    /**
    *
    * @param host

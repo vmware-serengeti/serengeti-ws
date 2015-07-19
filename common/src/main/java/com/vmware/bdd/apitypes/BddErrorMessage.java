@@ -14,8 +14,6 @@
  ***************************************************************************/
 package com.vmware.bdd.apitypes;
 
-
-import java.util.List;
 import java.util.Map;
 
 import com.vmware.bdd.security.tls.CertificateInfo;
@@ -26,7 +24,7 @@ public class BddErrorMessage {
    private String message;
 
    private CertificateInfo certInfo;
-   private List<String> warningMsgList;
+   private boolean warning = false;
    private Map<String, ValidationError> errors;
 
    public BddErrorMessage() {
@@ -67,21 +65,20 @@ public class BddErrorMessage {
       return errors;
    }
 
-   public List<String> getWarningMsgList() {
-      return warningMsgList;
-   }
-
-   public void setWarningMsgList(List<String> warningMsgList) {
-      this.warningMsgList = warningMsgList;
-   }
-
    public void setErrors(Map<String, ValidationError> errors) {
       this.errors = errors;
    }
 
-
    @Override
    public String toString() {
       return "BddErrorMessage [code=" + code + ", message=" + message + "]";
+   }
+
+   public boolean isWarning() {
+      return warning;
+   }
+
+   public void setWarning(boolean warning) {
+      this.warning = warning;
    }
 }

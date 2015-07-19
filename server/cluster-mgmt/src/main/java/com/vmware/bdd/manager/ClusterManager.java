@@ -1250,8 +1250,8 @@ public class ClusterManager {
 
    @ClusterManagerPointcut
    @Transactional
-   public void modifyCluster(ClusterCreate clusterModify, boolean warningforce) throws Exception {
-      String clusterName = clusterModify.getName();
+   public void updateCluster(ClusterCreate clusterUpdate, boolean ignoreWarning) throws Exception {
+      String clusterName = clusterUpdate.getName();
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
       if (cluster == null) {
          logger.error("cluster " + clusterName + " does not exist");
@@ -1259,17 +1259,17 @@ public class ClusterManager {
       }
       ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
 
-      List<String> updatingRpList = clusterModify.getRpNames();
+      List<String> newRpList = clusterUpdate.getRpNames();
 
-      if (!CollectionUtils.isEmpty(updatingRpList)){
-         //Check whehter the updating resourcepools are valid in vc_resource_pool
+      if (!CollectionUtils.isEmpty(newRpList)){
+         //Check whether the new resourcepools are valid in vc_resource_pool
          List<String> existRPs =
-               validateGivenRp(updatingRpList);
+               validateGivenRp(newRpList);
          if (CollectionUtils.isEmpty(existRPs)) {
             throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
          }
 
-         //Check whether the the updating resourcepools are contains these resourcepools which are used by cluster
+         //Check whether the new resourcepools include the current resourcepools which are used by this cluster
          Set<VcResourcePoolEntity> usedVCRps = cluster.getUsedRps();
          List<String> usedRpList =
                new ArrayList<String>(usedVCRps.size());
@@ -1277,48 +1277,36 @@ public class ClusterManager {
             usedRpList.add(rp.getName());
          }
 
-         if (!updatingRpList.containsAll(usedRpList)) {
-            throw BddException.NOT_CONTAIN(usedRpList.toString(),
-                  updatingRpList.toString());
+         logger.info("Updating resourcepools for cluster " + clusterName + " from "
+               + usedRpList.toString() + " to " + newRpList.toString());
+         if (!newRpList.containsAll(usedRpList)) {
+            throw BddException.NEW_RP_EXCLUDE_OLD_RP(null, usedRpList.toString(),
+                  newRpList.toString());
          }
 
-         logger.info("Update resourcepools cluster " + clusterName + " from "
-               + usedRpList.toString() + "to " + updatingRpList.toString());
-         cluster.setVcRpNameList(updatingRpList);
+         cluster.setVcRpNameList(newRpList);
       }
 
-      List<String> updatingDsList = clusterModify.getDsNames();
-      if (!CollectionUtils.isEmpty(updatingDsList)) {
-         //Check whether the updating datastores are valid vc_data_store
-         List<String> exitDS = validateGivenDS(updatingDsList);
-         if (CollectionUtils.isEmpty(exitDS)) {
+      List<String> newDsList = clusterUpdate.getDsNames();
+      if (!CollectionUtils.isEmpty(newDsList)) {
+         //Check whether the new datastores are valid vc_data_store
+         if (CollectionUtils.isEmpty(validateGivenDS(newDsList))) {
             throw ClusterConfigException.NO_DATASTORE_ADDED();
          }
 
-         //Check whether input dsNames include all datastores which cluster already uses
+         //Check whether the new dsNames contain all datastores used by this cluster already
          List<String> usedDsList = cluster.getVcDatastoreNameList();
-         List<String> warningMsgList = new ArrayList<String>();
-         if (!warningforce) {
+         logger.info("Updating dsNames for cluster " + clusterName + " from "
+               + usedDsList + " to " + newDsList.toString());
+         if (!ignoreWarning) {
             if (CollectionUtils.isEmpty(usedDsList)) {
-               warningMsgList.add(String
-                     .format(
-                           Constants.WARNING_CLUSTER_UPDATING_ALLDATASTORES,
-                           updatingDsList.toString()));
-            } else if (!updatingDsList.containsAll(usedDsList)) {
-               warningMsgList.add(String
-                     .format(Constants.WARNING_CLUSTER_UPDATING_DATASTORES,
-                           usedDsList.toString(), updatingDsList.toString()));
-            }
-
-            if (warningMsgList.size() > 0) {
-               throw new WarningMessageException(warningMsgList);
+               throw WarningMessageException.SET_EMPTY_DATASTORES_TO_NON_EMTPY(null, newDsList.toString());
+            } else if (!newDsList.containsAll(usedDsList)) {
+               throw WarningMessageException.NEW_DATASTORES_EXCLUDE_OLD_DATASTORES(null, newDsList.toString(), usedDsList.toString());
             }
          }
 
-         logger.info("Update  cluster " + clusterName + " from " + usedDsList
-               .toString()
-               + "to " + updatingDsList.toString());
-         cluster.setVcDatastoreNameList(clusterModify.getDsNames());
+         cluster.setVcDatastoreNameList(clusterUpdate.getDsNames());
       }
 
       clusterEntityMgr.update(cluster);

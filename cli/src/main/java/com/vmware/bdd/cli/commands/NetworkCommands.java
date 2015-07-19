@@ -186,9 +186,9 @@ public class NetworkCommands implements CommandMarker {
       }
    }
 
-   @CliCommand(value = "network modify", help = "Modify a network from Serengeti by name")
+   @CliCommand(value = "network modify", help = "Modify a network")
    public void modifyNetwork(
-         @CliOption(key = { "name" }, mandatory = true, help = "Customize the network's name") final String name,
+         @CliOption(key = { "name" }, mandatory = true, help = "The network name") final String name,
          @CliOption(key = { "addIP" }, mandatory = false, help = "The ip information") final String ip,
          @CliOption(key = { "dnsType" }, mandatory = false, specifiedDefaultValue = "NORMAL", help = "The type of DNS server: NORMAL, DYNAMIC or OTHERS") final String dnsType,
          @CliOption(key = { "generateHostname" }, mandatory = false, specifiedDefaultValue = "true", help = "Generate hostname for each VMs. This option only applies to normal DNS.") final Boolean generateHostname) {

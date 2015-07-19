@@ -66,6 +66,7 @@ import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.NetworkException;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
+import com.vmware.bdd.exception.WarningMessageException;
 import com.vmware.bdd.manager.ClusterManager;
 import com.vmware.bdd.manager.JobManager;
 import com.vmware.bdd.manager.RackInfoManager;
@@ -266,6 +267,29 @@ public class RestResource {
       redirectRequest(taskId, request, response);
    }
 
+   @RequestMapping(value = "/cluster/{clusterName}", method = RequestMethod.PUT, consumes = "application/json", produces = "application/json")
+   public void updateCluster(@PathVariable("clusterName") String clusterName,
+         @RequestBody(required = false) ClusterCreate clusterUpdate,
+         @RequestParam(value = "state", required = false) String state,
+         @RequestParam(value = "force", required = false, defaultValue = "false") Boolean force,
+         @RequestParam(value = "ignorewarning", required = false, defaultValue = "false") boolean ignoreWarning,
+         HttpServletRequest request, HttpServletResponse response) throws Exception {
+      if (state != null) {
+         // forward request to startStopResumeCluster() for backward compatibility
+         request.getRequestDispatcher(clusterName + "/action").forward(request, response);
+         response.setStatus(HttpStatus.ACCEPTED.value());
+         return;
+      }
+      verifyInitialized();
+      clusterName = CommonUtil.decode(clusterName);
+      if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateResourceName(clusterName)) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
+
+      clusterMgr.updateCluster(clusterUpdate, ignoreWarning);
+      response.setStatus(HttpStatus.OK.value());
+   }
+
    /**
     * Start or stop a normal cluster, or resume a failed cluster after adjusting the resources allocated to this cluster
     * @param clusterName
@@ -273,7 +297,7 @@ public class RestResource {
     * @param request
     * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
     */
-   @RequestMapping(value = "/cluster/{clusterName}", method = RequestMethod.PUT)
+   @RequestMapping(value = "/cluster/{clusterName}/action", method = RequestMethod.PUT)
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void startStopResumeCluster(
          @PathVariable("clusterName") String clusterName,
@@ -1227,7 +1251,11 @@ public class RestResource {
       response.setStatus(getHttpErrorCode(ex.getFullErrorId()));
       response.setContentType("application/json;charset=utf-8");
       response.setCharacterEncoding("utf-8");
-      return new BddErrorMessage(ex.getFullErrorId(), extractErrorMessage(ex));
+      BddErrorMessage msg = new BddErrorMessage(ex.getFullErrorId(), extractErrorMessage(ex));
+      if(ex instanceof WarningMessageException) {
+         msg.setWarning(true);
+      }
+      return msg;
    }
 
    private String extractErrorMessage(BddException ex) {
