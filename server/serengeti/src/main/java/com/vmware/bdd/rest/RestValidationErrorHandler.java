@@ -19,6 +19,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.vmware.bdd.exception.WarningMessageException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -77,7 +78,7 @@ public class RestValidationErrorHandler {
    @ResponseBody
    public BddErrorMessage processWarningMessage(WarningMessageException ex) {
       BddErrorMessage validationErrMsg = new BddErrorMessage(ex.getFullErrorId(),ex.getMessage());
-      validationErrMsg.setWarningMsgList(ex.getWarningMsgList());
+      validationErrMsg.setWarning(true);
       return validationErrMsg;
    }
 

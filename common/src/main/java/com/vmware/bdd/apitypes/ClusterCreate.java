@@ -90,7 +90,6 @@ public class ClusterCreate implements Serializable {
    @SerializedName("deploy_policy")
    @Deprecated
    private String deployPolicy;
-
    private List<String> dsNames;
 
    private Map<NetTrafficType, List<String>> networkConfig;

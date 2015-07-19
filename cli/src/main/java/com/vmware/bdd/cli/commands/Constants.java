@@ -95,6 +95,7 @@ public class Constants {
    public static final String OUTPUT_OP_UPLOAD = "upload";
    public static final String OUTPUT_OP_CONFIG = "config";
    public static final String OUTPUT_OP_MODIFY = "modify";
+   public static final String OUTPUT_OP_UPDATE = "update";
    public static final String OUTPUT_OP_EXPORT = "export";
    public static final String OUTPUT_OP_ADD = "add";
    public static final String OUTPUT_OP_LIST = "list";
@@ -114,6 +115,7 @@ public class Constants {
    public static final String OUTPUT_OP_RESULT_CREAT = "created";
    public static final String OUTPUT_OP_RESULT_CONFIG = "configured";
    public static final String OUTPUT_OP_RESULT_MODIFY = "modified";
+   public static final String OUTPUT_OP_RESULT_UPDATE = "updated";
    public static final String OUTPUT_OP_RESULT_DELETE = "deleted";
    public static final String OUTPUT_OP_RESULT_START = "started";
    public static final String OUTPUT_OP_RESULT_STOP = "stopped";

@@ -139,13 +139,13 @@ public class ClusterRestClient {
       actionOps(id, id, queryStrings);
    }
 
-   public void modifyCluster(ClusterCreate clusterModify, boolean warningforce) {
+   public void updateCluster(ClusterCreate clusterUpdate, boolean ignoreWarning) {
       StringBuilder path = new StringBuilder(Constants.REST_PATH_CLUSTER)
-            .append("/").append(clusterModify.getName()).append("/update")
-            .append("?").append("warningforce").append('=')
-            .append(warningforce);
+            .append("/").append(clusterUpdate.getName())
+            .append("?").append("ignorewarning").append('=')
+            .append(ignoreWarning);
       final HttpMethod httpverb = HttpMethod.PUT;
-      restClient.update(clusterModify, path.toString(), httpverb);
+      restClient.update(clusterUpdate, path.toString(), httpverb);
    }
 
    public void resize(String clusterName, String nodeGroup, int instanceNum, Map<String, String> queryStrings) {

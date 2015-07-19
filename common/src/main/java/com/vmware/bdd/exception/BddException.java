@@ -67,6 +67,10 @@ public class BddException extends RuntimeException {
       super();
    }
 
+   public BddException(String msg) {
+      super(msg);
+   }
+
    public BddException(Throwable cause, String section, String errorId,
          Object... detail) {
       super(formatErrorMessage(section + "." + errorId, detail), cause);
@@ -117,16 +121,6 @@ public class BddException extends RuntimeException {
 
    public static BddException NOT_FOUND(String object, String objectName) {
       return NOT_FOUND(null, object, objectName);
-   }
-
-   public static BddException NOT_CONTAIN(Throwable ex, String object,
-         String objectName) {
-      return new BddException(ex, "CLUSTER", "FAILED_TO_UPDATE", object,
-            objectName);
-   }
-
-   public static BddException NOT_CONTAIN(String object, String objectName) {
-      return NOT_CONTAIN(null, object, objectName);
    }
 
    public static BddException NOT_ALLOWED_SCALING(String object,
@@ -225,6 +219,11 @@ public class BddException extends RuntimeException {
 
    public static BddException EXTRA_PACKAGES_NOT_FOUND(String extraPackages) {
       return new BddException(null, "CLUSTER", "EXTRA_PACKAGES_NOT_FOUND", extraPackages);
+   }
+
+   public static BddException NEW_RP_EXCLUDE_OLD_RP(Throwable ex, String oldNames,
+         String newNames) {
+      return new BddException(ex, "CLUSTER_UPDATE", "NEW_RP_EXCLUDE_OLD_RP", oldNames, newNames);
    }
 
    public static BddException INVALID_DNS_TYPE(NetworkDnsType dnsType) {

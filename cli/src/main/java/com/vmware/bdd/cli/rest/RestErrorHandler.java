@@ -74,8 +74,8 @@ public class RestErrorHandler implements ResponseErrorHandler {
          if(errorMessage.getCertInfo() != null) {
             throw new UntrustedCertificateException(errorMessage.getCertInfo());
          }
-         if(errorMessage.getWarningMsgList() != null){
-            throw new WarningMessageException(errorMessage.getWarningMsgList());
+         if(errorMessage.isWarning()){
+            throw new WarningMessageException(errorMessage.getMessage());
          }
          throw new CliRestException(errorMessage.getMessage());
       } else {
