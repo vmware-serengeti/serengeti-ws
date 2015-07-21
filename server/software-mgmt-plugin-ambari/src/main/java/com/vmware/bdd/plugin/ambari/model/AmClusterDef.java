@@ -278,6 +278,14 @@ public class AmClusterDef implements Serializable {
       this.externalSecondaryNamenode = externalSecondaryNamenode;
    }
 
+   public List<AmNodeGroupDef> getNodeGroups() {
+      return nodeGroups;
+   }
+
+   public void setNodeGroups(List<AmNodeGroupDef> nodeGroups) {
+      this.nodeGroups = nodeGroups;
+   }
+
    public ApiBootstrap toApiBootStrap() {
       return toApiBootStrap(null);
    }
