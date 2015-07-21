@@ -33,8 +33,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
-import com.vmware.bdd.entity.*;
-import com.vmware.bdd.exception.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -43,6 +41,7 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -62,6 +61,18 @@ import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.TaskRead;
+import com.vmware.bdd.apitypes.VcResourceMap.VcClusterMap;
+import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.entity.NetworkEntity;
+import com.vmware.bdd.entity.NodeEntity;
+import com.vmware.bdd.entity.NodeGroupEntity;
+import com.vmware.bdd.entity.VcResourcePoolEntity;
+import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.exception.ClusterConfigException;
+import com.vmware.bdd.exception.ClusterHealServiceException;
+import com.vmware.bdd.exception.ClusterManagerException;
+import com.vmware.bdd.exception.VcProviderException;
+import com.vmware.bdd.exception.WarningMessageException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.IClusterHealService;
 import com.vmware.bdd.service.IClusteringService;
@@ -86,7 +97,6 @@ import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.JobUtils;
 import com.vmware.bdd.utils.ValidationUtils;
 import com.vmware.bdd.utils.Version;
-import org.springframework.transaction.annotation.Transactional;
 
 public class ClusterManager {
    static final Logger logger = Logger.getLogger(ClusterManager.class);
@@ -1655,7 +1665,7 @@ public class ClusterManager {
       return type;
    }
 
-   public void recoverClusters(Map<String, String> resMap) throws Exception {
+   public void recoverClusters(List<VcClusterMap> clstMaps) throws Exception {
       List<String> nodesNotFound = new ArrayList<String>();
       List<ClusterEntity> clusters = clusterEntityMgr.findAllClusters();
       for ( ClusterEntity cluster : clusters ) {
@@ -1666,14 +1676,21 @@ public class ClusterManager {
                logger.info("The cluster node vm " + node.getVmName() + " is not found.");
                nodesNotFound.add(node.getVmName());
             } else {
-               // the moid has been updated during the getVcVm() method, we need to update
-               // the esxi host name here, sine the esxi host name are generally different
-               // between 2 data centers
-               String srcHostName = node.getHostName();
-               String tgtHostName = resMap.get(srcHostName);
-               if ( tgtHostName != null ) {
-                  node.setHostName(tgtHostName);
-                  clusterEntityMgr.update(node);
+               if ( null != clstMaps ) {
+                  // for different data centers, we need to update the host name as well
+                  // the moid has been updated during the getVcVm() method, for different data centers,
+                  // we need to update the esxi host name as well, sine the esxi host name are generally
+                  // different between 2 data centers
+                  String srcHostName = node.getHostName();
+                  for ( VcClusterMap clstMap : clstMaps ) {
+                     Map<String, String> hostMap = clstMap.getHosts();
+                     String tgtHostName = hostMap.get(srcHostName);
+                     if ( tgtHostName != null ) {
+                        node.setHostName(tgtHostName);
+                        clusterEntityMgr.update(node);
+                        break;
+                     }
+                  }
                }
                if ( node.isNotExist() ) {
                   clusterEntityMgr.refreshNodeByMobId(vcVm.getId(), false);

@@ -20,13 +20,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ElasticityRequestBody;
@@ -37,6 +36,7 @@ import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.ValidateResult;
+import com.vmware.bdd.apitypes.VcResourceMap;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
 import com.vmware.bdd.utils.CommonUtil;
@@ -320,10 +320,10 @@ public class ClusterRestClient {
       };
    }
 
-   public void recover(Map<String, String> resMap) {
+   public void recover(VcResourceMap vcResMap) {
       final String path = "/" + Constants.REST_PATH_CLUSTER_RECOVER;
       final HttpMethod httpverb = HttpMethod.PUT;
-      restClient.update(resMap, path, httpverb);
+      restClient.update(vcResMap, path, httpverb);
    }
 
 }

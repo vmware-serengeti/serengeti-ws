@@ -14,11 +14,7 @@
  ****************************************************************************/
 package com.vmware.bdd.cli.commands;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,7 +25,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.vmware.bdd.exception.WarningMessageException;
 import jline.console.ConsoleReader;
 
 import org.apache.commons.collections.MapUtils;
@@ -59,10 +54,12 @@ import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.NodeStatus;
 import com.vmware.bdd.apitypes.TopologyType;
+import com.vmware.bdd.apitypes.VcResourceMap;
 import com.vmware.bdd.cli.rest.AppManagerRestClient;
 import com.vmware.bdd.cli.rest.CliRestException;
 import com.vmware.bdd.cli.rest.ClusterRestClient;
 import com.vmware.bdd.cli.rest.NetworkRestClient;
+import com.vmware.bdd.exception.WarningMessageException;
 import com.vmware.bdd.usermgmt.UserMgmtConstants;
 import com.vmware.bdd.utils.AppConfigValidationUtils;
 import com.vmware.bdd.utils.AppConfigValidationUtils.ValidationType;
@@ -1875,61 +1872,18 @@ public class ClusterCommands implements CommandMarker {
    public void recoverCluster(
          @CliOption(key = { "resMapFile" }, mandatory = false, help = "The resource map file name path") final String mapFilePath) {
       try {
-         Map<String, String> resMap = readResMapFromFile(mapFilePath);
-         restClient.recover(resMap);
+         VcResourceMap vcResMap = new VcResourceMap();
+         if ( null != mapFilePath ) {
+            vcResMap = CommandsUtils.getObjectByJsonString(VcResourceMap.class,
+                  CommandsUtils.dataFromFile(mapFilePath));
+         }
+         restClient.recover(vcResMap);
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER_ALL,
                Constants.OUTPUT_OP_RESULT_RECOVER_SUCC);
-      } catch (CliRestException | IOException | CliException e) {
+      } catch (CliRestException | IOException e) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_RESULT_RECOVER, Constants.OUTPUT_OP_RESULT_FAIL,
                e.getMessage());
       }
-   }
-
-   private Map<String, String> readResMapFromFile(String filePath) throws IOException,
-   FileNotFoundException, CliException {
-      FileInputStream fis = null;
-      InputStreamReader inputStreamReader = null;
-      BufferedReader bufferedReader = null;
-      HashMap<String, String> vcResMap = new HashMap<String, String>();
-
-      try {
-         fis = new FileInputStream(filePath);
-         inputStreamReader = new InputStreamReader(fis, "UTF-8");
-         bufferedReader = new BufferedReader(inputStreamReader);
-         String line = "";
-         int lineNum = 1;
-         while ((line = bufferedReader.readLine()) != null) {
-            line = line.trim();
-            if ( !line.isEmpty() ) {
-               String formatErrMsg = "Bad file format at line " + lineNum
-                     + ". It should be like res1 : res2.\n";
-               String[] mapstr = line.split(":");
-               String key = "";
-               String value = "";
-               if ( null != mapstr && mapstr.length == 2 ) {
-                  key = mapstr[0].trim();
-                  value = mapstr[1].trim();
-               }
-               if ( key.isEmpty() || value.isEmpty() ) {
-                  throw new CliException(formatErrMsg);
-               }
-               vcResMap.put(key, value);
-            }
-            lineNum++;
-         }
-      } finally {
-         if (fis != null) {
-            fis.close();
-         }
-         if (inputStreamReader != null) {
-            inputStreamReader.close();
-         }
-         if (bufferedReader != null) {
-            bufferedReader.close();
-         }
-      }
-
-      return vcResMap;
    }
 }
