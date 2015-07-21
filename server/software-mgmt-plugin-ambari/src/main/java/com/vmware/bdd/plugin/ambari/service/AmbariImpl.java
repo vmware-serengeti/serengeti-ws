@@ -524,18 +524,16 @@ public class AmbariImpl implements SoftwareManager {
                ProgressSplit.CREATE_BLUEPRINT.getProgress());
          reportStatus(clusterDef.getCurrentReport(), reportQueue);
 
+         ApiBlueprint apiBlueprint = clusterDef.toApiBlueprint();
          if (!isBlueprintCreated(clusterDef)) {
-            apiManager.createBlueprint(clusterName, clusterDef.toApiBlueprint());
+            apiManager.createBlueprint(clusterName, apiBlueprint);
          } else {
+            // For cluster resume/resize, the blueprint is already exist, we need to delete this blueprint first.
             if (isBlueprintCreatedByBDE(clusterDef)) {
-
-               // For cluster resume/resize, the blueprint is already exist, we need to delete this blueprint first.
-               if (isBlueprintCreatedByBDE(clusterDef)) {
-                  apiManager.deleteBlueprint(clusterName);
-               }
-
-               apiManager.createBlueprint(clusterName, clusterDef.toApiBlueprint());
+               apiManager.deleteBlueprint(clusterName);
             }
+
+            apiManager.createBlueprint(clusterName, apiBlueprint);
          }
       } catch (Exception e) {
          clusterDef.getCurrentReport().setAction("Failed to create blueprint");
@@ -569,16 +567,17 @@ public class AmbariImpl implements SoftwareManager {
       For cluster resume/resize, the blueprint is already exist, we need to check if this blueprint is created by BDE.
       So far, just check if all goup names and components exist in Ambari Cluster are included in given blueprint
        */
+      ApiBlueprint apiBlueprint = clusterDef.toApiBlueprint();
       String clusterName = clusterDef.getName();
-      ApiBlueprint apiBlueprint = apiManager.getBlueprint(clusterName);
+      ApiBlueprint apiBlueprintFromAm = apiManager.getBlueprint(clusterName);
 
       Map<String, Set> GroupNamesWithComponents = new HashMap<String, Set>();
-      for (AmNodeDef node : clusterDef.getNodes()) {
+      for (ApiHostGroup hostGroup : apiBlueprint.getApiHostGroups()) {
          Set<String> components = new HashSet<String>();
-         GroupNamesWithComponents.put(node.getName(), components);
+         GroupNamesWithComponents.put(hostGroup.getName(), components);
       }
 
-      for (ApiHostGroup apiHostGroup : apiBlueprint.getApiHostGroups()) {
+      for (ApiHostGroup apiHostGroup : apiBlueprintFromAm.getApiHostGroups()) {
          String groupName = apiHostGroup.getName();
          if (!GroupNamesWithComponents.containsKey(groupName)) {
             throw AmException.BLUEPRINT_ALREADY_EXIST(clusterName);
