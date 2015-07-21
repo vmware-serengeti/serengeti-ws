@@ -134,10 +134,6 @@ public class RestResource {
       return config;
    }
 
-   private static int getHttpErrorCode(String errorId) {
-      return httpStatusCodes.getInteger(errorId, DEFAULT_HTTP_ERROR_CODE);
-   }
-
    /**
     * Get REST api version
     * @return REST api version
@@ -1238,34 +1234,6 @@ public class RestResource {
       }
       result.setValidated(validated);
       return result;
-   }
-
-   @ExceptionHandler(Throwable.class)
-   @ResponseBody
-   public BddErrorMessage handleException(Throwable t,
-         HttpServletResponse response) {
-      if (t instanceof NestedRuntimeException) {
-         t = BddException.BAD_REST_CALL(t, t.getMessage());
-      }
-      BddException ex =
-            BddException.wrapIfNeeded(t, "REST API transport layer error.");
-      logger.error("rest call error", ex);
-      response.setStatus(getHttpErrorCode(ex.getFullErrorId()));
-      response.setContentType("application/json;charset=utf-8");
-      response.setCharacterEncoding("utf-8");
-      BddErrorMessage msg = new BddErrorMessage(ex.getFullErrorId(), extractErrorMessage(ex));
-      if(ex instanceof WarningMessageException) {
-         msg.setWarning(true);
-      }
-      return msg;
-   }
-
-   private String extractErrorMessage(BddException ex) {
-      String msg = ex.getMessage();
-      if (ex.getCause() instanceof DataAccessException) {
-         msg = "Data access layer exception. See the detailed error in the log";
-      }
-      return msg;
    }
 
    private void verifyInitialized() {
