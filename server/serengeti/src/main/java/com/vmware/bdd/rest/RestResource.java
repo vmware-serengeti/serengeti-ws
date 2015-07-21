@@ -22,8 +22,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.vmware.bdd.aop.annotation.RestCallPointcut;
-
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -42,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.vmware.bdd.aop.annotation.RestCallPointcut;
 import com.vmware.bdd.apitypes.AppManagerAdd;
 import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.apitypes.BddErrorMessage;
@@ -62,6 +61,9 @@ import com.vmware.bdd.apitypes.ResourceScale;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Type;
 import com.vmware.bdd.apitypes.ValidateResult;
+import com.vmware.bdd.apitypes.VcResourceMap;
+import com.vmware.bdd.apitypes.VcResourceMap.DatacenterMap;
+import com.vmware.bdd.apitypes.VcResourceMap.VcClusterMap;
 import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.NetworkException;
@@ -1276,21 +1278,32 @@ public class RestResource {
     */
    @RequestMapping(value = "/recover", method = RequestMethod.PUT, consumes = "application/json")
    @ResponseStatus(HttpStatus.OK)
-   public void recoverClusters(@RequestBody Map<String, String> resMap,
+   public void recoverClusters(@RequestBody VcResourceMap vcResMap,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
-      // update all the resource pools on the vc cluster info from name mapping
-      List<ResourcePoolRead> allRps = vcRpSvc.getAllResourcePoolForRest();
-      for ( ResourcePoolRead rp : allRps ) {
-         String rpName = rp.getRpName();
-         String srcVcCluster = rp.getVcCluster();
-         String tgtVcCluster = resMap.get(srcVcCluster);
-         if ( null != tgtVcCluster ) {
-            vcRpSvc.updateResourcePool(rpName, tgtVcCluster, null);
+      List<VcClusterMap> clstMaps = null;
+      List<DatacenterMap> dcmaps = vcResMap.getDatacenters();
+      if ( null != dcmaps ) {
+         // currently for bde, only one data center is considered
+         DatacenterMap dcmap = dcmaps.get(0);
+         clstMaps = dcmap.getClusters();
+
+         // update all the resource pools on the vc cluster info from name mapping
+         List<ResourcePoolRead> allRps = vcRpSvc.getAllResourcePoolForRest();
+         for ( ResourcePoolRead rp : allRps ) {
+            String rpName = rp.getRpName();
+            String srcVcCluster = rp.getVcCluster();
+            for ( VcClusterMap clstmap : clstMaps ) {
+               String clst = clstmap.getSrc();
+               if ( srcVcCluster.equals(clst) ) {
+                  vcRpSvc.updateResourcePool(rpName, clstmap.getTgt(), null);
+               }
+            }
          }
       }
 
-      // update all the nodes on vm moid and guest_host_name
-      clusterMgr.recoverClusters(resMap);
+      // update all the nodes on vm moid and host_name
+      // if clstMaps is null, it means doing recover on the same data center
+      clusterMgr.recoverClusters(clstMaps);
    }
 }
