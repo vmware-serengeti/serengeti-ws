@@ -425,6 +425,7 @@ public class ClusterCommands implements CommandMarker {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_CREATE, Constants.OUTPUT_OP_RESULT_FAIL,
                CommandsUtils.getExceptionMessage(e));
+         return;
       }
 
       // check the instant clone type and the HA configuration for node groups

@@ -20,9 +20,15 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.vmware.bdd.exception.WarningMessageException;
 
+import com.vmware.bdd.utils.CommonUtil;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.NestedRuntimeException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -44,6 +50,7 @@ import com.vmware.bdd.validation.ValidationErrors;
  */
 @ControllerAdvice
 public class RestValidationErrorHandler {
+   private static final Logger logger = Logger.getLogger(RestValidationErrorHandler.class);
    private MessageSource messageSource;
 
    @Autowired
@@ -96,31 +103,58 @@ public class RestValidationErrorHandler {
    @ResponseStatus(HttpStatus.BAD_REQUEST)
    @ResponseBody
    public BddErrorMessage processBddException(BddException ex) {
-      if(ex instanceof UntrustedCertificateException) {
-         return processUntrustedCertificate((UntrustedCertificateException)ex);
-      }
-
-      if(ex instanceof WarningMessageException) {
-         return processWarningMessage((WarningMessageException)ex);
-      }
-
-      if(ex instanceof ValidationException) {
-         return processValidationError((ValidationException)ex);
-      }
-
       return new BddErrorMessage(ex.getFullErrorId(), ex.getMessage());
    }
 
-   @ExceptionHandler(RuntimeException.class)
+   @ExceptionHandler(Throwable.class)
    @ResponseBody
-   public BddErrorMessage processRuntimeException(RuntimeException ex, HttpServletResponse response) {
-      if(ex instanceof BddException) {
-         return processBddException((BddException) ex);
+   public BddErrorMessage handleException(Throwable t,
+         HttpServletResponse response) {
+      if (t instanceof NestedRuntimeException) {
+         t = BddException.BAD_REST_CALL(t, t.getMessage());
       }
 
-      response.setStatus(500);
-      BddException ex1 = BddException.BAD_REST_CALL(ex, "Internal Server Error");
-      return new BddErrorMessage(ex1.getFullErrorId(), ex.getMessage());
+      BddException ex = BddException.wrapIfNeeded(t, "Unknown error.");
+      logger.error("Internal Server Error", ex);
+      response.setStatus(getHttpErrorCode(ex.getFullErrorId()));
+      response.setContentType("application/json;charset=utf-8");
+      response.setCharacterEncoding("utf-8");
+      BddErrorMessage msg = new BddErrorMessage(ex.getFullErrorId(), extractErrorMessage(ex));
+
+      return msg;
+   }
+
+   private static final String ERR_CODE_FILE = "serengeti-errcode.properties";
+   private static final int DEFAULT_HTTP_ERROR_CODE = 500;
+   /* HTTP status code read from a config file. */
+   private static org.apache.commons.configuration.Configuration httpStatusCodes =
+         init();
+
+   private static org.apache.commons.configuration.Configuration init() {
+      PropertiesConfiguration config = null;
+      try {
+         config = new PropertiesConfiguration();
+         config.setListDelimiter('\0');
+         config.load(ERR_CODE_FILE);
+      } catch (ConfigurationException ex) {
+         // error out if the configuration file is not there
+         String message = "Cannot load Serengeti error message file.";
+         Logger.getLogger(RestValidationErrorHandler.class).fatal(message, ex);
+         throw BddException.APP_INIT_ERROR(ex, message);
+      }
+      return config;
+   }
+
+   private String extractErrorMessage(BddException ex) {
+      String msg = ex.getMessage();
+      if (ex.getCause() instanceof DataAccessException) {
+         msg = "Data access layer exception. See the detailed error in the log";
+      }
+      return msg;
+   }
+
+   private static int getHttpErrorCode(String errorId) {
+      return httpStatusCodes.getInteger(errorId, DEFAULT_HTTP_ERROR_CODE);
    }
 
    private ValidationErrors processFieldErrors(List<FieldError> fieldErrors) {
