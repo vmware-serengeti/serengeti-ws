@@ -61,7 +61,7 @@ import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.TaskRead;
-import com.vmware.bdd.apitypes.VcResourceMap.VcClusterMap;
+import com.vmware.bdd.apitypes.VcClusterMap;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.entity.NodeEntity;
