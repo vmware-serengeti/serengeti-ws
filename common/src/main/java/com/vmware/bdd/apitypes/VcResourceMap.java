@@ -15,7 +15,6 @@
 package com.vmware.bdd.apitypes;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Author: Blake Zhang
@@ -30,69 +29,5 @@ public class VcResourceMap {
 
    public void setDatacenters(List<DatacenterMap> datacenters) {
       this.datacenters = datacenters;
-   }
-
-   public class DatacenterMap {
-      private String src;
-
-      private String tgt;
-
-      private List<VcClusterMap> clusters;
-
-      public String getSrc() {
-         return src;
-      }
-
-      public void setSrc(String src) {
-         this.src = src;
-      }
-
-      public String getTgt() {
-         return tgt;
-      }
-
-      public void setTgt(String tgt) {
-         this.tgt = tgt;
-      }
-
-      public List<VcClusterMap> getClusters() {
-         return clusters;
-      }
-
-      public void setClusters(List<VcClusterMap> clusters) {
-         this.clusters = clusters;
-      }
-   }
-
-   public class VcClusterMap {
-      private String src;
-
-      private String tgt;
-
-      private Map<String, String> hosts;
-
-      public String getSrc() {
-         return src;
-      }
-
-      public void setSrc(String src) {
-         this.src = src;
-      }
-
-      public String getTgt() {
-         return tgt;
-      }
-
-      public void setTgt(String tgt) {
-         this.tgt = tgt;
-      }
-
-      public Map<String, String> getHosts() {
-         return hosts;
-      }
-
-      public void setHosts(Map<String, String> hosts) {
-         this.hosts = hosts;
-      }
    }
 }
