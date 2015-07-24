@@ -73,7 +73,7 @@ public class ClusterOperationPoller extends StatusPoller {
             NodeReport nodeReport = nodeReports.get(nodeReportKey);
             nodeReport.setUseClusterMsg(false);
             ApiTaskInfo apiTaskInfo = apiTask.getApiTaskInfo();
-            if (nodeReport.getHostname().equals(apiTaskInfo.getHostName())) {
+            if (nodeReport.getHostname() != null && nodeReport.getHostname().equals(apiTaskInfo.getHostName())) {
                TaskStatus taskStatus =
                      TaskStatus.valueOf(apiTask.getApiTaskInfo().getStatus());
                if (taskStatus.isRunningState()) {

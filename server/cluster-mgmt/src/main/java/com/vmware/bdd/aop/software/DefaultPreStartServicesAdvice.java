@@ -177,6 +177,7 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
                   logger.error(errMsg);
                   if (force) {
                      logger.warn(JobConstants.FORCE_CLUSTER_OPERATION_IGNORE_EXCEPTION);
+                     continue;
                   } else {
                      throw SoftwareManagementException.FAILED_TO_GET_FQDN(vm.getName());
                   }
