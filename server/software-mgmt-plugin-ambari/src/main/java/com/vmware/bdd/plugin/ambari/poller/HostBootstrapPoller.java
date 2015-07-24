@@ -83,9 +83,9 @@ public class HostBootstrapPoller extends StatusPoller {
                for (ApiBootstrapHostStatus apiBootstrapHostStatus : apiBootstrapStatus.getApiBootstrapHostStatus()) {
                   if (Constants.HOST_BOOTSTRAP_FAILED.equals(apiBootstrapHostStatus.getStatus())) {
                      NodeReport nodeReport = nodeReports.get(nodeReportKey);
-                     nodeReport.setUseClusterMsg(false);
-                     nodeReport.setAction("Failed to bootstrap host");
-                     if (nodeReport.getHostname().equals(apiBootstrapHostStatus.getHostName())) {
+                     if (nodeReport.getHostname() != null && nodeReport.getHostname().equals(apiBootstrapHostStatus.getHostName())) {
+                        nodeReport.setUseClusterMsg(false);
+                        nodeReport.setAction("Failed to bootstrap host");
                         nodeReport.setErrMsg(apiBootstrapHostStatus.getLog());
                      }
                   }
