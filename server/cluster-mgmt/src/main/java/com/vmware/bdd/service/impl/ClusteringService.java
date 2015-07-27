@@ -1356,7 +1356,6 @@ public class ClusteringService implements IClusteringService {
 
       logger.info("VC resource container details:" + ContainerToStringHelper.convertToString(container));
 
-
       logger.info("check time on hosts.");
       // check time on hosts
       int maxTimeDiffInSec = Constants.MAX_TIME_DIFF_IN_SEC;
@@ -1381,6 +1380,7 @@ public class ClusteringService implements IClusteringService {
          container.removeHost(host);
       }
 
+      logger.info("filter hosts by networks.");
       // filter hosts by networks
       List<com.vmware.bdd.spectypes.VcCluster> usedClusters = clusterSpec.getVcClusters();
       List<String> noNetworkHosts = new ArrayList<String>();
@@ -1403,6 +1403,7 @@ public class ClusteringService implements IClusteringService {
          container.addRackMap(clusterSpec.getHostToRackMap());
       }
 
+      logger.info("rack topology file validation.");
       // rack topology file validation
       Set<String> validRacks = new HashSet<String>();
       List<AbstractHost> hosts = container.getAllHosts();
@@ -1422,6 +1423,8 @@ public class ClusteringService implements IClusteringService {
          }
       }
 
+      logger.info("pre-placement task.");
+      //pre-placement task
       List<BaseNode> baseNodes =
             placementService.getPlacementPlan(container, clusterSpec,
                   existedNodes, filteredHosts);
