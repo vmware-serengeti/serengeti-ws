@@ -1550,8 +1550,10 @@ public class ClusterManager {
       List<NodeRead> nodes = new ArrayList<NodeRead>();
       for (NodeGroupRead nodeGroup : cluster.getNodeGroups()) {
          for (NodeRead node : nodeGroup.getInstances()) {
-            hosts.add(node.getHostName());
-            nodes.add(node);
+            if (node.getMoId() != null) {
+               hosts.add(node.getHostName());
+               nodes.add(node);
+            }
          }
       }
 

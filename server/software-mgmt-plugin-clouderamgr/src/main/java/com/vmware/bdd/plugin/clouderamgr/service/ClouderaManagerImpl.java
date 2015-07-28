@@ -379,7 +379,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          clusterDef = new CmClusterDef(blueprint);
          ReflectionUtils.getPreStartServicesHook().preStartServices(blueprint.getName(), forceScaleOut);
 
-         provisionCluster(clusterDef, addedNodeNames, reportQueue, true);
+         provisionCluster(clusterDef, addedNodeNames, reportQueue, true, forceScaleOut);
          provisionParcels(clusterDef, addedNodeNames, reportQueue);
          Map<String, List<ApiRole>> roles = configureNodeServices(
                clusterDef, reportQueue, addedNodeNames);
@@ -1130,7 +1130,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
     * @throws Exception
     */
    private void installHosts(final CmClusterDef cluster, final List<String> addedNodes,
-         final ClusterReportQueue reportQueue) throws Exception {
+         final ClusterReportQueue reportQueue, boolean force) throws Exception {
       logger.info("Installing agent for each node of cluster: " + cluster.getName());
       List<String> ips = new ArrayList<String>();
       List<String> hostnames = new ArrayList<String>();
@@ -1166,8 +1166,13 @@ public class ClouderaManagerImpl implements SoftwareManager {
 
             hostInstallPoller = new HostInstallPoller(apiResourceRootV6, cmd.getId(), cluster.getCurrentReport(), reportQueue,
                   ProgressSplit.INSTALL_HOSTS_AGENT.getProgress(), addedNodes, domain, cmUsername, cmPassword);
+            //when force enabled, we will not check return value and ignore partial failures
+            boolean checkReturn = !force;
+            if (force) {
+               logger.warn("force cluster operation, will ignore failures");
+            }
             executeAndReport("Installing Host Agents", addedNodes, cmd, ProgressSplit.INSTALL_HOSTS_AGENT.getProgress(),
-                  cluster.getCurrentReport(), reportQueue, hostInstallPoller, true);
+                  cluster.getCurrentReport(), reportQueue, hostInstallPoller, checkReturn);
          } catch (Exception e) {
             logger.info(e.getMessage());
 
@@ -1212,8 +1217,19 @@ public class ClouderaManagerImpl implements SoftwareManager {
     * assume host IDs are already synced
     * @param clusterDef
     */
-   private void updateRackId(final CmClusterDef clusterDef) {
+   private void updateRackId(final CmClusterDef clusterDef, List<String> addedNodes) {
+      List<CmNodeDef> nodesToUpdateId = new ArrayList<CmNodeDef>();
       for (CmNodeDef node : clusterDef.getNodes()) {
+         //for cluster create, we need to update all nodes, but for cluster resize, we only need to update
+         // new addedNodes
+         if (addedNodes == null) {
+            nodesToUpdateId.add(node);
+         } else if (addedNodes.contains(node.getName())) {
+            nodesToUpdateId.add(node);
+         }
+      }
+      for (CmNodeDef node: nodesToUpdateId) {
+         logger.info("Updating RackId for node " + node.getName());
          ApiHost host = apiResourceRootV6.getHostsResource().readHost(node.getNodeId());
          host.setRackId(node.getRackId());
          apiResourceRootV6.getHostsResource().updateHost(host.getHostId(), host);
@@ -1255,6 +1271,11 @@ public class ClouderaManagerImpl implements SoftwareManager {
     */
    private void provisionCluster(final CmClusterDef cluster, final List<String> addedNodes,
          final ClusterReportQueue reportQueue, boolean removeBadHosts) throws Exception {
+      provisionCluster(cluster, addedNodes, reportQueue, removeBadHosts, false);
+   }
+
+   private void provisionCluster(final CmClusterDef cluster, final List<String> addedNodes,
+         final ClusterReportQueue reportQueue, boolean removeBadHosts, final boolean force) throws Exception {
 
       if (!isProvisioned(cluster.getName())) {
          executeAndReport("Inspecting Hosts", addedNodes, apiResourceRootV6.getClouderaManagerResource().inspectHostsCommand(),
@@ -1302,18 +1323,24 @@ public class ClouderaManagerImpl implements SoftwareManager {
       retry(2, new Retriable() {
          @Override
          public void doWork() throws Exception {
-            installHosts(cluster, addedNodes, reportQueue);
+            installHosts(cluster, addedNodes, reportQueue, force);
          }
       });
 
       syncHostsId(cluster);
-      updateRackId(cluster);
+      updateRackId(cluster, addedNodes);
       logger.debug("cluster spec after synced hosts Id: " + new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
             .create().toJson(cluster));
 
       Set<ApiHostRef> toAddHosts = new HashSet<ApiHostRef>();
       for (CmNodeDef node : cluster.getNodes()) {
-         toAddHosts.add(new ApiHostRef(node.getNodeId()));
+         if (addedNodes == null) {
+            //cluster creation
+            toAddHosts.add(new ApiHostRef(node.getNodeId()));
+         } else if (addedNodes.contains(node.getName())) {
+            //cluster resize
+            toAddHosts.add(new ApiHostRef(node.getNodeId()));
+         }
       }
 
       for (ApiHostRef hostRef : apiResourceRootV6.getClustersResource().listHosts(cluster.getName())) {
@@ -2180,6 +2207,9 @@ public class ClouderaManagerImpl implements SoftwareManager {
       return executeAndReport(action, null, command, endProgress, currentReport, reportQueue, poller, checkReturn);
    }
 
+   /**
+    * When checkReturn is true, we will check the return value of async cloudera command
+    */
    private ApiCommand executeAndReport(String action, List<String> nodeNames, final ApiCommand command,
          int endProgress, ClusterReport currentReport, ClusterReportQueue reportQueue, StatusPoller poller,
          boolean checkReturn) throws Exception {
