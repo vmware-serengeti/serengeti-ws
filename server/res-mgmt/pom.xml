@@ -49,5 +49,9 @@
          <groupId>com.jcraft</groupId>
          <artifactId>jsch</artifactId>
       </dependency>
+      <dependency>
+         <groupId>com.fasterxml.jackson.jaxrs</groupId>
+         <artifactId>jackson-jaxrs-json-provider</artifactId>
+      </dependency>
    </dependencies>
 </project>
