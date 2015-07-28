@@ -34,6 +34,7 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
+import com.vmware.bdd.service.resmgmt.IVcInventorySyncService;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -127,6 +128,9 @@ public class ClusterManager {
 
    @Autowired
    private UnsupportedOpsBlocker opsBlocker;
+
+   @Autowired
+   private IVcInventorySyncService syncService;
 
    private static boolean extraPackagesExisted = false;
    private static HashSet<String> extraRequiredPackages = getExtraRequiredPackages();
@@ -458,7 +462,8 @@ public class ClusterManager {
          throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
       }
 
-      this.resMgr.refreshVcResources();
+      //this.resMgr.refreshVcResources();
+      syncService.refreshInventory();
 
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
@@ -730,7 +735,8 @@ public class ClusterManager {
          throw ClusterConfigException.NO_DATASTORE_ADDED();
       }
 
-      this.resMgr.refreshVcResources();
+      //this.resMgr.refreshVcResources();
+      syncService.refreshInventory();
 
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
@@ -968,7 +974,8 @@ public class ClusterManager {
          throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
       }
 
-      this.resMgr.refreshVcResources();
+      //this.resMgr.refreshVcResources();
+      syncService.refreshInventory();
 
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
