@@ -251,6 +251,10 @@ public class VcCache {
       }
    }
 
+   public static void put(ManagedObjectReference moRef, VcObject vcObject) {
+      getInstance().objCache.put(moRef, vcObject);
+   }
+
    /**
     * Remove an old VcObject mapped by moRef in the cache.
     * @param moRef

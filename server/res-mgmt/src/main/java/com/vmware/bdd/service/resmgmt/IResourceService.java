@@ -237,5 +237,6 @@ public interface IResourceService {
    /**
     * refresh host, datastores, networks
     */
+   @Deprecated
    void refreshVcResources();
 }
