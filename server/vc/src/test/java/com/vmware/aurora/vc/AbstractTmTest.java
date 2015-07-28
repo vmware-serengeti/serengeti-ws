@@ -15,16 +15,14 @@
 
 package com.vmware.aurora.vc;
 
-import org.testng.annotations.BeforeClass;
-
 import com.google.gson.internal.Pair;
-
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.util.CmsWorker;
-
 import com.vmware.aurora.vc.vcevent.VcEventRouter;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcService;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 
 abstract public class AbstractTmTest {
 
@@ -60,5 +58,12 @@ abstract public class AbstractTmTest {
       rp = pair.second;
       ds = VcTestConfig.getTestDS();
       util = new TestUtil();
+   }
+
+   @AfterClass
+   public static void afterClass() {
+      System.out.println("afterClass");
+      AsyncVcTaskMgr.getInstance().shutdown();
+      VcContext.shutdown();
    }
 }

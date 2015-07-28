@@ -17,6 +17,8 @@ package com.vmware.aurora.vc;
 
 import java.util.concurrent.TimeUnit;
 
+import javax.crypto.spec.IvParameterSpec;
+
 import org.apache.log4j.Level;
 
 import com.vmware.aurora.stats.Profiler;
@@ -198,7 +200,7 @@ public class VcTask extends VcObjectImpl {
     * @param parent VC object of this task
     * @param callback (optional) task call back
     */
-   protected VcTask(TaskType type, ManagedObjectReference moRef,
+   public VcTask(TaskType type, ManagedObjectReference moRef,
          VcObject parent, IVcTaskCallback callback) throws Exception {
       super(MoUtil.getManagedObject(moRef));
       this.type = type;
@@ -335,6 +337,11 @@ public class VcTask extends VcObjectImpl {
          callback.syncCB();
       }
    }
+
+   public IVcTaskCallback getCallbacks() {
+      return callback;
+   }
+
 
    /**
     * Blocking wait for task completion. Wait on task's monitor until

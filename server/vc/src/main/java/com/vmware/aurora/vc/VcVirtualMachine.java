@@ -43,6 +43,7 @@ import com.vmware.aurora.vc.VcTask.TaskType;
 import com.vmware.aurora.vc.VcTaskMgr.IVcPseudoTaskBody;
 import com.vmware.aurora.vc.VcTaskMgr.IVcTaskBody;
 import com.vmware.aurora.vc.VmConfigUtil.ScsiControllerType;
+import com.vmware.aurora.vc.callbacks.VcTaskCallable;
 import com.vmware.aurora.vc.vcevent.VcEventHandlers.IVcEventHandler;
 import com.vmware.aurora.vc.vcevent.VcEventHandlers.VcEventType;
 import com.vmware.aurora.vc.vcevent.VcEventListener;
@@ -1197,6 +1198,9 @@ public interface VcVirtualMachine extends VcVmBase {
     */
    public VcTask cloneVmAsync(final CreateSpec vmSpec, final DeviceId[] removeDisks) throws Exception;
 
+
+   VcTaskCallable getCloneAsyncCallable(CreateSpec vmSpec,
+                                        DeviceId[] removeDisks) throws Exception;
 
    /**
     *
@@ -2431,6 +2435,26 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
          ManagedObjectReference snapMoRef, final ManagedObjectReference folderMoRef,
          ManagedObjectReference hostMoRef, boolean isLinked, final String name,
          ConfigSpec config, final IVcTaskCallback callback) throws Exception {
+      final VcTaskCallable cloneTaskCallable = getCloneCallable(dc, rpMoRef, dsMoRef, snapMoRef, folderMoRef, hostMoRef, isLinked, name, config, callback);
+
+      VcTask task = VcContext.getTaskMgr().execute(new IVcTaskBody() {
+         public VcTask body() throws Exception {
+            VirtualMachine vm = getManagedObject();
+            return new VcTask(TaskType.CloneVm,
+                  cloneTaskCallable.callVc(), callback);
+         }
+      });
+
+      logger.debug("clone_vm task on " + this + " to VM[" + name + "] created");
+
+      return task;
+   }
+
+   private VcTaskCallable getCloneCallable(final VcDatacenter dc,
+                                    ManagedObjectReference rpMoRef, ManagedObjectReference dsMoRef,
+                                    ManagedObjectReference snapMoRef, final ManagedObjectReference folderMoRef,
+                                    ManagedObjectReference hostMoRef, boolean isLinked, final String name,
+                                    ConfigSpec config, final IVcTaskCallback callback) throws Exception {
       final CloneSpec spec = new CloneSpecImpl();
       RelocateSpec relocSpec = new RelocateSpecImpl();
       relocSpec.setPool(rpMoRef);
@@ -2445,17 +2469,17 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
       spec.setSnapshot(snapMoRef);
       spec.setTemplate(false);
       spec.setConfig(config);
-
-      VcTask task = VcContext.getTaskMgr().execute(new IVcTaskBody() {
-         public VcTask body() throws Exception {
+      VcTaskCallable cloneTaskCallable = new VcTaskCallable(TaskType.CloneVm, callback) {
+         @Override
+         public ManagedObjectReference callVc() throws Exception {
             VirtualMachine vm = getManagedObject();
-            return new VcTask(TaskType.CloneVm,
-                  vm.clone(folderMoRef == null ? dc.getVmFolderMoRef() : folderMoRef, name, spec), callback);
+            return vm.clone(folderMoRef == null ? dc.getVmFolderMoRef() : folderMoRef, name, spec);
          }
-      });
-      logger.debug("clone_vm task on " + this + " to VM[" + name + "] created");
-      return task;
+      };
+
+      return cloneTaskCallable;
    }
+
 
    /* (non-Javadoc)
     * @see com.vmware.aurora.vc.VcVirtualmachine#cloneTemplate(java.lang.String, com.vmware.aurora.vc.VcResourcePool, com.vmware.aurora.vc.VcDatastore, com.vmware.vim.binding.vim.vm.ConfigSpec, com.vmware.aurora.vc.IVcTaskCallback)
@@ -2539,6 +2563,21 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
       return cloneWork(dc, rp.getMoRef(), dsMoRef, snap.getMoRef(),
             folder == null ? null : folder._getRef(), host == null ? null : host.getMoRef(), isLinked, name, config, callback);
    }
+
+   public VcTaskCallable getCloneSnapshotCallable(String name, VcResourcePool rp, VcDatastore ds, VcSnapshot snap, Folder folder,
+                               VcHost host, boolean isLinked, ConfigSpec config, IVcTaskCallback callback) throws Exception {
+      // no change to ds
+      AuAssert.check(!isTemplate());
+      AuAssert.check(snap != null);
+      final VcDatacenter dc = getDatacenter();
+      ManagedObjectReference dsMoRef = null;
+      if (ds != null) {
+         dsMoRef = ds.getMoRef();
+      }
+      return getCloneCallable(dc, rp.getMoRef(), dsMoRef, snap.getMoRef(),
+            folder == null ? null : folder._getRef(), host == null ? null : host.getMoRef(), isLinked, name, config, callback);
+   }
+
 
    /* (non-Javadoc)
     * @see com.vmware.aurora.vc.VcVirtualmachine#cloneSnapshot(java.lang.String, com.vmware.aurora.vc.VcResourcePool, com.vmware.aurora.vc.VcSnapshot, com.vmware.vim.binding.vim.Folder, boolean, com.vmware.vim.binding.vim.vm.ConfigSpec)
@@ -3599,6 +3638,58 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
    }
 
    @Override
+   public VcTaskCallable getCloneAsyncCallable(final CreateSpec vmSpec,
+                                               final DeviceId[] removeDisks) throws Exception {
+      final VcSnapshot parentVcSnap = vmSpec.getParentSnapshot();
+      final ConfigSpec configSpec =
+            (vmSpec.spec != null ? vmSpec.spec : new ConfigSpecImpl());
+      List<VirtualDeviceSpec> devChanges = new ArrayList<VirtualDeviceSpec>();
+
+      /*
+       * No device changes should be set already.
+       */
+      if (configSpec.getDeviceChange() != null &&
+            configSpec.getDeviceChange().length > 0) {
+         throw AuAssert.INTERNAL();
+      }
+      /*
+       * Append config for removing disks.
+       */
+      if (removeDisks != null) {
+         for (DeviceId deviceId : removeDisks) {
+            VirtualDevice dev = parentVcSnap.getVirtualDevice(deviceId);
+            if (dev != null) {
+               devChanges.add(VmConfigUtil.removeDeviceSpec(dev));
+            }
+         }
+      }
+      if (!devChanges.isEmpty()) {
+         configSpec.setDeviceChange(devChanges.toArray(new VirtualDeviceSpec[devChanges.size()]));
+      }
+
+      switch (vmSpec.cloneType) {
+         case VMFORK:
+            AuAssert.check(ArrayUtils.isEmpty(configSpec.getDeviceChange()), "Vmfork doesn't allow change disks.");
+            if(vmSpec.persisted) {
+               AuAssert.check(vmSpec.parentSnap != null, "Cannot create persistent fork child from a virtual machine which does not have a disk snapshot.");
+            }
+            AuAssert.check(isQuiescedForkParent(), "VM is not quiesced.");
+
+            return null;
+            /*return createForkChild(vmSpec.name, vmSpec.rp, vmSpec.ds,
+                  vmSpec.folder, vmSpec.persisted, VcCache.getRefreshVcTaskCB(vmSpec.rp));*/
+         case FULL:
+            return ((VcVirtualMachineImpl)vmSpec.getParentVm()).getCloneSnapshotCallable(vmSpec.name, vmSpec.rp, vmSpec.ds,
+                  parentVcSnap, vmSpec.folder, vmSpec.host, false/*not linked*/, configSpec, VcCache.getRefreshVcTaskCB(vmSpec.rp));
+         case LINKED:
+            return ((VcVirtualMachineImpl)vmSpec.getParentVm()).getCloneSnapshotCallable(vmSpec.name, vmSpec.rp, vmSpec.ds,
+                  parentVcSnap, vmSpec.folder, vmSpec.host, true/*linked*/, configSpec, VcCache.getRefreshVcTaskCB(vmSpec.rp));
+         default:
+            throw AuAssert.INTERNAL(new RuntimeException("Unsupported Clone Type: " + vmSpec.cloneType));
+      }
+   }
+
+   @Override
    public VcTask createForkChild(final String name, VcResourcePool rp, VcDatastore ds, final Folder folder,
                                     boolean persisted, final IVcTaskCallback callback) throws Exception {
       // no change to ds
@@ -3614,13 +3705,12 @@ class VcVirtualMachineImpl extends VcVmBaseImpl implements VcVirtualMachine {
       spec.setPersistent(persisted);
 
       final VirtualMachine vm = getManagedObject();
-      VcTask task = VcContext.getTaskMgr().execute(new IVcTaskBody() {
+
+      return VcContext.getTaskMgr().execute(new IVcTaskBody() {
          public VcTask body() throws Exception {
             return new VcTask(TaskType.CreateForkChild, vm.createForkChild(name, spec), callback);
          }
       });
-
-      return task;
    }
 
 

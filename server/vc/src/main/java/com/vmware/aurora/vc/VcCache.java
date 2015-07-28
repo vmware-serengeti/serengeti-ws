@@ -398,7 +398,7 @@ public class VcCache {
     * Sync for existing request on an VcObject.
     * Same as {@code syncRequest()}.
     */
-   static protected VcObject sync(ManagedObjectReference moRef) {
+   static public VcObject sync(ManagedObjectReference moRef) {
       return instance.syncRequest(moRef);
    }
 

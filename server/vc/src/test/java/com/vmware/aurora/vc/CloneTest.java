@@ -15,21 +15,28 @@
 
 package com.vmware.aurora.vc;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
-import org.testng.annotations.Test;
-
 import com.vmware.aurora.composition.ImportVmSP;
 import com.vmware.aurora.global.DiskSize;
 import com.vmware.aurora.vc.VcVirtualMachine.DiskCreateSpec;
+import com.vmware.aurora.vc.callbacks.CloneVmCallable;
+import com.vmware.aurora.vc.callbacks.CreateSnapshotCallable;
+import com.vmware.aurora.vc.callbacks.PowerOnCallable;
+import com.vmware.aurora.vc.callbacks.VcTaskCallableSequence;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.clone.spec.VmCreateSpec;
 import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
+import com.vmware.vim.binding.vim.Task;
+import com.vmware.vim.binding.vim.TaskInfo;
+import com.vmware.vim.binding.vim.VirtualMachine;
 import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
+import com.vmware.vim.binding.vmodl.ManagedObjectReference;
+import org.apache.log4j.Logger;
+import org.testng.annotations.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author shuang
@@ -256,7 +263,250 @@ public class CloneTest extends AbstractTmTest {
          });
       }
 
+   }
+
+   private VcVirtualMachine clonedVm = null;
+   @Test
+   public void testVMClone() throws Exception {
+
+      //Import vm -- "PlatformTestVM" as the target test vm.
+      final ImportVmSP sp0 = new TestUtil().testImportVM(vmName, rp);
 
 
+      final VcVirtualMachine virtualMachine = sp0.getResult();
+      final String snapshotName = "snapshotName";
+
+
+
+      VcTaskCallbackCallable deleteClonedVmTask = new VcTaskCallbackCallable(VcTask.TaskType.DestroyVm,
+            new IVcTaskCallback() {
+               @Override
+               public void completeCB(VcTask task) {
+                  synchronized (CloneTest.this) {
+                     CloneTest.this.notify();
+                  }
+               }
+
+               @Override
+               public void syncCB() {
+
+               }
+            }) {
+         @Override
+         public void completeCB(VcTask task) {
+            Task task1 = task.getManagedObject();
+            VcCache.refresh(task1._getRef());
+            VcCache.sync(task1._getRef());
+
+            TaskInfo taskInfo = task1.getInfo();
+
+            System.out.println(taskInfo.getState());
+
+            if(taskInfo.getState() == TaskInfo.State.success) {
+               ManagedObjectReference taskResult = (ManagedObjectReference) taskInfo.getResult();
+               clonedVm = VcCache.load(taskResult);
+            } else {
+               System.out.println(taskInfo.getError());
+            }
+         }
+
+         @Override
+         public void syncCB() {
+
+         }
+
+         @Override
+         public ManagedObjectReference callVc() throws Exception {
+            System.out.println();
+            VirtualMachine vm = clonedVm.getManagedObject();
+            return vm.destroy();
+         }
+      };
+
+
+
+
+      VcTaskCallableSequence taskCallableSequence = new VcTaskCallableSequence();
+
+      final CreateSnapshotCallable snapshotCallable = new CreateSnapshotCallable(snapshotName, snapshotName) {
+         @Override
+         public VcVirtualMachine getVm() {
+            return virtualMachine;
+         }
+      };
+
+      taskCallableSequence.addStep(snapshotCallable);
+
+
+      final CloneVmCallable cloneCallable = new CloneVmCallable() {
+         @Override
+         public VcVirtualMachine getSrcVm() {
+            return virtualMachine;
+         }
+
+         @Override
+         public VcVirtualMachine.CreateSpec getCloneSpec() {
+            VcVirtualMachine.CreateSpec vmSpec =
+                  new VcVirtualMachine.CreateSpec("ClonedVm", (VcSnapshot)snapshotCallable.getResult(), rp, ds, VcVmCloneType.LINKED,
+                        true,
+                        null);
+            return vmSpec;
+         }
+      };
+
+      taskCallableSequence.addStep(cloneCallable);
+
+      PowerOnCallable powerOnCallable = new PowerOnCallable() {
+         @Override
+         public VcVirtualMachine getVcVm() {
+            return (VcVirtualMachine)cloneCallable.getResult();
+         }
+      };
+
+      taskCallableSequence.addStep(powerOnCallable);
+
+
+
+      AsyncVcTaskMgr.getInstance().submitSequence(taskCallableSequence);
+
+      //Take a snapshot for test vm -- snap0
+      /*
+
+      VcTaskCallbackCallable cloneVmTask = new VcTaskCallbackCallable(VcTask.TaskType.CloneVm, deleteClonedVmTask) {
+
+         @Override
+         public ManagedObjectReference callVc() throws Exception {
+            VcCache.refresh(virtualMachine.getMoRef());
+            VcCache.sync(virtualMachine.getMoRef());
+            VcSnapshot snap = virtualMachine.getSnapshotByName("snapshot");
+
+            VcVirtualMachine.CreateSpec vmSpec =
+                  new VcVirtualMachine.CreateSpec("ClonedVm", snap, rp, ds, VcVmCloneType.LINKED,
+                        true,
+                        null);
+
+            return virtualMachine.getCloneAsyncCallable(vmSpec, null).callVc();
+         }
+
+         @Override
+         public void completeCB(VcTask task) {
+
+         }
+
+         @Override
+         public void syncCB() {
+
+         }
+      };
+
+      final String snapshotName = "snap";
+      TakeSnapshotSP sp1 =
+            new TestUtil().testTakeSnapshot(sp0.getResult().getId(), snapshotName, "snapshot of PlatformTestVM");
+
+      String newVmName1 = "clonedVM1";
+      CloneVmSP sp2 =
+            new TestUtil().testCloneVm(newVmName1, sp0.getResult().getId(),
+                  snapshotName, rp, ds, removeDisks, addDisks);*/
+      /*
+      VmCreateSpec vmCreateSpec = new VmCreateSpec();
+      vmCreateSpec.setTargetRp(rp);
+      vmCreateSpec.setTargetDs(ds);
+      vmCreateSpec.setCloneType(VcVmCloneType.FULL);
+      vmCreateSpec.setPersisted(true);
+      vmCreateSpec.setVmName("forkParentVm");
+
+
+      final VcVirtualMachine.CreateSpec vcVmCreateSpec =
+            vmCreateSpec.toCreateSpec(sp0.getResult().getSnapshotByName("snap"),
+                  new ConfigSpecImpl());
+
+      try {
+         forkParentVm = VcContext.inVcSessionDo(new VcSession<VcVirtualMachine>() {
+            @Override
+            protected boolean isTaskSession() {
+               return true;
+            }
+
+            @Override
+            protected VcVirtualMachine body() throws Exception {
+               forkParentVm = sp0.getResult().cloneVm(vcVmCreateSpec, null);
+               forkParentVm.enableForkParent();
+
+               Map<String, String> bootupConfigs = new HashMap<String, String>();
+               bootupConfigs.put("vmfork", "yes");
+               forkParentVm.setGuestConfigs(bootupConfigs);
+
+               forkParentVm.powerOn();
+
+               int i = 0;
+               while(i < 120){
+                  boolean flag = forkParentVm.isQuiescedForkParent();
+                  System.out.println("Vm Quiesced: " + flag);
+                  if(flag) {
+                     break;
+                  }
+
+                  Thread.sleep(2000);
+               }
+               return forkParentVm;
+            }
+         });
+
+
+         VmCreateSpec forkCreateSpec = new VmCreateSpec();
+         forkCreateSpec.setTargetRp(rp);
+         forkCreateSpec.setTargetDs(ds);
+         forkCreateSpec.setCloneType(VcVmCloneType.VMFORK);
+         forkCreateSpec.setPersisted(false);
+         forkCreateSpec.setVmName("fork01");
+
+         final VcVirtualMachine.CreateSpec vcForkCreateSpec =
+               forkCreateSpec.toCreateSpec(null, new ConfigSpecImpl());
+
+
+         forkChildVm = VcContext.inVcSessionDo(new VcSession<VcVirtualMachine>() {
+            @Override
+            protected boolean isTaskSession() {
+               return true;
+            }
+
+            @Override
+            protected VcVirtualMachine body() throws Exception {
+               forkChildVm = forkParentVm.cloneVm(vcForkCreateSpec, null);
+               forkChildVm.powerOn();
+               return forkChildVm;
+            }
+         });
+
+      } finally {
+
+         VcContext.inVcSessionDo(new VcSession<Void>() {
+            @Override
+            protected boolean isTaskSession() {
+               return true;
+            }
+
+            @Override
+            protected Void body() throws Exception {
+               if(forkChildVm != null) {
+                  forkChildVm.powerOff();
+                  forkChildVm.destroy(false);
+               }
+
+               if (forkParentVm != null) {
+                  forkParentVm.powerOff();
+                  forkParentVm.destroy();
+               }
+               sp0.getResult().removeAllSnapshots();
+               return null;
+            }
+         });
+      }
+
+*/
+
+      synchronized (this){
+         this.wait(45000);
+      }
    }
 }

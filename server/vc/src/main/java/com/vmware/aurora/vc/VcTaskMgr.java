@@ -155,6 +155,8 @@ public class VcTaskMgr {
          if (task != null) {
             logger.info("Task completed: " + task.getType() + " " + task.getMoRef().getValue());
             task.taskNotify(event.getTaskState());
+
+            AsyncVcTaskMgr.getInstance().taskFinished(task);
          } else {
             logger.debug("Foreign task: " + taskMoRef);
          }
@@ -382,7 +384,6 @@ public class VcTaskMgr {
     * aren't for some strange reasons. Example: ResourcePool.updateConfig().
     * @param name       pseudo-task name
     * @param eventType  expected completion event
-    * @param refId      target for expected event
     * @param obj        code to execute
     * @return moref returned by the task
     * @throws Exception
