@@ -204,6 +204,7 @@ public class ResourceService implements IResourceService {
       return findDSInVC(datastores);
    }
 
+   @Deprecated
    public void refreshVcResources() {
       VcResourceUtils.refreshVcResources();
    }
