@@ -30,6 +30,7 @@ import com.google.gson.reflect.TypeToken;
 import org.hibernate.annotations.Type;
 
 import com.vmware.bdd.spectypes.NicSpec;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
 /**
@@ -85,7 +86,7 @@ public class NicEntity extends EntityBase{
    }
 
    public boolean isReady() {
-      return (connected && ipv4Address != null && !Constants.NULL_IPV4_ADDRESS.equals(ipv4Address));
+      return (connected != null && connected && !CommonUtil.isBlank(ipv4Address) && !Constants.NULL_IPV4_ADDRESS.equalsIgnoreCase(ipv4Address));
    }
 
    public String getIpv4Address() {
