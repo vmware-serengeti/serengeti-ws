@@ -541,6 +541,8 @@ public class PlacementPlanner implements IPlacementPlanner {
          }
          // cannot find a datastore to hold this disk
          if (i >= datastores.size()) {
+            logger.error("placeUnSeparableDisks: not sufficient storage space to place disk "
+                  + disk.toString());
             return null;
          }
       }
@@ -549,7 +551,7 @@ public class PlacementPlanner implements IPlacementPlanner {
 
    private List<DiskSpec> evenSpliter(DiskSpec separable,
          List<AbstractDatastore> originDatastores) {
-      int minDiskSize = 2;
+      int minDiskSize = getMininumDiskSize();
       int maxNumDatastores = (separable.getSize() + minDiskSize - 1) / minDiskSize;
       Collections.sort(originDatastores);
       List<AbstractDatastore> datastores = new ArrayList<AbstractDatastore>();
@@ -765,6 +767,11 @@ public class PlacementPlanner implements IPlacementPlanner {
                   logger.info(String.format("%1$s disks number per node for node %2$s is %3$d", storageType, node.getVmName(), disksNum));
                   if (disksNum > 0) {
                      int subdiskSize = disk.getSize() / disksNum;
+                     if (subdiskSize <= 0) {
+                        logger.warn(String.format("%1$dGB storage for node %2$s can not be splited into %3$d disks. Will not split it.", disk.getSize(), node.getVmName(), disksNum));
+                        unseparable.add(disk);
+                        continue;
+                     }
                      logger.info(String.format("%1$dGB storage for node %2$s is splited into %3$d disks and each single disk size is %4$dGB", disk.getSize(), node.getVmName(), disksNum, subdiskSize));
                      for (int i = 0; i < disksNum; i++) {
                         if (i == disksNum - 1) {
@@ -946,7 +953,7 @@ public class PlacementPlanner implements IPlacementPlanner {
          // generate the disk placement plan for a candidate host
          if (placeDisk(vNode, candidate)) {
             // assign host
-            logger.info("candidate host " + candidate + " is selected");
+            logger.info("candidate host " + candidate + " is selected for node " + vNode.getBaseNodeNames());
             assignHost(vNode, candidate);
             found = true;
             break;
@@ -1163,5 +1170,10 @@ public class PlacementPlanner implements IPlacementPlanner {
 
       return new ArrayList<String>(this.rackUsageByGroup.get(groupName)
             .keySet());
+   }
+
+   public int getMininumDiskSize() {
+      // default min disk size is 2G.
+      return Configuration.getInt("storage.disk.size.min", 2);
    }
 }
