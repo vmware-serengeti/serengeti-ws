@@ -1013,7 +1013,8 @@ public class ClusterManager {
          }
       }
 
-      if (instanceNum == group.getDefineInstanceNum()) {
+      //when use force, we allow user to rerun resize to fix bad nodes
+      if ((instanceNum == group.getDefineInstanceNum()) && !force) {
          logger.error("the new instanceNum " + instanceNum + " shouldn't be the same as the old one ");
          throw ClusterManagerException.NO_NEED_TO_RESIZE(clusterName, nodeGroupName, instanceNum);
       }
