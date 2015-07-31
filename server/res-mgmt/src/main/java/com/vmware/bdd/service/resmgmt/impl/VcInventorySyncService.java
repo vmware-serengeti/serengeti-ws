@@ -7,9 +7,9 @@ import com.vmware.aurora.vc.VcObject;
 import com.vmware.bdd.service.resmgmt.IVcInventorySyncService;
 import com.vmware.bdd.service.resmgmt.sync.AbstractSyncVcResSP;
 import com.vmware.bdd.service.resmgmt.sync.SyncVcResourceSp;
+import com.vmware.bdd.service.resmgmt.sync.filter.VcResourceFilters;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -35,14 +35,25 @@ public class VcInventorySyncService implements IVcInventorySyncService {
 
    private VcInventorySyncCounters counters = new VcInventorySyncCounters();
 
+   private long waitMilliSecs = 100l;
+
    public void setCounters(VcInventorySyncCounters counters) {
       this.counters = counters;
    }
 
    /**
-    * refresh the whole vc inventory
+    * refresh the vc inventory, some resource will be filtered from refreshing.
     */
+   @Override
    public void refreshInventory() throws InterruptedException {
+      refreshInventory(null);
+   }
+
+   /**
+    * @param vcResourceFilters
+    * refresh the vc inventory, some resource will be filtered from refreshing.
+    */
+   public void refreshInventory(VcResourceFilters vcResourceFilters) throws InterruptedException {
       if (inProgress.get()) {
          if(LOGGER.isInfoEnabled()) {
             LOGGER.info("a inventory refresh is already in progress. wait for its finishing.");
@@ -60,7 +71,7 @@ public class VcInventorySyncService implements IVcInventorySyncService {
             counters.increaseInvRefresh();
             try {
                List<VcDatacenter> dcList = VcInventory.getDatacenters();
-               refresh(dcList);
+               refresh(vcResourceFilters == null ? dcList: vcResourceFilters.filter(dcList), vcResourceFilters);
             } finally {
                counters.setRefreshInProgress(false);
                inProgress.set(false);
@@ -92,23 +103,24 @@ public class VcInventorySyncService implements IVcInventorySyncService {
     */
    public void waitForCompletion() throws InterruptedException {
       while (inProgress.get()) {
-         Thread.sleep(50);
+         Thread.sleep(waitMilliSecs);
       }
    }
 
    /**
     * refresh vc resources concurrently.
-    *
+    * @param vcResourceFilters vc resource filters.
     * @param vcObjects vc resource objects to refresh
     */
-   protected <T extends VcObject> void refresh(List<T> vcObjects) {
+   protected <T extends VcObject> void refresh(List<T> vcObjects, VcResourceFilters vcResourceFilters) {
       AuAssert.check(CollectionUtils.isNotEmpty(vcObjects), "no vc resources to refresh!");
 
 
       List<AbstractSyncVcResSP> syncSps = new ArrayList<>();
 
-      for (VcObject vcObject : vcObjects) {
+      for (T vcObject : vcObjects) {
          SyncVcResourceSp syncVcResourceSp = new SyncVcResourceSp(vcObject.getMoRef());
+         syncVcResourceSp.setVcResourceFilters(vcResourceFilters);
          syncSps.add(syncVcResourceSp);
       }
 
@@ -134,26 +146,27 @@ public class VcInventorySyncService implements IVcInventorySyncService {
    }
 
    private void work(ExecutorService es, List<AbstractSyncVcResSP> syncSps) throws ExecutionException, InterruptedException {
-      List<Future<List<AbstractSyncVcResSP>>> refreshTaskList = submit(es, syncSps);
+      List<Future<List<AbstractSyncVcResSP>>> resultList = submit(es, syncSps);
 
-      while (refreshTaskList.size() > 0) {
-         List<Future<List<AbstractSyncVcResSP>>> newRefreshTaskList = new ArrayList<>();
-         for (Iterator<Future<List<AbstractSyncVcResSP>>> iterator = refreshTaskList.iterator(); iterator.hasNext(); ) {
-            Future<List<AbstractSyncVcResSP>> result = iterator.next();
+      while (resultList.size() > 0) {
+         Thread.sleep(waitMilliSecs);
+
+         List<AbstractSyncVcResSP> newTaskList = new ArrayList<>();
+         for (Iterator<Future<List<AbstractSyncVcResSP>>> resultIterator = resultList.iterator(); resultIterator.hasNext(); ) {
+            Future<List<AbstractSyncVcResSP>> result = resultIterator.next();
             if (result.isDone()) {
                counters.decreasePendingRefresh();
                counters.increaseFinishedRefresh();
-               newRefreshTaskList.addAll(submit(es, result.get()));
-               iterator.remove();
+
+               newTaskList.addAll(result.get());
+               resultIterator.remove();
             }
          }
 
-         Thread.sleep(50);
-
-         refreshTaskList.addAll(newRefreshTaskList);
+         resultList.addAll(submit(es, newTaskList));
 
          if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("remain refresh task count: " + refreshTaskList.size());
+            LOGGER.debug("remain refresh task count: " + resultList.size());
          }
       }
    }

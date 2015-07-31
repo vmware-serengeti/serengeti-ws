@@ -102,7 +102,7 @@ public class VcTask extends VcObjectImpl {
    private boolean notified;            // Did VcEventListener notify us?
    private boolean needsPoll;           // If need to poll for completions.
    private int progress;                // Current progress.
-
+   private String name;
    /**
     * @return if the task has been completed successfully
     */
@@ -181,12 +181,14 @@ public class VcTask extends VcObjectImpl {
       completionTimeNanos = timeNanos;
    }
 
+   public String getName() {return  name; }
    @Override
    protected void update(ManagedObject mo) {
       Task task = (Task)mo;
       TaskInfo info = task.getInfo();
       state = info.getState();
       eventChainId = info.getEventChainId();
+      name = task.getInfo().getKey();
    }
 
    /**
