@@ -16,7 +16,6 @@ package com.vmware.bdd.plugin.clouderamgr.service;
 
 import javax.ws.rs.NotFoundException;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -33,8 +32,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gson.Gson;
-import com.vmware.aurora.global.Configuration;
-import com.vmware.bdd.software.mgmt.plugin.utils.SerialUtils;
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -387,7 +384,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
          success = true;
          clusterDef.getCurrentReport().setProgress(100);
          clusterDef.getCurrentReport().setAction("");
-         clusterDef.getCurrentReport().setClusterAndNodesServiceStatus(ServiceStatus.STARTED);
+         clusterDef.getCurrentReport().setClusterAndNodesServiceStatus(ServiceStatus.STARTED, addedNodeNames);
       } catch (SoftwareManagementPluginException ex) {
          if (ex instanceof CommandExecFailException) {
             String hostId = ((CommandExecFailException)ex).getRefHostId();

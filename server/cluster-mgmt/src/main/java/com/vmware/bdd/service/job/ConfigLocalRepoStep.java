@@ -110,17 +110,14 @@ public class ConfigLocalRepoStep extends TrackableTasklet {
          long oldInstanceNum =
                getJobParameters(chunkContext).getLong(
                      JobConstants.GROUP_INSTANCE_OLD_NUMBER_JOB_PARAM);
-
+         toBeSetLocalRepo = new ArrayList<>();
          for (NodeEntity node : nodesInGroup) {
             long index = CommonUtil.getVmIndex(node.getVmName());
             if (index < oldInstanceNum) {
                // do not verify existing nodes from last successful deployment
                continue;
             }
-            if (node.getStatus().ordinal() >= NodeStatus.VM_READY.ordinal()) {
-               if (toBeSetLocalRepo == null) {
-                  toBeSetLocalRepo = new ArrayList<NodeEntity>();
-               }
+            if (node.getStatus().ordinal() == NodeStatus.VM_READY.ordinal()) {
                toBeSetLocalRepo.add(node);
             }
          }

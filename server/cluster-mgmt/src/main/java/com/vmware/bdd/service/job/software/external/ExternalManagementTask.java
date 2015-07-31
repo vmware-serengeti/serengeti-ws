@@ -191,7 +191,7 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
                }
                if (JobUtils.getJobParameterForceClusterOperation(chunkContext)) {
                   NodeStatus status = lockedClusterEntityManager.getClusterEntityMgr().findNodeByName(node.getName()).getStatus();
-                  if (status != NodeStatus.VM_READY) {
+                  if ((status != NodeStatus.VM_READY) && (status != NodeStatus.BOOTSTRAP_FAILED)) {
                      continue;
                   }
                }
@@ -199,6 +199,7 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
             }
          }
       }
+
       return addedNodeNames;
    }
 }

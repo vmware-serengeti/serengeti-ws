@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,7 +48,7 @@ public class SetLocalRepoService implements ISetLocalRepoService {
    @Override
    public boolean setLocalRepoForNodes(String clusterName,
          List<NodeEntity> nodes, String repoId, String localRepoURL) {
-      AuAssert.check(!nodes.isEmpty());
+      AuAssert.check(CollectionUtils.isNotEmpty(nodes), "cannot set localrepo to empty node list");
 
       logger.info("Setting password for " + clusterName);
       ArrayList<String> ipsOfNodes =

@@ -65,9 +65,11 @@ public class DeleteSingleVMStep extends TrackableTasklet {
          }
       }
       NodeGroupEntity nodeGroupEntity = clusterEntityManager.findByName(clusterName, nodeGroupName);
+      logger.info("before set defined instance, instanceNum is: " + nodeGroupEntity.getDefineInstanceNum());
       nodeGroupEntity.setDefineInstanceNum(nodeGroupEntity.getDefineInstanceNum() - 1);
       clusterEntityManager.update(nodeGroupEntity);
       clusterEntityManager.delete(nodeEntity);
+
       logger.info("VM " + nodeName + " has been deleted ? " + (clusterEntityManager.getNodeByVmName(nodeName) == null ? "YES" : "NO" ));
       putIntoJobExecutionContext(chunkContext,
             JobConstants.NODE_OPERATION_SUCCESS, true);

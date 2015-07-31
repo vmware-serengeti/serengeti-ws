@@ -118,8 +118,14 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
       Callable<Void>[] callables = new Callable[nodes.size()];
       int i = 0;
       for (NodeEntity node : nodes) {
-         WaitVMStatusTask task =
-               new WaitVMStatusTask(node.getMoId());
+         if (node.getMoId() == null || node.getMoId().isEmpty()) {
+            continue;
+         }
+         node = clusterEntityMgr.getNodeWithNicsByMobId(node.getMoId());
+         if (force && !node.nicsReady()) {
+            continue;
+         }
+         WaitVMStatusTask task = new WaitVMStatusTask(node.getMoId());
          callables[i] = task;
          i++;
       }
@@ -169,7 +175,13 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
                if (node.getMoId() == null || node.getMoId().isEmpty()) {
                   continue;
                }
+
                node = clusterEntityMgr.getNodeWithNicsByMobId(node.getMoId());
+
+               if (force && !node.nicsReady()) {
+                  continue;
+               }
+
                VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
                String hostname = VcVmUtil.getMgtHostName(vm, node.getPrimaryMgtIpV4());
                if (hostname == null || hostname.isEmpty()) {
