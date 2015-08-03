@@ -67,7 +67,7 @@ public class SetPasswordForNewNodesStep extends TrackableTasklet {
                // do not verify existing nodes from last successful deployment
                continue;
             }
-            if (node.getStatus().ordinal() == NodeStatus.VM_READY.ordinal()) {
+            if (node.getStatus().ordinal() >= NodeStatus.VM_READY.ordinal()) {
                if (toBeSetPassword == null) {
                   toBeSetPassword = new ArrayList<NodeEntity>();
                }
