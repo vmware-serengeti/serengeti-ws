@@ -885,7 +885,7 @@ public class AmbariImpl implements SoftwareManager {
          logger.info("Start cluster " + blueprint.getName() + " scale out.");
          clusterDef = new AmClusterDef(blueprint, privateKey, getVersion());
 
-         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName(), forceScaleOut);
+         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName(), addedNodeNames, forceScaleOut);
 
          bootstrap(clusterDef, addedNodeNames, reports, forceScaleOut);
          provisionComponents(clusterDef, addedNodeNames, reports);
@@ -1156,9 +1156,18 @@ public class AmbariImpl implements SoftwareManager {
       poller.waitForComplete();
 
       boolean success = false;
-      ApiRequest apiRequest =
-            apiManager.getRequest(clusterDef.getName(), request
-                  .getApiRequestInfo().getRequestId());
+
+      ApiRequest apiRequest = null;
+
+      try {
+         apiRequest = apiManager.getRequest(clusterDef.getName(), request
+               .getApiRequestInfo().getRequestId());
+      } catch (NullPointerException npe) {
+         // quick fix for the moment. should be handled properly later. Bug 1493094
+         logger.error("can't get ApiRequest Object from Ambari.", npe);
+         throw SoftwareManagementPluginException.INSTALL_COMPONENTS_FAIL(Constants.AMBARI_PLUGIN_NAME, clusterDef.getName());
+      }
+
       ClusterRequestStatus clusterRequestStatus =
             ClusterRequestStatus.valueOf(apiRequest.getApiRequestInfo()
                   .getRequestStatus());
@@ -1237,7 +1246,7 @@ public class AmbariImpl implements SoftwareManager {
       //TODO(qjin): find out the root cause of failure in startting services
       Exception resultException = null;
       try {
-         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterName, forceStart);
+         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterName, Collections.EMPTY_LIST, forceStart);
          for (int i = 0; i < getRequestMaxRetryTimes() && !success; i++) {
             ApiRequest apiRequestSummary;
             try {
