@@ -140,7 +140,7 @@ public class TestClouderaManagerImpl {
       public static PreStartServices getPreStartServicesHook() {
          return new PreStartServices() {
             @Override
-            public void preStartServices(String clusterName, boolean force) throws SoftwareManagementPluginException {
+            public void preStartServices(String clusterName, List<String> addedNodeNames, boolean force) throws SoftwareManagementPluginException {
             }
             @Override
             public void preStartServices(String clusterName) throws SoftwareManagementPluginException {

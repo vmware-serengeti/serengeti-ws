@@ -16,6 +16,8 @@ package com.vmware.bdd.software.mgmt.plugin.intf;
 
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 
+import java.util.List;
+
 /**
  * Author: Xiaoding Bian
  * Date: 7/29/14
@@ -23,7 +25,7 @@ import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginExc
  */
 public interface PreStartServices {
 
-   void preStartServices(String clusterName, boolean force) throws SoftwareManagementPluginException;
+   void preStartServices(String clusterName, List<String> addedNodeNames, boolean force) throws SoftwareManagementPluginException;
 
    void preStartServices(String clusterName) throws SoftwareManagementPluginException;
 

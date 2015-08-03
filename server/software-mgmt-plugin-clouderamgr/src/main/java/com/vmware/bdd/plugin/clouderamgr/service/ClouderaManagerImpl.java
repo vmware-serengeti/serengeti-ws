@@ -375,7 +375,7 @@ public class ClouderaManagerImpl extends AbstractSoftwareManager implements Soft
       CmClusterDef clusterDef = null;
       try {
          clusterDef = new CmClusterDef(blueprint);
-         ReflectionUtils.getPreStartServicesHook().preStartServices(blueprint.getName(), forceScaleOut);
+         ReflectionUtils.getPreStartServicesHook().preStartServices(blueprint.getName(), addedNodeNames, forceScaleOut);
 
          provisionCluster(clusterDef, addedNodeNames, reportQueue, true, forceScaleOut);
          provisionParcels(clusterDef, addedNodeNames, reportQueue);

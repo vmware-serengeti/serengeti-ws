@@ -16,6 +16,7 @@ package com.vmware.bdd.aop.software;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -95,11 +96,11 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
 
    @Override
    public void preStartServices(String clusterName) throws SoftwareManagementPluginException {
-      preStartServices(clusterName, false);
+      preStartServices(clusterName, Collections.EMPTY_LIST, false);
    }
 
    @Override
-   public void preStartServices(String clusterName, boolean force) throws SoftwareManagementPluginException {
+   public void preStartServices(String clusterName, List<String> addedNodeNameList, boolean force) throws SoftwareManagementPluginException {
       logger.info("Pre configuration for cluster " + clusterName);
       synchronized(this) {
          if (clusterEntityMgr == null) {
@@ -110,7 +111,7 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
 
       waitVmBootup(clusterName, force);
 
-      updateNodes(clusterName, force);
+      updateNodes(clusterName, addedNodeNameList, force);
    }
 
    private void waitVmBootup(String clusterName, boolean force) {
@@ -164,7 +165,7 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
    }
 
    @Transactional
-   private Void updateNodes(final String clusterName, final boolean force) {
+   private Void updateNodes(final String clusterName, final List<String> addedNodeNameList, final boolean force) {
 
       return VcContext.inVcSessionDo(new VcSession<Void>() {
          @Override
@@ -179,6 +180,9 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
                node = clusterEntityMgr.getNodeWithNicsByMobId(node.getMoId());
 
                if (force && !node.nicsReady()) {
+                  logger.warn(String.format("try to remove node %s for nicsNotReady", node.getVmName()));
+                  //remove the node from resizing nodes list
+                  addedNodeNameList.remove(node.getVmName());
                   continue;
                }
 
@@ -189,6 +193,10 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
                   logger.error(errMsg);
                   if (force) {
                      logger.warn(JobConstants.FORCE_CLUSTER_OPERATION_IGNORE_EXCEPTION);
+
+                     logger.warn(String.format("try to remove node %s for NoFQDN", node.getVmName()));
+                     //remove the node from resizing nodes list
+                     addedNodeNameList.remove(node.getVmName());
                      continue;
                   } else {
                      throw SoftwareManagementException.FAILED_TO_GET_FQDN(vm.getName());
