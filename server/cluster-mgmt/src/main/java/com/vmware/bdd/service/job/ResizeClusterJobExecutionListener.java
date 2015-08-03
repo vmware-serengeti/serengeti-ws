@@ -49,10 +49,10 @@ public class ResizeClusterJobExecutionListener extends
 
       final Long oldInstanceNum = getJobParameters(je).getLong(
                   JobConstants.GROUP_INSTANCE_OLD_NUMBER_JOB_PARAM, 0);
-      if (!success ||
-            hasNotReadyNodes(je) ||
-            hasSoftwareBootstapFailedNodes(clusterName, groupName, oldInstanceNum)) {
-         // resize cluster failed, revert defined instance number value
+      if (!success || hasNotReadyNodes(je)) {
+          // TODO: need to discuss whether to check the software provision status
+          // || hasSoftwareBootstapFailedNodes(clusterName, groupName, oldInstanceNum)) {
+         logger.warn("resize cluster failed, revert to the original defined instance number " + oldInstanceNum.intValue());
          updateDefinedInstanceNum(clusterName, groupName, oldInstanceNum);
       }
    }
