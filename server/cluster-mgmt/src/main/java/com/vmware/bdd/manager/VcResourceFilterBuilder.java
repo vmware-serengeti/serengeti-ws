@@ -46,6 +46,7 @@ public class VcResourceFilterBuilder {
                vcDsNameRegs[i] = CommonUtil.getDatastoreJavaPattern(dsEntity.getVcDatastore());
             }
          }
+         i++;
       }
 
       filters.addNameFilter(VC_RESOURCE_TYPE.DATA_STORE, vcDsNameRegs, true);
@@ -57,6 +58,7 @@ public class VcResourceFilterBuilder {
       for(String rpSpecName : rpNames) {
          VcResourcePoolEntity rpEntity = rpDao.findByName(rpSpecName);
          vcClusterNames[i] = rpEntity.getVcCluster();
+         i++;
       }
 
       filters.addNameFilter(VC_RESOURCE_TYPE.CLUSTER, vcClusterNames, false);
@@ -67,6 +69,7 @@ public class VcResourceFilterBuilder {
       for(String networkName : networkNames) {
          NetworkEntity networkEntity = networkDao.findNetworkByName(networkName);
          vcNetworkNames[i] = networkEntity.getPortGroup();
+         i++;
       }
 
       filters.addHostFilterByNetwork(vcNetworkNames);
