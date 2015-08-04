@@ -15,34 +15,14 @@
 
 package com.vmware.aurora.vc;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.EnumSet;
-
-import org.apache.log4j.Logger;
-
-import com.vmware.aurora.exception.AuroraException;
 import com.vmware.aurora.exception.VcException;
-import com.vmware.aurora.stats.Profiler;
-import com.vmware.aurora.stats.StatsType;
-import com.vmware.aurora.util.AuAssert;
-import com.vmware.aurora.vc.vcservice.VcContext;
-import com.vmware.vim.binding.vim.ClusterComputeResource;
-import com.vmware.vim.binding.vim.Datacenter;
-import com.vmware.vim.binding.vim.Datastore;
-import com.vmware.vim.binding.vim.HostSystem;
-import com.vmware.vim.binding.vim.Network;
-import com.vmware.vim.binding.vim.ResourcePool;
-import com.vmware.vim.binding.vim.Task;
-import com.vmware.vim.binding.vim.VirtualApp;
-import com.vmware.vim.binding.vim.VirtualMachine;
+import com.vmware.vim.binding.vim.*;
 import com.vmware.vim.binding.vim.dvs.DistributedVirtualPortgroup;
 import com.vmware.vim.binding.vim.vm.Snapshot;
 import com.vmware.vim.binding.vmodl.ManagedObject;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
-import com.vmware.vim.binding.vmodl.fault.ManagedObjectNotFound;
+
+import java.io.Serializable;
 
 public interface VcObject extends Serializable, VcCache.IVcCacheObject {
    /**
@@ -108,6 +88,8 @@ public interface VcObject extends Serializable, VcCache.IVcCacheObject {
     * @return a unique string for the VC object.
     */
    String getId();
+
+   String getName();
 
    /**
     * @return enum type of the VC object.
