@@ -10,6 +10,7 @@ import com.vmware.bdd.service.resmgmt.sync.SyncVcResourceSp;
 import com.vmware.bdd.service.resmgmt.sync.filter.VcResourceFilters;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -33,7 +34,8 @@ public class VcInventorySyncService implements IVcInventorySyncService {
 
    private AtomicBoolean inProgress = new AtomicBoolean(false);
 
-   private VcInventorySyncCounters counters = new VcInventorySyncCounters();
+   @Autowired
+   private VcInventorySyncCounters counters;
 
    private long waitMilliSecs = 100l;
 

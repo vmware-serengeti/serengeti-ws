@@ -1,4 +1,7 @@
-package com.vmware.bdd.mbean.resmgmt;
+package com.vmware.bdd.service.resmgmt.impl;
+
+import org.springframework.jmx.export.annotation.ManagedAttribute;
+import org.springframework.jmx.export.annotation.ManagedResource;
 
 /**
  * Created by xiaoliangl on 7/28/15.

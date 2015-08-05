@@ -1,7 +1,8 @@
 package com.vmware.bdd.service.resmgmt.impl;
 
-import com.vmware.bdd.mbean.resmgmt.VcInventorySyncCountersMBean;
+import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicIntegerArray;
@@ -9,13 +10,14 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 /**
  * Created by xiaoliangl on 7/28/15.
  */
-@ManagedResource
-public class VcInventorySyncCounters implements VcInventorySyncCountersMBean {
-   private AtomicBoolean refreshInProgress = new AtomicBoolean(false);
 
+@Component
+@ManagedResource(objectName= "bean:name=VcInventorySyncCountersMBean" , description= "My First Bean" )
+public class VcInventorySyncCounters {
+   private AtomicBoolean refreshInProgress = new AtomicBoolean(false);
    private AtomicIntegerArray counters = new AtomicIntegerArray(3);
 
-   @Override
+   @ManagedAttribute(description="The RefreshInProgress Attribute")
    public boolean isRefreshInProgress() {
       return refreshInProgress.get();
    }
@@ -24,7 +26,7 @@ public class VcInventorySyncCounters implements VcInventorySyncCountersMBean {
       refreshInProgress.set(flag);
    }
 
-   @Override
+   @ManagedAttribute(description="The InventoryRefresh Attribute")
    public int getInventoryRefresh() {
       return counters.get(0);
    }
@@ -33,7 +35,7 @@ public class VcInventorySyncCounters implements VcInventorySyncCountersMBean {
       counters.incrementAndGet(0);
    }
 
-   @Override
+   @ManagedAttribute
    public int getFinishedRefresh() {
       return counters.get(1);
    }
@@ -42,7 +44,7 @@ public class VcInventorySyncCounters implements VcInventorySyncCountersMBean {
       counters.incrementAndGet(1);
    }
 
-   @Override
+   @ManagedAttribute
    public int getPendingRefresh() {
       return counters.get(2);
    }
