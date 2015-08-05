@@ -5,6 +5,7 @@ import com.vmware.aurora.vc.VcHost;
 import com.vmware.bdd.utils.AuAssert;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -58,5 +59,9 @@ public class HostFilterByDatastore implements IVcResourceFilter<VcHost> {
       }
 
       return isMatched;
+   }
+
+   public String toString() {
+      return new ToStringBuilder(this).append("datastore_regx", regxList).toString();
    }
 }

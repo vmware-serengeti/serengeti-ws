@@ -97,10 +97,12 @@ public class VcResourceFilters {
       if(CollectionUtils.isNotEmpty(filterList)) {
          for (IVcResourceFilter filter : filterList) {
             isFiltered = filter.isFiltered(vcObject);
+
+            if(LOGGER.isDebugEnabled()) {
+               LOGGER.debug(vcObject.getName() + " is filtered by " + filter + ": " + isFiltered);
+            }
+
             if(isFiltered) {
-               if(LOGGER.isDebugEnabled()) {
-                  LOGGER.debug(vcObject.getName() + " is filtered.");
-               }
                break;
             }
          }

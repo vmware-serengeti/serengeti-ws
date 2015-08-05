@@ -3,6 +3,7 @@ package com.vmware.bdd.service.resmgmt.sync.filter;
 import com.vmware.aurora.vc.VcObject;
 import com.vmware.bdd.utils.AuAssert;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -41,5 +42,9 @@ class VcResourceNameRegFilter<T extends VcObject> implements IVcResourceFilter<T
       }
 
       return !isMatched;
+   }
+
+   public String toString() {
+      return new ToStringBuilder(this).append("regxList", regxList).toString();
    }
 }

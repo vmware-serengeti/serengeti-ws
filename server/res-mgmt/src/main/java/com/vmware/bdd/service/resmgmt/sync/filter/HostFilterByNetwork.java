@@ -5,6 +5,7 @@ import com.vmware.aurora.vc.VcNetwork;
 import com.vmware.bdd.utils.AuAssert;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.util.HashSet;
 import java.util.regex.Pattern;
@@ -38,4 +39,7 @@ public class HostFilterByNetwork implements IVcResourceFilter<VcHost> {
       return matchedNetworkCount == networkNameSet.size();
    }
 
+   public String toString() {
+      return new ToStringBuilder(this).append("networkNameSet", networkNameSet).toString();
+   }
 }
