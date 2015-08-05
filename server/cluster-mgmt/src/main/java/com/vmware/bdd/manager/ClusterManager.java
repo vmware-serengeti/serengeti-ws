@@ -35,6 +35,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
 import com.vmware.bdd.service.resmgmt.IVcInventorySyncService;
+import com.vmware.bdd.service.resmgmt.sync.filter.VcResourceFilters;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -125,6 +127,9 @@ public class ClusterManager {
 
    @Autowired
    private ClusterUserMgmtValidService clusterUserMgmtValidService;
+
+   @Autowired
+   private VcResourceFilterBuilder vcResourceFilterBuilder;
 
    @Autowired
    private UnsupportedOpsBlocker opsBlocker;
@@ -451,7 +456,7 @@ public class ClusterManager {
       if (softMgr.getType().equalsIgnoreCase(Constants.CLOUDERA_MANAGER_PLUGIN_TYPE)) {
          validateServiceUserAndGroupsInLdap(clusterSpec);
       }
-      logger.info("ClusteringService, creating cluster " + name);
+      logger.info("start to create a cluster: " + name);
 
       List<String> dsNames = getUsedDS(clusterSpec.getDsNames());
       if (dsNames.isEmpty()) {
@@ -463,7 +468,10 @@ public class ClusterManager {
       }
 
       //this.resMgr.refreshVcResources();
-      syncService.refreshInventory();
+
+      VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
+            getRpNames(clusterSpec.getRpNames()), createSpec.getNetworkNames());
+      syncService.refreshInventory(filters);
 
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
@@ -610,6 +618,16 @@ public class ClusterManager {
       return specifiedDsNames;
    }
 
+   private List<String> getRpNames(List<String> rpNames) {
+      if(CollectionUtils.isEmpty(rpNames)) {
+         List<String> newRpNameList = new ArrayList<>();
+         newRpNameList.addAll(clusterConfigMgr.getRpMgr().getAllRPNames());
+         return newRpNameList;
+      }
+
+      return rpNames;
+   }
+
    private List<VcCluster> getUsedVcClusters(List<String> rpNames) {
       List<VcCluster> clusters = null;
       if (rpNames == null || rpNames.isEmpty()) {
@@ -736,7 +754,9 @@ public class ClusterManager {
       }
 
       //this.resMgr.refreshVcResources();
-      syncService.refreshInventory();
+      VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
+            getRpNames(cluster.getVcRpNameList()), cluster.fetchNetworkNameList());
+      syncService.refreshInventory(filters);
 
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
@@ -975,7 +995,9 @@ public class ClusterManager {
       }
 
       //this.resMgr.refreshVcResources();
-      syncService.refreshInventory();
+      VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
+            getRpNames(cluster.getVcRpNameList()), cluster.fetchNetworkNameList());
+      syncService.refreshInventory(filters);
 
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
