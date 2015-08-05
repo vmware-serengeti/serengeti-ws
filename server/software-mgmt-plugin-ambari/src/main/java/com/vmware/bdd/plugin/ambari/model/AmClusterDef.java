@@ -367,14 +367,6 @@ public class AmClusterDef implements Serializable {
       this.ambariServerVersion = ambariServerVersion;
    }
 
-   public String getAmbariServerVersion() {
-      return ambariServerVersion;
-   }
-
-   public void setAmbariServerVersion(String ambariServerVersion) {
-      this.ambariServerVersion = ambariServerVersion;
-   }
-
    public ApiClusterBlueprint toApiClusterBlueprint() {
       ApiClusterBlueprint apiClusterBlueprint = new ApiClusterBlueprint();
       apiClusterBlueprint.setBlueprint(name);
