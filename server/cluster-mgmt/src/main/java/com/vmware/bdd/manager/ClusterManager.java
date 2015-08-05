@@ -34,6 +34,7 @@ import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
 import com.vmware.bdd.service.resmgmt.IVcInventorySyncService;
+import com.vmware.bdd.service.resmgmt.sync.filter.VcResourceFilters;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
@@ -42,6 +43,7 @@ import com.vmware.bdd.specpolicy.CommonClusterExpandPolicy;
 import com.vmware.bdd.spectypes.IronfanStack;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.*;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -71,6 +73,9 @@ public class ClusterManager {
 
    private IExecutionService executionService;
    private SoftwareManagerCollector softwareManagerCollector;
+
+   @Autowired
+   private VcResourceFilterBuilder vcResourceFilterBuilder;
 
    @Autowired
    private UnsupportedOpsBlocker opsBlocker;
@@ -382,7 +387,12 @@ public class ClusterManager {
          }
       }
       String name = clusterSpec.getName();
-      logger.info("ClusteringService, creating cluster " + name);
+
+      validateInfraConfig(clusterSpec);
+      if (softMgr.getType().equalsIgnoreCase(Constants.CLOUDERA_MANAGER_PLUGIN_TYPE)) {
+         validateServiceUserAndGroupsInLdap(clusterSpec);
+      }
+      logger.info("start to create a cluster: " + name);
 
       List<String> dsNames = getUsedDS(clusterSpec.getDsNames());
       if (dsNames.isEmpty()) {
@@ -393,7 +403,9 @@ public class ClusterManager {
          throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
       }
 
-      syncService.refreshInventory();
+      VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
+            getRpNames(clusterSpec.getRpNames()), createSpec.getNetworkNames());
+      syncService.refreshInventory(filters);
 
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
@@ -469,7 +481,7 @@ public class ClusterManager {
             vcClusterNames.add(vcCluster.getName());
          }
          throw ClusterConfigException.DATASTORE_UNACCESSIBLE(vcClusterNames,
-        		 dsNames);
+               dsNames);
       }
    }
 
@@ -480,6 +492,16 @@ public class ClusterManager {
                .getAllDatastoreNames());
       }
       return specifiedDsNames;
+   }
+
+   private List<String> getRpNames(List<String> rpNames) {
+      if(CollectionUtils.isEmpty(rpNames)) {
+         List<String> newRpNameList = new ArrayList<>();
+         newRpNameList.addAll(clusterConfigMgr.getRpMgr().getAllRPNames());
+         return newRpNameList;
+      }
+
+      return rpNames;
    }
 
    private List<VcCluster> getUsedVcClusters(List<String> rpNames) {
@@ -582,7 +604,9 @@ public class ClusterManager {
          throw ClusterConfigException.NO_DATASTORE_ADDED();
       }
 
-      syncService.refreshInventory();
+      VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
+            getRpNames(cluster.getVcRpNameList()), cluster.fetchNetworkNameList());
+      syncService.refreshInventory(filters);
 
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
@@ -815,7 +839,10 @@ public class ClusterManager {
          throw ClusterConfigException.NO_DATASTORE_ADDED();
       }
 
-      syncService.refreshInventory();
+      //this.resMgr.refreshVcResources();
+      VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
+            getRpNames(cluster.getVcRpNameList()), cluster.fetchNetworkNameList());
+      syncService.refreshInventory(filters);
 
       // validate accessibility
       validateDatastore(dsNames, vcClusters);

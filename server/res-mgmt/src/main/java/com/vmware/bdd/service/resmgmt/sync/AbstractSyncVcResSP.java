@@ -1,6 +1,7 @@
 package com.vmware.bdd.service.resmgmt.sync;
 
 import com.vmware.aurora.vc.*;
+import com.vmware.bdd.service.resmgmt.sync.filter.VcResourceFilters;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 import org.apache.log4j.Logger;
 
@@ -14,10 +15,15 @@ import java.util.concurrent.Callable;
 public abstract class AbstractSyncVcResSP implements Callable<List<AbstractSyncVcResSP>> {
    private final static Logger LOGGER = Logger.getLogger(AbstractSyncVcResSP.class);
 
+   private VcResourceFilters vcResourceFilters = null;
+
    protected List<AbstractSyncVcResSP> getSyncResourceSpList(ManagedObjectReference[] moRefs) {
       List<AbstractSyncVcResSP> syncChildSpList = new ArrayList<>();
       for (ManagedObjectReference moRef : moRefs) {
-         syncChildSpList.add(getSyncResourceSp(moRef));
+         AbstractSyncVcResSP syncVcResSP = getSyncResourceSp(moRef);
+         if(syncVcResSP != null) {
+            syncChildSpList.add(syncVcResSP);
+         }
       }
 
       return syncChildSpList;
@@ -26,7 +32,10 @@ public abstract class AbstractSyncVcResSP implements Callable<List<AbstractSyncV
    protected List<AbstractSyncVcResSP> getSyncResourceSpList(Iterable<ManagedObjectReference> moRefs) {
       List<AbstractSyncVcResSP> syncChildSpList = new ArrayList<>();
       for (ManagedObjectReference moRef : moRefs) {
-         syncChildSpList.add(getSyncResourceSp(moRef));
+         AbstractSyncVcResSP syncVcResSP = getSyncResourceSp(moRef);
+         if(syncVcResSP != null) {
+            syncChildSpList.add(syncVcResSP);
+         }
       }
 
       return syncChildSpList;
@@ -36,11 +45,29 @@ public abstract class AbstractSyncVcResSP implements Callable<List<AbstractSyncV
       VcObject vcObject = VcCache.lookup(moRef);
       //Vc Object exists meaning the object has been loaded before.
       // otherwise it's a newly added vc resource.
+
+      AbstractSyncVcResSP newSyncVcResSp = null;
       if (vcObject != null) {
-         return (new SyncResourceSp(vcObject));
+         if(vcResourceFilters == null || !vcResourceFilters.isFiltered(vcObject)) {
+            newSyncVcResSp = new SyncResourceSp(vcObject);
+         }
       } else {
-         return (new SyncVcResourceSp(moRef));
+         newSyncVcResSp = new SyncVcResourceSp(moRef);
       }
+
+      if(newSyncVcResSp != null && vcResourceFilters != null) {
+         newSyncVcResSp.setVcResourceFilters(vcResourceFilters);
+      }
+
+      return newSyncVcResSp;
+   }
+
+   /**
+    *
+    * @param vcResourceFilters filters to exclude vc resources from refresh.
+    */
+   public void setVcResourceFilters(VcResourceFilters vcResourceFilters) {
+      this.vcResourceFilters = vcResourceFilters;
    }
 
    @Override
