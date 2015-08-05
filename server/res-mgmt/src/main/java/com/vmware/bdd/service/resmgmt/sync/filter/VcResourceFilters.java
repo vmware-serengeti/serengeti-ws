@@ -27,7 +27,7 @@ public class VcResourceFilters {
 
 
          if(isReg) {
-            vcResourceFilterList.add(new VcResourceNameRegFilter<T>(resourceNames));
+            vcResourceFilterList.add(new VcResourceNameRegxFilter<T>(resourceNames));
          } else {
             vcResourceFilterList.add(new VcResourceNameFilter<T>(resourceNames));
          }
@@ -46,7 +46,7 @@ public class VcResourceFilters {
             filterMap.put(VC_RESOURCE_TYPE.HOST, vcResourceFilterList);
          }
 
-         vcResourceFilterList.add(new HostFilterByDatastore(vcDsNameRegxs));
+         vcResourceFilterList.add(new HostFilterByDsNameRegx(vcDsNameRegxs));
       } else {
          LOGGER.warn("can't create an empty host by datastore filter!");
       }

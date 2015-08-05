@@ -8,38 +8,39 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.util.HashSet;
-import java.util.regex.Pattern;
 
 /**
  * Created by xiaoliangl on 8/3/15.
  */
 public class HostFilterByNetwork implements IVcResourceFilter<VcHost> {
-   private HashSet<String> networkNameSet = new HashSet<>();
+   private HashSet<String> requiredNetworkNameSet = new HashSet<>();
 
    public HostFilterByNetwork(String[] vcNetworkNames) {
       AuAssert.check(ArrayUtils.isNotEmpty(vcNetworkNames), "can't build an empty name regx filter.");
 
       for (String name : vcNetworkNames) {
-         networkNameSet.add(name);
+         requiredNetworkNameSet.add(name);
       }
    }
 
    @Override
    public boolean isFiltered(VcHost vcHost) {
-      int matchedNetworkCount = 0;
+      boolean networkAccessible = false;
+
+      HashSet<String> hostNetworkNameSet = new HashSet<>();
       if(CollectionUtils.isNotEmpty(vcHost.getNetworks())) {
          for(VcNetwork vcNetwork : vcHost.getNetworks()) {
-            if(networkNameSet.contains(vcNetwork.getName())) {
-               matchedNetworkCount ++;
-            }
+            hostNetworkNameSet.add(vcNetwork.getName());
          }
+
+         networkAccessible = hostNetworkNameSet.containsAll(requiredNetworkNameSet);
       }
 
 
-      return matchedNetworkCount == networkNameSet.size();
+      return !networkAccessible;
    }
 
    public String toString() {
-      return new ToStringBuilder(this).append("networkNameSet", networkNameSet).toString();
+      return new ToStringBuilder(this).append("requiredNetworkNameSet", requiredNetworkNameSet).toString();
    }
 }
