@@ -748,7 +748,9 @@ public class ClusterManager {
       }
 
       //this.resMgr.refreshVcResources();
-      syncService.refreshInventory();
+      VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
+            getRpNames(cluster.getVcRpNameList()), cluster.fetchNetworkNameList());
+      syncService.refreshInventory(filters);
 
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
@@ -987,7 +989,9 @@ public class ClusterManager {
       }
 
       //this.resMgr.refreshVcResources();
-      syncService.refreshInventory();
+      VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
+            getRpNames(cluster.getVcRpNameList()), cluster.fetchNetworkNameList());
+      syncService.refreshInventory(filters);
 
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
