@@ -2,11 +2,10 @@ package com.vmware.bdd.service.resmgmt.impl;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vmware.aurora.util.CmsWorker;
-import com.vmware.bdd.service.resmgmt.IVcInventorySyncService;
-import com.vmware.bdd.service.utils.VcResourceUtils;
+
+import com.vmware.bdd.service.resmgmt.VC_RESOURCE_TYPE;
+import com.vmware.bdd.service.resmgmt.sync.filter.VcResourceFilters;
 import org.apache.log4j.Logger;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -105,6 +104,39 @@ public class VcInventorySyncServiceTest extends BaseResourceTest {
       logPerformance(counters);
 
       while (!future1.isDone() || !future2.isDone()) {
+         try {
+            Thread.sleep(500);
+         } catch (InterruptedException e) {
+            e.printStackTrace();
+         }
+      }
+   }
+
+   @Test
+   public void testSyncWithFilter() throws InterruptedException, IOException {
+      syncService.setCounters(counters);
+
+      ExecutorService es = Executors.newFixedThreadPool(2);
+
+      Runnable refresher = new Runnable() {
+         @Override
+         public void run() {
+            try {
+               VcResourceFilters vcResourceFilters = new VcResourceFilters();
+               vcResourceFilters = vcResourceFilters.addNameFilter(VC_RESOURCE_TYPE.DATA_STORE, new String[]{"DS_DC0_C0_H0_0",
+                     "DS_DC0_C0_H0_1", "DS_DC0_C0_H0_2", "DS_DC0_C0_H0_3", "DS_DC0_C0_H0_4", "DS_DC0_C0_H0_5",
+                     "DS_DC0_C0_H0_6", "DS_DC0_C0_H0_7", "DS_DC0_C0_H0_8", "DS_DC0_C0_H0_9"}, false);
+               syncService.refreshInventory(vcResourceFilters);
+            } catch (InterruptedException e) {
+               e.printStackTrace();
+            }
+         }
+      };
+      Future<?> future1 = es.submit(refresher);
+
+      logPerformance(counters);
+
+      while (!future1.isDone()) {
          try {
             Thread.sleep(500);
          } catch (InterruptedException e) {
