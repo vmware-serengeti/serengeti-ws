@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.springframework.batch.core.scope.context.ChunkContext;
 
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcVirtualMachine;
@@ -41,7 +42,6 @@ import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.IExecutionService;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.spectypes.NicSpec;
-import org.springframework.batch.core.scope.context.ChunkContext;
 
 public class JobUtils {
    private static final Logger logger = Logger.getLogger(JobUtils.class);
@@ -197,11 +197,7 @@ public class JobUtils {
          }
          for (NodeEntity nodeEntity : nodeEntities) {
             BaseNode node = convertNode(cluster, group, nodeEntity);
-            VcVirtualMachine vm = null;
-            if (node.getVmMobId() != null) {
-               vm = VcCache.getIgnoreMissing(node.getVmMobId());
-            } else
-               logger.warn("Node " + node.getVmName() + " mobid is null.");
+            VcVirtualMachine vm = ClusterUtil.getVcVm(entityMgr, nodeEntity);
             if (vm == null) {
                logger.warn("Cannot find VM in VcCache for node "
                      + node.getVmName() + " whose mobid is "
@@ -252,7 +248,7 @@ public class JobUtils {
    }
 
    public static void verifyNodeStatus(NodeEntity node,
-         NodeStatus expectedStatus, boolean ignoreMissing) {
+         NodeStatus expectedStatus, boolean ignoreMissing, IClusterEntityManager clusterEntityMgr) {
       if (node.getStatus() != expectedStatus) {
          if (ignoreMissing
                && (node.getStatus() == NodeStatus.NOT_EXIST || node
@@ -266,7 +262,7 @@ public class JobUtils {
             throw ClusteringServiceException.VM_UNAVAILABLE(node.getVmName());
          }
          // verify from VC
-         VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
+         VcVirtualMachine vm = ClusterUtil.getVcVm(clusterEntityMgr, node);
 
          if (expectedStatus == NodeStatus.VM_READY) {
 
@@ -301,11 +297,11 @@ public class JobUtils {
    }
 
    public static boolean verifyNodesStatus(List<NodeEntity> nodes,
-         NodeStatus expectedStatus, boolean ignoreMissing) {
+         NodeStatus expectedStatus, boolean ignoreMissing, IClusterEntityManager clusterEntityMgr) {
       boolean success = true;
       for (NodeEntity node : nodes) {
          try {
-            verifyNodeStatus(node, expectedStatus, ignoreMissing);
+            verifyNodeStatus(node, expectedStatus, ignoreMissing, clusterEntityMgr);
          } catch (Exception e) {
             node.setActionFailed(true);
             logger.debug("Node verify failed for " + node.getVmName()
@@ -391,13 +387,13 @@ public class JobUtils {
          }
          toBeVerified.add(node);
       }
-      return verifyNodesStatus(toBeVerified, NodeStatus.VM_READY, false);
+      return verifyNodesStatus(toBeVerified, NodeStatus.VM_READY, false, clusterEntityMgr);
    }
 
    private static boolean verifyAllVmReady(String clusterName,
          IClusterEntityManager clusterEntityMgr) {
       List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(clusterName);
-      return verifyNodesStatus(nodes, NodeStatus.VM_READY, false);
+      return verifyNodesStatus(nodes, NodeStatus.VM_READY, false, clusterEntityMgr);
    }
 
    public static void recordErrorInClusterOperation(ChunkContext chunkContext, String errMsg) {

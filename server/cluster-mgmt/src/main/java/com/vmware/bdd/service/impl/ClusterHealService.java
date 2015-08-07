@@ -22,15 +22,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import com.google.gson.Gson;
-import com.google.gson.internal.Pair;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.gson.internal.Pair;
 import com.vmware.aurora.composition.CreateVmSP;
 import com.vmware.aurora.composition.VmSchema;
 import com.vmware.aurora.composition.compensation.CompensateCreateVmSP;
@@ -48,7 +46,6 @@ import com.vmware.aurora.vc.VmConfigUtil;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.ClusterNetConfigInfo;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeStatus;
@@ -60,7 +57,6 @@ import com.vmware.bdd.exception.ClusterHealServiceException;
 import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
-import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractDatastore;
 import com.vmware.bdd.service.IClusterHealService;
 import com.vmware.bdd.service.IClusteringService;
@@ -74,6 +70,7 @@ import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.ClusterUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.JobUtils;
 import com.vmware.bdd.utils.VcVmUtil;
@@ -638,7 +635,7 @@ public class ClusterHealService implements IClusterHealService {
       NodeEntity node = clusterEntityMgr.findNodeByName(nodeName);
 
       logger.info("start update vm id and host info for node " + nodeName);
-      VcVirtualMachine vm = VcCache.getIgnoreMissing(newVmId);
+      VcVirtualMachine vm = ClusterUtil.getVcVm(clusterEntityMgr, node);
 
       node.setMoId(vm.getId());
       node.setHostName(vm.getHost().getName());
@@ -663,7 +660,7 @@ public class ClusterHealService implements IClusterHealService {
    @Override
    public void verifyNodeStatus(String vmId, String nodeName) {
       NodeEntity nodeEntity = clusterEntityMgr.findNodeByName(nodeName);
-      JobUtils.verifyNodeStatus(nodeEntity, NodeStatus.VM_READY, false);
+      JobUtils.verifyNodeStatus(nodeEntity, NodeStatus.VM_READY, false, clusterEntityMgr);
    }
 
    @Override
@@ -673,7 +670,7 @@ public class ClusterHealService implements IClusterHealService {
             new StartVmPostPowerOn(nodeEntity.fetchAllPortGroups(),
                   Constants.VM_POWER_ON_WAITING_SEC, clusterEntityMgr);
 
-      VcVirtualMachine vcVm = VcCache.getIgnoreMissing(vmId);
+      VcVirtualMachine vcVm = ClusterUtil.getVcVm(clusterEntityMgr, nodeEntity);
 
       if (vcVm == null) {
          logger.error("VC vm does not exist for vmId: " + vmId);
