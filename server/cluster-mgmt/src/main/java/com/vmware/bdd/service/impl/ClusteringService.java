@@ -1469,11 +1469,7 @@ public class ClusteringService implements IClusteringService {
             new HashMap<String, NodeOperationStatus>();
       for (int i = 0; i < nodes.size(); i++) {
          NodeEntity node = nodes.get(i);
-         if (node.getMoId() == null) {
-            logger.info("VC vm does not exist for node: " + node.getVmName());
-            continue;
-         }
-         VcVirtualMachine vcVm = VcCache.getIgnoreMissing(node.getMoId());
+         VcVirtualMachine vcVm = ClusterUtil.getVcVm(clusterEntityMgr, node);
          if (vcVm == null) {
             // cannot find VM
             logger.info("VC vm does not exist for node: " + node.getVmName());
@@ -1571,11 +1567,7 @@ public class ClusteringService implements IClusteringService {
             new HashMap<String, NodeOperationStatus>();
       for (int i = 0; i < nodes.size(); i++) {
          NodeEntity node = nodes.get(i);
-         if (node.getMoId() == null) {
-            logger.info("VC vm does not exist for node: " + node.getVmName());
-            continue;
-         }
-         VcVirtualMachine vcVm = VcCache.getIgnoreMissing(node.getMoId());
+         VcVirtualMachine vcVm = ClusterUtil.getVcVm(clusterEntityMgr, node);
 
          if (vcVm == null) {
             logger.info("VC vm does not exist for node: " + node.getVmName());
@@ -2010,7 +2002,7 @@ public class ClusteringService implements IClusteringService {
          host = VcResourceUtils.findHost(node.getHostName());
       }
 
-      VcVirtualMachine vcVm = VcCache.getIgnoreMissing(node.getMoId());
+      VcVirtualMachine vcVm = ClusterUtil.getVcVm(clusterEntityMgr, node);
       if (vcVm == null) {
          logger.info("VC vm does not exist for node: " + node.getVmName());
          return false;
@@ -2023,12 +2015,9 @@ public class ClusteringService implements IClusteringService {
    public boolean stopSingleVM(String clusterName, String nodeName,
          StatusUpdater statusUpdator, boolean... vmPoweroff) {
       NodeEntity node = this.clusterEntityMgr.findNodeByName(nodeName);
-      if (node.getMoId() == null) {
-         logger.error("vm mobid for node " + node.getVmName() + " is null");
-         return false;
-      }
-      VcVirtualMachine vcVm = VcCache.getIgnoreMissing(node.getMoId());
+      VcVirtualMachine vcVm = ClusterUtil.getVcVm(clusterEntityMgr, node);
       if (vcVm == null) {
+         // cannot find VM
          logger.info("VC vm does not exist for node: " + node.getVmName());
          return false;
       }

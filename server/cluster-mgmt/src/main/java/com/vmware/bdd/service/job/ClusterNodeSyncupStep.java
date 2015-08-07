@@ -75,7 +75,7 @@ public class ClusterNodeSyncupStep extends TrackableTasklet {
          logger.info("all node should be in status " + expectedStatus);
          List<NodeEntity> nodes =
                getClusterEntityMgr().findAllNodes(clusterName);
-         success = JobUtils.verifyNodesStatus(nodes, expectedStatus, true);
+         success = JobUtils.verifyNodesStatus(nodes, expectedStatus, true, getClusterEntityMgr());
          putIntoJobExecutionContext(chunkContext,
                JobConstants.VERIFY_NODE_STATUS_RESULT_PARAM, success);
       }

@@ -1,12 +1,12 @@
 package com.vmware.bdd.utils;
 
-import java.util.List;
-
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.VcVirtualMachine;
+import com.vmware.aurora.vc.vcservice.VcContext;
+import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 
@@ -31,26 +31,32 @@ public class ClusterUtil {
       VcVirtualMachine vcVm = null;
 
       // 1. get the vc cluster and resource pool containing the vm
-      String vmName = node.getVmName();
+      final String vmName = node.getVmName();
       String[] strs = vmName.split("-");
       String clusterName = strs[0];
       String groupName = strs[1];
-      VcResourcePool vcResPool = VcVmUtil.getTargetRp(clusterName, groupName, node);
+      final VcResourcePool vcResPool = VcVmUtil.getTargetRp(clusterName, groupName, node);
 
       // 2. get the vm by vm name from the target resource pool
-      List<VcVirtualMachine> vmList = vcResPool.getChildVMs();
-      for ( VcVirtualMachine vm : vmList ) {
-         if ( vmName.equals(vm.getName()) ) {
-            logger.info("The node vm " + node.getVmName() + " is found in vCenter by vm name.");
-            vcVm = vm;
-            break;
+      // when we get here, it means some vms under the resource pool might have
+      // changed after the last VcCache refresh, so we should update it first to get
+      // the new vm objects
+      VcContext.inVcSessionDo(new VcSession<Void>() {
+         public Void body() throws Exception {
+            vcResPool.update();
+            return null;
          }
-      }
+      });
+      // get the vm by name now
+      vcVm = VcVmUtil.findVmInRp(vcResPool, vmName);
 
       // 3. update the node table in bde db by setting the correct vm moid
       if ( vcVm != null ) {
+         logger.info("The node vm " + node.getVmName() + " is found in vCenter by vm name.");
          String moId = vcVm.getId();
+         String hostName = vcVm.getHost().getName();
          node.setMoId(moId);
+         node.setHostName(hostName);
          clusterEntityMgr.update(node);
       }
 
