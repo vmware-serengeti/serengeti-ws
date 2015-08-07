@@ -414,6 +414,11 @@ public class ClusterSpecFactory {
          newSpec.setDistroVersion(spec.getDistroVersion());
       }
 
+      // template name
+      if (spec.getTemplateName() != null) {
+         newSpec.setTemplateName(spec.getTemplateName());
+      }
+
       // --dsNames
       if (spec.getDsNames() != null) {
          newSpec.setDsNames(spec.getDsNames());

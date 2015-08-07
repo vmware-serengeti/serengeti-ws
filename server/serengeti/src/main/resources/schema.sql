@@ -93,6 +93,7 @@ create table cluster (
    distro_version      varchar(255),
    topology            varchar(255) not null,
    status              varchar(255) not null,
+   template_id         varchar(255),
    vc_datastore_names  text,
    vc_rp_names         text,
    start_after_deploy  boolean,
@@ -110,7 +111,7 @@ create table cluster (
    last_status         varchar(255),
    appmanager          varchar(255),
    advanced_properties text,
-  infrastructure_config text,
+   infrastructure_config text,
    primary key (id)
 );
 
@@ -234,7 +235,21 @@ create table server_info (
   deploy_time  timestamp(0) without time zone
 );
 
-CREATE TABLE usermgmtserver (
+create sequence node_template_seq;
+create table node_template (
+   id          bigint       not null unique DEFAULT nextval('node_template_seq'::regclass),
+   name        varchar(255),
+   moid        varchar(255),
+   last_modified timestamp without time zone,
+   tag         varchar(255),
+   os_family   varchar(255),
+   os_version  varchar(255),
+   primary key (id)
+);
+create index on node_template (name);
+create index on node_template (moid);
+
+create table usermgmtserver (
   name        VARCHAR(50),
   type        VARCHAR(30) not null ,
   baseGroupDn VARCHAR(200) not null ,
@@ -245,7 +260,7 @@ CREATE TABLE usermgmtserver (
   primary key (name)
 );
 
-CREATE TABLE mgmtvmcfg (
+create table mgmtvmcfg (
   name varchar (200),
   value varchar (1000),
   primary key (name)

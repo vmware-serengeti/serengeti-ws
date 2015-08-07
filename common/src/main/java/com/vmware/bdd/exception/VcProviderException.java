@@ -58,6 +58,10 @@ public class VcProviderException extends BddException {
       return new VcProviderException(null, "SERVER_NOT_FOUND", serverMobId);
    }
 
+   public static VcProviderException VM_NOT_FOUND(String mobId) {
+      return new VcProviderException(null, "VM_NOT_FOUND", mobId);
+   }
+
    public static VcProviderException DATASTORE_IS_REFERENCED_BY_CLUSTER(
          List<String> clusterNames) {
       return new VcProviderException(null,

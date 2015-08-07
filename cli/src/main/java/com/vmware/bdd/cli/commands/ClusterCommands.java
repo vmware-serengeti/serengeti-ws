@@ -86,12 +86,12 @@ public class ClusterCommands implements CommandMarker {
       return true;
    }
 
-   @CliCommand(value = "cluster create", help = "Create a hadoop cluster")
+   @CliCommand(value = "cluster create", help = "Create a new cluster")
    public void createCluster(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
          @CliOption(key = { "appManager" }, mandatory = false, help = "The application manager name") final String appManager,
          @CliOption(key = { "type" }, mandatory = false, help = "The cluster type is Hadoop or HBase") final String type,
-         @CliOption(key = { "distro" }, mandatory = false, help = "A hadoop distro name") final String distro,
+         @CliOption(key = { "distro" }, mandatory = false, help = "The distro name") final String distro,
          @CliOption(key = { "specFile" }, mandatory = false, help = "The spec file name path") final String specFilePath,
          @CliOption(key = { "rpNames" }, mandatory = false, help = "Resource Pools for the cluster: use \",\" among names.") final String rpNames,
          @CliOption(key = { "dsNames" }, mandatory = false, help = "Datastores for the cluster: use \",\" among names.") final String dsNames,
@@ -106,8 +106,9 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "localRepoURL" }, mandatory = false, help = "Local yum server URL for application managers, ClouderaManager/Ambari.") final String localRepoURL,
          @CliOption(key = { "adminGroupName" }, mandatory = false, help = "AD/LDAP Admin Group Name.") final String adminGroupName,
          @CliOption(key = { "userGroupName" }, mandatory = false, help = "AD/LDAP User Group Name.") final String userGroupName,
-         @CliOption(key = { "disableLocalUsers" }, mandatory = false, help = "flag to disable local users") final Boolean disableLocalUsersFlag,
-         @CliOption(key = { "skipVcRefresh" }, mandatory = false, help = "flag to skip refreshing VC resources") final Boolean skipVcRefresh
+         @CliOption(key = { "disableLocalUsers" }, mandatory = false, help = "Disable local users") final Boolean disableLocalUsersFlag,
+         @CliOption(key = { "skipVcRefresh" }, mandatory = false, help = "flag to skip refreshing VC resources") final Boolean skipVcRefresh,
+         @CliOption(key = { "template" }, mandatory = false, help = "The node template name") final String templateName
       ) {
       // validate the name
       if (name.indexOf("-") != -1) {
@@ -254,6 +255,8 @@ public class ClusterCommands implements CommandMarker {
       clusterCreate.setDistro(distroRead4Create.getName());
       clusterCreate.setDistroVendor(distroRead4Create.getVendor());
       clusterCreate.setDistroVersion(distroRead4Create.getVersion());
+
+      clusterCreate.setTemplateName(templateName);
 
       if (rpNames != null) {
          List<String> rpNamesList = CommandsUtils.inputsConvert(rpNames);
@@ -612,7 +615,7 @@ public class ClusterCommands implements CommandMarker {
       return true;
    }
 
-   @CliCommand(value = "cluster list", help = "Get cluster information")
+   @CliCommand(value = "cluster list", help = "Show cluster information")
    public void getCluster(
          @CliOption(key = { "name" }, mandatory = false, help = "The cluster name") final String name,
          @CliOption(key = { "detail" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to show node information") final boolean detail) {
@@ -1390,6 +1393,11 @@ public class ClusterCommands implements CommandMarker {
       clusterParams.put("AGENT VERSION", cluster.getVersion());
       clusterParams.put("APP MANAGER", cluster.getAppManager());
       clusterParams.put("DISTRO", cluster.getDistro());
+      clusterParams.put("NODE TEMPLATE", cluster.getTemplateName());
+      String cloneType = cluster.getClusterCloneType();
+      if (!CommandsUtils.isBlank(cloneType)) {
+         clusterParams.put("CLUSTER CLONE TYPE", cloneType.toUpperCase());
+      }
       if (topology != null && topology != TopologyType.NONE) {
          clusterParams.put("TOPOLOGY", topology.toString());
       }
@@ -1408,11 +1416,6 @@ public class ClusterCommands implements CommandMarker {
       if (!CommandsUtils.isBlank(cluster.getExternalMapReduce())) {
          clusterParams
                .put("EXTERNAL MAPREDUCE", cluster.getExternalMapReduce());
-      }
-
-      String cloneType = cluster.getClusterCloneType();
-      if (!CommandsUtils.isBlank(cloneType)) {
-         clusterParams.put("CLUSTER CLONE TYPE", cloneType.toUpperCase());
       }
 
       clusterParams.put("AD/LDAP ENABLED", Boolean.toString(MapUtils.isNotEmpty(userMgmtCfg)));

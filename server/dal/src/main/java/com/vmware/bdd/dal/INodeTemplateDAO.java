@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2012-2013 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2015 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,36 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
+
 package com.vmware.bdd.dal;
 
-import java.io.Serializable;
 import java.util.List;
 
-import org.hibernate.criterion.Criterion;
+import com.vmware.bdd.entity.NodeTemplateEntity;
 
+public interface INodeTemplateDAO extends IBaseDAO<NodeTemplateEntity> {
 
-/**
- * @author Jarred Li
- * @since 0.8
- * @version 0.8
- *
- * @param <T>
- */
-public interface IBaseDAO<T> {
+   NodeTemplateEntity findByMoid(String vmMoid);
+   List<NodeTemplateEntity> findByName(String name);
+   List<NodeTemplateEntity> findAllOrderByName();
 
-   void insert(T object);
-
-   void delete(T object);
-
-   void update(T object);
-
-   List<T> findAll();
-   
-   List<T> findAll(String orderBy, Boolean ascending);
-
-   T findById(Serializable id);
-
-   List<T> findByCriteria(final Criterion... queryCriteria);
-
-   T findUniqueByCriteria(Criterion... queryCriteria);
 }

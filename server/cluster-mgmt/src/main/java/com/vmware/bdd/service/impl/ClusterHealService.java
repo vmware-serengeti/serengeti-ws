@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import com.google.gson.Gson;
 import com.google.gson.internal.Pair;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -48,7 +47,6 @@ import com.vmware.aurora.vc.VmConfigUtil;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.ClusterNetConfigInfo;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeStatus;
@@ -60,7 +58,6 @@ import com.vmware.bdd.exception.ClusterHealServiceException;
 import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
-import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractDatastore;
 import com.vmware.bdd.service.IClusterHealService;
 import com.vmware.bdd.service.IClusteringService;
@@ -517,7 +514,7 @@ public class ClusterHealService implements IClusterHealService {
                List<String> folderNames = Arrays.asList(folderPath.split("/"));
                AuAssert.check(folderNames.size() == 3);
 
-               VcVirtualMachine templateVm = VcCache.get(clusteringService.getTemplateVmId());
+               VcVirtualMachine templateVm = VcCache.get(node.getNodeGroup().getCluster().getTemplateId());
                VcDatacenter dc = templateVm.getDatacenter();
 
                return VcResourceUtils.findFolderByNameList(dc, folderNames);
@@ -547,7 +544,7 @@ public class ClusterHealService implements IClusterHealService {
          String groupName, NodeEntity node, List<DiskSpec> fullDiskSet) {
       VmSchema createSchema =
             VcVmUtil.getVmSchema(clusterSpec, groupName, fullDiskSet,
-                  clusteringService.getTemplateVmId(),
+                  node.getNodeGroup().getCluster().getTemplateId(),
                   Constants.ROOT_SNAPSTHOT_NAME);
 
       Map<String, String> guestVariable = generateMachineId(clusterSpec, node);
@@ -718,7 +715,8 @@ public class ClusterHealService implements IClusterHealService {
 
       List<DiskSpec> fullDiskList = getReplacedFullDisks(node.getVmName(), replacementDisks);
 
-      VmSchema createSchema = VcVmUtil.getVmSchema(spec, groupName, fullDiskList, clusteringService.getTemplateVmId(), Constants.ROOT_SNAPSTHOT_NAME);
+      VmSchema createSchema = VcVmUtil.getVmSchema(spec, groupName, fullDiskList,
+            node.getNodeGroup().getCluster().getTemplateId(), Constants.ROOT_SNAPSTHOT_NAME);
 
       ReplaceVmBadDisksSP replaceVmDisksPrePowerOnSP = new ReplaceVmBadDisksSP(node.getMoId(),
             createSchema.diskSchema, VcVmUtil.getTargetRp(spec.getName(), groupName, node),

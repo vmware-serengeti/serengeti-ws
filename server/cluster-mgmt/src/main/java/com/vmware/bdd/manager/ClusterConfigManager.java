@@ -35,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.vc.DiskSpec.AllocationType;
+import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.apitypes.*;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
@@ -56,6 +57,7 @@ import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
+import com.vmware.bdd.service.resmgmt.INodeTemplateService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
@@ -80,16 +82,15 @@ public class ClusterConfigManager {
    private IDatastoreService datastoreMgr;
    private IClusterEntityManager clusterEntityMgr;
    private IClusteringService clusteringService;
+   @Autowired
+   private INodeTemplateService nodeTemplateService;
 
    private SoftwareManagerCollector softwareManagerCollector;
 
-   private static final String TEMPLATE_ID = "template_id";
    private static final String HTTP_PROXY = "serengeti.http_proxy";
    private static final String NO_PROXY = "serengeti.no_proxy";
    private static final String ELASTIC_RUNTIME_AUTOMATION_ENABLE =
          "elastic_runtime.automation.enable";
-   private String templateId = Configuration.getString(TEMPLATE_ID.toString(),
-         "centos57-x64");
    private String httpProxy = Configuration
          .getString(HTTP_PROXY.toString(), "");
    private String noProxy = Configuration.getStrings(NO_PROXY.toString(), "");
@@ -250,6 +251,7 @@ public class ClusterConfigManager {
          clusterEntity.setDistroVersion(cluster.getDistroVersion());
          clusterEntity.setStartAfterDeploy(true);
          clusterEntity.setPassword(cluster.getPassword());
+         clusterEntity.setTemplateId(this.nodeTemplateService.getNodeTemplateIdByName(cluster.getTemplateName()));
 
          // set cluster version
          clusterEntity.setVersion(clusterEntityMgr.getServerVersion());
@@ -620,10 +622,10 @@ public class ClusterConfigManager {
       }
 
       groupEntity.setCluster(clusterEntity);
+      String templateId = this.nodeTemplateService.getNodeTemplateNameByMoid(clusterEntity.getTemplateId());
       int cpuNum = group.getCpuNum() == null ? 0 : group.getCpuNum();
-      if (!VcVmUtil.validateCPU(clusteringService.getTemplateVmId(), cpuNum)) {
-         throw VcProviderException.CPU_NUM_NOT_MULTIPLE_OF_CORES_PER_SOCKET(
-               group.getName(), clusteringService.getTemplateVmName());
+      if (!VcVmUtil.validateCPU(clusterEntity.getTemplateId(), cpuNum)) {
+         throw VcProviderException.CPU_NUM_NOT_MULTIPLE_OF_CORES_PER_SOCKET(group.getName(), templateId);
       }
 
       groupEntity.setCpuNum(cpuNum);
@@ -794,6 +796,7 @@ public class ClusterConfigManager {
       clusterConfig.setNoProxy(noProxy);
       clusterConfig.setTopologyPolicy(clusterEntity.getTopologyPolicy());
       clusterConfig.setPassword(clusterEntity.getPassword());
+      clusterConfig.setTemplateName(this.nodeTemplateService.getNodeTemplateNameByMoid(clusterEntity.getTemplateId()));
 
       Map<String, String> hostToRackMap = rackInfoMgr.exportHostRackMap();
       if ((clusterConfig.getTopologyPolicy() == TopologyType.RACK_AS_RACK || clusterConfig
@@ -805,7 +808,6 @@ public class ClusterConfigManager {
       }
       clusterConfig.setHostToRackMap(hostToRackMap);
 
-      clusterConfig.setTemplateId(templateId);
       if (clusterEntity.getVcRpNames() != null) {
          logger.debug("resource pool specified at cluster level.");
          String[] rpNames =

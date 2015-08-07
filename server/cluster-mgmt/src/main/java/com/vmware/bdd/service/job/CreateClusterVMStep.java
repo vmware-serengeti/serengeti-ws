@@ -50,8 +50,8 @@ public class CreateClusterVMStep extends TrackableTasklet {
       }
       String clusterCloneType = clusterSpec.getClusterCloneType();
       boolean reserveRawDisks = clusterSpec.getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR);
-      boolean success = clusteringService.createVcVms(clusterSpec.getNetworkings(), nodes, usedIpSets,
-            reserveRawDisks, statusUpdator, clusterCloneType);
+      boolean success = clusteringService.createVcVms(clusterSpec, nodes, usedIpSets,
+            reserveRawDisks, statusUpdator);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_CREATE_VM_OPERATION_SUCCESS, success);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_ADDED_NODES_JOB_PARAM, nodes);
       asyncRefreshUsedResources(nodes);

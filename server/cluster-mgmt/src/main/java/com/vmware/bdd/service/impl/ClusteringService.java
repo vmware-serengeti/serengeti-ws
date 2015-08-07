@@ -34,7 +34,11 @@ import com.vmware.aurora.vc.*;
 import com.vmware.aurora.vc.vcevent.VcEventRouter;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
-import com.vmware.bdd.apitypes.*;
+import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.IpBlock;
+import com.vmware.bdd.apitypes.NetworkAdd;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.clone.spec.VmCreateResult;
 import com.vmware.bdd.clone.spec.VmCreateSpec;
@@ -66,6 +70,7 @@ import com.vmware.bdd.service.job.ClusterNodeUpdator;
 import com.vmware.bdd.service.job.NodeOperationStatus;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.resmgmt.INetworkService;
+import com.vmware.bdd.service.resmgmt.INodeTemplateService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
 import com.vmware.bdd.service.sp.*;
 import com.vmware.bdd.service.utils.VcResourceUtils;
@@ -73,7 +78,13 @@ import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.spectypes.HadoopRole;
-import com.vmware.bdd.utils.*;
+import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.ConfigInfo;
+import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.JobUtils;
+import com.vmware.bdd.utils.VcVmUtil;
+import com.vmware.bdd.utils.Version;
 import com.vmware.bdd.vmclone.service.intf.IClusterCloneService;
 import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
@@ -106,12 +117,12 @@ public class ClusteringService implements IClusteringService {
    private IPlacementService placementService;
    private IClusterInitializerService clusterInitializerService;
    private ElasticityScheduleManager elasticityScheduleMgr;
+   @Autowired
+   private INodeTemplateService nodeTemplateService;
 
-   private VcVirtualMachine templateVm;
-   private BaseNode templateNode;
-   private String templateNetworkLabel;
    private volatile boolean inited = false;
    private Throwable initError;
+
    private int cloneConcurrency;
    private VmEventManager processor;
 
@@ -194,14 +205,6 @@ public class ClusteringService implements IClusteringService {
       this.rpDao = rpDao;
    }
 
-   public String getTemplateVmId() {
-      return templateVm.getId();
-   }
-
-   public String getTemplateVmName() {
-      return templateVm.getName();
-   }
-
    public Map<String, IClusterCloneService> getCloneService() {
       return cloneServiceMap;
    }
@@ -265,16 +268,9 @@ public class ClusteringService implements IClusteringService {
                logger.warn("interupted during sleep " + e.getMessage());
             }
             startVMEventProcessor();
-            String poolSize =
-                  Configuration.getNonEmptyString("serengeti.scheduler.poolsize");
 
-            if (poolSize == null) {
-               Scheduler.init(Constants.DEFAULT_SCHEDULER_POOL_SIZE,
-                     Constants.DEFAULT_SCHEDULER_POOL_SIZE);
-            } else {
-               Scheduler.init(Integer.parseInt(poolSize),
-                     Integer.parseInt(poolSize));
-            }
+            int poolSize = Configuration.getInt("serengeti.scheduler.poolsize", Constants.DEFAULT_SCHEDULER_POOL_SIZE);
+            Scheduler.init(poolSize, poolSize);
 
             String concurrency =
                   Configuration
@@ -293,9 +289,8 @@ public class ClusteringService implements IClusteringService {
             // then add the periodic processing with default 5 minute interval
             CmsWorker.addPeriodic(nodeUpdator);
 
-            prepareTemplateVM();
-            loadTemplateNetworkLable();
-            convertTemplateVm();
+            initUUID();
+
             clusterInitializerService.transformClusterStatus();
             elasticityScheduleMgr.start();
             configureAlarm();
@@ -316,17 +311,16 @@ public class ClusteringService implements IClusteringService {
    }
 
    private void configureAlarm() {
+      VcDatacenter dc = VcResourceUtils.getCurrentDatacenter();
       List<String> folderList = new ArrayList<String>(1);
       String serengetiUUID = ConfigInfo.getSerengetiRootFolder();
       folderList.add(serengetiUUID);
       Folder rootFolder =
-            VcResourceUtils.findFolderByNameList(templateVm.getDatacenter(),
-                  folderList);
+            VcResourceUtils.findFolderByNameList(dc, folderList);
 
       if (rootFolder == null) {
          CreateVMFolderSP sp =
-               new CreateVMFolderSP(templateVm.getDatacenter(), null,
-                     folderList);
+               new CreateVMFolderSP(dc, null, folderList);
          Callable<Void>[] storeProcedures = new Callable[1];
          storeProcedures[0] = sp;
          Map<String, Folder> folders =
@@ -358,65 +352,33 @@ public class ClusteringService implements IClusteringService {
       elasticityScheduleMgr.shutdown();
    }
 
-   private void convertTemplateVm() {
-      templateNode = new BaseNode(templateVm.getName());
-      List<DiskSpec> diskSpecs = new ArrayList<DiskSpec>();
-      for (DeviceId slot : templateVm.getVirtualDiskIds()) {
-         VirtualDisk vmdk = (VirtualDisk) templateVm.getVirtualDevice(slot);
-         DiskSpec spec = new DiskSpec();
-         spec.setSize((int) (vmdk.getCapacityInKB() / (1024 * 1024)));
-         spec.setDiskType(DiskType.SYSTEM_DISK);
-         spec.setController(CommonUtil.getSystemAndSwapControllerType());
-         diskSpecs.add(spec);
-      }
-      templateNode.setDisks(diskSpecs);
-   }
-
-   private VcVirtualMachine getTemplateVm() {
-      String serverMobId =
-            Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
-      if (serverMobId == null) {
-         throw ClusteringServiceException.TEMPLATE_ID_NOT_FOUND();
-      }
-      VcVirtualMachine serverVm = VcCache.get(serverMobId);
-
-      if (ConfigInfo.isDeployAsVApp()) {
-         VcResourcePool vApp = serverVm.getParentVApp();
-         initUUID(vApp.getName());
-         for (VcVirtualMachine vm : vApp.getChildVMs()) {
-            // assume only two vm under serengeti vApp, serengeti server and
-            // template
-            if (!vm.getName().equals(serverVm.getName())) {
-               logger.info("got template vm: " + vm.getName());
-               return vm;
-            }
-         }
-         return null;
-      } else {
-         String templateVmName = ConfigInfo.getTemplateVmName();
-         logger.info(templateVmName);
-         Folder parentFolder = VcResourceUtils.findParentFolderOfVm(serverVm);
-         AuAssert.check(parentFolder != null);
-         initUUID(parentFolder.getName());
-         return VcResourceUtils.findTemplateVmWithinFolder(parentFolder,
-               templateVmName);
-      }
-   }
-
-   private void initUUID(String uuid) {
+   private void initUUID() {
       if (ConfigInfo.isInitUUID()) {
+         String uuid = null;
+         final VcVirtualMachine serverVm = VcResourceUtils.findServerVM();
+         if (ConfigInfo.isDeployAsVApp()) {
+            VcResourcePool vApp = serverVm.getParentVApp();
+            uuid = vApp.getName();
+         } else {
+            Folder parentFolder = VcResourceUtils.findParentFolderOfVm(serverVm);
+            AuAssert.check(parentFolder != null);
+            uuid = parentFolder.getName();
+         }
+
          ConfigInfo.setSerengetiUUID(uuid);
          ConfigInfo.setInitUUID(false);
          ConfigInfo.save();
       }
    }
 
-   private void prepareTemplateVM() {
-      final VcVirtualMachine templateVM = getTemplateVm();
+   private VcVirtualMachine getTemplateVM(String templateName) {
+      return this.nodeTemplateService.getNodeTemplateVMByName(templateName);
+   }
 
-      if (templateVM == null) {
-         throw ClusteringServiceException.TEMPLATE_VM_NOT_FOUND();
-      }
+   private VcVirtualMachine prepareTemplateVM(String templateName) {
+      VcVirtualMachine templateVM = getTemplateVM(templateName);
+      // update vm info in vc cache, in case snapshot is removed by others
+      VcVmUtil.updateVm(templateVM.getId());
 
       try {
          boolean needRemoveSnapshots = false;
@@ -437,7 +399,7 @@ public class ClusteringService implements IClusteringService {
          if (needRemoveSnapshots) {
             removeRootSnapshot(templateVM);
          }
-         this.templateVm = templateVM;
+         return templateVM;
       } catch (Exception e) {
          logger.error("Prepare template VM error: " + e.getMessage());
          throw BddException.INTERNAL(e, "Prepare template VM error.");
@@ -463,8 +425,23 @@ public class ClusteringService implements IClusteringService {
       });
    }
 
-   private void loadTemplateNetworkLable() {
-      templateNetworkLabel = VcContext.inVcSessionDo(new VcSession<String>() {
+   private BaseNode createBaseNodeFromTemplateVm(final VcVirtualMachine templateVm) {
+      BaseNode templateNode = new BaseNode(templateVm.getName());
+      List<DiskSpec> diskSpecs = new ArrayList<DiskSpec>();
+      for (DeviceId slot : templateVm.getVirtualDiskIds()) {
+         VirtualDisk vmdk = (VirtualDisk) templateVm.getVirtualDevice(slot);
+         DiskSpec spec = new DiskSpec();
+         spec.setSize((int) (vmdk.getCapacityInKB() / (1024 * 1024)));
+         spec.setDiskType(DiskType.SYSTEM_DISK);
+         spec.setController(CommonUtil.getSystemAndSwapControllerType());
+         diskSpecs.add(spec);
+      }
+      templateNode.setDisks(diskSpecs);
+      return templateNode;
+   }
+
+   private String getNodeTemplateNetworkLable(final VcVirtualMachine templateVm) {
+      return VcContext.inVcSessionDo(new VcSession<String>() {
          @Override
          protected String body() throws Exception {
             VirtualDevice[] devices =
@@ -479,7 +456,7 @@ public class ClusteringService implements IClusteringService {
       });
    }
 
-   private void updateNicLabels(List<BaseNode> vNodes) {
+   private void updateNicLabels(List<BaseNode> vNodes, String templateNetworkLabel) {
       logger.info("Start to set network schema for template nic.");
       for (BaseNode node : vNodes) {
          List<Network> networks = node.getVmSchema().networkSchema.networks;
@@ -806,6 +783,7 @@ public class ClusteringService implements IClusteringService {
    @SuppressWarnings("unchecked")
    private Map<String, Folder> createVcFolders(ClusterCreate cluster) {
       logger.info("createVcFolders, start to create cluster Folder.");
+      VcVirtualMachine templateVm = getTemplateVM(cluster.getTemplateName());
       // get all nodegroups
       Callable<Void>[] storeProcedures = new Callable[1];
       Folder clusterFolder = null;
@@ -1132,27 +1110,28 @@ public class ClusteringService implements IClusteringService {
 
    @SuppressWarnings("unchecked")
    @Override
-   public boolean createVcVms(List<NetworkAdd> networkAdds,
+   public boolean createVcVms(ClusterCreate clusterSpec,
          List<BaseNode> vNodes, Map<String, Set<String>> occupiedIpSets,
-         boolean reserveRawDisks, StatusUpdater statusUpdator,
-         String clusterCloneType) {
+         boolean reserveRawDisks, StatusUpdater statusUpdator) {
       if (vNodes.isEmpty()) {
          logger.info("No vm to be created.");
          return true;
       }
-      updateNicLabels(vNodes);
-      allocateStaticIp(vNodes, networkAdds, occupiedIpSets);
-      Map<String, Folder> folders = createVcFolders(vNodes.get(0).getCluster());
-      String clusterRpName = createVcResourcePools(vNodes);
-      logger.info("syncCreateVMs, start to create VMs.");
+      List<NetworkAdd> networkAdds = clusterSpec.getNetworkings();
+      String clusterCloneType = clusterSpec.getClusterCloneType();
+      logger.info("syncCreateVMs, start to create VMs for cluster " + clusterSpec.getName());
 
-      // update vm info in vc cache, in case snapshot is removed by others
-      VcVmUtil.updateVm(templateVm.getId());
-
+      logger.info(String.format("Preparing node template VM %s for creating cluster %s", clusterSpec.getTemplateName(), clusterSpec.getName()));
+      VcVirtualMachine templateVm = prepareNodeTemplate(clusterSpec.getTemplateName(), vNodes);
+      logger.info("node template VM moid is " + templateVm.getId());
       VmCreateSpec sourceSpec = new VmCreateSpec();
       sourceSpec.setVmId(templateVm.getId());
       sourceSpec.setVmName(templateVm.getName());
       sourceSpec.setTargetHost(templateVm.getHost());
+
+      allocateStaticIp(vNodes, networkAdds, occupiedIpSets);
+      Map<String, Folder> folders = createVcFolders(vNodes.get(0).getCluster());
+      String clusterRpName = createVcResourcePools(vNodes);
 
       List<VmCreateSpec> specs = new ArrayList<VmCreateSpec>();
       Map<String, BaseNode> nodeMap = new HashMap<String, BaseNode>();
@@ -1163,7 +1142,7 @@ public class ClusteringService implements IClusteringService {
          vNode.setFinished(false);
          // generate create spec for fast clone
          VmCreateSpec spec = new VmCreateSpec();
-         VmSchema createSchema = getVmSchema(vNode);
+         VmSchema createSchema = getVmSchema(vNode, templateVm.getId());
          spec.setSchema(createSchema);
          GuestMachineIdSpec machineIdSpec =
                new GuestMachineIdSpec(networkAdds,
@@ -1231,6 +1210,13 @@ public class ClusteringService implements IClusteringService {
       }
       logger.info(total + " VMs are successfully created.");
       return success;
+   }
+
+   private VcVirtualMachine prepareNodeTemplate(String templateName, List<BaseNode> vNodes) {
+      VcVirtualMachine templateVM = prepareTemplateVM(templateName);
+      String lable = getNodeTemplateNetworkLable(templateVM);
+      updateNicLabels(vNodes, lable);
+      return templateVM;
    }
 
    private IClusterCloneService chooseClusterCloneService(String type) {
@@ -1347,9 +1333,9 @@ public class ClusteringService implements IClusteringService {
       }
    }
 
-   private VmSchema getVmSchema(BaseNode vNode) {
+   private VmSchema getVmSchema(BaseNode vNode, String templateVmId) {
       VmSchema schema = vNode.getVmSchema();
-      schema.diskSchema.setParent(getTemplateVmId());
+      schema.diskSchema.setParent(templateVmId);
       schema.diskSchema.setParentSnap(Constants.ROOT_SNAPSTHOT_NAME);
       return schema;
    }
@@ -1415,7 +1401,8 @@ public class ClusteringService implements IClusteringService {
          filteredHosts.put(PlacementUtil.NETWORK_NAMES, clusterSpec.getNetworkNames());
       }
 
-      container.SetTemplateNode(templateNode);
+      VcVirtualMachine templateVm = getTemplateVM(clusterSpec.getTemplateName());
+      container.SetTemplateNode(createBaseNodeFromTemplateVm(templateVm));
       if (clusterSpec.getHostToRackMap() != null
             && clusterSpec.getHostToRackMap().size() != 0) {
          container.addRackMap(clusterSpec.getHostToRackMap());
@@ -1813,7 +1800,7 @@ public class ClusteringService implements IClusteringService {
       // path format: <serengeti...>/<cluster name>/<group name>
       String[] folderNames = path.split("/");
       AuAssert.check(folderNames.length == 3);
-      VcDatacenter dc = templateVm.getDatacenter();
+      VcDatacenter dc = VcResourceUtils.findVM(node.getVmMobId()).getDatacenter();
       List<String> deletedFolders = new ArrayList<String>();
       deletedFolders.add(folderNames[0]);
       deletedFolders.add(folderNames[1]);
@@ -2105,4 +2092,5 @@ public class ClusteringService implements IClusteringService {
          }
       }
    }
+
 }

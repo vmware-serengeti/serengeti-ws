@@ -38,6 +38,8 @@ import org.apache.log4j.Logger;
 import org.hibernate.annotations.Type;
 
 import com.google.gson.Gson;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.apitypes.ClusterNetConfigInfo;
@@ -87,6 +89,13 @@ public class ClusterEntity extends EntityBase {
 
    @Column(name = "password")
    private String password;
+
+   /*
+    * The moid of node template
+    */
+   @Column(name = "template_id")
+   private String templateId;
+
    /*
     * cluster definition field. VCResourcePool inside this array may not be used
     * by this cluster, so we should avoid setting up the ManyToMany mapping.
@@ -474,5 +483,13 @@ public class ClusterEntity extends EntityBase {
 
    public String getInfraConfig() {
       return infraConfig;
+   }
+
+   public String getTemplateId() {
+      return templateId;
+   }
+
+   public void setTemplateId(String templateId) {
+      this.templateId = templateId;
    }
 }

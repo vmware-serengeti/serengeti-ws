@@ -895,27 +895,8 @@ public class VcVmUtil {
       }
    }
 
-   public static VcVirtualMachine findVmInRp(final VcResourcePool rp,
-         final String vmName) {
-      return VcContext.inVcSessionDo(new VcSession<VcVirtualMachine>() {
-         @Override
-         protected VcVirtualMachine body() throws Exception {
-            VcVirtualMachine targetVm = null;
-            for (VcVirtualMachine vm : rp.getChildVMs()) {
-               if (vm.getName().equals(vmName)) {
-                  targetVm = vm;
-                  break;
-               }
-            }
-
-            return targetVm;
-         }
-
-         @Override
-         protected boolean isTaskSession() {
-            return true;
-         }
-      });
+   public static VcVirtualMachine findVmInRp(final VcResourcePool rp, final String vmName) {
+      return VcResourceUtils.findVmInRp(rp, vmName);
    }
 
    public static void rename(final String vmId, final String newName) {

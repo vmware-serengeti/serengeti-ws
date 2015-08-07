@@ -132,7 +132,7 @@ public class TestClusteringService {
       vNodes.add(node);
       MockTmScheduler.setFlag(VmOperation.CREATE_FOLDER, false);
       try {
-         service.createVcVms(networkAdds, vNodes, null, false, null, "fast");
+         service.createVcVms(spec, vNodes, null, false, null);
          Assert.assertTrue(false, "should throw exception but not.");
       } catch (Exception e) {
          logger.info(e.getMessage(), e);
@@ -153,7 +153,7 @@ public class TestClusteringService {
       MockTmScheduler.setFlag(VmOperation.CREATE_FOLDER, true);
       MockTmScheduler.setResultIsNull(true);
       try {
-         service.createVcVms(networkAdds, vNodes, null, false, null, "fast");
+         service.createVcVms(spec, vNodes, null, false, null);
          Assert.assertTrue(false, "should throw exception but not.");
       } catch (Exception e) {
          logger.info(e.getMessage(), e);
@@ -163,7 +163,6 @@ public class TestClusteringService {
 
    @Test(groups = { "TestClusteringService" }, dependsOnMethods = { "testCreateDhcpVmNullResult" })
    public void testCreateDhcpVmCreateVmFail() throws Exception {
-      List<NetworkAdd> networkAdds = createNetworkAdd();
       List<BaseNode> vNodes = new ArrayList<BaseNode>();
       BaseNode node = new BaseNode("test-master-0");
       // create cluster spec
@@ -218,10 +217,10 @@ public class TestClusteringService {
       cloneServiceMap.put("fastClusterCloneService", cloneService);
       service.setCloneService(cloneServiceMap);
 
-      boolean success = service.createVcVms(networkAdds, vNodes, null, false, null, "fast");
+      boolean success = service.createVcVms(spec, vNodes, null, false, null);
       Assert.assertTrue(!success, "should get create vm failed.");
       MockVcCache.setGetFlag(true);
-      success = service.createVcVms(networkAdds, vNodes, null, false, null, "fast");
+      success = service.createVcVms(spec, vNodes, null, false, null);
       Assert.assertTrue(!success, "should get create vm failed.");
    }
 
@@ -246,6 +245,8 @@ public class TestClusteringService {
    private ClusterCreate createClusterSpec() {
       ClusterCreate spec = new ClusterCreate();
       spec.setName("test");
+      spec.setNetworkings(createNetworkAdd());
+      spec.setClusterCloneType("fast");
       NodeGroupCreate[] nodeGroups = new NodeGroupCreate[1];
       NodeGroupCreate group = new NodeGroupCreate();
       group.setVmFolderPath("root/test/master");
@@ -317,7 +318,7 @@ public class TestClusteringService {
       cloneServiceMap.put("fastClusterCloneService", cloneService);
       service.setCloneService(cloneServiceMap);
 
-      boolean success = service.createVcVms(networkAdds, vNodes, null, false, null, "fast");
+      boolean success = service.createVcVms(spec, vNodes, null, false, null);
       Assert.assertTrue(success, "should get create vm success.");
    }
 

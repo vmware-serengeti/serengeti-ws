@@ -41,6 +41,7 @@ import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
+import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
@@ -284,6 +285,29 @@ public class VcResourceUtils {
       });
    }
 
+   public static List<VcVirtualMachine> findAllTemplateVmsWithinFolder(final Folder parentFolder) {
+      logger.info("find all template VMs in parent folder " + parentFolder.getName());
+      return VcContext.inVcSessionDo(new VcSession<List<VcVirtualMachine>>() {
+         @Override
+         protected List<VcVirtualMachine> body() throws Exception {
+            List<VcVirtualMachine> vms = new ArrayList<VcVirtualMachine>();
+            String serverMobId = getServerMobId();
+            for (ManagedObjectReference vmRef : parentFolder.getChildEntity()) {
+               if (VmodlTypeMap.Factory.getTypeMap()
+                     .getVmodlType(VirtualMachine.class).getWsdlName()
+                     .equals(vmRef.getType())) {
+                  VirtualMachine child = MoUtil.getManagedObject(vmRef);
+                  VcVirtualMachine vm = (VcVirtualMachine) VcCache.get(child);
+                  if (!vm.getId().equalsIgnoreCase(serverMobId)) {
+                     vms.add(vm);
+                  }
+               }
+            }
+            return vms;
+         }
+      });
+   }
+
    public static VcVirtualMachine findTemplateVmWithinFolder(
          final Folder parentFolder, final String templateVmName) {
       logger.info("parent folder name: " + parentFolder.getName());
@@ -374,6 +398,77 @@ public class VcResourceUtils {
                }
             }
             return false;
+         }
+      });
+   }
+
+   public static VcVirtualMachine findNodeTemplateByName(String name) {
+      logger.info("finding node template VM by name " + name);
+      VcVirtualMachine serverVm = VcCache.get(getServerMobId());
+
+      if (ConfigInfo.isDeployAsVApp()) {
+         VcResourcePool vApp = serverVm.getParentVApp();
+         return findVmInRp(vApp, name);
+      } else {
+         Folder parentFolder = VcResourceUtils.findParentFolderOfVm(serverVm);
+         AuAssert.check(parentFolder != null);
+         List<VcVirtualMachine> vms = findAllTemplateVmsWithinFolder(parentFolder);
+         for (VcVirtualMachine vm : vms) {
+            if (vm.getName().equalsIgnoreCase(name)) {
+               return vm;
+            }
+         }
+         return null;
+      }
+   }
+
+   public static List<VcVirtualMachine> findAllNodeTemplates() {
+      logger.info("finding all node template VMs");
+      VcVirtualMachine serverVm = VcCache.get(getServerMobId());
+
+      if (ConfigInfo.isDeployAsVApp()) {
+         VcResourcePool vApp = serverVm.getParentVApp();
+         List<VcVirtualMachine> vms = vApp.getChildVMs();
+         return filterServerVM(vms);
+      } else {
+         Folder parentFolder = VcResourceUtils.findParentFolderOfVm(serverVm);
+         AuAssert.check(parentFolder != null);
+         return findAllTemplateVmsWithinFolder(parentFolder);
+      }
+   }
+
+   private static List<VcVirtualMachine> filterServerVM(List<VcVirtualMachine> vms) {
+      String serverMobId = getServerMobId();
+      for (VcVirtualMachine vm : vms) {
+         if (vm.getId().contains(serverMobId)) {
+            // in serengeti database, the moid is 'null:VirtualMachine:vm-54321'
+            // in serengeti.properties 'vim.cms_moref = VirtualMachine:vm-12345' which does not have 'null:'
+            // not sure why, so use 'contains(serverMobId)' here
+            vms.remove(vm);
+            break;
+         }
+      }
+      return vms;
+   }
+
+   public static VcVirtualMachine findVmInRp(final VcResourcePool rp,
+         final String vmName) {
+      return VcContext.inVcSessionDo(new VcSession<VcVirtualMachine>() {
+         @Override
+         protected VcVirtualMachine body() throws Exception {
+            VcVirtualMachine targetVm = null;
+            for (VcVirtualMachine vm : rp.getChildVMs()) {
+               if (vm.getName().equals(vmName)) {
+                  targetVm = vm;
+                  break;
+               }
+            }
+            return targetVm;
+         }
+
+         @Override
+         protected boolean isTaskSession() {
+            return true;
          }
       });
    }
@@ -740,18 +835,45 @@ public class VcResourceUtils {
          return "";
    }
 
+   public static VcVirtualMachine findVM(final String moid) {
+      final VcVirtualMachine vm =
+            VcContext.inVcSessionDo(new VcSession<VcVirtualMachine>() {
+               @Override
+               protected VcVirtualMachine body() throws Exception {
+                  VcVirtualMachine vm = VcCache.get(moid);
+                  if (vm == null) {
+                     VcProviderException.VM_NOT_FOUND(moid);
+                  }
+                  return vm;
+               }
+            });
+      return vm;
+   }
+
+   public static String getServerMobId() {
+      String serverMobId = Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
+      if (serverMobId == null) {
+         throw ClusteringServiceException.SERVER_VM_ID_NOT_FOUND();
+      }
+      return serverMobId;
+   }
+
+   public static VcVirtualMachine findServerVM() {
+      return findServerVM(getServerMobId());
+   }
+
    /**
     * @param serverMobId
     * @return
     */
-   public static VcVirtualMachine findVM(final String serverMobId) {
+   public static VcVirtualMachine findServerVM(final String serverMobId) {
       final VcVirtualMachine serverVm =
             VcContext.inVcSessionDo(new VcSession<VcVirtualMachine>() {
                @Override
                protected VcVirtualMachine body() throws Exception {
                   VcVirtualMachine vm = VcCache.get(serverMobId);
                   if (vm == null) {
-                     VcProviderException.SERVER_NOT_FOUND(serverMobId);
+                     throw VcProviderException.SERVER_NOT_FOUND(serverMobId);
                   }
                   return vm;
                }
@@ -854,23 +976,29 @@ public class VcResourceUtils {
    }
 
    /*
+    * Get the VcDataCenter which BDE Server belongs to.
+    */
+   public static synchronized VcDatacenter getCurrentDatacenter() {
+      final String serverMobId =
+            Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
+      logger.info("server mob id:" + serverMobId);
+      final VcVirtualMachine serverVm = findServerVM(serverMobId);
+      final VcResourcePool vcRP = getVmRp(serverVm);
+      // only use the resources in the same DataCenter of BDE Server
+      return VcContext.inVcSessionDo(new VcSession<VcDatacenter>() {
+         @Override
+         protected VcDatacenter body() throws Exception {
+            return vcRP.getVcCluster().getDatacenter();
+         }
+      });
+   }
+
+   /*
     * Get the name of the DataCenter which BDE Server belongs to.
     */
    public static synchronized String getCurrentDatacenterName() {
       if (datacenterName == null) {
-         final String serverMobId =
-               Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
-         logger.info("server mob id:" + serverMobId);
-         final VcVirtualMachine serverVm = findVM(serverMobId);
-         final VcResourcePool vcRP = getVmRp(serverVm);
-         // only use the resources in the same DataCenter of BDE Server
-         datacenterName =
-               VcContext.inVcSessionDo(new VcSession<String>() {
-                  @Override
-                  protected String body() throws Exception {
-                     return vcRP.getVcCluster().getDatacenter().getName();
-                  }
-               });
+         datacenterName = getCurrentDatacenter().getName();
       }
       return datacenterName;
    }

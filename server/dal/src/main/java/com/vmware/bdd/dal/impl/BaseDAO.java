@@ -110,6 +110,27 @@ public abstract class BaseDAO<T> implements IBaseDAO<T> {
       return result;
    }
 
+   @Override
+   @SuppressWarnings("unchecked")
+   @Transactional(readOnly = true)
+   public List<T> findAll(String orderBy, Boolean ascending) {
+      logger.debug("findAll orderBy");
+      List<T> result = null;
+      Criteria query =
+            this.sessionFactory.getCurrentSession().createCriteria(type);
+
+      if (orderBy != null && !orderBy.isEmpty()) {
+         if (ascending) {
+            query.addOrder(Order.asc(orderBy));
+         }else {
+            query.addOrder(Order.desc(orderBy));
+         }
+      }
+
+      result = query.list();
+      return result;
+   }
+
    /* (non-Javadoc)
     * @see com.vmware.bdd.dal.IBaseDAO#findById(java.io.Serializable)
     */

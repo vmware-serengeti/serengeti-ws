@@ -45,6 +45,7 @@ import com.vmware.bdd.dal.IClusterDAO;
 import com.vmware.bdd.dal.INetworkDAO;
 import com.vmware.bdd.dal.INodeDAO;
 import com.vmware.bdd.dal.INodeGroupDAO;
+import com.vmware.bdd.dal.INodeTemplateDAO;
 import com.vmware.bdd.dal.IServerInfoDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.DiskEntity;
@@ -55,6 +56,7 @@ import com.vmware.bdd.entity.ServerInfoEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
@@ -83,6 +85,9 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
    private INodeGroupDAO nodeGroupDao;
 
    private INodeDAO nodeDao;
+
+   @Autowired
+   private INodeTemplateDAO nodeTemplateDAO;
 
    private INetworkDAO networkDAO;
 
@@ -718,6 +723,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       clusterRead.setDistro(cluster.getDistro());
       clusterRead.setDistroVendor(cluster.getDistroVendor());
       clusterRead.setTopologyPolicy(cluster.getTopologyPolicy());
+      clusterRead.setTemplateName(nodeTemplateDAO.findByMoid(cluster.getTemplateId()).getName());
       clusterRead.setAutomationEnable(cluster.getAutomationEnable());
       clusterRead.setVhmMinNum(cluster.getVhmMinNum());
       clusterRead.setVhmMaxNum(cluster.getVhmMaxNum());

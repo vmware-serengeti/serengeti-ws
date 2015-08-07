@@ -29,12 +29,24 @@ public class ClusteringServiceException extends BddException {
       super(cause, "CLUSTERING_SERVICE", errorId, detail);
    }
 
-   public static ClusteringServiceException TEMPLATE_ID_NOT_FOUND() {
-      return new ClusteringServiceException(null, "TEMPLATE_ID_NOT_FOUND");
+   public static ClusteringServiceException SERVER_VM_ID_NOT_FOUND() {
+      return new ClusteringServiceException(null, "SERVER_VM_ID_NOT_FOUND");
    }
 
-   public static ClusteringServiceException TEMPLATE_VM_NOT_FOUND() {
-      return new ClusteringServiceException(null, "TEMPLATE_VM_NOT_FOUND");
+   public static ClusteringServiceException TEMPLATE_VM_NOT_FOUND(String name) {
+      return new ClusteringServiceException(null, "TEMPLATE_VM_NOT_FOUND", name);
+   }
+
+   public static ClusteringServiceException NO_AVAILABLE_NODE_TEMPLATE() {
+      return new ClusteringServiceException(null, "NO_AVAILABLE_NODE_TEMPLATE");
+   }
+
+   public static ClusteringServiceException MORE_THAN_ONE_NODE_TEMPLATE() {
+      return new ClusteringServiceException(null, "MORE_THAN_ONE_NODE_TEMPLATE");
+   }
+
+   public static ClusteringServiceException DUPLICATE_NODE_TEMPLATE(String name) {
+      return new ClusteringServiceException(null, "DUPLICATE_NODE_TEMPLATE", name);
    }
 
    public static ClusteringServiceException TARGET_VC_RP_NOT_FOUND(

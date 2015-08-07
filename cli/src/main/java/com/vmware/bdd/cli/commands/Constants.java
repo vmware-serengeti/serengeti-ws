@@ -51,6 +51,7 @@ public class Constants {
    public static final String REST_PATH_CONFIGURATIONS = "configurations";
    public static final String REST_PATH_CLUSTER_RACK = "rack";
    public static final String REST_PATH_CLUSTER_RACK_PARAM_TOPOLOGY = "topology";
+   public static final String REST_PATH_TEMPLATES = "templates";
 
    public static final String QUERY_ACTION_KEY = "state";
    public static final String QUERY_ACTION_START = "start";
@@ -91,6 +92,7 @@ public class Constants {
    public static final String OUTPUT_OBJECT_NODE = "node";
    public static final String OUTPUT_OBJECT_RESOURCEPOOL = "resourcepool";
    public static final String OUTPUT_OBJECT_TOPOLOGY = "topology";
+   public static final String OUTPUT_OBJECT_TEMPLATE = "template";
    public static final String OUTPUT_OP_CREATE = "create";
    public static final String OUTPUT_OP_UPLOAD = "upload";
    public static final String OUTPUT_OP_CONFIG = "config";
@@ -234,6 +236,9 @@ public class Constants {
    public static final String FORMAT_TABLE_COLUMN_DESCRIPTION = "DESCRIPTION";
    public static final String FORMAT_TABLE_COLUMN_URL = "URL";
    public static final String FORMAT_TABLE_COLUMN_USERNAME = "USERNAME";
+   public static final String FORMAT_TABLE_COLUMN_VM_MOID = "MOID";
+   public static final String FORMAT_TABLE_COLUMN_VM_LAST_MODIFIED = "LAST MODIFIED";
+   public static final String FORMAT_TABLE_COLUMN_VM_TAG = "TAG";
    public static final String DEFAULT_DISTRO = "bigtop";
    public static final String PARAM_PROMPT_CONTINUE_MESSAGE = "Are you sure you want to continue (Y/N)? ";
    public static final String PARAM_PROMPT_ADD_CERTIFICATE_MESSAGE = "Are you sure you want to add this certificate (Y/N)? ";

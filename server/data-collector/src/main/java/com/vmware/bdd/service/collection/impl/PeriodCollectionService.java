@@ -191,12 +191,7 @@ public class PeriodCollectionService implements IPeriodCollectionService {
 
    private long getMemoryQuotaSizeOfVC() {
       long totalMemory = 0L;
-      String serverMobId =
-            Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
-      if (serverMobId == null) {
-         throw ClusteringServiceException.TEMPLATE_ID_NOT_FOUND();
-      }
-      VcVirtualMachine serverVm = VcCache.get(serverMobId);
+      VcVirtualMachine serverVm = VcResourceUtils.findServerVM();
       if (serverVm != null) {
          VcDatacenter vcDatacenter = serverVm.getDatacenter();
          if (vcDatacenter != null) {
@@ -216,12 +211,7 @@ public class PeriodCollectionService implements IPeriodCollectionService {
 
    private int getCpuQuotaSizeOfVC() {
       int totalCpu = 0;
-      String serverMobId =
-            Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
-      if (serverMobId == null) {
-         throw ClusteringServiceException.TEMPLATE_ID_NOT_FOUND();
-      }
-      VcVirtualMachine serverVm = VcCache.get(serverMobId);
+      VcVirtualMachine serverVm = VcResourceUtils.findServerVM();
       if (serverVm != null) {
          VcDatacenter vcDatacenter = serverVm.getDatacenter();
          if (vcDatacenter != null) {
@@ -324,12 +314,7 @@ public class PeriodCollectionService implements IPeriodCollectionService {
 
    private int numberOfHostInVC() {
       int numberOfHost = 0;
-      String serverMobId =
-            Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
-      if (serverMobId == null) {
-         throw ClusteringServiceException.TEMPLATE_ID_NOT_FOUND();
-      }
-      VcVirtualMachine serverVm = VcCache.get(serverMobId);
+      VcVirtualMachine serverVm = VcResourceUtils.findServerVM();
       if (serverVm != null) {
          VcDatacenter vcDatacenter = serverVm.getDatacenter();
          if (vcDatacenter != null) {
@@ -407,12 +392,7 @@ public class PeriodCollectionService implements IPeriodCollectionService {
 
    private String getVersionsOfESXi() {
       Map<String, Integer> versionCountMap = new HashMap <>();
-      String serverMobId =
-            Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
-      if (serverMobId == null) {
-         throw ClusteringServiceException.TEMPLATE_ID_NOT_FOUND();
-      }
-      VcVirtualMachine serverVm = VcCache.get(serverMobId);
+      VcVirtualMachine serverVm = VcResourceUtils.findServerVM();
       if (serverVm != null) {
          VcDatacenter vcDatacenter = serverVm.getDatacenter();
          if (vcDatacenter != null) {
@@ -445,14 +425,10 @@ public class PeriodCollectionService implements IPeriodCollectionService {
 
    private String typesOfStorages() {
       StringBuffer typesOfStoragesBuff = new StringBuffer();
-      String serverMobId =
-            Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
       int localTypeOfStorages = 0;
       int remoteTypeOfStorages = 0;
-      if (serverMobId == null) {
-         throw ClusteringServiceException.TEMPLATE_ID_NOT_FOUND();
-      }
-      VcVirtualMachine serverVm = VcCache.get(serverMobId);
+
+      VcVirtualMachine serverVm = VcResourceUtils.findServerVM();
       if (serverVm != null) {
          VcDatacenter vcDatacenter = serverVm.getDatacenter();
          if (vcDatacenter != null) {

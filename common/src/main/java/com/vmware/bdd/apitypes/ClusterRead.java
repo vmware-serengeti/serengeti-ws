@@ -90,6 +90,8 @@ public class ClusterRead implements Comparable<ClusterRead> {
 
    private String clusterCloneType;
 
+   private String templateName;
+
    public ClusterRead() {
 
    }
@@ -562,5 +564,13 @@ public class ClusterRead implements Comparable<ClusterRead> {
 
    public void setClusterCloneType(String clusterCloneType) {
       this.clusterCloneType = clusterCloneType;
+   }
+
+   public String getTemplateName() {
+      return templateName;
+   }
+
+   public void setTemplateName(String templateName) {
+      this.templateName = templateName;
    }
 }

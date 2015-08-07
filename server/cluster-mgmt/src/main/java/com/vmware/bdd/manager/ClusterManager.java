@@ -84,6 +84,7 @@ import com.vmware.bdd.service.IExecutionService;
 import com.vmware.bdd.service.impl.ClusterUserMgmtValidService;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.resmgmt.INetworkService;
+import com.vmware.bdd.service.resmgmt.INodeTemplateService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
@@ -125,6 +126,9 @@ public class ClusterManager {
    private SoftwareManagerCollector softwareManagerCollector;
 
    private ShrinkManager shrinkManager;
+
+   @Autowired
+   private INodeTemplateService nodeTemplateService;
 
    @Autowired
    private ClusterUserMgmtValidService clusterUserMgmtValidService;
@@ -367,7 +371,6 @@ public class ClusterManager {
    public ClusterCreate getClusterSpec(String clusterName) {
       ClusterCreate spec = clusterConfigMgr.getClusterConfig(clusterName);
       spec.setVcClusters(null);
-      spec.setTemplateId(null);
       spec.setDistroMap(null);
       spec.setSharedDatastorePattern(null);
       spec.setLocalDatastorePattern(null);
@@ -443,7 +446,7 @@ public class ClusterManager {
       //Check the cpu, memory max configuration according vm hardware version
       if (clusterSpec != null && clusterSpec.getNodeGroups() != null) {
          for (NodeGroupCreate ng : clusterSpec.getNodeGroups()) {
-            String templateVmId = clusteringService.getTemplateVmId();
+            String templateVmId = this.nodeTemplateService.getNodeTemplateIdByName(clusterSpec.getTemplateName());
             if (templateVmId != null) {
                VcResourceUtils.checkVmMaxConfiguration(templateVmId,
                      ng.getCpuNum() == null ? 0 : ng.getCpuNum(),

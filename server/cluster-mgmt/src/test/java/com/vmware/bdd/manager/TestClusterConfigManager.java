@@ -44,12 +44,6 @@ import com.google.gson.GsonBuilder;
 import com.vmware.bdd.apitypes.*;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
-import com.vmware.bdd.apitypes.DistroRead;
-import com.vmware.bdd.apitypes.InstanceType;
-import com.vmware.bdd.apitypes.IpBlock;
-import com.vmware.bdd.apitypes.NetworkDnsType;
-import com.vmware.bdd.apitypes.NodeGroupCreate;
-import com.vmware.bdd.apitypes.PlacementPolicy;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation.GroupAssociationType;
 import com.vmware.bdd.dal.IServerInfoDAO;
@@ -65,6 +59,7 @@ import com.vmware.bdd.service.impl.ClusteringService;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
+import com.vmware.bdd.service.resmgmt.impl.NodeTemplateService;
 import com.vmware.bdd.service.resmgmt.impl.ResourceInitializerService;
 import com.vmware.bdd.specpolicy.ClusterSpecFactory;
 import com.vmware.bdd.spectypes.HadoopRole;
@@ -161,6 +156,7 @@ public class TestClusterConfigManager {
       clusterEntityMgr =
             context
                   .getBean("clusterEntityManager", IClusterEntityManager.class);
+      NodeTemplateService nodeTemplateService = Mockito.mock(NodeTemplateService.class);
       DistroRead distro = new DistroRead();
       List<String> roles = new ArrayList<String>();
       roles.add("hadoop_namenode");
@@ -172,9 +168,8 @@ public class TestClusterConfigManager {
       roles.add("hive_server");
       roles.add("pig");
       distro.setRoles(roles);
-      Mockito.when(clusteringService.getTemplateVmId()).thenReturn("vm-1234");
-      Mockito.when(clusteringService.getTemplateVmName()).thenReturn(
-            "node-template");
+      Mockito.when(nodeTemplateService.getNodeTemplateIdByName("node-template")).thenReturn("vm-1234");
+      Mockito.when(nodeTemplateService.getNodeTemplateNameByMoid("vm-1234")).thenReturn("node-template");
       Mockito.when(distroMgr.getDistroByName("apache")).thenReturn(distro);
       Mockito.when(distroMgr.checkPackagesExistStatus("apache")).thenReturn(
             PackagesExistStatus.TARBALL);

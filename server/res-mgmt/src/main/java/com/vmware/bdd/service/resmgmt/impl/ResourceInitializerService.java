@@ -140,7 +140,7 @@ public class ResourceInitializerService implements IResourceInitializerService {
       final String serverMobId =
             Configuration.getString(Constants.SERENGETI_SERVER_VM_MOBID);
       logger.info("server mob id:" + serverMobId);
-      final VcVirtualMachine serverVm = VcResourceUtils.findVM(serverMobId);
+      final VcVirtualMachine serverVm = VcResourceUtils.findServerVM(serverMobId);
       final VcResourcePool vcRP = VcResourceUtils.getVmRp(serverVm);
       String clusterName = VcResourceUtils.getRpCluster(vcRP).getName();
       String vcRPName = vcRP.getName();

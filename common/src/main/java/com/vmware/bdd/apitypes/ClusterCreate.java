@@ -60,6 +60,7 @@ public class ClusterCreate implements Serializable {
    private String externalNamenode;
    private String externalSecondaryNamenode;
    private Set<String> externalDatanodes;
+
    @Expose
    @SerializedName("groups")
    private NodeGroupCreate[] nodeGroups;
@@ -83,9 +84,8 @@ public class ClusterCreate implements Serializable {
    @SerializedName("vc_clusters")
    private List<VcCluster> vcClusters;
    @Expose
-   @SerializedName("template_id")
-   @Deprecated
-   private String templateId;
+   @SerializedName("template_name")
+   private String templateName;
    @Expose
    @SerializedName("deploy_policy")
    @Deprecated
@@ -374,13 +374,12 @@ public class ClusterCreate implements Serializable {
       this.vcClusters = vcClusters;
    }
 
-   @RestIgnore
-   public String getTemplateId() {
-      return templateId;
+   public String getTemplateName() {
+      return templateName;
    }
 
-   public void setTemplateId(String templateId) {
-      this.templateId = templateId;
+   public void setTemplateName(String templateName) {
+      this.templateName = templateName;
    }
 
    @RestIgnore

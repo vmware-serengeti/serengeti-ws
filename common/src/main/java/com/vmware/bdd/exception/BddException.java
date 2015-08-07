@@ -261,4 +261,5 @@ public class BddException extends RuntimeException {
    public static BddException CLUSTER_RECOVER_FAILED(String vmNames) {
       return new BddException(null, "CLUSTER", "RECOVER_FAILED", vmNames);
    }
+
 }

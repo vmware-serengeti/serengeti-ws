@@ -158,6 +158,7 @@ public class RestResource {
          throws Exception {
       verifyInitialized();
       String clusterName = createSpec.getName();
+      logger.info(String.format("The specified node template name for creating cluster %s is %s", clusterName, createSpec.getTemplateName()));
       if (!CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }

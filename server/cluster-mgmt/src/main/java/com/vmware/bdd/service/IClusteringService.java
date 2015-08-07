@@ -122,17 +122,16 @@ public interface IClusteringService {
 
    /**
     *
-    * @param networkAdds
+    * @param clusterSpec
     * @param vNodes
     * @param occupiedMgrIps
     * @param reserveRawDisks
     * @param statusUpdater
     * @return
     */
-   public boolean createVcVms(List<NetworkAdd> networkAdds,
+   public boolean createVcVms(ClusterCreate clusterSpec,
          List<BaseNode> vNodes, Map<String, Set<String>> occupiedMgrIps,
-         boolean reserveRawDisks, StatusUpdater statusUpdater,
-         String clusterCloneType);
+         boolean reserveRawDisks, StatusUpdater statusUpdater);
 
    /**
     * Initialize clustering service
@@ -188,20 +187,6 @@ public interface IClusteringService {
     */
    public boolean stopSingleVM(String clusterName, String nodeName,
          StatusUpdater statusUpdator, boolean... vmPoweroff);
-
-   /**
-    * get the vm id of template vm
-    * 
-    * @return
-    */
-   public String getTemplateVmId();
-
-   /**
-    * get the vm name of template vm
-    * 
-    * @return
-    */
-   public String getTemplateVmName();
 
    public VmEventManager getEventProcessor();
 

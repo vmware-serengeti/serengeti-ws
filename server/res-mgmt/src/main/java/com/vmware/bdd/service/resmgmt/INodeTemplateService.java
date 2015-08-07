@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2012-2013 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2015 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,36 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.dal;
 
-import java.io.Serializable;
+package com.vmware.bdd.service.resmgmt;
+
 import java.util.List;
 
-import org.hibernate.criterion.Criterion;
+import com.vmware.aurora.vc.VcVirtualMachine;
+import com.vmware.bdd.apitypes.VirtualMachineRead;
 
+public interface INodeTemplateService {
 
-/**
- * @author Jarred Li
- * @since 0.8
- * @version 0.8
- *
- * @param <T>
- */
-public interface IBaseDAO<T> {
+   public List<VirtualMachineRead> getAllNodeTemplates();
+   public VcVirtualMachine getNodeTemplateVMByMoid(String moid);
+   public VcVirtualMachine getNodeTemplateVMByName(String templateName);
+   public String getNodeTemplateNameByMoid(String moid);
+   public String getNodeTemplateIdByName(String templateName);
 
-   void insert(T object);
-
-   void delete(T object);
-
-   void update(T object);
-
-   List<T> findAll();
-   
-   List<T> findAll(String orderBy, Boolean ascending);
-
-   T findById(Serializable id);
-
-   List<T> findByCriteria(final Criterion... queryCriteria);
-
-   T findUniqueByCriteria(Criterion... queryCriteria);
 }
