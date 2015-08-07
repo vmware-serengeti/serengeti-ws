@@ -605,6 +605,7 @@
                <configuration>
                   <source>${java.source.version}</source>
                   <target>${java.target.version}</target>
+                  <encoding>UTF-8</encoding>
                </configuration>
             </plugin>
             <plugin>
@@ -630,6 +631,7 @@
                   <archive>
                      <addMavenDescriptor>false</addMavenDescriptor>
                   </archive>
+                  <encoding>UTF-8</encoding>
                </configuration>
             </plugin>
             <plugin>
@@ -728,6 +730,7 @@
                      <!-- Produces XML report -->
                      <xmlOutput>true</xmlOutput>
                      <findbugsXmlOutput>true</findbugsXmlOutput>
+                     <encoding>UTF-8</encoding>
                   </configuration>
                   <executions>
                      <!--
