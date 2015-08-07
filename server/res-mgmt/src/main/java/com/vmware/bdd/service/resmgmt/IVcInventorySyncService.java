@@ -13,4 +13,6 @@ public interface IVcInventorySyncService {
    boolean isRefreshInProgress();
 
    void waitForCompletion() throws InterruptedException;
+
+   void asyncRefreshInventory(VcResourceFilters filters);
 }
