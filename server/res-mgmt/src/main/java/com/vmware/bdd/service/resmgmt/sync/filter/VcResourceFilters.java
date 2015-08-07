@@ -19,13 +19,7 @@ public class VcResourceFilters {
 
    public <T extends VcObject> VcResourceFilters addNameFilter(VC_RESOURCE_TYPE resourceClass, String[] resourceNames, boolean isReg) {
       if(ArrayUtils.isNotEmpty(resourceNames)) {
-         List<IVcResourceFilter> vcResourceFilterList = filterMap.get(resourceClass);
-         if(vcResourceFilterList == null) {
-            vcResourceFilterList = new ArrayList<>();
-            filterMap.put(resourceClass, vcResourceFilterList);
-         }
-
-
+         List<IVcResourceFilter> vcResourceFilterList = getFilterList(resourceClass);
          if(isReg) {
             vcResourceFilterList.add(new VcResourceNameRegxFilter<T>(resourceNames));
          } else {
@@ -40,37 +34,42 @@ public class VcResourceFilters {
 
    public VcResourceFilters addHostFilterByDatastore(String[] vcDsNameRegxs) {
       if(ArrayUtils.isNotEmpty(vcDsNameRegxs)) {
-         List<IVcResourceFilter> vcResourceFilterList = filterMap.get(VC_RESOURCE_TYPE.HOST);
-         if (vcResourceFilterList == null) {
-            vcResourceFilterList = new ArrayList<>();
-            filterMap.put(VC_RESOURCE_TYPE.HOST, vcResourceFilterList);
-         }
-
-         vcResourceFilterList.add(new HostFilterByDsNameRegx(vcDsNameRegxs));
+         getFilterList(VC_RESOURCE_TYPE.HOST).add(new HostFilterByDsNameRegx(vcDsNameRegxs));
       } else {
          LOGGER.warn("can't create an empty host by datastore filter!");
       }
-
-
       return this;
    }
 
 
    public VcResourceFilters addHostFilterByNetwork(String[] vcNetworkNames) {
       if(ArrayUtils.isNotEmpty(vcNetworkNames)) {
-         List<IVcResourceFilter> vcResourceFilterList = filterMap.get(VC_RESOURCE_TYPE.HOST);
-         if (vcResourceFilterList == null) {
-            vcResourceFilterList = new ArrayList<>();
-            filterMap.put(VC_RESOURCE_TYPE.HOST, vcResourceFilterList);
-         }
-
-         vcResourceFilterList.add(new HostFilterByNetwork(vcNetworkNames));
+         getFilterList(VC_RESOURCE_TYPE.HOST).add(new HostFilterByNetwork(vcNetworkNames));
       } else {
          LOGGER.warn("can't create an empty host by datastore filter!");
       }
 
+      return this;
+   }
+
+   public VcResourceFilters addFilterByType(VC_RESOURCE_TYPE type) {
+      if(type != null) {
+         getFilterList(type).add(new VcResourceTypeFilter());
+      } else {
+         LOGGER.warn("can't create an null type filter!");
+      }
 
       return this;
+   }
+
+   private List<IVcResourceFilter> getFilterList(VC_RESOURCE_TYPE type) {
+      List<IVcResourceFilter> vcResourceFilterList = filterMap.get(type);
+      if (vcResourceFilterList == null) {
+         vcResourceFilterList = new ArrayList<>();
+         filterMap.put(type, vcResourceFilterList);
+      }
+
+      return vcResourceFilterList;
    }
 
    public <T extends VcObject> List<T> filter(List<T> vcObjects) {
