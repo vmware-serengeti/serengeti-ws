@@ -91,6 +91,30 @@ public class VcInventorySyncService implements IVcInventorySyncService {
       }
    }
 
+
+   @Override
+   public void asyncRefreshInventory(final VcResourceFilters filters) {
+      if(LOGGER.isInfoEnabled()) {
+         LOGGER.info("trigger asyncRefreshInventory.");
+      }
+      es.submit(new Runnable() {
+         @Override
+         public void run() {
+            try {
+               if(LOGGER.isInfoEnabled()) {
+                  LOGGER.info("asyncRefreshInventory started.");
+               }
+               refreshInventory(filters);
+               if(LOGGER.isInfoEnabled()) {
+                  LOGGER.info("asyncRefreshInventory end.");
+               }
+            } catch (InterruptedException e) {
+               LOGGER.error("asyncRefreshInventory failed", e);
+            }
+         }
+      });
+   }
+
    @Override
    public boolean isRefreshInProgress() {
       return inProgress.get();
