@@ -108,6 +108,10 @@ public class TopologyCommands implements CommandMarker {
          String line = "";
          int lineNum = 1;
          while ((line = bufferedReader.readLine()) != null) {
+            int idx = line.indexOf("#");
+            if ( idx >= 0 ) {
+               line = line.substring(0, idx);
+            }
             line = line.trim();
             if (line.isEmpty()) {
                lineNum++;
