@@ -18,6 +18,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHost;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostGroup;
+
 public class AmHostGroupInfo {
 
    private String name;
@@ -113,5 +117,39 @@ public class AmHostGroupInfo {
 
    public void updateGroupName(String groupName) {
       this.name = groupName;
+   }
+
+   public ApiHostGroup toApiHostGroupForClusterBlueprint() {
+      ApiHostGroup apiHostGroup = new ApiHostGroup();
+      apiHostGroup.setName(this.name);
+      apiHostGroup.setCardinality(this.getStringCardinality());
+      apiHostGroup.setConfigurations(this.configurations);
+
+      List<ApiHost> apiHosts = new ArrayList<ApiHost>();
+      for (String host : this.hosts) {
+         ApiHost apiHost = new ApiHost();
+         apiHost.setFqdn(host);
+         apiHosts.add(apiHost);
+      }
+      apiHostGroup.setApiHosts(apiHosts);
+
+      return apiHostGroup;
+   }
+
+   public ApiHostGroup toApiHostGroupForBlueprint() {
+      ApiHostGroup apiHostGroup = new ApiHostGroup();
+      apiHostGroup.setName(this.name);
+      apiHostGroup.setCardinality(this.getStringCardinality());
+      apiHostGroup.setConfigurations(this.configurations);
+
+      List<ApiComponentInfo> apiComponents = new ArrayList<ApiComponentInfo>();
+      for (String componentName : this.roles) {
+         ApiComponentInfo apiComponent = new ApiComponentInfo();
+         apiComponent.setName(componentName);
+         apiComponents.add(apiComponent);
+      }
+      apiHostGroup.setApiComponents(apiComponents);
+
+      return apiHostGroup;
    }
 }

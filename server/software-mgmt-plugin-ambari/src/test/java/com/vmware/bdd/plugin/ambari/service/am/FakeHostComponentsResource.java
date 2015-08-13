@@ -41,5 +41,11 @@ public class FakeHostComponentsResource implements HostComponentsResource {
       return BuildResponse.buildResponse("clusters/simple_request.json");
    }
 
+   @Override
+   public Response readComponentsAfterConfigChange(String fields, String stale_configs) {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
 
 }

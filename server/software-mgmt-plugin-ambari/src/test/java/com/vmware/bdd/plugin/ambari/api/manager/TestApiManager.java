@@ -21,12 +21,16 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterList;
+<<<<<<< HEAD
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroup;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponent;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponentsRequest;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
+=======
+>>>>>>> aac75e0... Don't generate duplicated config group during cluster resize if have the same disk number
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiService;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
 import com.vmware.bdd.plugin.ambari.service.am.FakeRootResourceV1;
@@ -56,12 +60,16 @@ public class TestApiManager {
       Mockito.when(apiRootResource.getRootV1()).thenReturn(rootResourceV1);
       AmbariManagerClientbuilder clientbuilder = Mockito.mock(AmbariManagerClientbuilder.class);
       Mockito.when(clientbuilder.build()).thenReturn(apiRootResource);
+<<<<<<< HEAD
       //apiManager = new ApiManager("10.141.72.211", 8080, "admin", "admin");
       apiManager = new ApiManager(clientbuilder);
       hostNames = new ArrayList<String>();
       hostNames.add("host01");
       hostNames.add("host02");
       hostNames.add("host03");
+=======
+      apiManager = new ApiManager(clientbuilder);
+>>>>>>> aac75e0... Don't generate duplicated config group during cluster resize if have the same disk number
    }
 
    @AfterMethod
@@ -77,7 +85,7 @@ public class TestApiManager {
       String stackServiceName = "HDFS";
       String stackComponentName = "NAMENODE";
       String filter = "*";
-      
+
       //System.out.println(ApiUtils.objectToJson(apiManager.getStackList()));
       //System.out.println(ApiUtils.objectToJson(apiManager.getStack(stackName)));
       //System.out.println(ApiUtils.objectToJson(apiManager.getStackVersionList(stackName)));

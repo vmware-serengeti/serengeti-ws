@@ -14,39 +14,38 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.api.model.cluster;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+import java.util.HashSet;
+import java.util.Set;
 
-/**
- * Created by qjin on 3/15/15.
- */
-public class ApiOperationLevel {
-   @Expose
-   @SerializedName("level")
-   private String level;
+import org.apache.commons.lang.StringUtils;
 
-   @Expose
-   @SerializedName("cluster_name")
-   private String clusterName;
+public class ApiRestartRequiredCompent {
 
-   public ApiOperationLevel(String level, String clusterName) {
-      this.level = level;
-      this.clusterName = clusterName;
+   private String name;
+
+   private Set<String> hosts = new HashSet<String>();
+
+   public String getName() {
+      return name;
    }
 
-   public String getClusterName() {
-      return clusterName;
+   public void setName(String name) {
+      this.name = name;
    }
 
-   public void setClusterName(String clusterName) {
-      this.clusterName = clusterName;
+   public Set<String> getHosts() {
+      return hosts;
    }
 
-   public String getLevel() {
-      return level;
+   public void setHosts(Set<String> hosts) {
+      this.hosts = hosts;
    }
 
-   public void setLevel(String level) {
-      this.level = level;
+   public void addHost(String host) {
+      this.hosts.add(host);
+   }
+
+   public String getStringHosts() {
+      return StringUtils.join(this.hosts, ",");
    }
 }

@@ -389,10 +389,44 @@ public class AmClusterDef implements Serializable {
 
    public List<AmNodeDef> getNodes() {
       List<AmNodeDef> nodes = new ArrayList<AmNodeDef>();
-      for (AmNodeGroupDef nodeGroup : nodeGroups) {
+      for (AmNodeGroupDef nodeGroup : this.nodeGroups) {
          nodes.addAll(nodeGroup.getNodes());
       }
       return nodes;
+   }
+
+   public List<AmNodeGroupDef> getNodeGroupsByNodes(List<AmNodeDef> originalNodes) {
+      Map<String, AmNodeGroupDef> nodeGroupsMap = new HashMap<String, AmNodeGroupDef>();
+      for (AmNodeDef node : originalNodes) {
+         AmNodeGroupDef nodeGroup = getNodeGroupByNode(node);
+         if (nodeGroup != null && !nodeGroupsMap.containsKey(nodeGroup.getName())) {
+            nodeGroupsMap.put(nodeGroup.getName(), nodeGroup);
+         }
+      }
+      List<AmNodeGroupDef> nodeGroups = new ArrayList<AmNodeGroupDef>();
+      nodeGroups.addAll(nodeGroupsMap.values());
+      return nodeGroups;
+   }
+
+   public AmNodeGroupDef getNodeGroupByNode(AmNodeDef originalNode) {
+      AmNodeGroupDef nodeGroupbyNode = null;
+      for (AmNodeGroupDef nodeGroup : this.nodeGroups) {
+         for (AmNodeDef node : nodeGroup.getNodes()) {
+            if (node.getName().equals(originalNode.getName())) {
+               nodeGroupbyNode = nodeGroup;
+               break;
+            }
+         }
+      }
+      return nodeGroupbyNode;
+   }
+
+   public List<AmHostGroupInfo> getAmHostGroupsInfoByNodeGroups(List<AmNodeGroupDef> nodeGroups) {
+      List<AmHostGroupInfo> amHostGroupsInfo = new ArrayList<AmHostGroupInfo>();
+      for (AmNodeGroupDef nodeGroup : nodeGroups) {
+         amHostGroupsInfo.addAll(nodeGroup.generateHostGroupsInfo());
+      }
+      return amHostGroupsInfo;
    }
 
    private boolean isNodeGenerateFromExternalNamenode(AmNodeDef node) {

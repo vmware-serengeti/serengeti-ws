@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2014-2015 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,10 @@ public interface Constants {
    public static final String AMBARI_SERVER_VERSION_1_6_0 = "1.6.0";
    public static final String VERSION_UNBOUNDED = "-1";
 
-   public static final String OPERATION_LEVEL = "CLUSTER";
+   public static final String OPERATION_CLUSTER_LEVEL = "CLUSTER";
+   public static final String OPERATION_SERVICE_LEVEL = "SERVICE";
+
+   public static final String OPERATION_COMMAND_RESTART = "RESTART";
 
    public static final String CONFIG_HDFS_SITE = "hdfs-site";
    public static final String CONFIG_YARN_SITE = "yarn-site";

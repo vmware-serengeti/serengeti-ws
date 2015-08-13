@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2015 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,27 +16,27 @@ package com.vmware.bdd.plugin.ambari.api.model.cluster;
 
 import java.util.List;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+public class ApiRestartRequiredService {
 
-/**
- * Created by qjin on 12/7/14.
- */
-public class ApiHostComponents {
+   private String name;
 
-   @Expose
-   @SerializedName("items")
-   private List<ApiHostComponent> hostComponents;
+   private List<ApiRestartRequiredCompent> apiRestartRequiredCompents;
 
-   public List<ApiHostComponent> getHostComponents() {
-      return hostComponents;
+   public String getName() {
+      return name;
    }
 
-   public void setHostComponents(List<ApiHostComponent> hostComponents) {
-      this.hostComponents = hostComponents;
+   public void setName(String name) {
+      this.name = name;
    }
+
+   public List<ApiRestartRequiredCompent> getApiRestartRequiredCompents() {
+      return apiRestartRequiredCompents;
+   }
+
+   public void setApiRestartRequiredCompents(
+         List<ApiRestartRequiredCompent> apiRestartRequiredCompents) {
+      this.apiRestartRequiredCompents = apiRestartRequiredCompents;
+   }
+
 }
-
-
-
-

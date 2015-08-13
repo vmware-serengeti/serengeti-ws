@@ -1,6 +1,6 @@
 /*
  * **************************************************************************
- *  * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ *  * Copyright (c) 2015 VMware, Inc. All Rights Reserved.
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
  *  * You may obtain a copy of the License at
@@ -17,33 +17,30 @@
 
 package com.vmware.bdd.plugin.ambari.api.model;
 
+import java.util.List;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiPostRequestInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiRequestsPostResourceFilter;
 
-/**
- * Created by qjin on 7/7/14.
- */
-public class ApiPutRequest {
+public class ApiPostRequest {
+
    @Expose
-   @SerializedName("Body")
-   private ApiBody body;
+   @SerializedName("Requests/resource_filters")
+   private List<ApiRequestsPostResourceFilter> apiRequestsResourceFilters;
 
    @Expose
    @SerializedName("RequestInfo")
    private ApiPostRequestInfo requestInfo;
 
-   public ApiPutRequest(ApiPostRequestInfo apiRequestInfo, ApiBody apiBody) {
+   public ApiPostRequest(ApiPostRequestInfo apiRequestInfo) {
       this.requestInfo = apiRequestInfo;
-      this.body = apiBody;
    }
 
-   public ApiBody getBody() {
-      return body;
-   }
-
-   public void setBody(ApiBody body) {
-      this.body = body;
+   public ApiPostRequest(ApiPostRequestInfo apiRequestInfo, List<ApiRequestsPostResourceFilter> apiRequestsResourceFilters) {
+      this(apiRequestInfo);
+      this.apiRequestsResourceFilters = apiRequestsResourceFilters;
    }
 
    public ApiPostRequestInfo getRequestInfo() {
@@ -53,4 +50,14 @@ public class ApiPutRequest {
    public void setRequestInfo(ApiPostRequestInfo requestInfo) {
       this.requestInfo = requestInfo;
    }
+
+   public List<ApiRequestsPostResourceFilter> getApiRequestsResourceFilters() {
+      return apiRequestsResourceFilters;
+   }
+
+   public void setApiRequestsResourceFilters(
+         List<ApiRequestsPostResourceFilter> apiRequestsResourceFilters) {
+      this.apiRequestsResourceFilters = apiRequestsResourceFilters;
+   }
+
 }

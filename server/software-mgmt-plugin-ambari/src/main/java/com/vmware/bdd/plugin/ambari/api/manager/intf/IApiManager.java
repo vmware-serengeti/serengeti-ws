@@ -24,14 +24,14 @@ import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapStatus;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterBlueprint;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterConfigurations;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroup;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponentsRequest;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostList;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequestList;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRestartRequiredService;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiService;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiRequest;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiRequestList;
 import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStack;
 import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackComponent;
 import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackComponentList;
@@ -87,7 +87,7 @@ public interface IApiManager {
 
    public ApiRequest startComponents(String clusterName,
          List<String> hostNames, List<String> components)
-         throws AmbariApiException;
+               throws AmbariApiException;
 
    public ApiRequest stopAllComponentsInHosts(String clusterName,
          List<String> hostNames)  throws AmbariApiException;
@@ -165,6 +165,12 @@ public interface IApiManager {
 
    public ApiHostList getRegisteredHosts() throws AmbariApiException;
 
-   ApiStackServiceList getServicesWithFilter(String stackName,
-                                             String stackVersion, String filter) throws AmbariApiException;
+   public ApiStackServiceList getServicesWithFilter(String stackName, String stackVersion, String filter) throws AmbariApiException;
+
+   public List<ApiRestartRequiredService> getRestartRequiredServices(String clusterName) throws AmbariApiException;
+
+   public List<ApiRequest> restartRequiredServices(String clusterName) throws AmbariApiException;
+
+   public ApiRequest restartRequiredService(String clusterName, ApiRestartRequiredService apiRestartRequiredService) throws AmbariApiException;
+
 }

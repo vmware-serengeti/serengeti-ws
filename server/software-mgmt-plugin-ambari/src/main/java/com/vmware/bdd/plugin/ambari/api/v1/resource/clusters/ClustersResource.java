@@ -76,6 +76,9 @@ public interface ClustersResource {
    @Path("/{clusterName}/host_components")
    public HostComponentsResource getHostComponentsResource(@PathParam(Parameters.CLUSTER_NAME) String clusterName);
 
+   @Path("/{clusterName}/components")
+   public ComponentsResource getComponentsResource(@PathParam(Parameters.CLUSTER_NAME) String clusterName);
+
    @Path("/{clusterName}/config_groups")
    public ConfigGroupsResource getConfigGroupsResource(@PathParam(Parameters.CLUSTER_NAME) String clusterName);
 

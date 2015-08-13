@@ -21,12 +21,13 @@ import java.util.List;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.plugin.ambari.api.exception.AmbariApiException;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequestInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiRequest;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiGetRequestInfo;
 import com.vmware.bdd.plugin.ambari.exception.AmException;
 import com.vmware.bdd.plugin.ambari.model.AmClusterDef;
 import com.vmware.bdd.plugin.ambari.service.am.FakeApiManager;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
+
 import mockit.Mock;
 import mockit.MockClass;
 import mockit.Mockit;
@@ -215,7 +216,7 @@ public class TestAmbariImpl {
          @Override
          public ApiRequest stopAllServicesInCluster(String clusterName) throws AmbariApiException {
             ApiRequest apiRequest = new ApiRequest();
-            apiRequest.setApiRequestInfo(new ApiRequestInfo());
+            apiRequest.setApiRequestInfo(new ApiGetRequestInfo());
             return apiRequest;
          }
       };
@@ -356,7 +357,7 @@ public class TestAmbariImpl {
          @Override
          public ApiRequest startAllServicesInCluster(String clusterName) throws AmbariApiException {
             ApiRequest apiRequest = new ApiRequest();
-            apiRequest.setApiRequestInfo(new ApiRequestInfo());
+            apiRequest.setApiRequestInfo(new ApiGetRequestInfo());
             return apiRequest;
          }
       };
@@ -382,7 +383,7 @@ public class TestAmbariImpl {
       ApiManager backup = spy.getApiManager();
       spy.setApiManager(apiManager);
       ApiRequest request = new ApiRequest();
-      ApiRequestInfo requestInfo = new ApiRequestInfo();
+      ApiGetRequestInfo requestInfo = new ApiGetRequestInfo();
       request.setApiRequestInfo(requestInfo);
       try {
          spy.doSoftwareOperation(blueprint.getName(), request, clusterReport, reportQueue);

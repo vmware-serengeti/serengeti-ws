@@ -59,6 +59,18 @@ public class ApiComponentInfo {
    @SerializedName("state")
    private String state;
 
+   @Expose
+   @SerializedName("cluster_name")
+   private String clusterName;
+
+   @Expose
+   @SerializedName("stale_configs")
+   private Boolean staleConfigs;
+
+   @Expose
+   @SerializedName("host_name")
+   private String hostName;
+
    // Just for ambari server 2.0
 
    @Expose
@@ -192,4 +204,29 @@ public class ApiComponentInfo {
    public void setAdvertiseVersion(Boolean advertiseVersion) {
       this.advertiseVersion = advertiseVersion;
    }
+
+   public String getClusterName() {
+      return clusterName;
+   }
+
+   public void setClusterName(String clusterName) {
+      this.clusterName = clusterName;
+   }
+
+   public Boolean getStaleConfigs() {
+      return staleConfigs;
+   }
+
+   public void setStaleConfigs(Boolean staleConfigs) {
+      this.staleConfigs = staleConfigs;
+   }
+
+   public String getHostName() {
+      return hostName;
+   }
+
+   public void setHostName(String hostName) {
+      this.hostName = hostName;
+   }
+
 }

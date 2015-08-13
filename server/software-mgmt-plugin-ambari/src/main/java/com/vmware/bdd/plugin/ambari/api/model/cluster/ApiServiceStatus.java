@@ -24,5 +24,6 @@ public enum ApiServiceStatus {
    STARTED,    //service is running
    INSTALLED,   //service is installed, but not running
    STOPPED,
-   ALERT
+   ALERT,
+   RESTART
 }
