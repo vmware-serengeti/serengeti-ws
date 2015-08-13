@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2014-2015 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,15 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model.cluster;
+package com.vmware.bdd.plugin.ambari.api.model.cluster.request;
 
-import java.util.HashMap;
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiRequestInfo {
+public class ApiGetRequestInfo {
 
    @Expose
    @SerializedName("id")
@@ -78,10 +77,6 @@ public class ApiRequestInfo {
    private String status;
 
    @Expose
-   @SerializedName("resource_filters")
-   private List<String> resourceFilters;
-
-   @Expose
    @SerializedName("start_time")
    private long startTime;
 
@@ -98,18 +93,12 @@ public class ApiRequestInfo {
    private String type;
 
    @Expose
-   @SerializedName("context")
-   private String context;
-
-   @Expose
-   @SerializedName("command")
-   private String command;
-
-   @Expose
-   @SerializedName("parameters")
-   private HashMap<String, String> parameters;
    @SerializedName("operation_level")
-   private ApiOperationLevel operationLevel;
+   private String operationLevel;
+
+   @Expose
+   @SerializedName("resource_filters")
+   private List<ApiRequestsGetResourceFilter> resourceFilters;
 
    public Long getRequestId() {
       return requestId;
@@ -215,14 +204,6 @@ public class ApiRequestInfo {
       this.requestStatus = requestStatus;
    }
 
-   public List<String> getResourceFilters() {
-      return resourceFilters;
-   }
-
-   public void setResource_filters(List<String> resourceFilters) {
-      this.resourceFilters = resourceFilters;
-   }
-
    public long getStartTime() {
       return startTime;
    }
@@ -255,14 +236,6 @@ public class ApiRequestInfo {
       this.type = type;
    }
 
-   public String getContext() {
-      return context;
-   }
-
-   public void setContext(String context) {
-      this.context = context;
-   }
-
    public String getStatus() {
       return status;
    }
@@ -271,26 +244,21 @@ public class ApiRequestInfo {
       this.status = status;
    }
 
-   public String getCommand() {
-      return command;
-   }
-
-   public void setCommand(String command) {
-      this.command = command;
-   }
-
-   public HashMap<String, String> getParameters() {
-      return parameters;
-   }
-
-   public void setParameters(HashMap<String, String> parameters) {
-      this.parameters = parameters;
-   }
-   public ApiOperationLevel getOperationLevel() {
+   public String getOperationLevel() {
       return operationLevel;
    }
 
-   public void setOperationLevel(ApiOperationLevel operationLevel) {
+   public void setOperationLevel(String operationLevel) {
       this.operationLevel = operationLevel;
    }
+
+   public List<ApiRequestsGetResourceFilter> getResourceFilters() {
+      return resourceFilters;
+   }
+
+   public void setResourceFilters(
+         List<ApiRequestsGetResourceFilter> resourceFilters) {
+      this.resourceFilters = resourceFilters;
+   }
+
 }

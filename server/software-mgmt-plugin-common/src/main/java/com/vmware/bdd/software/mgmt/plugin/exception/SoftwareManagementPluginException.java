@@ -195,4 +195,8 @@ public class SoftwareManagementPluginException extends RuntimeException {
    public static SoftwareManagementPluginException READ_BLACKLIST_FOR_SCALE_IN_FAILED(String errMsg) {
       return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.READ_BLACKLIST_FOR_SCALE_IN_FAILED", null, errMsg);
    }
+
+   public static SoftwareManagementPluginException RESTART_CLUSTER_SERVICE_FAILED(Throwable cause, String appMgr, String clusterName) {
+      return APP_MANAGER_COMMON_EXCEPTION("APP_MANAGER.RESTART_CLUSTER_SERVICE_FAILED", cause, appMgr, clusterName);
+   }
 }

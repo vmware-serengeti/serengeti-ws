@@ -22,7 +22,6 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiOperationLevel;
 import com.vmware.bdd.plugin.ambari.utils.Constants;
 
 import org.apache.log4j.Logger;
@@ -37,36 +36,39 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiErrorMessage;
 import com.vmware.bdd.plugin.ambari.api.model.ApiHostsRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiHostsRequestInfo;
 import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
+import com.vmware.bdd.plugin.ambari.api.model.ApiPostRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiPutRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiRootServicesComponents;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprintList;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrapStatus;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiAlert;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterConfigurations;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterList;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponent;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroup;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroupList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHost;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostStatus;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequestInfo;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequestList;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRestartRequiredCompent;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRestartRequiredService;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiService;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceAlert;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceAlertList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceStatus;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponent;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponents;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponentsRequest;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequestsResourceFilter;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiPostRequestInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiOperationLevel;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiRequest;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiRequestList;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiRequestsPostResourceFilter;
 import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStack;
 import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackComponent;
 import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackComponentList;
@@ -249,7 +251,7 @@ public class ApiManager implements IApiManager {
       serviceInfo.setState(ApiServiceStatus.INSTALLED.name());
       ApiBody body = new ApiBody();
       body.setServiceInfo(serviceInfo);
-      ApiRequestInfo requestInfo = new ApiRequestInfo();
+      ApiPostRequestInfo requestInfo = new ApiPostRequestInfo();
       requestInfo.setContext("Stop All Services");
       ApiPutRequest stopRequest = new ApiPutRequest(requestInfo, body);
       String request = ApiUtils.objectToJson(stopRequest);
@@ -280,10 +282,10 @@ public class ApiManager implements IApiManager {
       serviceInfo.setState(ApiServiceStatus.STARTED.name());
       ApiBody body = new ApiBody();
       body.setServiceInfo(serviceInfo);
-      ApiRequestInfo requestInfo = new ApiRequestInfo();
+      ApiPostRequestInfo requestInfo = new ApiPostRequestInfo();
       requestInfo.setContext("Start All Services");
       if (!isAmbari_1_6_0()) {
-         ApiOperationLevel operationLevel = new ApiOperationLevel(Constants.OPERATION_LEVEL, clusterName);
+         ApiOperationLevel operationLevel = new ApiOperationLevel(Constants.OPERATION_CLUSTER_LEVEL, clusterName);
          requestInfo.setOperationLevel(operationLevel);
       }
       ApiPutRequest startRequest = new ApiPutRequest(requestInfo, body);
@@ -304,7 +306,7 @@ public class ApiManager implements IApiManager {
    }
 
    public ApiRequest decommissionComponent(String clusterName, String host, String serviceName, String managementRoleName, String slaveRoleName) {
-      ApiRequestInfo requestInfo = new ApiRequestInfo();
+      ApiPostRequestInfo requestInfo = new ApiPostRequestInfo();
       requestInfo.setCommand("DECOMMISSION");
       requestInfo.setContext("Decommission " + slaveRoleName);
       HashMap<String, String> parameters = new HashMap<>();
@@ -312,18 +314,14 @@ public class ApiManager implements IApiManager {
       parameters.put("excluded_hosts", host);
       requestInfo.setParameters(parameters);
 
-      ApiRequestsResourceFilter requestsResourceFilter = new ApiRequestsResourceFilter();
-      requestsResourceFilter.setServiceName(serviceName);
-      requestsResourceFilter.setComponentName(managementRoleName);
-      List<ApiRequestsResourceFilter> requestsResourceFilters = new ArrayList<ApiRequestsResourceFilter>();
+      ApiRequestsPostResourceFilter requestsResourceFilter = new ApiRequestsPostResourceFilter(serviceName, managementRoleName);
+      List<ApiRequestsPostResourceFilter> requestsResourceFilters = new ArrayList<ApiRequestsPostResourceFilter>();
       requestsResourceFilters.add(requestsResourceFilter);
 
-      HashMap<String, Object> requestBodyMap = new HashMap<>();
-      requestBodyMap.put("RequestInfo", requestInfo);
-      requestBodyMap.put("Requests/resource_filters", requestsResourceFilters);
+      ApiPostRequest decommissionComponentRequest = new ApiPostRequest(requestInfo, requestsResourceFilters);
       Response response = null;
       try {
-         String request = ApiUtils.objectToJson(requestBodyMap);
+         String request = ApiUtils.objectToJson(decommissionComponentRequest);
          logger.info("When decommission component, cmd is " + request);
          response = apiResourceRootV1.getClustersResource().getRequestsResource(clusterName).postRequest(request);
       } catch (Exception e) {
@@ -1034,6 +1032,106 @@ public class ApiManager implements IApiManager {
    public ApiStackServiceList getServicesWithFilter(String stackName,
          String stackVersion, String filter) throws AmbariApiException {
       return null;
+   }
+
+   @Override
+   public List<ApiRequest> restartRequiredServices(String clusterName) throws AmbariApiException {
+      List<ApiRequest> restartServicesApiRequests = new ArrayList<ApiRequest>();
+
+      List<ApiRestartRequiredService> apiRestartRequiredServices = getRestartRequiredServices(clusterName);
+      for (ApiRestartRequiredService apiRestartRequiredService : apiRestartRequiredServices) {
+         restartServicesApiRequests.add(restartRequiredService(clusterName, apiRestartRequiredService));
+      }
+
+      return restartServicesApiRequests;
+   }
+
+   @Override
+   public ApiRequest restartRequiredService(String clusterName, ApiRestartRequiredService apiRestartRequiredService) throws AmbariApiException {
+      String serviceName = apiRestartRequiredService.getName();
+      ApiPostRequestInfo requestInfo = new ApiPostRequestInfo();
+      requestInfo.setContext("Restart all components with Stale Configs for " + serviceName);
+      requestInfo.setCommand(Constants.OPERATION_COMMAND_RESTART);
+      if (!isAmbari_1_6_0()) {
+         ApiOperationLevel operationLevel = new ApiOperationLevel(Constants.OPERATION_SERVICE_LEVEL, clusterName, serviceName);
+         requestInfo.setOperationLevel(operationLevel);
+      }
+      List<ApiRequestsPostResourceFilter> apiRequestsResourceFilters = new ArrayList<ApiRequestsPostResourceFilter>();
+      for (ApiRestartRequiredCompent apiRestartRequiredCompent : apiRestartRequiredService.getApiRestartRequiredCompents()) {
+         ApiRequestsPostResourceFilter apiRequestResourceFilter = new ApiRequestsPostResourceFilter(serviceName, apiRestartRequiredCompent.getName(), apiRestartRequiredCompent.getStringHosts());
+         apiRequestsResourceFilters.add(apiRequestResourceFilter);
+      }
+      ApiPostRequest restartServiceRequest = new ApiPostRequest(requestInfo, apiRequestsResourceFilters);
+      String request = ApiUtils.objectToJson(restartServiceRequest);
+      logger.info("The request in restarting service is :" + request);
+
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource().getRequestsResource(clusterName).postRequest(request);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
+      String responseJson = handleAmbariResponse(response);
+
+      logger.info("in restarting service, reponse is :" + responseJson);
+      return ApiUtils.jsonToObject(ApiRequest.class, responseJson);
+   }
+
+   @Override
+   public List<ApiRestartRequiredService> getRestartRequiredServices(String clusterName) throws AmbariApiException {
+      Map<String, ApiRestartRequiredService> apiRestartRequiredServicesMap = new HashMap<String, ApiRestartRequiredService>();
+      Response response = null;
+      try {
+         String fields = "HostRoles/service_name,HostRoles/state,HostRoles/host_name,HostRoles/stale_configs,&minimal_response=true";
+         String staleConfigs = "true";
+         response = apiResourceRootV1.getClustersResource().getHostComponentsResource(clusterName).readComponentsAfterConfigChange(fields, staleConfigs);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
+      String apiComponentListJson = handleAmbariResponse(response);
+      ApiComponentList apiComponentList = ApiUtils.jsonToObject(ApiComponentList.class, apiComponentListJson);
+      for (ApiComponent apiComponent : apiComponentList.getComponents()) {
+         ApiComponentInfo apiComponentInfo = apiComponent.getHostComponent();
+         String serviceName = apiComponentInfo.getServiceName();
+
+         ApiRestartRequiredService apiRestartRequiredService = new ApiRestartRequiredService();
+         if (apiRestartRequiredServicesMap.containsKey(serviceName)) {
+            apiRestartRequiredService = apiRestartRequiredServicesMap.get(serviceName);
+         }
+         apiRestartRequiredService.setName(serviceName);
+
+         String componentName = apiComponentInfo.getComponentName();
+         String host = apiComponentInfo.getHostName();
+
+         List<ApiRestartRequiredCompent> apiRestartRequiredCompents = apiRestartRequiredService.getApiRestartRequiredCompents();
+         if (apiRestartRequiredCompents == null) {
+            apiRestartRequiredCompents = new ArrayList<ApiRestartRequiredCompent> ();
+         }
+
+         boolean isExisted = false;
+         for (ApiRestartRequiredCompent apiRestartRequiredCompent : apiRestartRequiredCompents) {
+            if (apiRestartRequiredCompent.getName().equals(componentName)) {
+               apiRestartRequiredCompent.addHost(host);
+               isExisted = true;
+               break;
+            }
+         }
+
+         if(!isExisted) {
+            ApiRestartRequiredCompent apiRestartRequiredCompent = new ApiRestartRequiredCompent();
+            apiRestartRequiredCompent.setName(componentName);
+            apiRestartRequiredCompent.addHost(host);
+            apiRestartRequiredCompents.add(apiRestartRequiredCompent);
+         }
+
+         apiRestartRequiredService.setApiRestartRequiredCompents(apiRestartRequiredCompents);
+         apiRestartRequiredServicesMap.put(serviceName, apiRestartRequiredService);
+      }
+
+      List<ApiRestartRequiredService> apiRestartRequiredServices = new ArrayList<ApiRestartRequiredService>();
+      apiRestartRequiredServices.addAll(apiRestartRequiredServicesMap.values());
+
+      return apiRestartRequiredServices;
    }
 
    protected String handleAmbariResponse(Response response)

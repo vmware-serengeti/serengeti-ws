@@ -1,6 +1,6 @@
 /*
  * **************************************************************************
- *  * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ *  * Copyright (c) 2015 VMware, Inc. All Rights Reserved.
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
  *  * You may obtain a copy of the License at
@@ -14,43 +14,49 @@
  *  * limitations under the License.
  *  **************************************************************************
  */
+package com.vmware.bdd.plugin.ambari.api.model.cluster.request;
 
-package com.vmware.bdd.plugin.ambari.api.model;
+import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiPostRequestInfo;
 
-/**
- * Created by qjin on 7/7/14.
- */
-public class ApiPutRequest {
-   @Expose
-   @SerializedName("Body")
-   private ApiBody body;
+public class ApiRequestsGetResourceFilter {
 
    @Expose
-   @SerializedName("RequestInfo")
-   private ApiPostRequestInfo requestInfo;
+   @SerializedName("service_name")
+   private String serviceName;
 
-   public ApiPutRequest(ApiPostRequestInfo apiRequestInfo, ApiBody apiBody) {
-      this.requestInfo = apiRequestInfo;
-      this.body = apiBody;
+   @Expose
+   @SerializedName("component_name")
+   private String componentName;
+
+   @Expose
+   @SerializedName("hosts")
+   private List<String> hosts;
+
+   public String getServiceName() {
+      return serviceName;
    }
 
-   public ApiBody getBody() {
-      return body;
+   public void setServiceName(String serviceName) {
+      this.serviceName = serviceName;
    }
 
-   public void setBody(ApiBody body) {
-      this.body = body;
+   public String getComponentName() {
+      return componentName;
    }
 
-   public ApiPostRequestInfo getRequestInfo() {
-      return requestInfo;
+   public void setComponentName(String componentName) {
+      this.componentName = componentName;
    }
 
-   public void setRequestInfo(ApiPostRequestInfo requestInfo) {
-      this.requestInfo = requestInfo;
+   public List<String> getHosts() {
+      return hosts;
    }
+
+   public void setHosts(List<String> hosts) {
+      this.hosts = hosts;
+   }
+
 }

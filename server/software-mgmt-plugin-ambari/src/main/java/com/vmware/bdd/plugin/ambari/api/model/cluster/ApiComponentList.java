@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2015 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,18 +19,14 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiRequest {
+public class ApiComponentList {
 
    @Expose
    private String href;
 
    @Expose
-   @SerializedName("Requests")
-   private ApiRequestInfo apiRequestInfo;
-
-   @Expose
-   @SerializedName("tasks")
-   private List<ApiTask> apiTasks;
+   @SerializedName("items")
+   private List<ApiComponent> components;
 
    public String getHref() {
       return href;
@@ -40,20 +36,12 @@ public class ApiRequest {
       this.href = href;
    }
 
-   public ApiRequestInfo getApiRequestInfo() {
-      return apiRequestInfo;
+   public List<ApiComponent> getComponents() {
+      return components;
    }
 
-   public void setApiRequestInfo(ApiRequestInfo apiRequestInfo) {
-      this.apiRequestInfo = apiRequestInfo;
-   }
-
-   public List<ApiTask> getApiTasks() {
-      return apiTasks;
-   }
-
-   public void setApiTasks(List<ApiTask> apiTasks) {
-      this.apiTasks = apiTasks;
+   public void setComponents(List<ApiComponent> components) {
+      this.components = components;
    }
 
 }

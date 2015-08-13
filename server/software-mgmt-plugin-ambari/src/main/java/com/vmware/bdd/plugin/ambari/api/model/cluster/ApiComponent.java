@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2015 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,14 +19,22 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiRequestList {
+public class ApiComponent {
 
    @Expose
    private String href;
 
    @Expose
-   @SerializedName("items")
-   private List<ApiRequest> apiRequest;
+   @SerializedName("ServiceComponentInfo")
+   private ApiComponentInfo serviceComponentInfo;
+
+   @Expose
+   @SerializedName("host_components")
+   private List<ApiHostComponent> hostComponents;
+
+   @Expose
+   @SerializedName("HostRoles")
+   private ApiComponentInfo hostComponent;
 
    public String getHref() {
       return href;
@@ -36,12 +44,27 @@ public class ApiRequestList {
       this.href = href;
    }
 
-   public List<ApiRequest> getApiRequest() {
-      return apiRequest;
+   public ApiComponentInfo getServiceComponentInfo() {
+      return serviceComponentInfo;
    }
 
-   public void setApiRequest(List<ApiRequest> apiRequest) {
-      this.apiRequest = apiRequest;
+   public void setServiceComponentInfo(ApiComponentInfo serviceComponentInfo) {
+      this.serviceComponentInfo = serviceComponentInfo;
    }
 
+   public List<ApiHostComponent> getHostComponents() {
+      return hostComponents;
+   }
+
+   public void setHostComponents(List<ApiHostComponent> hostComponents) {
+      this.hostComponents = hostComponents;
+   }
+
+   public ApiComponentInfo getHostComponent() {
+      return hostComponent;
+   }
+
+   public void setHostComponent(ApiComponentInfo hostComponent) {
+      this.hostComponent = hostComponent;
+   }
 }

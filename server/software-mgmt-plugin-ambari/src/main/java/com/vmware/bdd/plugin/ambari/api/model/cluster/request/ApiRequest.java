@@ -12,31 +12,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.plugin.ambari.api.model.cluster;
+package com.vmware.bdd.plugin.ambari.api.model.cluster.request;
 
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiTask;
 
-/**
- * Created by qjin on 12/7/14.
- */
-public class ApiHostComponents {
+public class ApiRequest {
 
    @Expose
-   @SerializedName("items")
-   private List<ApiHostComponent> hostComponents;
+   private String href;
 
-   public List<ApiHostComponent> getHostComponents() {
-      return hostComponents;
+   @Expose
+   @SerializedName("Requests")
+   private ApiGetRequestInfo apiRequestInfo;
+
+   @Expose
+   @SerializedName("tasks")
+   private List<ApiTask> apiTasks;
+
+   public String getHref() {
+      return href;
    }
 
-   public void setHostComponents(List<ApiHostComponent> hostComponents) {
-      this.hostComponents = hostComponents;
+   public void setHref(String href) {
+      this.href = href;
    }
+
+   public ApiGetRequestInfo getApiRequestInfo() {
+      return apiRequestInfo;
+   }
+
+   public void setApiRequestInfo(ApiGetRequestInfo apiRequestInfo) {
+      this.apiRequestInfo = apiRequestInfo;
+   }
+
+   public List<ApiTask> getApiTasks() {
+      return apiTasks;
+   }
+
+   public void setApiTasks(List<ApiTask> apiTasks) {
+      this.apiTasks = apiTasks;
+   }
+
 }
-
-
-
-

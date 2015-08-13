@@ -23,10 +23,10 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHost;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostList;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequestInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiTask;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiTaskInfo;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiRequest;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiGetRequestInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -111,7 +111,7 @@ public class FakeApiManager extends ApiManager {
       apiTask.setApiTaskInfo(taskInfo);
       apiTasks.add(apiTask);
       apiRequest.setApiTasks(apiTasks);
-      ApiRequestInfo apiRequestInfo = new ApiRequestInfo();
+      ApiGetRequestInfo apiRequestInfo = new ApiGetRequestInfo();
       apiRequestInfo.setRequestStatus("FAILED");
       apiRequest.setApiRequestInfo(apiRequestInfo);
       return  apiRequest;

@@ -19,8 +19,8 @@ import com.vmware.bdd.plugin.ambari.api.ApiRootResource;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterList;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiService;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
 import com.vmware.bdd.plugin.ambari.service.am.FakeRootResourceV1;
@@ -48,8 +48,7 @@ public class TestApiManager {
       Mockito.when(apiRootResource.getRootV1()).thenReturn(rootResourceV1);
       AmbariManagerClientbuilder clientbuilder = Mockito.mock(AmbariManagerClientbuilder.class);
       Mockito.when(clientbuilder.build()).thenReturn(apiRootResource);
-      //apiManager = new ApiManager(clientbuilder);
-      apiManager = new ApiManager("10.141.72.211", 8080, "admin", "admin");
+      apiManager = new ApiManager(clientbuilder);
    }
 
    @AfterMethod
@@ -65,7 +64,7 @@ public class TestApiManager {
       String stackServiceName = "HDFS";
       String stackComponentName = "NAMENODE";
       String filter = "*";
-      
+
       //System.out.println(ApiUtils.objectToJson(apiManager.getStackList()));
       //System.out.println(ApiUtils.objectToJson(apiManager.getStack(stackName)));
       //System.out.println(ApiUtils.objectToJson(apiManager.getStackVersionList(stackName)));
@@ -340,5 +339,10 @@ public class TestApiManager {
    @Test
    public void testGetRegisteredHosts() throws Exception {
 
+   }
+
+   @Test
+   public void testGetRestartRequiredServices() throws Exception {
+      // TODO
    }
 }

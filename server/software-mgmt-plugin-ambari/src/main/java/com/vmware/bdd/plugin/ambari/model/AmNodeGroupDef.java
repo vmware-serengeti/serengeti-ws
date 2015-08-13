@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gson.annotations.Expose;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHost;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostGroup;
 
 public class AmNodeGroupDef implements Serializable {
@@ -88,20 +86,7 @@ public class AmNodeGroupDef implements Serializable {
       List<ApiHostGroup> apiHostGroups = new ArrayList<ApiHostGroup>();
 
       for (AmHostGroupInfo amHostGroupInfo: generateHostGroupsInfo()) {
-         ApiHostGroup apiHostGroup = new ApiHostGroup();
-         apiHostGroup.setName(amHostGroupInfo.getName());
-         apiHostGroup.setCardinality(amHostGroupInfo.getStringCardinality());
-         apiHostGroup.setConfigurations(amHostGroupInfo.getConfigurations());
-
-         List<ApiComponentInfo> apiComponents = new ArrayList<ApiComponentInfo>();
-         for (String componentName : amHostGroupInfo.getRoles()) {
-            ApiComponentInfo apiComponent = new ApiComponentInfo();
-            apiComponent.setName(componentName);
-            apiComponents.add(apiComponent);
-         }
-         apiHostGroup.setApiComponents(apiComponents);
-
-         apiHostGroups.add(apiHostGroup);
+         apiHostGroups.add(amHostGroupInfo.toApiHostGroupForBlueprint());
       }
 
       return apiHostGroups;
@@ -111,20 +96,7 @@ public class AmNodeGroupDef implements Serializable {
       List<ApiHostGroup> apiHostGroups = new ArrayList<ApiHostGroup>();
 
       for (AmHostGroupInfo amHostGroupInfo: generateHostGroupsInfo()) {
-         ApiHostGroup apiHostGroup = new ApiHostGroup();
-         apiHostGroup.setName(amHostGroupInfo.getName());
-         apiHostGroup.setCardinality(amHostGroupInfo.getStringCardinality());
-         apiHostGroup.setConfigurations(amHostGroupInfo.getConfigurations());
-
-         List<ApiHost> apiHosts = new ArrayList<ApiHost>();
-         for (String host : amHostGroupInfo.getHosts()) {
-            ApiHost apiHost = new ApiHost();
-            apiHost.setFqdn(host);
-            apiHosts.add(apiHost);
-         }
-         apiHostGroup.setApiHosts(apiHosts);
-
-         apiHostGroups.add(apiHostGroup);
+         apiHostGroups.add(amHostGroupInfo.toApiHostGroupForClusterBlueprint());
       }
       return apiHostGroups;
    }
