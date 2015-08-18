@@ -15,8 +15,13 @@ import java.util.concurrent.Callable;
 public abstract class AbstractSyncVcResSP implements Callable<List<AbstractSyncVcResSP>> {
    private final static Logger LOGGER = Logger.getLogger(AbstractSyncVcResSP.class);
 
-
    private VcResourceFilters vcResourceFilters = null;
+
+   private boolean skipped = false;
+
+   protected AbstractSyncVcResSP(boolean skippRefresh) {
+      skipped = skippRefresh;
+   }
 
    protected List<AbstractSyncVcResSP> getSyncResourceSpList(ManagedObjectReference[] moRefs) {
       List<AbstractSyncVcResSP> syncChildSpList = new ArrayList<>();
@@ -48,12 +53,10 @@ public abstract class AbstractSyncVcResSP implements Callable<List<AbstractSyncV
       //Vc Object exists meaning the object has been loaded before.
       // otherwise it's a newly added vc resource.
 
-
       AbstractSyncVcResSP newSyncVcResSp = null;
       if (vcObject != null) {
-         if(vcResourceFilters == null || !vcResourceFilters.isFiltered(vcObject)) {
-            newSyncVcResSp = new SyncResourceSp(vcObject);
-         }
+         boolean isFiltered = vcResourceFilters != null && vcResourceFilters.isFiltered(vcObject);
+         newSyncVcResSp = new SyncResourceSp(vcObject, isFiltered);
       } else {
          newSyncVcResSp = new SyncVcResourceSp(moRef);
       }
@@ -78,8 +81,10 @@ public abstract class AbstractSyncVcResSP implements Callable<List<AbstractSyncV
       //sync the current vc resource object
       VcObject vcObject = syncThis();
 
-      if(LOGGER.isDebugEnabled()) {
-         LOGGER.debug(String.format("sync vc resource itself: %1s is done.", vcObject.getId()));
+      if(!skipped && LOGGER.isDebugEnabled()) {
+         if(vcObject instanceof VcDatastore) {
+            LOGGER.debug(String.format("%1s freesize:%2sGB", vcObject.getName(), ((VcDatastore) vcObject).getFreeSpace()/1024/1024/1024));
+         }
       }
 
       //build a list of task
@@ -108,6 +113,10 @@ public abstract class AbstractSyncVcResSP implements Callable<List<AbstractSyncV
       }
 
       return syncChildSpList;
+   }
+
+   protected final boolean isSkipped() {
+      return skipped;
    }
 
    protected abstract VcObject syncThis();

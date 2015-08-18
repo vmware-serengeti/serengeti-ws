@@ -17,6 +17,7 @@ public class SyncVcResourceSp extends AbstractSyncVcResSP {
    private final ManagedObjectReference moRef;
 
    public SyncVcResourceSp(ManagedObjectReference moRef1) {
+      super(false);
       moRef = moRef1;
    }
 
@@ -31,10 +32,10 @@ public class SyncVcResourceSp extends AbstractSyncVcResSP {
                VcCache.put(moRef, vcObject);
 
                if (LOGGER.isDebugEnabled()) {
-                  LOGGER.debug(String.format("retrieve vc resource[%1s] is updated.", moRef));
+                  LOGGER.debug(String.format("vc resource[%1s-%2s] is retrieved.", vcObject.getName(), moRef.getValue()));
                }
             } catch (Exception ex) {
-               LOGGER.error(String.format("retrieve vc resource[%1s] failed.", moRef), ex);
+               LOGGER.error(String.format("retrieve vc resource[%1s] failed.", moRef.getValue()), ex);
             }
 
             return vcObject;

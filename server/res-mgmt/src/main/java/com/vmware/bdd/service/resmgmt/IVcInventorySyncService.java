@@ -15,4 +15,6 @@ public interface IVcInventorySyncService {
    void waitForCompletion() throws InterruptedException;
 
    void asyncRefreshInventory(VcResourceFilters filters);
+
+   void asyncRefreshUsedDatastores(String[] dsNames);
 }
