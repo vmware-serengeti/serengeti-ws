@@ -79,27 +79,17 @@ public class CreateClusterVMStep extends TrackableTasklet {
    }
 
    private void asyncRefreshUsedResources(List<BaseNode> addedNodes) {
-      VcResourceFilters filters = new VcResourceFilters();
-      filters.addFilterByType(VC_RESOURCE_TYPE.HOST).addFilterByType(VC_RESOURCE_TYPE.RESOURCE_POOL);
-
-      Set<String> clusterNameSet = new HashSet<>();
       Set<String> dsNameSet = new HashSet<>();
       for (BaseNode node: addedNodes) {
-         clusterNameSet.add(node.getClusterName());
          for(DiskSpec disk : node.getDisks()) {
             dsNameSet.add(disk.getTargetDs());
          }
       }
 
-      String[] clusterNames = new String[clusterNameSet.size()];
-      clusterNameSet.toArray(clusterNames);
       String[] dsNames = new String[dsNameSet.size()];
       dsNameSet.toArray(dsNames);
 
-      filters.addNameFilter(VC_RESOURCE_TYPE.CLUSTER, clusterNames, false);
-      filters.addNameFilter(VC_RESOURCE_TYPE.DATA_STORE, dsNames, false);
-
-      syncService.asyncRefreshInventory(filters);
+      syncService.asyncRefreshUsedDatastores(dsNames);
    }
 
 }

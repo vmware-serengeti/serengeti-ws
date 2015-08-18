@@ -387,11 +387,6 @@ public class ClusterManager {
          }
       }
       String name = clusterSpec.getName();
-
-      validateInfraConfig(clusterSpec);
-      if (softMgr.getType().equalsIgnoreCase(Constants.CLOUDERA_MANAGER_PLUGIN_TYPE)) {
-         validateServiceUserAndGroupsInLdap(clusterSpec);
-      }
       logger.info("start to create a cluster: " + name);
 
       List<String> dsNames = getUsedDS(clusterSpec.getDsNames());
@@ -839,7 +834,6 @@ public class ClusterManager {
          throw ClusterConfigException.NO_DATASTORE_ADDED();
       }
 
-      //this.resMgr.refreshVcResources();
       VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
             getRpNames(cluster.getVcRpNameList()), cluster.fetchNetworkNameList());
       syncService.refreshInventory(filters);
