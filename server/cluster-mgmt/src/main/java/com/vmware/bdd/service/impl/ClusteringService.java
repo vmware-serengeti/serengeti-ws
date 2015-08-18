@@ -150,7 +150,7 @@ public class ClusteringService implements IClusteringService {
    private VcVirtualMachine templateVm;
    private BaseNode templateNode;
    private String templateNetworkLabel;
-   private static boolean initialized = false;
+   private volatile static boolean initialized = false;
    private int cloneConcurrency;
    private VmEventManager processor;
 
@@ -277,52 +277,67 @@ public class ClusteringService implements IClusteringService {
 
    public synchronized void init() {
       if (!initialized) {
-         // XXX hack to approve bootstrap instance id, should be moved out of Configuration
-         Configuration
-               .approveBootstrapInstanceId(Configuration.BootstrapUsage.ALLOWED);
-         Configuration
-               .approveBootstrapInstanceId(Configuration.BootstrapUsage.FINALIZED);
-
-         VcContext.initVcContext();
-         new VcEventRouter();
-         CmsWorker.addPeriodic(new VcInventory.SyncInventoryRequest());
-         VcInventory.loadInventory();
          try {
-            Thread.sleep(1000);
-         } catch (InterruptedException e) {
-            logger.warn("interupted during sleep " + e.getMessage());
-         }
-         startVMEventProcessor();
-         String poolSize =
-               Configuration.getNonEmptyString("serengeti.scheduler.poolsize");
+            // XXX hack to approve bootstrap instance id, should be moved out of Configuration
+            Configuration
+                  .approveBootstrapInstanceId(Configuration.BootstrapUsage.ALLOWED);
+            Configuration
+                  .approveBootstrapInstanceId(Configuration.BootstrapUsage.FINALIZED);
 
-         if (poolSize == null) {
-            Scheduler.init(Constants.DEFAULT_SCHEDULER_POOL_SIZE,
-                  Constants.DEFAULT_SCHEDULER_POOL_SIZE);
-         } else {
-            Scheduler.init(Integer.parseInt(poolSize),
-                  Integer.parseInt(poolSize));
-         }
+            VcContext.initVcContext();
+            new VcEventRouter();
+            CmsWorker.addPeriodic(new VcInventory.SyncInventoryRequest());
+            VcInventory.loadInventory();
+            try {
+               Thread.sleep(1000);
+            } catch (InterruptedException e) {
+               logger.warn("interupted during sleep " + e.getMessage());
+            }
+            startVMEventProcessor();
+            String poolSize =
+                  Configuration.getNonEmptyString("serengeti.scheduler.poolsize");
 
-         String concurrency =
-               Configuration
-                     .getNonEmptyString("serengeti.singlevm.concurrency");
-         if (concurrency != null) {
-            cloneConcurrency = Integer.parseInt(concurrency);
-         } else {
-            cloneConcurrency = 1;
-         }
+            if (poolSize == null) {
+               Scheduler.init(Constants.DEFAULT_SCHEDULER_POOL_SIZE,
+                     Constants.DEFAULT_SCHEDULER_POOL_SIZE);
+            } else {
+               Scheduler.init(Integer.parseInt(poolSize),
+                     Integer.parseInt(poolSize));
+            }
 
-         CmsWorker
-               .addPeriodic(new ClusterNodeUpdator(getLockClusterEntityMgr()));
-         prepareTemplateVM();
-         loadTemplateNetworkLable();
-         convertTemplateVm();
-         clusterInitializerService.transformClusterStatus();
-         elasticityScheduleMgr.start();
-         configureAlarm();
-         initialized = true;
+            String concurrency =
+                  Configuration
+                        .getNonEmptyString("serengeti.singlevm.concurrency");
+            if (concurrency != null) {
+               cloneConcurrency = Integer.parseInt(concurrency);
+            } else {
+               cloneConcurrency = 1;
+            }
+
+            CmsWorker
+                  .addPeriodic(new ClusterNodeUpdator(getLockClusterEntityMgr()));
+            prepareTemplateVM();
+            loadTemplateNetworkLable();
+            convertTemplateVm();
+            clusterInitializerService.transformClusterStatus();
+            elasticityScheduleMgr.start();
+            configureAlarm();
+            initialized = true;
+         } catch (Throwable throwable) {
+            logger.error("Failed to init Clustering Service.", throwable);
+            initError = throwable;
+         }
       }
+   }
+
+   private volatile Throwable initError;
+
+   public Throwable getInitError() {
+      return initError;
+   }
+
+   public boolean isInited() {
+      return initialized;
    }
 
    private void startVMEventProcessor() {
@@ -430,6 +445,7 @@ public class ClusteringService implements IClusteringService {
    }
 
    private void prepareTemplateVM() {
+      logger.info("start prepareTemplateVM");
       final VcVirtualMachine templateVM = getTemplateVm();
 
       if (templateVM == null) {
@@ -444,14 +460,17 @@ public class ClusteringService implements IClusteringService {
             ConfigInfo.save();
          }
 
+         logger.info("check enableOvfEnvTransport");
          if (VcVmUtil.enableOvfEnvTransport(templateVM)) {
             needRemoveSnapshots = true;
          }
 
+         logger.info("check enableSyncTimeWithHost");
          if (VcVmUtil.enableSyncTimeWithHost(templateVM)) {
             needRemoveSnapshots = true;
          }
 
+         logger.info("check and RemoveSnapshots");
          if (needRemoveSnapshots) {
             removeRootSnapshot(templateVM);
          }

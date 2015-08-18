@@ -23,11 +23,13 @@ import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.VcVmUtil;
+import org.apache.log4j.Logger;
 
 import java.util.List;
 import java.util.Map;
 
 public class CreateVmPrePowerOn implements IPrePostPowerOn {
+   private final static Logger LOGGER = Logger.getLogger(CreateVmPrePowerOn.class);
    private VcVirtualMachine vm;
    private boolean reserveRawDisks;
    private List<DiskSchema.Disk> disks;
@@ -46,19 +48,24 @@ public class CreateVmPrePowerOn implements IPrePostPowerOn {
    @Override
    public Void call() throws Exception {
       if (!ha) {
+         LOGGER.debug("disable VM HA");
          VcVmUtil.disableHa(vm);
       }
       if (ft) {
+         LOGGER.debug("enable VM FT");
          VcVmUtil.enableFt(vm);
       }
 
+      LOGGER.debug("enable disk UUID");
       // enable disk UUID
       VcVmUtil.enableDiskUUID(vm);
 
+      LOGGER.debug("addVolumesToBootupConfigs");
       addVolumesToBootupConfigs(VcVmUtil.getVolumes(vm.getId(), disks));
 
       // by default, the share level is NORMAL
       if (!Priority.NORMAL.equals(ioShares)) {
+         LOGGER.debug("configIOShares");
          configIOShares();
       }
       return null;

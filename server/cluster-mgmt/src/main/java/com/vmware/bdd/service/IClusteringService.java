@@ -202,4 +202,8 @@ public interface IClusteringService {
    public VmEventManager getEventProcessor();
 
    boolean isSupportVHM(String clusterName);
+
+   boolean isInited();
+
+   Throwable getInitError();
 }

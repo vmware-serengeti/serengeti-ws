@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.vmware.bdd.aop.annotation.RestCallPointcut;
 
+import com.vmware.bdd.service.IClusteringService;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -107,6 +108,9 @@ public class RestResource {
    private ScaleManager scaleMgr;
    @Autowired
    private SoftwareManagerCollector softwareManagerCollector;
+
+   @Autowired
+   private IClusteringService clusteringService;
 
    private static final String ERR_CODE_FILE = "serengeti-errcode.properties";
    private static final int DEFAULT_HTTP_ERROR_CODE = 500;
@@ -1237,8 +1241,10 @@ public class RestResource {
    }
 
    private void verifyInitialized() {
-      if (!ClusteringService.isInitialized()) {
-         throw BddException.INIT_VC_FAIL();
+      if (!clusteringService.isInited()) {
+         Throwable initError = clusteringService.getInitError();
+         throw BddException.APP_INIT_ERROR(initError, initError.getMessage());
+         //throw BddException.INIT_VC_FAIL();
       }
    }
 }
