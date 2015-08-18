@@ -153,6 +153,7 @@ public class Constants {
    public static final String ZOOKEEPER_NOT_RESIZE = "zookeeper node groups cannot be resized.";
    public static final String PARAMS_EXCLUSION = " cannot be set at the same time.";
    public static final String PARAMS_EXCLUSION_PAIR_NETWORK_ADD_IP_DHCP = "ip and dhcp";
+   public static final String PARAMS_EXCLUSION_PAIR_NETWORK_ADD_STATIC_DDNS = "static ip and dynamic DNS";
    public static final String PARAMS_NETWORK_ADD_IP_DHCP_NOT_NULL = "You must enter one of ip,dhcp.";
    public static final String PARAMS_NETWORK_ADD_DNS = "dns";
    public static final String PARAMS_NETWORK_ADD_GATEWAY = "gateway";

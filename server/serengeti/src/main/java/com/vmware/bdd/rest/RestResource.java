@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.vmware.bdd.apitypes.*;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -41,29 +42,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.vmware.bdd.aop.annotation.RestCallPointcut;
-import com.vmware.bdd.apitypes.AppManagerAdd;
-import com.vmware.bdd.apitypes.AppManagerRead;
-import com.vmware.bdd.apitypes.BddErrorMessage;
-import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.ClusterRead;
-import com.vmware.bdd.apitypes.DatacenterMap;
-import com.vmware.bdd.apitypes.DatastoreAdd;
-import com.vmware.bdd.apitypes.DatastoreRead;
-import com.vmware.bdd.apitypes.DistroRead;
-import com.vmware.bdd.apitypes.ElasticityRequestBody;
-import com.vmware.bdd.apitypes.FixDiskRequestBody;
-import com.vmware.bdd.apitypes.NetworkAdd;
-import com.vmware.bdd.apitypes.NetworkRead;
-import com.vmware.bdd.apitypes.RackInfo;
-import com.vmware.bdd.apitypes.RackInfoList;
-import com.vmware.bdd.apitypes.ResourcePoolAdd;
-import com.vmware.bdd.apitypes.ResourcePoolRead;
-import com.vmware.bdd.apitypes.ResourceScale;
-import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Type;
-import com.vmware.bdd.apitypes.ValidateResult;
-import com.vmware.bdd.apitypes.VcClusterMap;
-import com.vmware.bdd.apitypes.VcResourceMap;
 import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.NetworkException;
@@ -848,6 +827,9 @@ public class RestResource {
          }
          if (na.getDns2() != null && !IpAddressUtil.isValidIp(na.getDns2())) {
             throw BddException.INVALID_PARAMETER("secondary DNS", na.getDns2());
+         }
+         if (na.getDnsType().equals(NetworkDnsType.DYNAMIC)) {
+            throw BddException.INVALID_PARAMETER("dns TYPE", na.getDnsType());
          }
          IpAddressUtil.verifyIPBlocks(na.getIpBlocks(), netmask);
          networkSvc.addIpPoolNetwork(na.getName(), na.getPortGroup(),
