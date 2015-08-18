@@ -1,3 +1,17 @@
+/***************************************************************************
+ * Copyright (c) 2012-2015 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ***************************************************************************/
 package com.vmware.bdd.service.resmgmt.sync;
 
 import com.vmware.aurora.vc.*;
@@ -15,8 +29,13 @@ import java.util.concurrent.Callable;
 public abstract class AbstractSyncVcResSP implements Callable<List<AbstractSyncVcResSP>> {
    private final static Logger LOGGER = Logger.getLogger(AbstractSyncVcResSP.class);
 
-
    private VcResourceFilters vcResourceFilters = null;
+
+   private boolean skipped = false;
+
+   protected AbstractSyncVcResSP(boolean skippRefresh) {
+      skipped = skippRefresh;
+   }
 
    protected List<AbstractSyncVcResSP> getSyncResourceSpList(ManagedObjectReference[] moRefs) {
       List<AbstractSyncVcResSP> syncChildSpList = new ArrayList<>();
@@ -48,12 +67,10 @@ public abstract class AbstractSyncVcResSP implements Callable<List<AbstractSyncV
       //Vc Object exists meaning the object has been loaded before.
       // otherwise it's a newly added vc resource.
 
-
       AbstractSyncVcResSP newSyncVcResSp = null;
       if (vcObject != null) {
-         if(vcResourceFilters == null || !vcResourceFilters.isFiltered(vcObject)) {
-            newSyncVcResSp = new SyncResourceSp(vcObject);
-         }
+         boolean isFiltered = vcResourceFilters != null && vcResourceFilters.isFiltered(vcObject);
+         newSyncVcResSp = new SyncResourceSp(vcObject, isFiltered);
       } else {
          newSyncVcResSp = new SyncVcResourceSp(moRef);
       }
@@ -78,8 +95,10 @@ public abstract class AbstractSyncVcResSP implements Callable<List<AbstractSyncV
       //sync the current vc resource object
       VcObject vcObject = syncThis();
 
-      if(LOGGER.isDebugEnabled()) {
-         LOGGER.debug(String.format("sync vc resource itself: %1s is done.", vcObject.getId()));
+      if(!skipped && LOGGER.isDebugEnabled()) {
+         if(vcObject instanceof VcDatastore) {
+            LOGGER.debug(String.format("%1s freesize:%2sGB", vcObject.getName(), ((VcDatastore) vcObject).getFreeSpace()/1024/1024/1024));
+         }
       }
 
       //build a list of task
@@ -108,6 +127,10 @@ public abstract class AbstractSyncVcResSP implements Callable<List<AbstractSyncV
       }
 
       return syncChildSpList;
+   }
+
+   protected final boolean isSkipped() {
+      return skipped;
    }
 
    protected abstract VcObject syncThis();

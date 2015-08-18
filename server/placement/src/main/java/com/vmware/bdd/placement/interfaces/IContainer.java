@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.vmware.aurora.vc.VcCluster;
+import com.vmware.bdd.placement.entity.AbstractDatacenter;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.placement.entity.VirtualGroup;
@@ -137,4 +138,6 @@ public interface IContainer {
     * @param hostname
     */
    public void removeHost(String hostname);
+
+   public AbstractDatacenter getDc();
 }

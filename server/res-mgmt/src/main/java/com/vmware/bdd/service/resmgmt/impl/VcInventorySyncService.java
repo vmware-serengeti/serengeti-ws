@@ -1,3 +1,17 @@
+/***************************************************************************
+ * Copyright (c) 2012-2015 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ***************************************************************************/
 package com.vmware.bdd.service.resmgmt.impl;
 
 import com.vmware.aurora.util.AuAssert;
@@ -5,6 +19,7 @@ import com.vmware.aurora.vc.VcDatacenter;
 import com.vmware.aurora.vc.VcInventory;
 import com.vmware.aurora.vc.VcObject;
 import com.vmware.bdd.service.resmgmt.IVcInventorySyncService;
+import com.vmware.bdd.service.resmgmt.VC_RESOURCE_TYPE;
 import com.vmware.bdd.service.resmgmt.sync.AbstractSyncVcResSP;
 import com.vmware.bdd.service.resmgmt.sync.SyncVcResourceSp;
 import com.vmware.bdd.service.resmgmt.sync.filter.VcResourceFilters;
@@ -71,7 +86,7 @@ public class VcInventorySyncService implements IVcInventorySyncService {
             counters.increaseInvRefresh();
             try {
                List<VcDatacenter> dcList = VcInventory.getDatacenters();
-               refresh(vcResourceFilters == null ? dcList : vcResourceFilters.filter(dcList), vcResourceFilters);
+               refresh(dcList, vcResourceFilters);
             } finally {
                counters.setRefreshInProgress(false);
                inProgress.set(false);
@@ -113,6 +128,18 @@ public class VcInventorySyncService implements IVcInventorySyncService {
             }
          }
       });
+   }
+
+   @Override
+   public void asyncRefreshUsedDatastores(String[] dsNames) {
+      VcResourceFilters filters = new VcResourceFilters();
+      filters.addFilterByType(VC_RESOURCE_TYPE.HOST)
+            .addFilterByType(VC_RESOURCE_TYPE.RESOURCE_POOL)
+            .addFilterByType(VC_RESOURCE_TYPE.CLUSTER)
+            .addFilterByType(VC_RESOURCE_TYPE.DATA_CENTER);
+      filters.addNameFilter(VC_RESOURCE_TYPE.DATA_STORE, dsNames, false);
+
+      asyncRefreshInventory(filters);
    }
 
    @Override

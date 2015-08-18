@@ -15,26 +15,6 @@
 
 package com.vmware.bdd.service.impl;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.google.gson.Gson;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
@@ -50,27 +30,11 @@ import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Scheduler;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.util.CmsWorker;
-import com.vmware.aurora.vc.DeviceId;
-import com.vmware.aurora.vc.VcCache;
-import com.vmware.aurora.vc.VcCluster;
-import com.vmware.aurora.vc.VcDatacenter;
-import com.vmware.aurora.vc.VcDatastore;
-import com.vmware.aurora.vc.VcHost;
-import com.vmware.aurora.vc.VcInventory;
-import com.vmware.aurora.vc.VcResourcePool;
-import com.vmware.aurora.vc.VcSnapshot;
-import com.vmware.aurora.vc.VcUtil;
-import com.vmware.aurora.vc.VcVirtualMachine;
-import com.vmware.aurora.vc.VcVmCloneType;
+import com.vmware.aurora.vc.*;
 import com.vmware.aurora.vc.vcevent.VcEventRouter;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
-import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.IpBlock;
-import com.vmware.bdd.apitypes.NetworkAdd;
-import com.vmware.bdd.apitypes.NodeGroupCreate;
-import com.vmware.bdd.apitypes.Priority;
-import com.vmware.bdd.apitypes.StorageRead.DiskScsiControllerType;
+import com.vmware.bdd.apitypes.*;
 import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.clone.spec.VmCreateResult;
 import com.vmware.bdd.clone.spec.VmCreateSpec;
@@ -93,6 +57,7 @@ import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.placement.exception.PlacementException;
 import com.vmware.bdd.placement.interfaces.IPlacementService;
+import com.vmware.bdd.placement.util.ContainerToStringHelper;
 import com.vmware.bdd.placement.util.PlacementUtil;
 import com.vmware.bdd.service.IClusterInitializerService;
 import com.vmware.bdd.service.IClusteringService;
@@ -102,35 +67,30 @@ import com.vmware.bdd.service.job.NodeOperationStatus;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
-import com.vmware.bdd.service.sp.BaseProgressCallback;
-import com.vmware.bdd.service.sp.ConfigIOShareSP;
-import com.vmware.bdd.service.sp.CreateResourcePoolSP;
-import com.vmware.bdd.service.sp.CreateVmPrePowerOn;
-import com.vmware.bdd.service.sp.DeleteRpSp;
-import com.vmware.bdd.service.sp.DeleteVmByIdSP;
-import com.vmware.bdd.service.sp.NoProgressUpdateCallback;
-import com.vmware.bdd.service.sp.SetAutoElasticitySP;
-import com.vmware.bdd.service.sp.StartVmPostPowerOn;
-import com.vmware.bdd.service.sp.StartVmSP;
-import com.vmware.bdd.service.sp.StopVmSP;
+import com.vmware.bdd.service.sp.*;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.spectypes.HadoopRole;
-import com.vmware.bdd.utils.AuAssert;
-import com.vmware.bdd.utils.ClusterUtil;
-import com.vmware.bdd.utils.CommonUtil;
-import com.vmware.bdd.utils.ConfigInfo;
-import com.vmware.bdd.utils.Constants;
-import com.vmware.bdd.utils.JobUtils;
-import com.vmware.bdd.utils.VcVmUtil;
-import com.vmware.bdd.utils.Version;
+import com.vmware.bdd.utils.*;
 import com.vmware.bdd.vmclone.service.intf.IClusterCloneService;
 import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
 import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ClusteringService implements IClusteringService {
    private static final int VC_RP_MAX_NAME_LENGTH = 80;
@@ -1394,6 +1354,9 @@ public class ClusteringService implements IClusteringService {
 //         VcResourceUtils.refreshDatastore(cl);
          container.addResource(cl);
       }
+
+      logger.info("VC resource container details:" + ContainerToStringHelper.convertToString(container));
+
 
       logger.info("check time on hosts.");
       // check time on hosts
