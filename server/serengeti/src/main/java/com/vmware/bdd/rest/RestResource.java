@@ -14,8 +14,34 @@
  ***************************************************************************/
 package com.vmware.bdd.rest;
 
-import com.vmware.bdd.aop.annotation.RestCallPointcut;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.vmware.bdd.apitypes.*;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.NestedRuntimeException;
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+import com.vmware.bdd.aop.annotation.RestCallPointcut;
 import com.vmware.bdd.apitypes.TaskRead.Type;
 import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.exception.BddException;
@@ -819,6 +845,9 @@ public class RestResource {
          }
          if (na.getDns2() != null && !IpAddressUtil.isValidIp(na.getDns2())) {
             throw BddException.INVALID_PARAMETER("secondary DNS", na.getDns2());
+         }
+         if (na.getDnsType().equals(NetworkDnsType.DYNAMIC)) {
+            throw BddException.INVALID_PARAMETER("dns TYPE", na.getDnsType());
          }
          IpAddressUtil.verifyIPBlocks(na.getIpBlocks(), netmask);
          networkSvc.addIpPoolNetwork(na.getName(), na.getPortGroup(),

@@ -109,6 +109,12 @@ public class NetworkCommands implements CommandMarker {
                Constants.PARAMS_EXCLUSION_PAIR_NETWORK_ADD_IP_DHCP
                + Constants.PARAMS_EXCLUSION);
          return;
+      } else if(!CommandsUtils.isBlank(ip) && dnsType.equals(NetworkDnsType.DYNAMIC)) {
+          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
+                  Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
+                  Constants.PARAMS_EXCLUSION_PAIR_NETWORK_ADD_STATIC_DDNS
+                          + Constants.PARAMS_EXCLUSION);
+          return;
       } else if (dhcp) {
          operType = NetworkType.DHCP;
       } else if (!CommandsUtils.isBlank(ip)) {
@@ -194,6 +200,13 @@ public class NetworkCommands implements CommandMarker {
       NetworkAdd networkAdd = new NetworkAdd();
       networkAdd.setName(name);
       try {
+         if (!CommandsUtils.isBlank(ip) && dnsType.equals(NetworkDnsType.DYNAMIC)) {
+             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
+                     Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
+                     Constants.PARAMS_EXCLUSION_PAIR_NETWORK_ADD_STATIC_DDNS
+                             + Constants.PARAMS_EXCLUSION);
+             return;
+         }
          if (ip != null) {
             if (!validateIP(ip, Constants.OUTPUT_OP_MODIFY)) {
                return;
