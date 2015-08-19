@@ -309,7 +309,7 @@ public class CmsWorker {
          this.queue = queue;
       }
 
-      abstract protected boolean executeOnce();
+      abstract public boolean executeOnce();
       protected boolean isContinue() {
          return true;
       }

@@ -138,6 +138,10 @@ public interface IClusteringService {
     */
    public void init();
 
+   public boolean isInited();
+
+   public Throwable getInitError();
+
    /**
     * Destroy clustering service
     */
