@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.vmware.bdd.aop.annotation.RestCallPointcut;
-
 import com.vmware.bdd.service.IClusteringService;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -108,9 +107,9 @@ public class RestResource {
    private ScaleManager scaleMgr;
    @Autowired
    private SoftwareManagerCollector softwareManagerCollector;
-
    @Autowired
    private IClusteringService clusteringService;
+
 
    private static final String ERR_CODE_FILE = "serengeti-errcode.properties";
    private static final int DEFAULT_HTTP_ERROR_CODE = 500;
@@ -394,8 +393,8 @@ public class RestResource {
 	  if (scale.getCpuNumber() <= 0
 			&& scale.getMemory() < Constants.MIN_MEM_SIZE) {
 		 throw BddException.INVALID_PARAMETER_WITHOUT_EQUALS_SIGN(
-						"node group scale parameter. The number of CPUs must be greater than zero, and the memory size in MB must be greater than or equal to "
-								+ Constants.MIN_MEM_SIZE + ":", scale);
+             "node group scale parameter. The number of CPUs must be greater than zero, and the memory size in MB must be greater than or equal to "
+                   + Constants.MIN_MEM_SIZE + ":", scale);
 		}
       logger.info("scale cluster: " + scale.toString());
       Long taskId =
@@ -1216,20 +1215,11 @@ public class RestResource {
       return result;
    }
 
-   @ExceptionHandler(Throwable.class)
-   @ResponseBody
-   public BddErrorMessage handleException(Throwable t,
-         HttpServletResponse response) {
-      if (t instanceof NestedRuntimeException) {
-         t = BddException.BAD_REST_CALL(t, t.getMessage());
+   private void verifyInitialized() {
+      if (!clusteringService.isInited()) {
+         Throwable initErr = clusteringService.getInitError();
+         throw BddException.APP_INIT_ERROR(initErr, initErr.getMessage());
       }
-      BddException ex =
-            BddException.wrapIfNeeded(t, "REST API transport layer error.");
-      logger.error("rest call error", ex);
-      response.setStatus(getHttpErrorCode(ex.getFullErrorId()));
-      response.setContentType("application/json;charset=utf-8");
-      response.setCharacterEncoding("utf-8");
-      return new BddErrorMessage(ex.getFullErrorId(), extractErrorMessage(ex));
    }
 
    private String extractErrorMessage(BddException ex) {
@@ -1238,13 +1228,5 @@ public class RestResource {
          msg = "Data access layer exception. See the detailed error in the log";
       }
       return msg;
-   }
-
-   private void verifyInitialized() {
-      if (!clusteringService.isInited()) {
-         Throwable initError = clusteringService.getInitError();
-         throw BddException.APP_INIT_ERROR(initError, initError.getMessage());
-         //throw BddException.INIT_VC_FAIL();
-      }
    }
 }
