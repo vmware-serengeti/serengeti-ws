@@ -110,7 +110,8 @@ public class ClusteringService implements IClusteringService {
    private VcVirtualMachine templateVm;
    private BaseNode templateNode;
    private String templateNetworkLabel;
-   private static boolean initialized = false;
+   private volatile boolean inited = false;
+   private Throwable initError;
    private int cloneConcurrency;
    private VmEventManager processor;
 
@@ -235,59 +236,74 @@ public class ClusteringService implements IClusteringService {
       this.softwareManagerCollector = softwareManagerCollector;
    }
 
+   public boolean isInited() {
+      return inited;
+   }
+
+   public Throwable getInitError() {
+      return initError;
+   }
+
    public synchronized void init() {
-      if (!initialized) {
-         // XXX hack to approve bootstrap instance id, should be moved out of Configuration
-         Configuration
-               .approveBootstrapInstanceId(Configuration.BootstrapUsage.ALLOWED);
-         Configuration
-               .approveBootstrapInstanceId(Configuration.BootstrapUsage.FINALIZED);
-
-         VcContext.initVcContext();
-         new VcEventRouter();
-         CmsWorker.addPeriodic(new VcInventory.SyncInventoryRequest());
-         VcInventory.loadInventory();
+      if (!inited) {
          try {
-            Thread.sleep(1000);
-         } catch (InterruptedException e) {
-            logger.warn("interupted during sleep " + e.getMessage());
+            // XXX hack to approve bootstrap instance id, should be moved out of Configuration
+            Configuration.approveBootstrapInstanceId(Configuration.BootstrapUsage.ALLOWED);
+            Configuration.approveBootstrapInstanceId(Configuration.BootstrapUsage.FINALIZED);
+
+            VcContext.initVcContext();
+            new VcEventRouter();
+
+            //disable background VC refresh.
+            //CmsWorker.addPeriodic(new VcInventory.SyncInventoryRequest());
+            VcInventory.loadInventory();
+
+            //why??
+            try {
+               Thread.sleep(1000);
+            } catch (InterruptedException e) {
+               logger.warn("interupted during sleep " + e.getMessage());
+            }
+            startVMEventProcessor();
+            String poolSize =
+                  Configuration.getNonEmptyString("serengeti.scheduler.poolsize");
+
+            if (poolSize == null) {
+               Scheduler.init(Constants.DEFAULT_SCHEDULER_POOL_SIZE,
+                     Constants.DEFAULT_SCHEDULER_POOL_SIZE);
+            } else {
+               Scheduler.init(Integer.parseInt(poolSize),
+                     Integer.parseInt(poolSize));
+            }
+
+            String concurrency =
+                  Configuration
+                        .getNonEmptyString("serengeti.singlevm.concurrency");
+            if (concurrency != null) {
+               cloneConcurrency = Integer.parseInt(concurrency);
+            } else {
+               cloneConcurrency = 1;
+            }
+
+            ClusterNodeUpdator nodeUpdator = new ClusterNodeUpdator(getLockClusterEntityMgr());
+            // refresh the cluster nodes once on bde startup, till now the vc cache has
+            // been loaded, so it should be fast to do it
+            logger.info("refresh the cluster nodes once on bde startup...");
+            nodeUpdator.executeOnce();
+            // then add the periodic processing with default 5 minute interval
+            CmsWorker.addPeriodic(nodeUpdator);
+
+            prepareTemplateVM();
+            loadTemplateNetworkLable();
+            convertTemplateVm();
+            clusterInitializerService.transformClusterStatus();
+            elasticityScheduleMgr.start();
+            configureAlarm();
+            inited = true;
+         } catch (Throwable err) {
+            logger.error("init ClusteringService error", err);
+            initError = err;
          }
-         startVMEventProcessor();
-         String poolSize =
-               Configuration.getNonEmptyString("serengeti.scheduler.poolsize");
-
-         if (poolSize == null) {
-            Scheduler.init(Constants.DEFAULT_SCHEDULER_POOL_SIZE,
-                  Constants.DEFAULT_SCHEDULER_POOL_SIZE);
-         } else {
-            Scheduler.init(Integer.parseInt(poolSize),
-                  Integer.parseInt(poolSize));
-         }
-
-         String concurrency =
-               Configuration
-                     .getNonEmptyString("serengeti.singlevm.concurrency");
-         if (concurrency != null) {
-            cloneConcurrency = Integer.parseInt(concurrency);
-         } else {
-            cloneConcurrency = 1;
-         }
-
-         ClusterNodeUpdator nodeUpdator = new ClusterNodeUpdator(getLockClusterEntityMgr());
-         // refresh the cluster nodes once on bde startup, till now the vc cache has
-         // been loaded, so it should be fast to do it
-         logger.info("refresh the cluster nodes once on bde startup...");
-         nodeUpdator.executeOnce();
-         // then add the periodic processing with default 5 minute interval
-         CmsWorker.addPeriodic(nodeUpdator);
-
-         prepareTemplateVM();
-         loadTemplateNetworkLable();
-         convertTemplateVm();
-         clusterInitializerService.transformClusterStatus();
-         elasticityScheduleMgr.start();
-         configureAlarm();
-         initialized = true;
       }
    }
 
@@ -2033,10 +2049,6 @@ public class ClusteringService implements IClusteringService {
 
    public VmEventManager getEventProcessor() {
       return this.processor;
-   }
-
-   public static boolean isInitialized() {
-      return initialized;
    }
 
    @Override
