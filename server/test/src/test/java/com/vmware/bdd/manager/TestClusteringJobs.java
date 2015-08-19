@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -393,7 +394,7 @@ public class TestClusteringJobs extends
       createSpec.setNetworkConfig(createNetConfig(TEST_STATIC_NETWORK_NAME, staticPortgroup));
       createSpec.setDistro("bigtop");
       createSpec.setDistroVendor(Constants.DEFAULT_VENDOR);
-      long jobExecutionId = clusterMgr.createCluster(createSpec);
+      long jobExecutionId = clusterMgr.createCluster(createSpec, new BaseConfiguration());
       ClusterRead cluster =
             clusterMgr.getClusterByName(TEST_STATIC_IP_CLUSTER_NAME, false);
       Assert.assertTrue(
@@ -575,7 +576,7 @@ public class TestClusteringJobs extends
       createSpec.setDistro("bigtop");
       NodeGroupCreate worker = createSpec.getNodeGroup("worker");
       worker.setInstanceNum(1);
-      long jobExecutionId = clusterMgr.createCluster(createSpec);
+      long jobExecutionId = clusterMgr.createCluster(createSpec, new BaseConfiguration());
       ClusterRead cluster =
             clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
       Assert.assertTrue(
@@ -601,7 +602,7 @@ public class TestClusteringJobs extends
    @Transactional(propagation = Propagation.NEVER)
    public void testClusterResume() throws Exception {
       long jobExecutionId =
-            clusterMgr.resumeClusterCreation(TEST_DHCP_CLUSTER_NAME);
+            clusterMgr.resumeClusterCreation(TEST_DHCP_CLUSTER_NAME, new BaseConfiguration());
       ClusterRead cluster =
             clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
       Assert.assertTrue(
@@ -622,7 +623,7 @@ public class TestClusteringJobs extends
    @Transactional(propagation = Propagation.NEVER)
    public void testClusterResizeFailed() throws Exception {
       long jobExecutionId =
-            clusterMgr.resizeCluster(TEST_DHCP_CLUSTER_NAME, "worker", 2);
+            clusterMgr.resizeCluster(TEST_DHCP_CLUSTER_NAME, "worker", 2, false, new BaseConfiguration());
       ClusterRead cluster =
             clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
       Assert.assertTrue(
@@ -657,7 +658,7 @@ public class TestClusteringJobs extends
       stopVcVm(vcRP + "/" + ConfigInfo.getSerengetiUUID() + "-"
             + TEST_DHCP_CLUSTER_NAME + "/" + "worker",
             TEST_DHCP_CLUSTER_NAME + "-worker-0");
-      long jobExecutionId = clusterMgr.resizeCluster(TEST_DHCP_CLUSTER_NAME, "worker", 2);
+      long jobExecutionId = clusterMgr.resizeCluster(TEST_DHCP_CLUSTER_NAME, "worker", 2, false, new BaseConfiguration());
       ClusterRead cluster =
             clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
       Assert.assertTrue(cluster.getStatus() == ClusterStatus.UPDATING,
@@ -796,7 +797,7 @@ public class TestClusteringJobs extends
       createSpec.setName(TEST_STATIC_IP_CLUSTER_NAME);
       createSpec.setType(ClusterType.HDFS_MAPRED);
       try {
-         clusterMgr.createCluster(createSpec);
+         clusterMgr.createCluster(createSpec, new BaseConfiguration());
          Assert.assertTrue(false, "Cluster creation should throw exception.");
       } catch (Exception e) {
          e.printStackTrace();

@@ -28,6 +28,7 @@ import java.util.Set;
 import jline.console.ConsoleReader;
 
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.core.CommandMarker;
@@ -103,7 +104,8 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "localRepoURL" }, mandatory = false, help = "Local yum server URL for application managers, ClouderaManager/Ambari.") final String localRepoURL,
          @CliOption(key = { "adminGroupName" }, mandatory = false, help = "AD/LDAP Admin Group Name.") final String adminGroupName,
          @CliOption(key = { "userGroupName" }, mandatory = false, help = "AD/LDAP User Group Name.") final String userGroupName,
-         @CliOption(key = { "disableLocalUsers" }, mandatory = false, help = "flag to disable local users") final Boolean disableLocalUsersFlag
+         @CliOption(key = { "disableLocalUsers" }, mandatory = false, help = "flag to disable local users") final Boolean disableLocalUsersFlag,
+         @CliOption(key = { "skipVcRefresh" }, mandatory = false, help = "flag to skip refreshing VC resources") final Boolean skipVcRefresh
       ) {
       // validate the name
       if (name.indexOf("-") != -1) {
@@ -125,7 +127,7 @@ public class ClusterCommands implements CommandMarker {
                Constants.RESUME_DONOT_NEED_SET_PASSWORD);
          return;
       } else if (resume) {
-         resumeCreateCluster(name);
+         resumeCreateCluster(name, skipVcRefresh);
          return;
       }
 
@@ -416,7 +418,7 @@ public class ClusterCommands implements CommandMarker {
                warningMsgList, alwaysAnswerYes, null)) {
             return;
          }
-         restClient.create(clusterCreate);
+         restClient.create(clusterCreate, BooleanUtils.toBoolean(skipVcRefresh));
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
                Constants.OUTPUT_OP_RESULT_CREAT);
       } catch (CliRestException e) {
@@ -752,7 +754,9 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "nodeGroup" }, mandatory = true, help = "The node group name") final String nodeGroup,
          @CliOption(key = { "instanceNum" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The new instance number, should be larger than 0") final int instanceNum,
          @CliOption(key = { "cpuNumPerNode" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The number of vCPU for the nodes in this group") final int cpuNumber,
-         @CliOption(key = { "memCapacityMbPerNode" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The number of memory size in Mb for the nodes in this group") final long memory) {
+         @CliOption(key = { "memCapacityMbPerNode" }, mandatory = false, unspecifiedDefaultValue = "0", help = "The number of memory size in Mb for the nodes in this group") final long memory,
+         @CliOption(key = { "force" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Ignore errors during resizing cluster") final Boolean force,
+         @CliOption(key = { "skipVcRefresh" }, mandatory = false, help = "flag to skip refreshing VC resources") final Boolean skipVcRefresh) {
 
       if ((instanceNum > 0 && cpuNumber == 0 && memory == 0)
             || (instanceNum == 0 && (cpuNumber > 0 || memory > 0))) {
@@ -793,7 +797,10 @@ public class ClusterCommands implements CommandMarker {
             }
             TaskRead taskRead = null;
             if (instanceNum > 0) {
-               restClient.resize(name, nodeGroup, instanceNum);
+               Map<String, String> queryStrings = new HashMap<String, String>();
+               queryStrings.put(Constants.FORCE_CLUSTER_OPERATION_KEY, force.toString());
+               queryStrings.put(Constants.REST_PARAM_SKIP_REFRESH_VC, Boolean.toString(BooleanUtils.toBoolean(skipVcRefresh)));
+               restClient.resize(name, nodeGroup, instanceNum, queryStrings);
             } else if (cpuNumber > 0 || memory > 0) {
                if (!cluster.getStatus().isActiveServiceStatus()) {
                   CommandsUtils.printCmdFailure(
@@ -1234,10 +1241,11 @@ public class ClusterCommands implements CommandMarker {
       return null;
    }
 
-   private void resumeCreateCluster(final String name) {
+   private void resumeCreateCluster(final String name, Boolean skipVcRefresh) {
       Map<String, String> queryStrings = new HashMap<String, String>();
       queryStrings.put(Constants.QUERY_ACTION_KEY,
             Constants.QUERY_ACTION_RESUME);
+      queryStrings.put(Constants.REST_PARAM_SKIP_REFRESH_VC, Boolean.toString(BooleanUtils.toBoolean(skipVcRefresh)));
 
       try {
          restClient.actionOps(name, queryStrings);
