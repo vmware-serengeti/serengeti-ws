@@ -90,6 +90,12 @@ public class PeriodCollectionService implements IPeriodCollectionService {
          Map<String, Object> commonReportsData = getCommonReportsData();
          data.put(dataObjectType.getName(), commonReportsData);
          break;
+      case VC_CORRELATION:
+         // Add this information to bde telemetry for correlation analysis
+         // between products.
+         Map<String, Object> vcCorrelationData = getVcCorrelationData();
+         data.put(dataObjectType.getName(), vcCorrelationData);
+         break;
       default:
       }
       return Collections.unmodifiableMap(data);
@@ -117,7 +123,7 @@ public class PeriodCollectionService implements IPeriodCollectionService {
    private Map<String, Object> getEnvironmentalInfo() {
       Map<String, Object> environmentalInfoData = new HashMap<String, Object>();
       environmentalInfoData.put(CollectionConstants.OBJECT_ID, CommonUtil.getUUID());
-      environmentalInfoData.put(CollectionConstants.ENVIRONMENTAL_INFO_VERSION_OF_VCENTER, getVersionOfVCenter());
+      environmentalInfoData.put(CollectionConstants.ENVIRONMENTAL_INFO_VERSION_OF_VCENTER, "vCenter" + " " + getVersionOfVCenter());
       environmentalInfoData.put(CollectionConstants.ENVIRONMENTAL_INFO_VERSION_OF_ESXI, getVersionsOfESXi());
       environmentalInfoData.put(CollectionConstants.ENVIRONMENTAL_INFO_TYPE_OF_STORAGE, typesOfStorages());
       environmentalInfoData.put(CollectionConstants.ENVIRONMENTAL_INFO_DISTROS_OF_HADOOP, getDistrosOfHadoop());
@@ -384,10 +390,14 @@ public class PeriodCollectionService implements IPeriodCollectionService {
       String version = "";
       VcContext.initVcContext();
       version = VcContext.getVcVersion();
-      if (!CommonUtil.isBlank(version)) {
-         version = "vCenter" + " " + version;
-      }
       return version;
+   }
+
+   private String getUuidOfVCenter() {
+      String uuid = "";
+      VcContext.initVcContext();
+      uuid = VcContext.getServerGuid();
+      return uuid;
    }
 
    private String getVersionsOfESXi() {
@@ -501,4 +511,13 @@ public class PeriodCollectionService implements IPeriodCollectionService {
       this.collectionInitializerService = collectionInitializerService;
    }
 
+   private Map<String, Object> getVcCorrelationData() {
+      Map<String, Object> vcCorrelationData = new HashMap<String, Object>();
+      vcCorrelationData.put(CollectionConstants.OBJECT_ID, CommonUtil.getUUID());
+      vcCorrelationData.put(CollectionConstants.VC_BDE_INSTANCE_ID, collectionInitializerService.getInstanceId());
+      vcCorrelationData.put(CollectionConstants.VC_UUID, getUuidOfVCenter());
+      vcCorrelationData.put(CollectionConstants.VC_VERSION, getVersionOfVCenter());
+      logger.info("Collect VC correlation data: " + vcCorrelationData.toString());
+      return vcCorrelationData;
+   }
 }
