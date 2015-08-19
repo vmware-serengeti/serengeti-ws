@@ -28,6 +28,11 @@
 		<beans:property name="collectionDriverManager" ref="collectionDriverManager" />
 		<beans:property name="periodCollectionService" ref="periodCollectionService" />
 	</beans:bean>
+	<beans:bean name="collectVcCorrelationDataTasklet"
+		class="com.vmware.bdd.service.collection.job.CollectVcCorrelationDataStep">
+		<beans:property name="collectionDriverManager" ref="collectionDriverManager" />
+		<beans:property name="periodCollectionService" ref="periodCollectionService" />
+	</beans:bean>
 	<job id="collectDataJob" job-repository="jobRepository">
 		<split id="collectionSplit" task-executor="taskExecutor">
 			<flow>
@@ -43,6 +48,11 @@
 			<flow>
 				<step id="collectCommonReportsDataStep">
 					<tasklet ref="collectCommonReportsDataTasklet" />
+				</step>
+			</flow>
+			<flow>
+				<step id="collectVcCorrelationDataStep">
+					<tasklet ref="collectVcCorrelationDataTasklet" />
 				</step>
 			</flow>
 		</split>

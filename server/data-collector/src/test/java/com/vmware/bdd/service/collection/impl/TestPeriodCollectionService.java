@@ -96,6 +96,7 @@ public class TestPeriodCollectionService {
       testCollectFootPrintData();
       testCollectEnvironmentalInfo();
       testCommonReportsData();
+      testVcCorrelationData();
    }
 
    private void testCollectFootPrintData() throws ParseException {
@@ -191,5 +192,15 @@ public class TestPeriodCollectionService {
       assertEquals(fieldsMap.get("name"), "vSphere Big Data Extensions");
       assertEquals(fieldsMap.get("version"), Constants.VERSION);
       assertEquals(fieldsMap.get("edition"), "Enterprise");
+   }
+
+   private void testVcCorrelationData() {
+      Mockito.when(collectionInitializerService.getInstanceId()).thenReturn("instanceId");
+      Map<String, Map<String, ?>> data = periodCollectionService.collectData(DataObjectType.VC_CORRELATION);
+      Map<String, ?> fieldsMap = data.get(DataObjectType.VC_CORRELATION.getName());
+      assertEquals(fieldsMap.get("id"), "resourceId");
+      assertEquals(fieldsMap.get("bde_instance_id"), "instanceId");
+      assertEquals(fieldsMap.get("vc_uuid"), "vCenter_uuid");
+      assertEquals(fieldsMap.get("vc_version"), "5.5.0");
    }
 }

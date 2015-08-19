@@ -45,4 +45,10 @@ public class MockVcContext {
    public static synchronized void initVcContext() {
 
    }
+
+   @Mock
+   public static String getServerGuid() {
+      return "vCenter_uuid";
+   }
+
 }
