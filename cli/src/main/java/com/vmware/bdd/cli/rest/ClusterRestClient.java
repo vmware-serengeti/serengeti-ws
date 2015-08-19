@@ -46,13 +46,16 @@ public class ClusterRestClient {
    @Autowired
    private RestClient restClient;
 
-   public void create(ClusterCreate clusterCreate) {
-      final String path = Constants.REST_PATH_CLUSTERS;
+   public void create(ClusterCreate clusterCreate, boolean skipVcRefresh) {
+      final StringBuilder pathSb = new StringBuilder(Constants.REST_PATH_CLUSTERS);
+      pathSb.append('?').append(Constants.REST_PARAM_SKIP_REFRESH_VC).append('=')
+            .append(skipVcRefresh);
+
       final HttpMethod httpverb = HttpMethod.POST;
 
       PrettyOutput outputCallBack =
             getClusterPrettyOutputCallBack(this, clusterCreate.getName());
-      restClient.createObject(clusterCreate, path, httpverb, outputCallBack);
+      restClient.createObject(clusterCreate, pathSb.toString(), httpverb, outputCallBack);
    }
 
    public void configCluster(ClusterCreate clusterConfig) {
@@ -149,15 +152,15 @@ public class ClusterRestClient {
    }
 
    public void resize(String clusterName, String nodeGroup, int instanceNum, Map<String, String> queryStrings) {
-      final String path =
-            Constants.REST_PATH_CLUSTER + "/" + clusterName + "/"
-                  + Constants.REST_PATH_NODEGROUP + "/" + nodeGroup
-                  + "/instancenum";
+      final StringBuilder pathSb = new StringBuilder(Constants.REST_PATH_CLUSTER);
+
+      pathSb.append('/').append(clusterName).append('/').append(Constants.REST_PATH_NODEGROUP).append('/').append(nodeGroup).append("/instancenum");
+
       final HttpMethod httpverb = HttpMethod.PUT;
 
       PrettyOutput outputCallBack =
             getClusterPrettyOutputCallBack(this, clusterName);
-      restClient.updateWithQueryStrings(Integer.valueOf(instanceNum), path, queryStrings, httpverb,
+      restClient.updateWithQueryStrings(Integer.valueOf(instanceNum), pathSb.toString(), queryStrings, httpverb,
             outputCallBack);
    }
 

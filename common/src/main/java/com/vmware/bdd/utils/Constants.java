@@ -266,4 +266,6 @@ public class Constants {
    public static final String FORCE_CLUSTER_OPERATION_JOB_PARAM = "force.cluster.operation";
 
    public static final String VC_INVENTORY_SYNC_INTERVAL_IN_SECOND = "vc.inventory.sync.intervalSecond";
+
+   public static final String SKIP_REFRESH_VC = "skip.refresh.vc.resource";
 }

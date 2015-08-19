@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.configuration.BaseConfiguration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -188,6 +189,7 @@ public class RestResource {
    @RequestMapping(value = "/clusters", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void createCluster(@RequestBody ClusterCreate createSpec,
+         @RequestParam(value = "skiprefreshvc", required = false) boolean skipRefreshVC,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
       verifyInitialized();
@@ -207,7 +209,10 @@ public class RestResource {
          }
       }
 
-      long jobExecutionId = clusterMgr.createCluster(createSpec);
+      BaseConfiguration params = new BaseConfiguration();
+      params.addProperty(Constants.SKIP_REFRESH_VC, skipRefreshVC);
+
+      long jobExecutionId = clusterMgr.createCluster(createSpec, params);
       redirectRequest(jobExecutionId, request, response);
    }
 
@@ -273,7 +278,7 @@ public class RestResource {
          @RequestParam(value = "ignorewarning", required = false, defaultValue = "false") boolean ignoreWarning,
          HttpServletRequest request, HttpServletResponse response) throws Exception {
       if (state != null) {
-         // forward request to startStopResumeCluster() for backward compatibility
+         // forward request to startStop`() for backward compatibility
          request.getRequestDispatcher(clusterName + "/action").forward(request, response);
          response.setStatus(HttpStatus.ACCEPTED.value());
          return;
@@ -301,6 +306,7 @@ public class RestResource {
          @PathVariable("clusterName") String clusterName,
          @RequestParam(value = "state", required = true) String state,
          @RequestParam(value = "force", required = false, defaultValue = "false") Boolean force,
+         @RequestParam(value = "skiprefreshvc", required = false) boolean skipRefreshVC,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
 
@@ -319,7 +325,9 @@ public class RestResource {
          taskId = clusterMgr.startCluster(clusterName, force);
          redirectRequest(taskId, request, response);
       } else if (state.equals("resume")) {
-         taskId = clusterMgr.resumeClusterCreation(clusterName);
+         BaseConfiguration params = new BaseConfiguration();
+         params.addProperty(Constants.SKIP_REFRESH_VC, skipRefreshVC);
+         taskId = clusterMgr.resumeClusterCreation(clusterName, params);
          redirectRequest(taskId, request, response);
       } else {
          throw BddException.INVALID_PARAMETER("cluster state", state);
@@ -340,6 +348,7 @@ public class RestResource {
          @PathVariable("groupName") String groupName,
          @RequestBody Integer instanceNum,
          @RequestParam(value = "force", required = false, defaultValue = "false") Boolean force,
+         @RequestParam(value = "skiprefreshvc", required = false) boolean skipRefreshVC,
          HttpServletRequest request,
          HttpServletResponse response) throws Exception {
 
@@ -359,8 +368,11 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("node group instance number",
                String.valueOf(instanceNum));
       }
+      BaseConfiguration params = new BaseConfiguration();
+      params.addProperty(Constants.SKIP_REFRESH_VC, skipRefreshVC);
+
       Long taskId =
-            clusterMgr.resizeCluster(clusterName, groupName, instanceNum, force);
+            clusterMgr.resizeCluster(clusterName, groupName, instanceNum, force, params);
       redirectRequest(taskId, request, response);
    }
 
@@ -1241,7 +1253,7 @@ public class RestResource {
 
    /**
     * Recover clusters for disaster recovery from a data center to another
-    * @param resMap: vc resource name mapping from one data center to another
+    * @param vcResMap: vc resource name mapping from one data center to another
     * @param request
     */
    @RequestMapping(value = "/recover", method = RequestMethod.PUT, consumes = "application/json")
