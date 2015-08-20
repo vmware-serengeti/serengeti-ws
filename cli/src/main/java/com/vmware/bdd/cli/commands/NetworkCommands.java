@@ -104,13 +104,16 @@ public class NetworkCommands implements CommandMarker {
          @CliOption(key = { "generateHostname" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Generate hostname for each VMs. This option only applies to normal DNS.") final Boolean generateHostname) {
 
       NetworkType operType = null;
+
+       CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NETWORK, NetworkDnsType.DYNAMIC.toString());
       if (!CommandsUtils.isBlank(ip) && dhcp) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
                Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
                Constants.PARAMS_EXCLUSION_PAIR_NETWORK_ADD_IP_DHCP
                + Constants.PARAMS_EXCLUSION);
          return;
-      } else if(!CommandsUtils.isBlank(ip) && dnsType.equals(NetworkDnsType.DYNAMIC)) {
+//      } else if(!CommandsUtils.isBlank(ip) && dnsType.equals("DYNAMIC")) {
+      } else if(!CommandsUtils.isBlank(ip) && NetworkDnsType.DYNAMIC.toString().equals(dnsType)) {
           CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
                   Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
                   Constants.PARAMS_EXCLUSION_PAIR_NETWORK_ADD_STATIC_DDNS
@@ -202,7 +205,7 @@ public class NetworkCommands implements CommandMarker {
       NetworkAdd networkAdd = new NetworkAdd();
       networkAdd.setName(name);
       try {
-         if (!CommandsUtils.isBlank(ip) && dnsType.equals(NetworkDnsType.DYNAMIC)) {
+         if (!CommandsUtils.isBlank(ip) && dnsType.equals(NetworkDnsType.DYNAMIC.toString())) {
              CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
                      Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
                      Constants.PARAMS_EXCLUSION_PAIR_NETWORK_ADD_STATIC_DDNS

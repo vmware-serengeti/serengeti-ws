@@ -828,7 +828,7 @@ public class RestResource {
          if (na.getDns2() != null && !IpAddressUtil.isValidIp(na.getDns2())) {
             throw BddException.INVALID_PARAMETER("secondary DNS", na.getDns2());
          }
-         if (na.getDnsType().equals(NetworkDnsType.DYNAMIC)) {
+         if (na.getDnsType().equals(NetworkDnsType.DYNAMIC.toString())) {
             throw BddException.INVALID_PARAMETER("dns TYPE", na.getDnsType());
          }
          IpAddressUtil.verifyIPBlocks(na.getIpBlocks(), netmask);
