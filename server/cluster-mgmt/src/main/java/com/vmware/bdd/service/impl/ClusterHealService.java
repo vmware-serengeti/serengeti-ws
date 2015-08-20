@@ -556,9 +556,11 @@ public class ClusterHealService implements IClusterHealService {
 
       boolean ft = getFtFlag(clusterSpec, groupName);
 
+      boolean isMapDistro = clusterEntityMgr.findByName(clusterSpec.getName()).getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR);
+
       // delete old vm and rename new vm in the prePowerOn
       ReplaceVmPrePowerOn prePowerOn =
-            new ReplaceVmPrePowerOn(node.getMoId(), node.getVmName(),
+            new ReplaceVmPrePowerOn(isMapDistro, node.getMoId(), node.getVmName(),
                   clusterSpec.getNodeGroup(groupName).getStorage().getShares(),
                   createSchema.networkSchema, createSchema.diskSchema, ha, ft);
 

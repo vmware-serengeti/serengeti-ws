@@ -48,8 +48,9 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
    private DiskSchema diskSchema;
    private boolean ha;
    private boolean ft;
+   private boolean isMapDistro;
 
-   public ReplaceVmPrePowerOn(String vmId, String newName, Priority ioShares,
+   public ReplaceVmPrePowerOn(boolean isMapDistro, String vmId, String newName, Priority ioShares,
          NetworkSchema networkSchema, DiskSchema diskSchema, boolean ha, boolean ft) {
       this.oldVmId = vmId;
       this.newName = newName;
@@ -58,6 +59,7 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
       this.diskSchema = diskSchema;
       this.ha = ha;
       this.ft = ft;
+      this.isMapDistro = isMapDistro;
    }
 
    private OptionValue[] getVhmExtraConfigs(VcVirtualMachine oldVm) {
@@ -128,8 +130,8 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
             AuAssert.check(bootupConfigs != null);
             VcVmUtil.addBootupUUID(bootupConfigs);
 
-            // disk fix does support MapR distro, just set this flag to "false"
-            bootupConfigs.put(Constants.GUEST_VARIABLE_RESERVE_RAW_DISKS, String.valueOf(false));
+            // disk fix support MapR distro
+            bootupConfigs.put(Constants.GUEST_VARIABLE_RESERVE_RAW_DISKS, String.valueOf(isMapDistro));
             bootupConfigs.put(Constants.GUEST_VARIABLE_VOLUMES, VcVmUtil.getVolumes(vm.getId(), diskSchema.getDisks()));
             vm.setGuestConfigs(bootupConfigs);
 

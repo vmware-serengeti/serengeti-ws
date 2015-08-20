@@ -1478,14 +1478,6 @@ public class ClusterManager {
       for (NodeGroupEntity nodeGroup : nodeGroups) {
          List<String> roles = nodeGroup.getRoleNameList();
 
-         // TODO: more fine control on node roles
-         // Allow disk fix except ironfan
-         if (Constants.IRONFAN.equals(softMgr.getType()) && softMgr.hasMgmtRole(roles)) {
-            logger.info("node group " + nodeGroup.getName()
-                  + " contains management roles, pass it");
-            continue;
-         }
-
          workerNodesFound = true;
          for (NodeEntity node : clusterEntityMgr.findAllNodes(clusterName,
                nodeGroup.getName())) {
