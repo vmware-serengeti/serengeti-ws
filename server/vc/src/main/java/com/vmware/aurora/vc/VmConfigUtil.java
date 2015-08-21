@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.global.DiskSize;
 import com.vmware.aurora.util.AuAssert;
+import com.vmware.bdd.apitypes.LatencyPriority;
 import com.vmware.vim.binding.impl.vim.DescriptionImpl;
 import com.vmware.vim.binding.impl.vim.ext.ManagedByInfoImpl;
 import com.vmware.vim.binding.impl.vim.option.OptionValueImpl;
@@ -411,6 +412,19 @@ public class VmConfigUtil {
       Long maxBalloon = memSize * 75 / 100;
       OptionValue balloonOption =
             new OptionValueImpl("sched.mem.maxmemctl", maxBalloon.toString());
+      spec.setExtraConfig(new OptionValue[] { balloonOption });
+   }
+
+   /**
+    *
+    * @param spec
+    *           -- vm spec
+    * @param level
+    *           -- latency sensitivity's level
+    */
+   public static void setLatencySensitivity(ConfigSpec spec, LatencyPriority level) {
+      OptionValue balloonOption =
+            new OptionValueImpl("sched.cpu.latencySensitivity", level.name());
       spec.setExtraConfig(new OptionValue[] { balloonOption });
    }
 

@@ -59,6 +59,12 @@ public class FakeStackServicesResource implements ServicesResource {
    }
 
    @Override
+   public Response readServiceConfigurationWithFilter(String stackServiceName) {
+      return null;
+   }
+
+
+   @Override
    public ComponentsResource getComponentsResource(String stackServiceName) {
       return new FakeComponentsResource(stackVersion);
    }

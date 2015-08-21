@@ -26,6 +26,7 @@ import java.util.Set;
 import com.cloudera.api.model.ApiClusterVersion;
 import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
+import com.vmware.bdd.apitypes.LatencyPriority;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRole;
 import com.vmware.bdd.plugin.clouderamgr.model.support.AvailableServiceRoleContainer;
 import com.vmware.bdd.plugin.clouderamgr.utils.Constants;
@@ -34,6 +35,7 @@ import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeInfo;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.usermgmt.UserMgmtConstants;
+import com.vmware.aurora.util.HbaseRegionServerOptsUtil;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -188,6 +190,21 @@ public class CmClusterDef implements Serializable {
                      break;
                   case "SQOOP_SERVER":
                      roleDef.addConfig(Constants.CONFIG_SQOOP_METASTORE_DATA_DIR, node.getVolumes().get(0) + "/sqoop2/metastore");
+                     break;
+                  case "HBASE_REGION_SERVER":
+                     if(group.getLatencySensitivity() ==  LatencyPriority.HIGH) {
+                        long nodeMem = group.getMemorySize();
+                        long hbaseHeapByte =
+                              HbaseRegionServerOptsUtil.getHeapSizeByte(nodeMem,group.getRoles().size());
+                        logger.info("in CM, Set hbase regionserer's heap size to "
+                                    + String.valueOf(hbaseHeapByte));
+                        roleDef.addConfig(
+                              Constants.CONFIG_HBASE_REGIONSERVER_JAVA_HEAPSIZE,
+                              String.valueOf(hbaseHeapByte));
+                        roleDef.addConfig(
+                              Constants.CONFIG_HBASE_REGIONSERVER_OPTS,
+                              HbaseRegionServerOptsUtil.getCMHbaseRegionServerStringParameter(group.getMemorySize(),group.getRoles().size()));
+                     }
                      break;
                   default:
                      break;

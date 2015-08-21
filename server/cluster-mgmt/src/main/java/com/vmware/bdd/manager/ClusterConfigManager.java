@@ -23,6 +23,9 @@ import java.util.regex.Pattern;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import com.vmware.aurora.util.HbaseRegionServerOptsUtil;
+import com.vmware.bdd.spectypes.HadoopRole;
+import com.vmware.bdd.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -52,7 +55,6 @@ import com.vmware.bdd.exception.ClusterConfigException;
 import com.vmware.bdd.exception.UniqueConstraintViolationException;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
-import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
@@ -64,10 +66,6 @@ import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.specpolicy.CommonClusterExpandPolicy;
 import com.vmware.bdd.spectypes.VcCluster;
-import com.vmware.bdd.utils.CommonUtil;
-import com.vmware.bdd.utils.Constants;
-import com.vmware.bdd.utils.InfrastructureConfigUtils;
-import com.vmware.bdd.utils.VcVmUtil;
 
 public class ClusterConfigManager {
    private static final long serialVersionUID = 1L;
@@ -311,6 +309,23 @@ public class ClusterConfigManager {
                throw ClusterConfigException.INVALID_SPEC(failedMsgList);
             }
          }
+         //Set HBASE_REGISIONSERVER_OPTS for ironfan hbase_regionserer whose latencySensitivity is set to HIGH
+         if(!CommonUtil.isBlank(cluster.getAppManager()) && Constants.IRONFAN.equals(cluster.getAppManager()))
+            for(int i=0; i<clusterEntity.getNodeGroups().size(); i++){
+               NodeGroupEntity group = clusterEntity.getNodeGroups().get(i);
+               String groupRoles = group.getRoles();
+               if((group.getLatencySensitivity() == LatencyPriority.HIGH)
+                     && ((groupRoles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE.toString())))){
+                     setHbase_RegionServer_Opts(cluster, group);
+                     if (cluster.getConfiguration() != null
+                           && cluster.getConfiguration().size() > 0) {
+                        clusterEntity.setHadoopConfig((new Gson()).toJson(cluster
+                              .getConfiguration()));
+                     }
+                     break;
+               }
+            }
+
 
          if (cluster.getTopologyPolicy() == null) {
             clusterEntity.setTopologyPolicy(TopologyType.NONE);
@@ -342,6 +357,40 @@ public class ClusterConfigManager {
          logger.info("can not create cluster " + name
                + ", which is already existed.");
          throw BddException.ALREADY_EXISTS(ex, "Cluster", name);
+      }
+   }
+
+   /**
+    * Set the HBASE_REGIONSERVER_OPTS for hbase_regionserver node when the nodegroup's latencySensitivity is High
+    * @param cluster
+    * @param ng
+    */
+   private void setHbase_RegionServer_Opts(ClusterCreate cluster, NodeGroupEntity ng) {
+      Map<String, Object> conf = cluster.getConfiguration();
+      if (conf == null) {
+         conf = new HashMap<String, Object>();
+         cluster.setConfiguration(conf);
+      }
+
+      Map<String, Object> hbase = (Map<String, Object>) conf.get("hbase");
+      if (hbase == null) {
+         hbase = new HashMap<String, Object>();
+         conf.put("hbase", hbase);
+      }
+
+      Map<String, Object> hbaseEnv = (Map<String, Object>) hbase.get("hbase-env.sh");
+      if (hbaseEnv == null) {
+         hbaseEnv = new HashMap<String, Object>();
+         hbase.put("hbase-env.sh", hbaseEnv);
+      }
+
+      if (hbaseEnv.get("HBASE_REGIONSERVER_OPTS") == null) {
+         Gson gson = new Gson();
+         int roleNums = gson.fromJson(ng.getRoles(), List.class).size();
+         hbaseEnv.put("HBASE_REGIONSERVER_OPTS", HbaseRegionServerOptsUtil
+                     .getIronfanHbaseRegionServerStringParameter(
+                           ng.getMemorySize(), roleNums));
+         logger.info("hbase-env.sh" + hbase.get("HBASE_REGIONSERVER_OPTS"));
       }
    }
 
@@ -633,6 +682,8 @@ public class ClusterConfigManager {
       groupEntity.setSwapRatio(group.getSwapRatio());
       groupEntity.setName(group.getName());
       groupEntity.setNodeType(group.getInstanceType());
+      groupEntity.setReservedCpu_ratio(group.getReservedCpu_ratio());
+      groupEntity.setReservedMem_ratio(group.getReservedMem_ratio());
 
       PlacementPolicy policies = group.getPlacementPolicies();
       if (policies != null) {
@@ -706,6 +757,13 @@ public class ClusterConfigManager {
       } else {
          groupEntity.setHaFlag(haFlag);
       }
+      LatencyPriority latencySensitivity = group.getLatencySensitivity();
+      if(latencySensitivity != null)
+         groupEntity.setLatencySensitivity(latencySensitivity);
+      else
+         groupEntity.setLatencySensitivity(LatencyPriority.NORMAL);
+      groupEntity.setReservedCpu_ratio(group.getReservedCpu_ratio());
+      groupEntity.setReservedMem_ratio(group.getReservedMem_ratio());
       if (group.getConfiguration() != null
             && group.getConfiguration().size() > 0) {
          groupEntity.setHadoopConfig(gson.toJson(group.getConfiguration()));
@@ -1015,6 +1073,9 @@ public class ClusterConfigManager {
 
       expandGroupStorage(ngEntity, group);
       group.setHaFlag(ngEntity.getHaFlag());
+      group.setLatencySensitivity(ngEntity.getLatencySensitivity());
+      group.setReservedCpu_ratio(ngEntity.getReservedCpu_ratio());
+      group.setReservedMem_ratio(ngEntity.getReservedMem_ratio());
       if (ngEntity.getHadoopConfig() != null) {
          Map<String, Object> hadoopConfig =
                (new Gson()).fromJson(ngEntity.getHadoopConfig(), Map.class);

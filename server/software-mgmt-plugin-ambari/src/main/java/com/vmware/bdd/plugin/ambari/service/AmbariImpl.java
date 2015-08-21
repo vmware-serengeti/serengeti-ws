@@ -28,11 +28,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.bdd.apitypes.LatencyPriority;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager_1_7_0;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager_2_0_0;
 import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 
+import com.vmware.aurora.util.HbaseRegionServerOptsUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 
@@ -286,6 +288,10 @@ public class AmbariImpl implements SoftwareManager {
          logger.info("Blueprint:");
          logger.info(ApiUtils.objectToJson(blueprint));
          logger.info("Start cluster " + blueprint.getName() + " creation.");
+
+         setHaseRegionConfig(blueprint);
+         logger.info("Blueprint: After  setHaseRegionConfig");
+         logger.info(ApiUtils.objectToJson(blueprint));
 
          String ambariServerVersion = getVersion();
          clusterDef = new AmClusterDef(blueprint, privateKey, ambariServerVersion);
@@ -677,6 +683,72 @@ public class AmbariImpl implements SoftwareManager {
       }
    }
 
+   private void setHaseRegionConfig(ClusterBlueprint blueprint) {
+      //Check whether latencySensivity is set to high,and the roles include HBASE_REGIONSERVER, then set HBASE_REGIONSERVER_OPTS
+      List<ApiConfiguration> configList =
+            apiManager.getServiceConfiguration(
+                  blueprint.getHadoopStack().getVendor(),
+                  blueprint.getHadoopStack().getFullVersion(),
+                  "HBASE");
+
+      for (NodeGroupInfo group : blueprint.getNodeGroups()) {
+         if (group.getLatencySensitivity() == (LatencyPriority.HIGH)
+               && group.getRoles().contains(
+               HadoopRole.HBASE_REGIONSERVER_ROLE.toString())) {
+            setHbase_AmbariRegionServer_Opts(configList, group);
+            break;
+         }
+      }
+   }
+   /**
+    * Set HBASE_REGIONSERVER_OPTS for ambari hbase regionserver
+    * @param configList
+    * @param group
+    */
+   private void setHbase_AmbariRegionServer_Opts(List<ApiConfiguration> configList, NodeGroupInfo group){
+      String configurationType = "hbase-env";
+      Map<String, Object> conf = group.getConfiguration();
+      if (conf == null) {
+         conf = new HashMap<String, Object>();
+         group.setConfiguration(conf);
+      }
+      Map<String, Object> confHbaseEnv =
+            (Map<String, Object>) conf.get(configurationType);
+      if (confHbaseEnv == null) {
+         confHbaseEnv = new HashMap<String, Object>();
+         conf.put(configurationType, confHbaseEnv);
+      }
+      if (confHbaseEnv.get("hbase_regionserver_heapsize") == null) {
+         long hbaseHeapsizeMhz = HbaseRegionServerOptsUtil.getHeapSizeMhz(
+               (long) group.getMemorySize(), group.getRoles().size());
+         confHbaseEnv.put("hbase_regionserver_heapsize",
+               String.valueOf(hbaseHeapsizeMhz) + "m");
+      }
+      if (confHbaseEnv.get("hbase_regionserver_xmn_ratio") == null)
+         confHbaseEnv.put("hbase_regionserver_xmn_ratio", "0.33");
+      if (confHbaseEnv.get("content") == null) {
+         String hbase_env_template = null;
+         //Get hbase regionserver opts jinja template from ambari rest api
+         for (ApiConfiguration tmp : configList) {
+            if (tmp.getApiConfigurationInfo().getType()
+                  .contains(configurationType)) {
+               hbase_env_template = tmp.getApiConfigurationInfo().getPropertyValue();
+               hbase_env_template = hbase_env_template + HbaseRegionServerOptsUtil
+                           .getAmbariHbaseRegionServerStringParameter();
+               break;
+            }
+         }
+
+         confHbaseEnv.put("content", hbase_env_template);
+
+         logger.info("hbase xmn ratio is " + confHbaseEnv
+               .get("hbase_regionserver_xmn_ratio"));
+         logger.info("hbase ops is " + confHbaseEnv.get("content"));
+         logger.info("hbase regionserver heap size is " + confHbaseEnv
+               .get("hbase_regionserver_heapsize"));
+      }
+   }
+
    private boolean hasHosts(String clusterName) {
       return !apiManager.getClusterHostsList(clusterName).getApiHosts().isEmpty();
    }
@@ -794,7 +866,6 @@ public class AmbariImpl implements SoftwareManager {
 
    private void updateConfigGroup(ApiConfigGroupInfo apiConfigGroupInfo, String clusterName, ApiHostGroup apiHostGroupFromClusterSpec, List<String> newHosts) {
       try {
-         boolean needUpdate = false;
 
          ApiConfigGroup newApiConfigGroup = new ApiConfigGroup();
 
@@ -874,7 +945,6 @@ public class AmbariImpl implements SoftwareManager {
                   // Just update properties which contains mount piont start with /mnt/datax for cluster upgrading
                   if (valueOfPropertyFromClusterSpec != null && valueOfPropertyFromClusterSpec.contains("/mnt/data0")) {
                      properties.put(propertyKey, valueOfPropertyFromClusterSpec);
-                     needUpdate = true;
                   } else {
                      properties.put(propertyKey, valueOfPropertyFromAmbariServer);
                   }
@@ -892,11 +962,11 @@ public class AmbariImpl implements SoftwareManager {
 
          newApiConfigGroup.setApiConfigGroupInfo(newApiConfigGroupInfo);
 
-         logger.info("The new config group: " + ApiUtils.objectToJson(newApiConfigGroup));
+         logger.info("The new config group: " + ApiUtils
+               .objectToJson(newApiConfigGroup));
 
-         if (needUpdate) {
-            apiManager.updateConfigGroup(clusterName, apiConfigGroupInfo.getId(), newApiConfigGroup);
-         }
+         apiManager.updateConfigGroup(clusterName, apiConfigGroupInfo.getId(),
+               newApiConfigGroup);
 
       } catch (Exception e) {
          String errMsg = "Failed to configure services for config group " + apiConfigGroupInfo.getId() + ((e.getMessage() == null) ? "" : (", " + e.getMessage()));
@@ -915,6 +985,9 @@ public class AmbariImpl implements SoftwareManager {
          logger.info("Blueprint:");
          logger.info(ApiUtils.objectToJson(blueprint));
          logger.info("Start cluster " + blueprint.getName() + " scale out.");
+         setHaseRegionConfig(blueprint);
+         logger.info("After config hbase for Blueprint:");
+         logger.info(ApiUtils.objectToJson(blueprint));
          clusterDef = new AmClusterDef(blueprint, privateKey, getVersion());
 
          ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName(), addedNodeNames, forceScaleOut);

@@ -30,6 +30,7 @@ import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks.GroupRacksType;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
 /**
@@ -57,6 +58,15 @@ public class NodeGroupCreate {
    @Expose
    @SerializedName("memory")
    private Integer memCapacityMB;
+   @Expose
+   @SerializedName("latencySensitivity")
+   private LatencyPriority latencySensitivity;
+   @Expose
+   @SerializedName("reservedCpu_ratio")
+   private Float reservedCpu_ratio=0F;
+   @Expose
+   @SerializedName("reservedMem_ratio")
+   private Float reservedMem_ratio=0F;
    @Expose
    @SerializedName("swap_ratio")
    private Float swapRatio = 1F;
@@ -87,6 +97,9 @@ public class NodeGroupCreate {
       this.placementPolicies = group.placementPolicies;
       this.memCapacityMB = group.memCapacityMB;
       this.swapRatio = group.swapRatio;
+      this.latencySensitivity = group.latencySensitivity;
+      this.reservedCpu_ratio = group.reservedCpu_ratio;
+      this.reservedMem_ratio = group.reservedMem_ratio;
       this.name = group.name;
       this.roles = group.roles;
       this.rpNames = group.rpNames;
@@ -113,6 +126,15 @@ public class NodeGroupCreate {
          nodeGroupInfo.setStorageSize(storage.getSizeGB());
          nodeGroupInfo.setStorageType(storage.getType());
       }
+      if(latencySensitivity != null
+            && !CommonUtil.isBlank(latencySensitivity.name())) {
+         nodeGroupInfo.setLatencySensitivity(latencySensitivity);
+      }else {
+         nodeGroupInfo.setLatencySensitivity(LatencyPriority.NORMAL);
+      }
+      nodeGroupInfo.setReservedCpu_ratio(reservedCpu_ratio);
+      nodeGroupInfo.setReservedMem_ratio(reservedMem_ratio);
+
       nodeGroupInfo.setNodes(null);
       return nodeGroupInfo;
    }
@@ -217,6 +239,18 @@ public class NodeGroupCreate {
    public void setHaFlag(String haFlag) {
       this.haFlag = haFlag;
    }
+
+   public LatencyPriority getLatencySensitivity() { return latencySensitivity; }
+
+   public void setLatencySensitivity(LatencyPriority latencySensitivity) { this.latencySensitivity = latencySensitivity; }
+
+   public Float getReservedCpu_ratio() { return reservedCpu_ratio; }
+
+   public void setReservedCpu_ratio(Float reservedCpu_ratio) { this.reservedCpu_ratio = reservedCpu_ratio; }
+
+   public Float getReservedMem_ratio() { return reservedMem_ratio; }
+
+   public void setReservedMem_ratio(Float reservedMem_ratio) { this.reservedMem_ratio = reservedMem_ratio; }
 
    @RestIgnore
    public List<VcCluster> getVcClusters(ClusterCreate cluster) {

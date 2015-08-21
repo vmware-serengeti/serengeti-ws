@@ -31,6 +31,7 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.vmware.bdd.apitypes.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +71,7 @@ import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.apitypes.StorageRead.DiskScsiControllerType;
 import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.clone.spec.VmCreateResult;
 import com.vmware.bdd.clone.spec.VmCreateSpec;
@@ -1480,6 +1482,36 @@ public class ClusteringService implements IClusteringService {
       for (BaseNode baseNode : baseNodes) {
          baseNode.setNodeAction(Constants.NODE_ACTION_CLONING_VM);
       }
+
+      //Check nodegroup reserved cpu&mem ratio, then set the node's cpuReservationMHz = vcpuNum * ESXcpuMhz*ratio
+      for (BaseNode current : baseNodes) {
+         Float cpuRatio = current.getNodeGroup().getReservedCpu_ratio();
+         Float memRatio = current.getNodeGroup().getReservedMem_ratio();
+         //if ReservedCpu_ratio is set, caculate the reservedCpu for vm
+         if ( cpuRatio != null  && cpuRatio > 0 && cpuRatio <= 1) {
+            if (current.getTargetHost() != null) {
+               VcHost host = VcResourceUtils.findHost(current.getTargetHost());
+               long nodeCpuMhz =
+                     host.getCpuHz() / (1024 * 1024) * current.getCpu();
+               current.getVmSchema().resourceSchema.cpuReservationMHz
+                     = (long) Math.ceil(nodeCpuMhz * cpuRatio);
+               logger.info("Base Node's cpuReservationMHz is set to "
+                     + current.getVmSchema().resourceSchema.cpuReservationMHz);
+            }
+         }
+         //Check latency&ReservedMem_ratio is set, caculate the reservedMem for vm
+         if ( memRatio != null  && memRatio > 0 && memRatio <= 1) {
+            if(current.getVmSchema().resourceSchema.latencySensitivity == LatencyPriority.HIGH)
+               current.getVmSchema().resourceSchema.memReservationSize = current.getMem();
+            else{
+               current.getVmSchema().resourceSchema.memReservationSize
+                     = (long) Math.ceil(current.getMem() * memRatio);
+            }
+            logger.info("Base Node's memReservationM is set to "
+                  + current.getVmSchema().resourceSchema.memReservationSize);
+         }
+      }
+
       logger.info("Finished calculating provision plan");
 
       return baseNodes;

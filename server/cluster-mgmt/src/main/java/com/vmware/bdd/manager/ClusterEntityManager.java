@@ -27,6 +27,7 @@ import java.util.Set;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
+import com.vmware.bdd.apitypes.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
@@ -36,11 +37,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.aop.annotation.RetryTransaction;
-import com.vmware.bdd.apitypes.ClusterRead;
-import com.vmware.bdd.apitypes.ClusterStatus;
-import com.vmware.bdd.apitypes.NodeGroupRead;
-import com.vmware.bdd.apitypes.NodeStatus;
-import com.vmware.bdd.apitypes.ResourcePoolRead;
 import com.vmware.bdd.dal.IClusterDAO;
 import com.vmware.bdd.dal.INetworkDAO;
 import com.vmware.bdd.dal.INodeDAO;
@@ -671,10 +667,16 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
             || group.getHaFlag().equalsIgnoreCase(Constants.HA_FLAG_ON)) {
          nodeGroupInfo.setHaEnabled(true);
       }
+      if(group.getLatencySensitivity() != null
+            && !CommonUtil.isBlank(group.getLatencySensitivity().name()))
+         nodeGroupInfo.setLatencySensitivity(group.getLatencySensitivity());
+      else
+         nodeGroupInfo.setLatencySensitivity(LatencyPriority.NORMAL);
+
       nodeGroupInfo.setInstanceType(group.getNodeType());
       nodeGroupInfo.setStorageSize(group.getStorageSize());
       nodeGroupInfo.setStorageType(group.getStorageType().name());
-
+      nodeGroupInfo.setMemorySize(group.getMemorySize());
       // set nodes
       List<NodeInfo> nodeInfos = new ArrayList<NodeInfo>();
       for (NodeEntity node : group.getNodes()) {

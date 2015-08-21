@@ -558,6 +558,51 @@ public class ClusterCreate implements Serializable {
       }
    }
 
+   private void validateCpuRatio(NodeGroupCreate[] nodeGroups,
+         List<String> failedMsgList) {
+      boolean validated = true;
+      StringBuilder invalidNodeGroupNames = new StringBuilder();
+      for (NodeGroupCreate nodeGroup : nodeGroups) {
+         if (nodeGroup.getReservedCpu_ratio() < 0
+               ||nodeGroup.getReservedCpu_ratio() > 1) {
+            validated = false;
+            invalidNodeGroupNames.append(nodeGroup.getName()).append(",");
+         }
+      }
+      if (!validated) {
+         StringBuilder errorMsgBuff = new StringBuilder();
+         invalidNodeGroupNames.delete(invalidNodeGroupNames.length() - 1,
+               invalidNodeGroupNames.length());
+         failedMsgList
+               .add(errorMsgBuff
+                     .append("The 'reservedCpu_ratio' must be equal to or greater than 0, and less than or equal to 1 in group ")
+                     .append(invalidNodeGroupNames.toString()).append(".")
+                     .toString());
+      }
+   }
+
+   private void validateMemRatio(NodeGroupCreate[] nodeGroups,
+         List<String> failedMsgList) {
+      boolean validated = true;
+      StringBuilder invalidNodeGroupNames = new StringBuilder();
+      for (NodeGroupCreate nodeGroup : nodeGroups) {
+         if (nodeGroup.getReservedMem_ratio() < 0
+               ||nodeGroup.getReservedCpu_ratio() > 1) {
+            validated = false;
+            invalidNodeGroupNames.append(nodeGroup.getName()).append(",");
+         }
+      }
+      if (!validated) {
+         StringBuilder errorMsgBuff = new StringBuilder();
+         invalidNodeGroupNames.delete(invalidNodeGroupNames.length() - 1,
+               invalidNodeGroupNames.length());
+         failedMsgList
+               .add(errorMsgBuff
+                     .append("The 'reservedMem_ratio' must be equal to or greater than 0, and less than or equal to 1 in group ")
+                     .append(invalidNodeGroupNames.toString()).append(".")
+                     .toString());
+      }
+   }
    public boolean hasHDFSUrlConfigured() {
       return getExternalHDFS() != null && !getExternalHDFS().isEmpty();
    }
@@ -638,6 +683,10 @@ public class ClusterCreate implements Serializable {
 
       // check node group's swapRatio
       validateSwapRatio(nodeGroupCreates, failedMsgList);
+
+      validateCpuRatio(nodeGroupCreates, failedMsgList);
+
+      validateMemRatio(nodeGroupCreates, failedMsgList);
 
       for (NodeGroupCreate nodeGroupCreate : nodeGroupCreates) {
          // check node group's instanceNum

@@ -1,28 +1,25 @@
 package com.vmware.bdd.plugin.ambari.api.manager;
 
+import com.google.gson.Gson;
 import com.vmware.bdd.plugin.ambari.api.exception.AmbariApiException;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiAlert;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceAlert;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceAlertList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceStatus;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStack;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackComponent;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackComponentList;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackList;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackService;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackServiceList;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackVersion;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackVersionList;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.*;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 import org.apache.log4j.Logger;
+import com.google.gson.reflect.TypeToken;
 
 import javax.ws.rs.core.Response;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by qjin on 5/12/15.
@@ -246,6 +243,29 @@ public class ApiManager_1_7_0 extends ApiManager {
                   apiStackServiceWithComponentsJson);
       return apiStackService;
    }
+   @Override
+   public List<ApiConfiguration> getServiceConfiguration(String stackName,
+         String stackVersion, String serviceName)
+         throws AmbariApiException {
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getStacks2Resource()
+               .getStackVersionsResource(stackName)
+               .getStackServicesResource(stackVersion)
+               .readServiceConfigurationWithFilter(serviceName);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
+      String apiStackServiceWithComponentsJson = handleAmbariResponse(response);
+      Gson gson = new Gson();
+      List<ApiConfiguration> apiConfigurationInfo =
+            gson.fromJson(apiStackServiceWithComponentsJson,
+                  new TypeToken<List<ApiConfiguration>>() {
+                  }.getType());
+
+      return apiConfigurationInfo;
+   }
+
 
    @Override
    public ServiceStatus getClusterStatus(String clusterName, HadoopStack stack) throws AmbariApiException {

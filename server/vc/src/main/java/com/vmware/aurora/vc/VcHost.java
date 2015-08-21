@@ -59,6 +59,7 @@ public interface VcHost extends VcObject {
    abstract boolean isInMaintenanceMode();
    abstract boolean isUnavailbleForManagement();
    abstract String  getVersion();
+   abstract long getCpuHz();
 }
 
 @SuppressWarnings("serial")
@@ -71,6 +72,7 @@ class VcHostImpl extends VcObjectImpl implements VcHost {
    private ManagedObjectReference[] datastore;
    private RuntimeInfo runtime;
    private String version;
+   private long cpuHz;
 
    protected VcHostImpl(HostSystem host) throws Exception {
       super(host);
@@ -89,6 +91,7 @@ class VcHostImpl extends VcObjectImpl implements VcHost {
       if (host.getConfig() != null && host.getConfig().getProduct() != null) {
          version = host.getConfig().getProduct().getVersion();
       }
+      cpuHz = host.getHardware().getCpuInfo().getHz();
    }
 
    /* (non-Javadoc)
@@ -189,5 +192,11 @@ class VcHostImpl extends VcObjectImpl implements VcHost {
    @Override
    public String getVersion() {
       return version;
+   }
+
+   @Override
+   public long getCpuHz() {
+
+      return cpuHz;
    }
 }

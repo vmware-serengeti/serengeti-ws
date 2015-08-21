@@ -32,17 +32,13 @@ import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.vmware.bdd.apitypes.*;
 import org.hibernate.annotations.Type;
 
 import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
-import com.vmware.bdd.apitypes.InstanceType;
-import com.vmware.bdd.apitypes.NodeGroupRead;
-import com.vmware.bdd.apitypes.NodeRead;
-import com.vmware.bdd.apitypes.PlacementPolicy;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks;
-import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.utils.AuAssert;
 
 /**
@@ -66,6 +62,15 @@ public class NodeGroupEntity extends EntityBase {
    // MB
    @Column(name = "memory")
    private int memorySize;
+
+   @Column(name = "reservedCpu_ratio")
+   private Float reservedCpu_ratio;
+
+   @Column(name = "reservedMem_ratio")
+   private Float reservedMem_ratio;
+
+   @Column(name = "latencySensitivity")
+   private LatencyPriority latencySensitivity;
 
    @Column(name = "swap_ratio")
    private Float swapRatio = 1F;
@@ -412,11 +417,35 @@ public class NodeGroupEntity extends EntityBase {
       return datastores;
    }
 
+   public LatencyPriority getLatencySensitivity() {
+      return latencySensitivity;
+   }
+
+   public void setLatencySensitivity(LatencyPriority latencySensitivity) {
+      this.latencySensitivity = latencySensitivity;
+   }
+
+   public Float getReservedCpu_ratio() {
+      return reservedCpu_ratio;
+   }
+
+   public void setReservedCpu_ratio(Float reservedCpu_ratio) {
+      this.reservedCpu_ratio = reservedCpu_ratio;
+   }
+
+   public Float getReservedMem_ratio() {
+      return reservedMem_ratio;
+   }
+
+   public void setReservedMem_ratio(Float reservedMem_ratio) {
+      this.reservedMem_ratio = reservedMem_ratio;
+   }
+
    // this method should be called inside a transaction
    public NodeGroupRead toNodeGroupRead() {
       return toNodeGroupRead(false);
    }
-   
+
    // this method should be called inside a transaction
    public NodeGroupRead toNodeGroupRead(boolean ignoreObsoleteNode) {
       NodeGroupRead nodeGroupRead = new NodeGroupRead();

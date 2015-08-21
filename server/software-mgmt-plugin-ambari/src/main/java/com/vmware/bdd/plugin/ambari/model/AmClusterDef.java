@@ -22,11 +22,13 @@ import java.util.Map;
 
 import com.google.gson.annotations.Expose;
 import com.vmware.aurora.global.Configuration;
+import com.vmware.bdd.apitypes.LatencyPriority;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprintInfo;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostGroup;
+import com.vmware.bdd.plugin.ambari.spectypes.HadoopRole;
 import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 import com.vmware.bdd.plugin.ambari.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
@@ -97,6 +99,7 @@ public class AmClusterDef implements Serializable {
          setRackTopologyFileName(blueprint);
       }
       setAdditionalConfigurations(blueprint, ambariServerVersion);
+
       this.configurations = AmUtils.toAmConfigurations(blueprint.getConfiguration());
 
       this.nodeGroups = new ArrayList<AmNodeGroupDef>();
@@ -106,6 +109,8 @@ public class AmClusterDef implements Serializable {
          nodeGroupDef.setName(group.getName());
          nodeGroupDef.setInstanceNum(group.getInstanceNum());
          nodeGroupDef.setRoles(group.getRoles());
+         nodeGroupDef.setLatencySensitivity(group.getLatencySensitivity());
+         nodeGroupDef.setMemSize(group.getMemorySize());
          nodeGroupDef.setConfigurations(AmUtils.toAmConfigurations(group.getConfiguration()));
 
          List<AmNodeDef> nodes = new ArrayList<AmNodeDef>();
