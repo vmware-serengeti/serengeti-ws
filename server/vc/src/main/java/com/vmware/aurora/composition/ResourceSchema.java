@@ -21,6 +21,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAttribute;
 import java.lang.reflect.Field;
 
+import com.vmware.bdd.apitypes.LatencyPriority;
 import com.vmware.aurora.interfaces.model.IDatabaseConfig.Priority;
 
 /**
@@ -50,6 +51,9 @@ public class ResourceSchema extends Schema {
 
    @XmlAttribute(required = true)
    public Priority priority;
+
+   @XmlAttribute()
+   public LatencyPriority latencySensitivity;
 
    @Override
    protected Object fieldValueOf(Field field) throws IllegalArgumentException,

@@ -50,4 +50,8 @@ public interface ServicesResource {
    @Path("/{stackServiceName}/components")
    public ComponentsResource getComponentsResource(@PathParam(Parameters.STACK_SERVICE_NAME) String stackServiceName);
 
+   @GET
+   @Path("/{stackServiceName}/configurations/content")
+   public Response readServiceConfigurationWithFilter(@PathParam(Parameters.STACK_SERVICE_NAME) String stackServiceName);
+
 }

@@ -16,11 +16,29 @@ package com.vmware.bdd.manager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+
+import com.vmware.bdd.apitypes.*;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.hibernate.Hibernate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.aop.annotation.RetryTransaction;
-import com.vmware.bdd.apitypes.*;
-import com.vmware.bdd.dal.*;
-import com.vmware.bdd.entity.*;
+import com.vmware.bdd.dal.IClusterDAO;
+import com.vmware.bdd.dal.INetworkDAO;
+import com.vmware.bdd.dal.INodeDAO;
+import com.vmware.bdd.dal.INodeGroupDAO;
+import com.vmware.bdd.dal.IServerInfoDAO;
+import com.vmware.bdd.entity.ClusterEntity;
+import com.vmware.bdd.entity.DiskEntity;
+import com.vmware.bdd.entity.NicEntity;
+import com.vmware.bdd.entity.NodeEntity;
+import com.vmware.bdd.entity.NodeGroupEntity;
+import com.vmware.bdd.entity.ServerInfoEntity;
+import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
@@ -653,10 +671,16 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
             || group.getHaFlag().equalsIgnoreCase(Constants.HA_FLAG_ON)) {
          nodeGroupInfo.setHaEnabled(true);
       }
+      if(group.getLatencySensitivity() != null
+            && !CommonUtil.isBlank(group.getLatencySensitivity().name()))
+         nodeGroupInfo.setLatencySensitivity(group.getLatencySensitivity());
+      else
+         nodeGroupInfo.setLatencySensitivity(LatencyPriority.NORMAL);
+
       nodeGroupInfo.setInstanceType(group.getNodeType());
       nodeGroupInfo.setStorageSize(group.getStorageSize());
       nodeGroupInfo.setStorageType(group.getStorageType().name());
-
+      nodeGroupInfo.setMemorySize(group.getMemorySize());
       // set nodes
       List<NodeInfo> nodeInfos = new ArrayList<NodeInfo>();
       for (NodeEntity node : group.getNodes()) {

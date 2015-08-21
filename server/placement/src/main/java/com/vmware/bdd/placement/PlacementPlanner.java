@@ -28,6 +28,7 @@ import java.util.Set;
 
 import com.google.gson.Gson;
 import com.vmware.aurora.global.Configuration;
+import com.vmware.bdd.apitypes.*;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import org.apache.log4j.Logger;
@@ -38,11 +39,7 @@ import com.vmware.aurora.composition.NetworkSchema.Network;
 import com.vmware.aurora.composition.ResourceSchema;
 import com.vmware.aurora.interfaces.model.IDatabaseConfig.Priority;
 import com.vmware.aurora.vc.DiskSpec.AllocationType;
-import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
-import com.vmware.bdd.apitypes.DiskSplitPolicy;
-import com.vmware.bdd.apitypes.NetworkAdd;
-import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks.GroupRacksType;
 import com.vmware.bdd.apitypes.StorageRead.DiskScsiControllerType;
@@ -258,7 +255,12 @@ public class PlacementPlanner implements IPlacementPlanner {
       resourceSchema.memReservationSize = 0;
       resourceSchema.name = "Resource Schema";
       resourceSchema.priority = Priority.Normal;
-
+      if(nodeGroup.getLatencySensitivity() != null
+         &&!CommonUtil.isBlank(nodeGroup.getLatencySensitivity().name())) {
+         resourceSchema.latencySensitivity = nodeGroup.getLatencySensitivity();
+      } else {
+         resourceSchema.latencySensitivity = LatencyPriority.NORMAL;
+      }
       node.getVmSchema().resourceSchema = resourceSchema;
 
       return node;

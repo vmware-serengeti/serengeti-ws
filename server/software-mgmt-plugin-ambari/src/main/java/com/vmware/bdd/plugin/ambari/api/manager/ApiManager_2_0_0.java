@@ -1,5 +1,7 @@
 package com.vmware.bdd.plugin.ambari.api.manager;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.vmware.bdd.plugin.ambari.api.exception.AmbariApiException;
 
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiAlert;
@@ -7,14 +9,7 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceAlert;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceAlertList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceStatus;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStack;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackComponent;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackComponentList;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackList;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackService;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackServiceList;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackVersion;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackVersionList;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.*;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
@@ -247,6 +242,28 @@ public class ApiManager_2_0_0 extends ApiManager {
             ApiUtils.jsonToObject(ApiStackService.class,
                   apiStackServiceWithComponentsJson);
       return apiStackService;
+   }
+
+   @Override
+   public List<ApiConfiguration> getServiceConfiguration(String stackName,
+         String stackVersion, String serviceName)
+         throws AmbariApiException {
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getStacksResource()
+               .getStackVersionsResource(stackName)
+               .getStackServicesResource(stackVersion)
+               .readServiceConfigurationWithFilter(serviceName);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
+      String apiStackServiceWithComponentsJson = handleAmbariResponse(response);
+      Gson gson = new Gson();
+      List<ApiConfiguration> apiConfigurationInfo =
+            gson.fromJson(apiStackServiceWithComponentsJson,
+                  new TypeToken<List<ApiConfiguration>>() {
+                  }.getType());
+      return apiConfigurationInfo;
    }
 
    @Override

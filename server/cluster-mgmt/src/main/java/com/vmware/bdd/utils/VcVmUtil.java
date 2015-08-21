@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 
 import com.google.gson.Gson;
-import com.vmware.bdd.apitypes.StorageRead;
+import com.vmware.bdd.apitypes.*;
 
 import org.apache.log4j.Logger;
 
@@ -42,13 +42,6 @@ import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.aurora.vc.VmConfigUtil;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
-import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.NetworkAdd;
-import com.vmware.bdd.apitypes.NodeGroupCreate;
-import com.vmware.bdd.apitypes.NodeStatus;
-import com.vmware.bdd.apitypes.Priority;
-import com.vmware.bdd.apitypes.VcVmNetworkInfo;
-import com.vmware.bdd.apitypes.VcVmNicInfo;
 import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NicEntity;
 import com.vmware.bdd.entity.NodeEntity;
@@ -741,6 +734,9 @@ public class VcVmUtil {
                   .getMemCapacityMB();
       resourceSchema.priority =
             com.vmware.aurora.interfaces.model.IDatabaseConfig.Priority.Normal;
+      resourceSchema.latencySensitivity =
+            (CommonUtil.isBlank(groupSpec.getLatencySensitivity().name()) ?
+                  LatencyPriority.NORMAL : groupSpec.getLatencySensitivity());
       schema.resourceSchema = resourceSchema;
 
       // prepare disk schema

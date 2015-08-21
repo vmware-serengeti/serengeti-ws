@@ -21,9 +21,12 @@ import javax.xml.bind.JAXBException;
 
 import com.vmware.aurora.exception.CommonException;
 import com.vmware.aurora.vc.VmConfigUtil;
+import com.vmware.bdd.apitypes.LatencyPriority;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.vim.binding.impl.vim.ResourceAllocationInfoImpl;
 import com.vmware.vim.binding.impl.vim.SharesInfoImpl;
 import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
+import com.vmware.vim.binding.vim.ResourceAllocationInfo;
 import com.vmware.vim.binding.vim.SharesInfo;
 import com.vmware.vim.binding.vim.SharesInfo.Level;
 
@@ -69,10 +72,39 @@ public class ResourceSchemaUtil {
       }
       SharesInfo shares = new SharesInfoImpl(100, shareLevel);
       spec.setCpuAllocation(new ResourceAllocationInfoImpl(
-            resourceSchema.cpuReservationMHz, false /* not expandable */, unlimited,
+            resourceSchema.cpuReservationMHz, false /* not expandable */,
+            unlimited,
             shares, null));
-      spec.setMemoryAllocation(new ResourceAllocationInfoImpl(
-            resourceSchema.memReservationSize, false /* not expandable */, unlimited,
-            shares, null));
+
+      if(resourceSchema != null){
+         VmConfigUtil
+               .setLatencySensitivity(spec, resourceSchema.latencySensitivity);
+      }
+
+      if(resourceSchema.latencySensitivity == LatencyPriority.HIGH) {
+         spec.setMemoryAllocation(new ResourceAllocationInfoImpl(
+               resourceSchema.memSize, false /* not expandable */, unlimited,
+               shares, null));
+      }else{
+         spec.setMemoryAllocation(new ResourceAllocationInfoImpl(
+               resourceSchema.memReservationSize, false /* not expandable */, unlimited,
+               shares, null));
+      }
    }
+
+   public static void setMemReservationSize(ConfigSpecImpl spec,
+         ResourceAllocationInfo rs, long memory) {
+      spec.setMemoryAllocation(
+            new ResourceAllocationInfoImpl(
+                  memory, false, rs.getLimit(), rs.getShares(),
+                  null));
+   }
+
+   public static void setCpuAllocationSize(ConfigSpecImpl spec,
+         ResourceAllocationInfo rs, long cpu) {
+      spec.setCpuAllocation(new ResourceAllocationInfoImpl(
+            cpu, false, rs.getLimit(), rs.getShares(), null));
+
+   }
+
 }

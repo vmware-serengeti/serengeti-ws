@@ -35,6 +35,8 @@ public interface Constants {
    public static final String CONFIG_NM_LOCAL_DIRS = "yarn_nodemanager_local_dirs";
    public static final String CONFIG_MAPRED_JT_LOCAL_DIR_LIST = "jobtracker_mapred_local_dir_list";
    public static final String CONFIG_MAPRED_TT_LOCAL_DIR_LIST = "tasktracker_mapred_local_dir_list";
+   public static final String CONFIG_HBASE_REGIONSERVER_JAVA_HEAPSIZE = "hbase_regionserver_java_heapsize";
+   public static final String CONFIG_HBASE_REGIONSERVER_OPTS = "hbase_regionserver_java_opts";
 
    // HA configs
    public static final String CONFIG_DFS_JOURNALNODE_EDITS_DIR = "dfs_journalnode_edits_dir";

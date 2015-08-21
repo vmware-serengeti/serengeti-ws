@@ -22,6 +22,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import com.vmware.bdd.plugin.ambari.api.model.stack2.*;
 import com.vmware.bdd.plugin.ambari.utils.Constants;
 
 import org.apache.log4j.Logger;
@@ -69,14 +70,6 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiOperationLevel;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiRequestList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiRequestsPostResourceFilter;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStack;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackComponent;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackComponentList;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackList;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackService;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackServiceList;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackVersion;
-import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackVersionList;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.api.v1.RootResourceV1;
 import com.vmware.bdd.plugin.ambari.utils.AmUtils;
@@ -173,6 +166,12 @@ public class ApiManager implements IApiManager {
    @Override
    public ApiStackService getStackServiceWithComponents(String stackName,
          String stackVersion, String serviceName) throws AmbariApiException {
+      return null;
+   }
+
+   public List<ApiConfiguration> getServiceConfiguration(String stackName,
+         String stackVersion, String serviceName)
+         throws AmbariApiException{
       return null;
    }
 

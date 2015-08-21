@@ -20,6 +20,7 @@ import java.util.Map;
 
 import com.google.gson.annotations.Expose;
 import com.vmware.bdd.apitypes.InstanceType;
+import com.vmware.bdd.apitypes.LatencyPriority;
 import com.vmware.bdd.apitypes.PlacementPolicy;
 
 /**
@@ -50,7 +51,11 @@ public class NodeGroupInfo implements Serializable{
    private String storageType;
    private PlacementPolicy placement;
    private InstanceType instanceType;
+   private int memorySize;
    private int storageSize;
+   private LatencyPriority latencySensitivity;
+   private Float reservedCpu_ratio;
+   private Float reservedMem_ratio;
 
    public String getName() {
       return name;
@@ -130,5 +135,37 @@ public class NodeGroupInfo implements Serializable{
 
    public void setStorageSize(int storageSize) {
       this.storageSize = storageSize;
+   }
+
+   public int getMemorySize() {
+      return memorySize;
+   }
+
+   public void setMemorySize(int memorySize) {
+      this.memorySize = memorySize;
+   }
+
+   public LatencyPriority getLatencySensitivity() {
+      return latencySensitivity;
+   }
+
+   public void setLatencySensitivity(LatencyPriority latencySensitivity) {
+      this.latencySensitivity = latencySensitivity;
+   }
+
+   public Float getReservedCpu_ratio() {
+      return reservedCpu_ratio;
+   }
+
+   public void setReservedCpu_ratio(Float reservedCpu_ratio) {
+      this.reservedCpu_ratio = reservedCpu_ratio;
+   }
+
+   public Float getReservedMem_ratio() {
+      return reservedMem_ratio;
+   }
+
+   public void setReservedMem_ratio(Float reservedMem_ratio) {
+      this.reservedMem_ratio = reservedMem_ratio;
    }
 }
