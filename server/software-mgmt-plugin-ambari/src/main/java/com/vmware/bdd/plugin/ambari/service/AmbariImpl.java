@@ -1131,36 +1131,53 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
       List<AmNodeGroupDef> nodeGroups = clusterDef.getNodeGroupsByNodes(targetNodeDefs);
       List<AmHostGroupInfo> amHostGroupsInfo = clusterDef.getAmHostGroupsInfoByNodeGroups(nodeGroups);
 
-      List<String> existedConfigGroupNames = new ArrayList<String> ();
+      Map<String, Set<String>> existedConfigGroupMap = new HashMap<String, Set<String>> ();
 
       ApiConfigGroupList apiConfigGroupList = apiManager.getConfigGroupsList(clusterDef.getName());
       for(AmHostGroupInfo amHostGroupInfo : amHostGroupsInfo) {
+         logger.info("amHostGroupInfo from spec: " + ApiUtils.objectToJson(amHostGroupInfo));
          for (ApiConfigGroup group : apiConfigGroupList.getConfigGroups()) {
             logger.info("ApiConfigGroup from ambari server: "+ ApiUtils.objectToJson(group));
             ApiConfigGroupInfo apiConfigGroupInfo = group.getApiConfigGroupInfo();
             if (apiConfigGroupInfo != null && apiConfigGroupInfo.getDesiredConfigs() != null) {
 
                List<String> newHosts = newHostsMap.get(amHostGroupInfo.getVolumesCount());
+               logger.info("New hosts " + ApiUtils.objectToJson(newHosts) + " which have " + amHostGroupInfo.getVolumesCount() + " volumes.");
 
-               // Add new hosts to the config group of Ambari server if have the same volumes count in a group
-               if (amHostGroupInfo.getName().equals(apiConfigGroupInfo.getGroupName())) {
-                  if (newHosts != null) {
-                     updateConfigGroup(apiConfigGroupInfo, clusterDef.getName(), amHostGroupInfo.toApiHostGroupForClusterBlueprint(), newHosts);
-                     existedConfigGroupNames.add(apiConfigGroupInfo.getGroupName());
-                     break;
+               List<Map<String, Object>> configs = amHostGroupInfo.getConfigurations();
+               for (Map<String, Object> map : configs) {
+                  for (String type : map.keySet()) {
+
+                     String serviceName = configTypeToService.get(type + ".xml");
+                     String configGroupName = apiConfigGroupInfo.getGroupName();
+                     Set<String> existedConfigGroupTags =  existedConfigGroupMap.get(configGroupName);
+                     if (existedConfigGroupTags == null) {
+                        existedConfigGroupTags = new HashSet<String> ();
+                     }
+
+                     // Add new hosts to the config group of Ambari server if have the same volumes count in a group
+                     if (amHostGroupInfo.getName().equals(configGroupName) && apiConfigGroupInfo.getTag().equals(serviceName) && (newHosts != null)) {
+                        logger.info("Add hosts " + ApiUtils.objectToJson(newHosts) +" to config group " + configGroupName + " tag " + serviceName + ".");
+                        updateConfigGroup(apiConfigGroupInfo, clusterDef.getName(), amHostGroupInfo.toApiHostGroupForClusterBlueprint(), newHosts);
+                        existedConfigGroupTags.add(serviceName);
+                        existedConfigGroupMap.put(configGroupName, existedConfigGroupTags);
+                        break;
+                     }
+
+                     // Update config group name to GROUP_NAME_vol* of Ambari server if it is the same config group
+                     if (apiConfigGroupInfo.getTag().equals(serviceName) && isTheSameConfigGroup(apiConfigGroupInfo, amHostGroupInfo)) {
+                        logger.info("Just update config group name " + configGroupName + " to " + amHostGroupInfo.getName());
+                        apiConfigGroupInfo.setGroupName(amHostGroupInfo.getName());
+                        updateConfigGroup(apiConfigGroupInfo, clusterDef.getName(), amHostGroupInfo.toApiHostGroupForClusterBlueprint(), newHosts);
+                        existedConfigGroupTags.add(serviceName);
+                        existedConfigGroupMap.put(configGroupName, existedConfigGroupTags);
+                     }
                   }
-               }
-
-               // Update config group name to GROUP_NAME_vol* of Ambari server if it is the same config group
-               if (isTheSameConfigGroup(apiConfigGroupInfo, amHostGroupInfo)) {
-                  apiConfigGroupInfo.setGroupName(amHostGroupInfo.getName());
-                  updateConfigGroup(apiConfigGroupInfo, clusterDef.getName(), amHostGroupInfo.toApiHostGroupForClusterBlueprint(), newHosts);
-                  existedConfigGroupNames.add(apiConfigGroupInfo.getGroupName());
                }
             }
          }
       }
-      createConfigGroups(clusterDef, nodeGroups, configTypeToService, existedConfigGroupNames);
+      createConfigGroups(clusterDef, nodeGroups, configTypeToService, existedConfigGroupMap);
 
    }
 
@@ -1169,9 +1186,15 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
       for (ApiHostInfo apiHostInfo : apiConfigGroupInfo.getHosts()) {
          associatedHosts.add(apiHostInfo.getHostName());
       }
+      logger.info("Associated hosts: "+ ApiUtils.objectToJson(associatedHosts));
+      if (CollectionUtils.isEmpty(associatedHosts)) {
+         return false;
+      }
+
       boolean isTheSameConfigGroup = true;
       for (String host : associatedHosts) {
          if (!amHostGroupInfo.getHosts().contains(host)) {
+            logger.info("The host : " + host + " is not associated.");
             isTheSameConfigGroup = false;
             break;
          }
@@ -1180,14 +1203,11 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
       return isTheSameConfigGroup;
    }
 
-   private void createConfigGroups(AmClusterDef clusterDef, List<AmNodeGroupDef> nodeGroups, Map<String, String> configTypeToService, List<String> existedConfigGroupNames) {
+   private void createConfigGroups(AmClusterDef clusterDef, List<AmNodeGroupDef> nodeGroups, Map<String, String> configTypeToService, Map<String, Set<String>> existedConfigGroupMap) {
       List<ApiConfigGroup> configGroups = new ArrayList<>();
       Map<String, ApiConfigGroup> serviceToGroup = new HashMap<>();
       for (AmNodeGroupDef nodeGroup : nodeGroups) {
          for (AmHostGroupInfo amHostGroupInfo : nodeGroup.generateHostGroupsInfo()) {
-            if (existedConfigGroupNames.contains(amHostGroupInfo.getName())) {
-               continue;
-            }
             // for each nodeGroup with the same number of disks, one set of config group will be created
             // for each service, one config group will be created, which contains all property types belong to this service
             serviceToGroup.clear();
@@ -1196,6 +1216,13 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
             for (Map<String, Object> map : configs) {
                for (String type : map.keySet()) {
                   String serviceName = configTypeToService.get(type + ".xml");
+
+                  // No need to create this configuration if it is existed
+                  Set<String> existedConfigGroupTags = existedConfigGroupMap.get(amHostGroupInfo.getName());
+                  if (CollectionUtils.isNotEmpty(existedConfigGroupTags) && existedConfigGroupTags.contains(serviceName)) {
+                     continue;
+                  }
+
                   ApiConfigGroup confGroup = serviceToGroup.get(serviceName);
                   if (confGroup == null) {
                      confGroup = createConfigGroup(clusterDef, amHostGroupInfo, serviceName);
