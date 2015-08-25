@@ -441,8 +441,16 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
          }
          reportStatus(clusterDef.getCurrentReport(), reportQueue);
 
-         ApiBootstrap apiBootstrapRequest =
-               apiManager.createBootstrap(clusterDef.toApiBootStrap(addedHosts));
+         ApiBootstrap apiBootstrap = clusterDef.toApiBootStrap(addedHosts);
+
+         removeRegisteredHosts(apiBootstrap);
+
+         if (CollectionUtils.isEmpty(apiBootstrap.getHosts())) {
+            logger.info("No hosts need to boostrap Because all hosts are registered.");
+            return;
+         }
+
+         ApiBootstrap apiBootstrapRequest = apiManager.createBootstrap(apiBootstrap);
 
          HostBootstrapPoller poller =
                new HostBootstrapPoller(apiManager, apiBootstrapRequest,
@@ -505,6 +513,18 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
       } finally {
          reportQueue.addClusterReport(clusterDef.getCurrentReport().clone());
       }
+   }
+
+   private void removeRegisteredHosts(ApiBootstrap apiBootstrap) {
+      // No need to bootstrap registered hosts
+      List<ApiHost> registeredHosts = apiManager.getRegisteredHosts().getApiHosts();
+      List<String> boostrapHosts = apiBootstrap.getHosts();
+
+      for (ApiHost registeredHost : registeredHosts) {
+         boostrapHosts.remove(registeredHost.getApiHostInfo().getHostName());
+      }
+
+      apiBootstrap.setHosts(boostrapHosts);
    }
 
    private void setBootstrapNodeError(final AmClusterDef clusterDef,
