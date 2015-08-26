@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gson.annotations.Expose;
+
 import com.vmware.bdd.apitypes.LatencyPriority;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostGroup;
 
@@ -126,18 +127,22 @@ public class AmNodeGroupDef implements Serializable {
    }
 
    public List<AmHostGroupInfo> generateHostGroupsInfo() {
+      return generateHostGroupsInfo(null);
+   }
+
+   public List<AmHostGroupInfo> generateHostGroupsInfo(Map<String, String> configTypeToService) {
       Map<Integer, AmHostGroupInfo> amHostGroupsInfoMap = new HashMap<Integer, AmHostGroupInfo>();
 
       for (AmNodeDef node : this.nodes) {
          if (amHostGroupsInfoMap.isEmpty()) {
-            AmHostGroupInfo amHostGroupInfo = new AmHostGroupInfo(node, this);
+            AmHostGroupInfo amHostGroupInfo = new AmHostGroupInfo(node, this, configTypeToService);
             amHostGroupsInfoMap.put(amHostGroupInfo.getVolumesCount(), amHostGroupInfo);
          } else {
             AmHostGroupInfo existingAmHostGroupInfo = amHostGroupsInfoMap.get(node.getVolumesCount());
             if (existingAmHostGroupInfo != null) {
                existingAmHostGroupInfo.addNewHost(node);
             } else {
-               AmHostGroupInfo newAmHostGroupInfo = new AmHostGroupInfo(node, this);
+               AmHostGroupInfo newAmHostGroupInfo = new AmHostGroupInfo(node, this, configTypeToService);
                amHostGroupsInfoMap.put(newAmHostGroupInfo.getVolumesCount(), newAmHostGroupInfo);
             }
          }
@@ -145,7 +150,7 @@ public class AmNodeGroupDef implements Serializable {
 
       // Set the name of Ambari hostGroup to the nodeGroup name from spec file if all nodes have the same volumes count
       if (amHostGroupsInfoMap.size() == 1) {
-         amHostGroupsInfoMap.get(this.nodes.get(0).getVolumesCount()).updateGroupName(this.getName());
+         amHostGroupsInfoMap.get(this.nodes.get(0).getVolumesCount()).updateConfigGroupName(this.getName());
       }
 
       List<AmHostGroupInfo> amHostGroupsInfo = new ArrayList<AmHostGroupInfo>();

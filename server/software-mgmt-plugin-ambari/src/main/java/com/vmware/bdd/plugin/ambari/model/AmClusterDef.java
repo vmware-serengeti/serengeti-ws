@@ -426,10 +426,10 @@ public class AmClusterDef implements Serializable {
       return nodeGroupbyNode;
    }
 
-   public List<AmHostGroupInfo> getAmHostGroupsInfoByNodeGroups(List<AmNodeGroupDef> nodeGroups) {
+   public List<AmHostGroupInfo> getAmHostGroupsInfoByNodeGroups(List<AmNodeGroupDef> nodeGroups, Map<String, String> configTypeToService) {
       List<AmHostGroupInfo> amHostGroupsInfo = new ArrayList<AmHostGroupInfo>();
       for (AmNodeGroupDef nodeGroup : nodeGroups) {
-         amHostGroupsInfo.addAll(nodeGroup.generateHostGroupsInfo());
+         amHostGroupsInfo.addAll(nodeGroup.generateHostGroupsInfo(configTypeToService));
       }
       return amHostGroupsInfo;
    }
