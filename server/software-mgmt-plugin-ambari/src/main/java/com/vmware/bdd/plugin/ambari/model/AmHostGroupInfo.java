@@ -15,8 +15,11 @@
 package com.vmware.bdd.plugin.ambari.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHost;
@@ -24,11 +27,13 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostGroup;
 
 public class AmHostGroupInfo {
 
-   private String name;
+   private String configGroupName;
+
+   private String nodeGroupName;
 
    private int cardinality;
 
-   private List<String> hosts;
+   private Set<String> hosts;
 
    private int volumesCount;
 
@@ -36,10 +41,14 @@ public class AmHostGroupInfo {
 
    private List<Map<String, Object>> configurations;
 
-   public AmHostGroupInfo(AmNodeDef node, AmNodeGroupDef nodeGroup) {
-      // Generate a new Ambari hostGroup with name <NODE_GROUP_NAME>_vol<VOLUMES_COUNT> to distinguish different volumes of all nodes in the same group from spec file for Ambari Blueprint
-      this.name = nodeGroup.getName() + "_vol" + node.getVolumesCount();
+   // Just for cluster resize
+   private Map<String, Set<String>> tag2Hosts = new HashMap<String, Set<String>> ();
 
+   public AmHostGroupInfo(AmNodeDef node, AmNodeGroupDef nodeGroup, Map<String, String> configTypeToService) {
+      // Generate a new Ambari hostGroup with name <NODE_GROUP_NAME>_vol<VOLUMES_COUNT> to distinguish different volumes of all nodes in the same group from spec file for Ambari Blueprint
+      this.configGroupName = nodeGroup.getName() + "_vol" + node.getVolumesCount();
+
+      this.nodeGroupName = nodeGroup.getName();
       this.cardinality = 1;
       this.roles = nodeGroup.getRoles();
       this.volumesCount = node.getVolumesCount();
@@ -53,17 +62,38 @@ public class AmHostGroupInfo {
       }
       this.configurations = configurations;
 
-      List<String> hosts = new ArrayList<String>();
+      Set<String> hosts = new HashSet<String>();
       hosts.add(node.getFqdn());
       this.hosts = hosts;
+
+      if (configTypeToService != null) {
+         for(String service : getServices(configTypeToService, configurations)) {
+            this.tag2Hosts.put(service, hosts);
+         }
+      }
    }
 
-   public String getName() {
-      return name;
+
+   private static Set<String> getServices(Map<String, String> configTypeToService, List<Map<String, Object>> configurations) {
+      Set<String> services = new HashSet<String> ();
+      List<Map<String, Object>> configs = configurations;
+      for (Map<String, Object> map : configs) {
+         for (String type : map.keySet()) {
+            String service = configTypeToService.get(type + ".xml");
+            if (service != null) {
+               services.add(service);
+            }
+         }
+      }
+      return services;
    }
 
-   public void setName(String name) {
-      this.name = name;
+   public String getConfigGroupName() {
+      return configGroupName;
+   }
+
+   public void setConfigGroupName(String configGroupame) {
+      this.configGroupName = configGroupame;
    }
 
    public int getCardinality() {
@@ -74,13 +104,14 @@ public class AmHostGroupInfo {
       this.cardinality = cardinality;
    }
 
-   public List<String> getHosts() {
+   public Set<String> getHosts() {
       return hosts;
    }
 
-   public void setHosts(List<String> hosts) {
+   public void setHosts(Set<String> hosts) {
       this.hosts = hosts;
    }
+
 
    public int getVolumesCount() {
       return volumesCount;
@@ -106,22 +137,51 @@ public class AmHostGroupInfo {
       this.configurations = configurations;
    }
 
+   public String getNodeGroupName() {
+      return nodeGroupName;
+   }
+
+   public void setNodeGroupName(String nodeGroupName) {
+      this.nodeGroupName = nodeGroupName;
+   }
+
+   public Map<String, Set<String>> getTag2Hosts() {
+      return tag2Hosts;
+   }
+
+   public void setTag2Hosts(Map<String, Set<String>> tag2Hosts) {
+      this.tag2Hosts = tag2Hosts;
+   }
+
    public void addNewHost(AmNodeDef node) {
-      this.cardinality = this.cardinality + 1;
-      this.hosts.add(node.getFqdn());
+     this.cardinality = this.cardinality + 1;
+     String host = node.getFqdn();
+     this.hosts.add(host);
+     addNewHost2Tag(host);
+   }
+
+   private void addNewHost2Tag(String host) {
+      for (String tag : this.tag2Hosts.keySet()) {
+         Set<String> hosts = this.tag2Hosts.get(tag);
+         if (hosts != null) {
+            hosts = new HashSet<String> ();
+         }
+         hosts.add(host);
+         this.tag2Hosts.put(tag, hosts);
+      }
    }
 
    public String getStringCardinality() {
       return String.valueOf(this.cardinality);
    }
 
-   public void updateGroupName(String groupName) {
-      this.name = groupName;
+   public void updateConfigGroupName(String configGroupame) {
+      this.configGroupName = configGroupame;
    }
 
    public ApiHostGroup toApiHostGroupForClusterBlueprint() {
       ApiHostGroup apiHostGroup = new ApiHostGroup();
-      apiHostGroup.setName(this.name);
+      apiHostGroup.setName(this.configGroupName);
       apiHostGroup.setCardinality(this.getStringCardinality());
       apiHostGroup.setConfigurations(this.configurations);
 
@@ -138,7 +198,7 @@ public class AmHostGroupInfo {
 
    public ApiHostGroup toApiHostGroupForBlueprint() {
       ApiHostGroup apiHostGroup = new ApiHostGroup();
-      apiHostGroup.setName(this.name);
+      apiHostGroup.setName(this.configGroupName);
       apiHostGroup.setCardinality(this.getStringCardinality());
       apiHostGroup.setConfigurations(this.configurations);
 
@@ -151,5 +211,21 @@ public class AmHostGroupInfo {
       apiHostGroup.setApiComponents(apiComponents);
 
       return apiHostGroup;
+   }
+
+   public void removeOldTag(String tag) {
+      this.tag2Hosts.remove(tag);
+   }
+
+   public boolean removeOldHostFromTag(String host, String tag) {
+      if (this.tag2Hosts.get(tag) == null) {
+         return false;
+      } else {
+         boolean isRemoved = this.tag2Hosts.get(tag).remove(host);
+         if (this.tag2Hosts.get(tag).isEmpty()) {
+            removeOldTag(tag);
+         }
+         return isRemoved;
+      }
    }
 }

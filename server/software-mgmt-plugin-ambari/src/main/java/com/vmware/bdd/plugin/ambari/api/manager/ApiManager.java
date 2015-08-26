@@ -1081,7 +1081,7 @@ public class ApiManager implements IApiManager {
       Map<String, ApiRestartRequiredService> apiRestartRequiredServicesMap = new HashMap<String, ApiRestartRequiredService>();
       Response response = null;
       try {
-         String fields = "HostRoles/service_name,HostRoles/state,HostRoles/host_name,HostRoles/stale_configs,&minimal_response=true";
+         String fields = "HostRoles/*,&minimal_response=true";
          String staleConfigs = "true";
          response = apiResourceRootV1.getClustersResource().getHostComponentsResource(clusterName).readComponentsAfterConfigChange(fields, staleConfigs);
       } catch (Exception e) {
