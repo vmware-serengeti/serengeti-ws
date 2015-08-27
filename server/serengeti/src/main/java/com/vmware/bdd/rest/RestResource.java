@@ -14,69 +14,15 @@
  ***************************************************************************/
 package com.vmware.bdd.rest;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.vmware.bdd.service.IClusteringService;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.NestedRuntimeException;
-import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
 import com.vmware.bdd.aop.annotation.RestCallPointcut;
-import com.vmware.bdd.apitypes.AppManagerAdd;
-import com.vmware.bdd.apitypes.AppManagerRead;
-import com.vmware.bdd.apitypes.BddErrorMessage;
-import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.ClusterRead;
-import com.vmware.bdd.apitypes.DatacenterMap;
-import com.vmware.bdd.apitypes.DatastoreAdd;
-import com.vmware.bdd.apitypes.DatastoreRead;
-import com.vmware.bdd.apitypes.DistroRead;
-import com.vmware.bdd.apitypes.ElasticityRequestBody;
-import com.vmware.bdd.apitypes.FixDiskRequestBody;
-import com.vmware.bdd.apitypes.NetworkAdd;
-import com.vmware.bdd.apitypes.NetworkRead;
-import com.vmware.bdd.apitypes.RackInfo;
-import com.vmware.bdd.apitypes.RackInfoList;
-import com.vmware.bdd.apitypes.ResourcePoolAdd;
-import com.vmware.bdd.apitypes.ResourcePoolRead;
-import com.vmware.bdd.apitypes.ResourceScale;
-import com.vmware.bdd.apitypes.TaskRead;
+import com.vmware.bdd.apitypes.*;
 import com.vmware.bdd.apitypes.TaskRead.Type;
-import com.vmware.bdd.apitypes.ValidateResult;
-import com.vmware.bdd.apitypes.VcClusterMap;
-import com.vmware.bdd.apitypes.VcResourceMap;
 import com.vmware.bdd.entity.AppManagerEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.NetworkException;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
-import com.vmware.bdd.exception.WarningMessageException;
-import com.vmware.bdd.manager.ClusterManager;
-import com.vmware.bdd.manager.JobManager;
-import com.vmware.bdd.manager.RackInfoManager;
-import com.vmware.bdd.manager.SWMgrCollectorInternalException;
-import com.vmware.bdd.manager.ScaleManager;
-import com.vmware.bdd.manager.SoftwareManagerCollector;
-import com.vmware.bdd.service.impl.ClusteringService;
+import com.vmware.bdd.manager.*;
+import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.resmgmt.IAppManagerService;
 import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
@@ -88,6 +34,22 @@ import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.IpAddressUtil;
+import org.apache.commons.configuration.BaseConfiguration;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 public class RestResource {
@@ -191,6 +153,7 @@ public class RestResource {
    @RequestMapping(value = "/clusters", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.ACCEPTED)
    public void createCluster(@RequestBody ClusterCreate createSpec,
+         @RequestParam(value = "skiprefreshvc", required = false) boolean skipRefreshVC,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
       verifyInitialized();
@@ -210,7 +173,10 @@ public class RestResource {
          }
       }
 
-      long jobExecutionId = clusterMgr.createCluster(createSpec);
+      BaseConfiguration params = new BaseConfiguration();
+      params.addProperty(Constants.SKIP_REFRESH_VC, skipRefreshVC);
+
+      long jobExecutionId = clusterMgr.createCluster(createSpec, params);
       redirectRequest(jobExecutionId, request, response);
    }
 
@@ -276,7 +242,7 @@ public class RestResource {
          @RequestParam(value = "ignorewarning", required = false, defaultValue = "false") boolean ignoreWarning,
          HttpServletRequest request, HttpServletResponse response) throws Exception {
       if (state != null) {
-         // forward request to startStopResumeCluster() for backward compatibility
+         // forward request to startStop`() for backward compatibility
          request.getRequestDispatcher(clusterName + "/action").forward(request, response);
          response.setStatus(HttpStatus.ACCEPTED.value());
          return;
@@ -304,6 +270,7 @@ public class RestResource {
          @PathVariable("clusterName") String clusterName,
          @RequestParam(value = "state", required = true) String state,
          @RequestParam(value = "force", required = false, defaultValue = "false") Boolean force,
+         @RequestParam(value = "skiprefreshvc", required = false) boolean skipRefreshVC,
          HttpServletRequest request, HttpServletResponse response)
          throws Exception {
 
@@ -322,7 +289,9 @@ public class RestResource {
          taskId = clusterMgr.startCluster(clusterName, force);
          redirectRequest(taskId, request, response);
       } else if (state.equals("resume")) {
-         taskId = clusterMgr.resumeClusterCreation(clusterName);
+         BaseConfiguration params = new BaseConfiguration();
+         params.addProperty(Constants.SKIP_REFRESH_VC, skipRefreshVC);
+         taskId = clusterMgr.resumeClusterCreation(clusterName, params);
          redirectRequest(taskId, request, response);
       } else {
          throw BddException.INVALID_PARAMETER("cluster state", state);
@@ -343,6 +312,7 @@ public class RestResource {
          @PathVariable("groupName") String groupName,
          @RequestBody Integer instanceNum,
          @RequestParam(value = "force", required = false, defaultValue = "false") Boolean force,
+         @RequestParam(value = "skiprefreshvc", required = false) boolean skipRefreshVC,
          HttpServletRequest request,
          HttpServletResponse response) throws Exception {
 
@@ -362,8 +332,11 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("node group instance number",
                String.valueOf(instanceNum));
       }
+      BaseConfiguration params = new BaseConfiguration();
+      params.addProperty(Constants.SKIP_REFRESH_VC, skipRefreshVC);
+
       Long taskId =
-            clusterMgr.resizeCluster(clusterName, groupName, instanceNum, force);
+            clusterMgr.resizeCluster(clusterName, groupName, instanceNum, force, params);
       redirectRequest(taskId, request, response);
    }
 
@@ -417,8 +390,8 @@ public class RestResource {
 	  if (scale.getCpuNumber() <= 0
 			&& scale.getMemory() < Constants.MIN_MEM_SIZE) {
 		 throw BddException.INVALID_PARAMETER_WITHOUT_EQUALS_SIGN(
-						"node group scale parameter. The number of CPUs must be greater than zero, and the memory size in MB must be greater than or equal to "
-								+ Constants.MIN_MEM_SIZE + ":", scale);
+             "node group scale parameter. The number of CPUs must be greater than zero, and the memory size in MB must be greater than or equal to "
+                   + Constants.MIN_MEM_SIZE + ":", scale);
 		}
       logger.info("scale cluster: " + scale.toString());
       Long taskId =

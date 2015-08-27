@@ -38,6 +38,7 @@ import com.vmware.bdd.service.resmgmt.IVcInventorySyncService;
 import com.vmware.bdd.service.resmgmt.sync.filter.VcResourceFilters;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobParameter;
@@ -417,7 +418,7 @@ public class ClusterManager {
    }
 
    @ClusterManagerPointcut
-   public Long createCluster(ClusterCreate createSpec) throws Exception {
+   public Long createCluster(ClusterCreate createSpec, org.apache.commons.configuration.Configuration newParams) throws Exception {
       SoftwareManager softMgr = softwareManagerCollector.getSoftwareManager(createSpec.getAppManager());
       // @ Todo if specify hadoop stack, we can get hadoop stack by stack name. Otherwise, we will get a default hadoop stack.
       HadoopStack stack = clusterConfigMgr.filterDistroFromAppManager(softMgr, createSpec.getDistro());
@@ -467,11 +468,17 @@ public class ClusterManager {
          throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
       }
 
-      //this.resMgr.refreshVcResources();
+      if(logger.isDebugEnabled()) {
+         logger.debug("skipRefreshVc: " + newParams.getBoolean(Constants.SKIP_REFRESH_VC));
+      }
 
-      VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
-            getRpNames(clusterSpec.getRpNames()), createSpec.getNetworkNames());
-      syncService.refreshInventory(filters);
+      if(BooleanUtils.toBoolean(newParams.getBoolean(Constants.SKIP_REFRESH_VC))) {
+         logger.info("skip refresh vc resources.");
+      } else {
+         VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
+               getRpNames(clusterSpec.getRpNames()), createSpec.getNetworkNames());
+         syncService.refreshInventory(filters);
+      }
 
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
@@ -726,7 +733,7 @@ public class ClusterManager {
       }
    }
 
-   public Long resumeClusterCreation(String clusterName) throws Exception {
+   public Long resumeClusterCreation(String clusterName, org.apache.commons.configuration.Configuration newParams) throws Exception {
       logger.info("ClusterManager, resume cluster creation " + clusterName);
 
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
@@ -753,10 +760,17 @@ public class ClusterManager {
          throw ClusterConfigException.NO_DATASTORE_ADDED();
       }
 
-      //this.resMgr.refreshVcResources();
-      VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
-            getRpNames(cluster.getVcRpNameList()), cluster.fetchNetworkNameList());
-      syncService.refreshInventory(filters);
+      if(logger.isDebugEnabled()) {
+         logger.debug("skipRefreshVc: " + newParams.getBoolean(Constants.SKIP_REFRESH_VC));
+      }
+
+      if(BooleanUtils.toBoolean(newParams.getBoolean(Constants.SKIP_REFRESH_VC))) {
+         logger.info("skip refresh vc resources.");
+      } else {
+         VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
+               getRpNames(cluster.getVcRpNameList()), cluster.fetchNetworkNameList());
+         syncService.refreshInventory(filters);
+      }
 
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
@@ -971,7 +985,7 @@ public class ClusterManager {
 
    @ClusterManagerPointcut
    public Long resizeCluster(String clusterName, String nodeGroupName,
-         int instanceNum, boolean force) throws Exception {
+         int instanceNum, boolean force, org.apache.commons.configuration.Configuration newParams) throws Exception {
       logger.info("ClusterManager, updating node group " + nodeGroupName
             + " in cluster " + clusterName + " reset instance number to "
             + instanceNum);
@@ -994,10 +1008,17 @@ public class ClusterManager {
          throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
       }
 
-      //this.resMgr.refreshVcResources();
-      VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
-            getRpNames(cluster.getVcRpNameList()), cluster.fetchNetworkNameList());
-      syncService.refreshInventory(filters);
+      if(logger.isDebugEnabled()) {
+         logger.debug("skipRefreshVc: " + newParams.getBoolean(Constants.SKIP_REFRESH_VC));
+      }
+
+      if(BooleanUtils.toBoolean(newParams.getBoolean(Constants.SKIP_REFRESH_VC))) {
+         logger.info("skip refresh vc resources.");
+      } else {
+         VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
+               getRpNames(cluster.getVcRpNameList()), cluster.fetchNetworkNameList());
+         syncService.refreshInventory(filters);
+      }
 
       // validate accessibility
       validateDatastore(dsNames, vcClusters);

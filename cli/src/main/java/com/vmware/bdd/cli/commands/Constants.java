@@ -289,6 +289,7 @@ public class Constants {
    public static final String WARNING_INSTANT_CLONE_WITH_HA = "Warning: you are using instant clone with HA function "
          + "for node group %s. Currently the instant clone does not support HA function well, so the cluster creation "
          + "might fail or the HA function might not work.";
+   public static final String REST_PARAM_SKIP_REFRESH_VC = "skiprefreshvc";
 
    enum YES_NO {
       yes, no
