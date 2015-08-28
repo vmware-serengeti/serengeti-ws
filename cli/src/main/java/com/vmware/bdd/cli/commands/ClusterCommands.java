@@ -862,6 +862,7 @@ public class ClusterCommands implements CommandMarker {
          @CliOption(key = { "name" }, mandatory = true, help = "the cluster name") final String name,
          @CliOption(key = { "rpNames" }, mandatory = false, help = "Resource Pools for the cluster: use \",\" among names.") final String rpNames,
          @CliOption(key = { "dsNames" }, mandatory = false, help = "Datastores for the cluster: use \",\" among names.") final String dsNames,
+         @CliOption(key = { "append" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Append the specified rpNames or dsNames to current value.") final Boolean append,
          @CliOption(key = { "yes" }, mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Answer 'yes' to all Y/N questions. ") final boolean alwaysAnswerYes) {
 
       ClusterRead cluster = null;
@@ -880,6 +881,7 @@ public class ClusterCommands implements CommandMarker {
          return;
       }
       boolean ignoreWarning = alwaysAnswerYes;
+      boolean onlyAppend = append;
       List<String> rpNamesList = new ArrayList<String>();
       List<String> dsNamesList = new ArrayList<String>();
       List<String> warningMsgList = new ArrayList<String>();
@@ -900,7 +902,7 @@ public class ClusterCommands implements CommandMarker {
 
       if(!CommonUtil.isBlank(rpNames) || !CommonUtil.isBlank(dsNames)) {
          try {
-            restClient.updateCluster(clusterUpdate, ignoreWarning);
+            restClient.updateCluster(clusterUpdate, ignoreWarning, onlyAppend);
             CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
                   Constants.OUTPUT_OP_RESULT_UPDATE);
          } catch (WarningMessageException e){
@@ -911,7 +913,7 @@ public class ClusterCommands implements CommandMarker {
                return;
             } else {
                ignoreWarning = true;
-               restClient.updateCluster(clusterUpdate, ignoreWarning);
+               restClient.updateCluster(clusterUpdate, ignoreWarning, onlyAppend);
                CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
                      Constants.OUTPUT_OP_RESULT_UPDATE);
             }

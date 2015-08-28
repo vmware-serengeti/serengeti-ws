@@ -690,11 +690,12 @@ public class AmbariImpl implements SoftwareManager {
                   blueprint.getHadoopStack().getVendor(),
                   blueprint.getHadoopStack().getFullVersion(),
                   "HBASE");
-
+      logger.info("Get Ambari hbase opts template");
       for (NodeGroupInfo group : blueprint.getNodeGroups()) {
          if (group.getLatencySensitivity() == (LatencyPriority.HIGH)
                && group.getRoles().contains(
                HadoopRole.HBASE_REGIONSERVER_ROLE.toString())) {
+            logger.info("Start to set hbase region opts");
             setHbase_AmbariRegionServer_Opts(configList, group);
             break;
          }

@@ -1261,7 +1261,7 @@ public class ClusterManager {
 
    @ClusterManagerPointcut
    @Transactional
-   public void updateCluster(ClusterCreate clusterUpdate, boolean ignoreWarning) throws Exception {
+   public void updateCluster(ClusterCreate clusterUpdate, boolean ignoreWarning, boolean appendResource) throws Exception {
       String clusterName = clusterUpdate.getName();
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
       if (cluster == null) {
@@ -1279,32 +1279,47 @@ public class ClusterManager {
          if (CollectionUtils.isEmpty(existRPs)) {
             throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
          }
-
-         //Check whether the new resourcepools include the current resourcepools which are used by this cluster
-         Set<VcResourcePoolEntity> usedVCRps = cluster.getUsedRps();
-         List<String> usedRpList =
-               new ArrayList<String>(usedVCRps.size());
-         for (VcResourcePoolEntity rp : usedVCRps) {
-            usedRpList.add(rp.getName());
-         }
-
-         logger.info("Updating resourcepools for cluster " + clusterName + " from "
-               + usedRpList.toString() + " to " + newRpList.toString());
-         if (!newRpList.containsAll(usedRpList)) {
-            throw BddException.NEW_RP_EXCLUDE_OLD_RP(null, usedRpList.toString(),
-                  newRpList.toString());
+         //check whether the updating resourcepool only the new ones
+         if(appendResource == true ){
+            List<String> usingRpList = cluster.getVcRpNameList();
+            if(CollectionUtils.isEmpty(usingRpList)) {
+               return;
+            }
+            newRpList = appendResource(usingRpList, newRpList);
+         }else {
+            //Check whether the new resourcepools include the current resourcepools which are used by this cluster
+            Set<VcResourcePoolEntity> usedVCRps = cluster.getUsedRps();
+            List<String> usedRpList =
+                  new ArrayList<String>(usedVCRps.size());
+            for (VcResourcePoolEntity rp : usedVCRps) {
+               usedRpList.add(rp.getName());
+            }
+            logger.info("Updating resourcepools for cluster " + clusterName + " from "
+                        + usedRpList.toString() + " to " + newRpList.toString());
+            if (!newRpList.containsAll(usedRpList)) {
+               throw BddException
+                     .NEW_RP_EXCLUDE_OLD_RP(null, usedRpList.toString(),
+                           newRpList.toString());
+            }
          }
 
          cluster.setVcRpNameList(newRpList);
       }
 
       List<String> newDsList = clusterUpdate.getDsNames();
+
       if (!CollectionUtils.isEmpty(newDsList)) {
          //Check whether the new datastores are valid vc_data_store
          if (CollectionUtils.isEmpty(validateGivenDS(newDsList))) {
             throw ClusterConfigException.NO_DATASTORE_ADDED();
          }
-
+         //check whether the updating resourcepool only the new ones
+         if(appendResource == true){
+            List<String> usingDsList = cluster.getVcDatastoreNameList();
+            if(CollectionUtils.isEmpty(usingDsList))
+               return;
+            newDsList = appendResource(usingDsList, newDsList);
+         }
          //Check whether the new dsNames contain all datastores used by this cluster already
          List<String> usedDsList = cluster.getVcDatastoreNameList();
          logger.info("Updating dsNames for cluster " + clusterName + " from "
@@ -1317,7 +1332,7 @@ public class ClusterManager {
             }
          }
 
-         cluster.setVcDatastoreNameList(clusterUpdate.getDsNames());
+         cluster.setVcDatastoreNameList(newDsList);
       }
 
       clusterEntityMgr.update(cluster);
@@ -1366,6 +1381,15 @@ public class ClusterManager {
       }
 
       return exitsRps;
+   }
+
+   private List<String> appendResource(List<String> fullRs, List<String> addRs) {
+      for(String rs : addRs) {
+         if (!fullRs.contains(rs)) {
+            fullRs.add(rs);
+         }
+      }
+      return fullRs;
    }
 
 
