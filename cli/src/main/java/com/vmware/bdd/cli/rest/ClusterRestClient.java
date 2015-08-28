@@ -142,11 +142,13 @@ public class ClusterRestClient {
       actionOps(id, id, queryStrings);
    }
 
-   public void updateCluster(ClusterCreate clusterUpdate, boolean ignoreWarning) {
+   public void updateCluster(ClusterCreate clusterUpdate, boolean ignoreWarning, boolean append) {
       StringBuilder path = new StringBuilder(Constants.REST_PATH_CLUSTER)
             .append("/").append(clusterUpdate.getName())
             .append("?").append("ignorewarning").append('=')
-            .append(ignoreWarning);
+            .append(ignoreWarning).append("&")
+            .append("append")
+            .append('=').append(append);
       final HttpMethod httpverb = HttpMethod.PUT;
       restClient.update(clusterUpdate, path.toString(), httpverb);
    }

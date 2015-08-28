@@ -267,6 +267,7 @@ public class RestResource {
          @RequestParam(value = "state", required = false) String state,
          @RequestParam(value = "force", required = false, defaultValue = "false") Boolean force,
          @RequestParam(value = "ignorewarning", required = false, defaultValue = "false") boolean ignoreWarning,
+         @RequestParam(value = "append", required = false, defaultValue = "false") boolean append,
          HttpServletRequest request, HttpServletResponse response) throws Exception {
       if (state != null) {
          // forward request to startStop`() for backward compatibility
@@ -280,7 +281,7 @@ public class RestResource {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
 
-      clusterMgr.updateCluster(clusterUpdate, ignoreWarning);
+      clusterMgr.updateCluster(clusterUpdate, ignoreWarning, append);
       response.setStatus(HttpStatus.OK.value());
    }
 
