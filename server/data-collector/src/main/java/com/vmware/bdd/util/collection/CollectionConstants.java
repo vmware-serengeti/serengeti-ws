@@ -26,7 +26,6 @@ public class CollectionConstants {
     public final static String BDE_PRODUCT_INSTANCE = "bde.product_instance";
     public final static String BDE_OPERATION = "bde.operation";
     public final static String BDE_CLUSTER_SNAPSHOT = "bde.cluster_snapshot";
-    public final static String BDE_VC = "bde.vc";
 
     public final static String OBJECT_ID = "id";
     public final static String FOOTPRINT_VERSION = "version";
@@ -95,8 +94,8 @@ public class CollectionConstants {
     public final static String SPARK = "Spark";
     public final static String SOLR = "Solr";
 
-    public final static String VC_BDE_INSTANCE_ID = "bde_instance_id";
     public final static String VC_UUID = "vc_uuid";
     public final static String VC_VERSION = "vc_version";
+    public final static String VC_RELATION = "vc_relation";
 }
 

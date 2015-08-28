@@ -90,12 +90,6 @@ public class PeriodCollectionService implements IPeriodCollectionService {
          Map<String, Object> commonReportsData = getCommonReportsData();
          data.put(dataObjectType.getName(), commonReportsData);
          break;
-      case VC_CORRELATION:
-         // Add this information to bde telemetry for correlation analysis
-         // between products.
-         Map<String, Object> vcCorrelationData = getVcCorrelationData();
-         data.put(dataObjectType.getName(), vcCorrelationData);
-         break;
       default:
       }
       return Collections.unmodifiableMap(data);
@@ -128,6 +122,12 @@ public class PeriodCollectionService implements IPeriodCollectionService {
       environmentalInfoData.put(CollectionConstants.ENVIRONMENTAL_INFO_TYPE_OF_STORAGE, typesOfStorages());
       environmentalInfoData.put(CollectionConstants.ENVIRONMENTAL_INFO_DISTROS_OF_HADOOP, getDistrosOfHadoop());
       environmentalInfoData.put(CollectionConstants.ENVIRONMENTAL_INFO_APP_MANAGERS, getAppManagers());
+
+      // Add VC relation to bde environmental information
+      Map<String, Object> vcRelationMap = new HashMap<String, Object>();
+      vcRelationMap.put(CollectionConstants.VC_UUID, getUuidOfVCenter());
+      vcRelationMap.put(CollectionConstants.VC_VERSION, getVersionOfVCenter());
+      environmentalInfoData.put(CollectionConstants.VC_RELATION, vcRelationMap);
       return environmentalInfoData;
    }
 
@@ -533,15 +533,5 @@ public class PeriodCollectionService implements IPeriodCollectionService {
    public void setCollectionInitializerService(
          ICollectionInitializerService collectionInitializerService) {
       this.collectionInitializerService = collectionInitializerService;
-   }
-
-   private Map<String, Object> getVcCorrelationData() {
-      Map<String, Object> vcCorrelationData = new HashMap<String, Object>();
-      vcCorrelationData.put(CollectionConstants.OBJECT_ID, CommonUtil.getUUID());
-      vcCorrelationData.put(CollectionConstants.VC_BDE_INSTANCE_ID, collectionInitializerService.getInstanceId());
-      vcCorrelationData.put(CollectionConstants.VC_UUID, getUuidOfVCenter());
-      vcCorrelationData.put(CollectionConstants.VC_VERSION, getVersionOfVCenter());
-      logger.info("Collect VC correlation data: " + vcCorrelationData.toString());
-      return vcCorrelationData;
    }
 }
