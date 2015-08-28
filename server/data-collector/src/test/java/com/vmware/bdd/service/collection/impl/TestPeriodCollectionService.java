@@ -47,6 +47,7 @@ import com.vmware.bdd.service.resmgmt.IResourcePoolService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
+import com.vmware.bdd.util.collection.CollectionConstants;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 
@@ -96,7 +97,6 @@ public class TestPeriodCollectionService {
       testCollectFootPrintData();
       testCollectEnvironmentalInfo();
       testCommonReportsData();
-      testVcCorrelationData();
    }
 
    private void testCollectFootPrintData() throws ParseException {
@@ -182,6 +182,12 @@ public class TestPeriodCollectionService {
       assertEquals(fieldsMap.get("type_of_storage"), "LOCAL:1,REMOTE:1");
       assertEquals(fieldsMap.get("distros_of_hadoop"), "BIGTOP 2.0.0");
       assertEquals(fieldsMap.get("app_managers"), "Default,ClouderaManager");
+
+      // check the new added vc correlation data
+      @SuppressWarnings("unchecked")
+      Map<String, Object> vcRelationMap = (Map<String, Object>)fieldsMap.get(CollectionConstants.VC_RELATION);
+      assertEquals(vcRelationMap.get("vc_uuid"), "vCenter_uuid");
+      assertEquals(vcRelationMap.get("vc_version"), "5.5.0");
    }
 
    private void testCommonReportsData() {
@@ -192,15 +198,5 @@ public class TestPeriodCollectionService {
       assertEquals(fieldsMap.get("name"), "vSphere Big Data Extensions");
       assertEquals(fieldsMap.get("version"), Constants.VERSION);
       assertEquals(fieldsMap.get("edition"), "Enterprise");
-   }
-
-   private void testVcCorrelationData() {
-      Mockito.when(collectionInitializerService.getInstanceId()).thenReturn("instanceId");
-      Map<String, Map<String, ?>> data = periodCollectionService.collectData(DataObjectType.VC_CORRELATION);
-      Map<String, ?> fieldsMap = data.get(DataObjectType.VC_CORRELATION.getName());
-      assertEquals(fieldsMap.get("id"), "resourceId");
-      assertEquals(fieldsMap.get("bde_instance_id"), "instanceId");
-      assertEquals(fieldsMap.get("vc_uuid"), "vCenter_uuid");
-      assertEquals(fieldsMap.get("vc_version"), "5.5.0");
    }
 }

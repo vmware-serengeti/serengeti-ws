@@ -22,8 +22,7 @@ public enum DataObjectType {
    ENVIRONMENTAL_INFORMATION(CollectionConstants.BDE_ENVIRONMENTAL_INFORMATION),
    COMMONREPORTS(CollectionConstants.BDE_PRODUCT_INSTANCE),
    OPERATION(CollectionConstants.BDE_OPERATION),
-   CLUSTER_SNAPSHOT(CollectionConstants.BDE_CLUSTER_SNAPSHOT),
-   VC_CORRELATION(CollectionConstants.BDE_VC);
+   CLUSTER_SNAPSHOT(CollectionConstants.BDE_CLUSTER_SNAPSHOT);
 
    private String name;
 
