@@ -19,6 +19,8 @@ import com.vmware.bdd.plugin.ambari.api.ApiRootResource;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterList;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRestartRequiredCompent;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRestartRequiredService;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiService;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
@@ -34,7 +36,10 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class TestApiManager {
    private ApiManager apiManager;
@@ -342,7 +347,44 @@ public class TestApiManager {
    }
 
    @Test
+   public void testRestartRequiredServices() throws Exception {
+      List<ApiRequest> apiRequests = apiManager.restartRequiredServices(clusterName);
+      Assert.assertNotNull(apiRequests);
+   }
+
+   @Test
+   public void testrestartRequiredService() throws Exception {
+      ApiRestartRequiredService apiRestartRequiredService = new ApiRestartRequiredService();
+      apiRestartRequiredService.setName(clusterName);
+
+      List<ApiRestartRequiredCompent> apiRestartRequiredCompents = new ArrayList<ApiRestartRequiredCompent>();
+
+      ApiRestartRequiredCompent apiRestartRequiredCompent_1 = new ApiRestartRequiredCompent();
+      apiRestartRequiredCompent_1.setName("DATANODE");
+      Set<String> hosts_1 = new HashSet<String>();
+      hosts_1.add("127.0.0.1");
+      hosts_1.add("127.0.0.2");
+      apiRestartRequiredCompent_1.setHosts(hosts_1);
+      apiRestartRequiredCompents.add(apiRestartRequiredCompent_1);
+
+      ApiRestartRequiredCompent apiRestartRequiredCompent_2 = new ApiRestartRequiredCompent();
+      apiRestartRequiredCompent_2.setName("NODEMANAGER");
+      Set<String> hosts_2 = new HashSet<String>();
+      hosts_2.add("127.0.0.1");
+      hosts_2.add("127.0.0.2");
+      apiRestartRequiredCompent_1.setHosts(hosts_2);
+      apiRestartRequiredCompents.add(apiRestartRequiredCompent_2);
+
+      apiRestartRequiredService.setApiRestartRequiredCompents(apiRestartRequiredCompents);
+
+      System.out.println(ApiUtils.objectToJson(apiRestartRequiredService));
+      ApiRequest apiRequest = apiManager.restartRequiredService(clusterName, apiRestartRequiredService);
+      Assert.assertNotNull(apiRequest);
+   }
+
+   @Test
    public void testGetRestartRequiredServices() throws Exception {
-      // TODO
+      List<ApiRestartRequiredService> apiRestartRequiredServices = apiManager.getRestartRequiredServices(clusterName);
+      Assert.assertNotNull(apiRestartRequiredServices);
    }
 }
