@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vmware.bdd.apitypes.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -102,7 +103,7 @@ public class ClusterRestClient {
       final HttpMethod httpverb = HttpMethod.GET;
 
       return restClient.getObjectByPath(ClusterCreate.class, path, httpverb,
-            false);
+              false);
    }
 
    @SuppressWarnings("unchecked")
@@ -124,7 +125,7 @@ public class ClusterRestClient {
       final HttpMethod httpverb = HttpMethod.GET;
 
       return restClient.getAllObjects(ClusterRead[].class, path, httpverb,
-            detail);
+              detail);
    }
 
    public void actionOps(String id, String callbackId,
@@ -132,8 +133,8 @@ public class ClusterRestClient {
       final String path = Constants.REST_PATH_CLUSTER;
       final HttpMethod httpverb = HttpMethod.PUT;
 
-      PrettyOutput outputCallBack =
-            getClusterPrettyOutputCallBack(this, callbackId);
+       PrettyOutput outputCallBack =
+               getClusterPrettyOutputCallBack(this, callbackId);
       restClient.actionOps(id, path, httpverb, queryStrings, outputCallBack);
    }
 
@@ -233,6 +234,7 @@ public class ClusterRestClient {
          private boolean needUpdate = true;
          private ClusterRead cluster = null;
 
+         @Override
          public void prettyOutput() throws Exception {
             try {
                if (cluster != null) {
@@ -256,6 +258,7 @@ public class ClusterRestClient {
             }
          }
 
+         @Override
          public boolean isRefresh(boolean realTime) throws Exception {
             try {
                cluster = clusterRestClient.get(id, realTime);
@@ -319,6 +322,7 @@ public class ClusterRestClient {
             return needUpdate;
          }
 
+         @Override
          public String[] getCompletedTaskSummary() {
             return completedTaskSummary;
          }
@@ -330,5 +334,15 @@ public class ClusterRestClient {
       final HttpMethod httpverb = HttpMethod.PUT;
       restClient.update(vcResMap, path, httpverb);
    }
+
+    public void addNodeGroups(String clusterName, NodeGroupAdd nodeGroupAdd) {
+        final String path =
+                Constants.REST_PATH_CLUSTER + "/" + clusterName + "/nodegroups";
+        final HttpMethod httpverb = HttpMethod.POST;
+
+        PrettyOutput outputCallBack =
+                getClusterPrettyOutputCallBack(this, clusterName);
+        restClient.createObject(nodeGroupAdd, path, httpverb, outputCallBack);
+    }
 
 }

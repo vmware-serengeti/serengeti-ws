@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.vmware.bdd.apitypes.*;
 import jline.console.ConsoleReader;
 
 import org.apache.commons.collections.MapUtils;
@@ -36,15 +37,14 @@ import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
-
 import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.ElasticityRequestBody;
-import com.vmware.bdd.apitypes.ElasticityRequestBody.ElasticityMode;
 import com.vmware.bdd.apitypes.FixDiskRequestBody;
+import com.vmware.bdd.apitypes.ElasticityRequestBody.ElasticityMode;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.NetworkRead;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
@@ -1591,7 +1591,7 @@ public class ClusterCommands implements CommandMarker {
       failedMsg.append(new ListToStringConverter<String>(failedMsgList, '\n'));
 
       CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER, op,
-            Constants.OUTPUT_OP_RESULT_FAIL, failedMsg.toString());
+              Constants.OUTPUT_OP_RESULT_FAIL, failedMsg.toString());
    }
 
    private void validateConfiguration(ClusterCreate cluster,
@@ -1769,7 +1769,7 @@ public class ClusterCommands implements CommandMarker {
             warningMsgBuff.append(failureName).append(", ");
          }
          warningMsgBuff.delete(warningMsgBuff.length() - 2,
-               warningMsgBuff.length());
+                 warningMsgBuff.length());
          if (failureNames.size() > 1) {
             warningMsgBuff.append(" are ");
          } else {
@@ -1877,6 +1877,70 @@ public class ClusterCommands implements CommandMarker {
          warningMsg = String.format(Constants.WARNING_INSTANT_CLONE_WITH_HA, ngs.toString());
       }
       return warningMsg;
+   }
+
+   @CliCommand(value = "cluster add", help = "Add element to hadoop cluster")
+   public void addCluster(
+        @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
+        @CliOption(key = { "nodeGroup" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "node group") final boolean nodeGroup,
+        @CliOption(key = { "specFile" }, mandatory = true, help = "The spec file name path") final String specFilePath,
+        @CliOption(key = { "resume" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to resume cluster creation") final boolean resume
+    ) {
+      try {
+          if (resume) {
+              resumeCreateCluster(name);
+              return;
+          }
+
+          if (!nodeGroup) {
+              CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                      Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
+                      Constants.PARAM_NOT_CONTAIN_SPECFILE);
+              return;
+          }
+          if (specFilePath == null) {
+              CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                      Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
+                      Constants.PARAM_NOT_CONTAIN_SPECFILE);
+              return;
+          }
+          ClusterRead cluster = restClient.get(name, false);
+          if (cluster == null) {
+              CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                      Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
+                      "cluster " + name + " does not exist.");
+              return;
+          }
+
+          NodeGroupAdd nodeGroupAdd = new NodeGroupAdd();
+          NodeGroupAdd nodeGroupAddSpec = CommandsUtils.getObjectByJsonString(NodeGroupAdd.class,
+                  CommandsUtils.dataFromFile(specFilePath));
+          nodeGroupAdd.setSpecFile(true);
+          nodeGroupAdd.setNodeGroups(nodeGroupAddSpec.getNodeGroups());
+
+          // validate the name
+          if (name.indexOf("-") != -1) {
+              CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                      Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
+                      Constants.PARAM_NODEGROUP + Constants.PARAM_NOT_CONTAIN_HORIZONTAL_LINE);
+              return;
+          } else if (name.indexOf(" ") != -1) {
+              CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                      Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
+                      Constants.PARAM_NODEGROUP + Constants.PARAM_NOT_CONTAIN_BLANK_SPACE);
+              return;
+          }
+//          nodeGroupAdd.setName(name);
+
+          restClient.addNodeGroups(name, nodeGroupAdd);
+          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
+                  Constants.OUTPUT_OP_ADD);
+      } catch (Exception e) {
+          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
+                  Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+          return;
+      }
+
    }
 
    @CliCommand(value = "cluster recover", help = "Recover clusters")

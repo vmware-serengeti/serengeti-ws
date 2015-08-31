@@ -64,6 +64,8 @@ public interface IClusterEntityManager {
 
    public void insert(NodeEntity node);
 
+   public void insert(NodeGroupEntity group);
+
    public void delete(NodeEntity node);
 
    public void delete(ClusterEntity cluster);

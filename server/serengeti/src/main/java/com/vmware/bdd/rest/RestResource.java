@@ -447,10 +447,10 @@ public class RestResource {
 
       Long taskId =
             clusterMgr.asyncSetParam(clusterName,
-                  requestBody.getActiveComputeNodeNum(),
-                  requestBody.getMinComputeNodeNum(),
-                  requestBody.getMaxComputeNodeNum(),
-                  requestBody.getEnableAuto(), requestBody.getIoPriority());
+                    requestBody.getActiveComputeNodeNum(),
+                    requestBody.getMinComputeNodeNum(),
+                    requestBody.getMaxComputeNodeNum(),
+                    requestBody.getEnableAuto(), requestBody.getIoPriority());
       redirectRequest(taskId, request, response);
    }
 
@@ -468,11 +468,11 @@ public class RestResource {
       verifyInitialized();
       validateInput(clusterName, requestBody);
       clusterMgr.syncSetParam(clusterName,
-            requestBody.getActiveComputeNodeNum(),
-            requestBody.getMinComputeNodeNum(),
-            requestBody.getMaxComputeNodeNum(),
-            requestBody.getEnableAuto(),
-            requestBody.getIoPriority());
+              requestBody.getActiveComputeNodeNum(),
+              requestBody.getMinComputeNodeNum(),
+              requestBody.getMaxComputeNodeNum(),
+              requestBody.getEnableAuto(),
+              requestBody.getIoPriority());
    }
 
    private void validateInput(String clusterName, ElasticityRequestBody requestBody) {
@@ -514,7 +514,7 @@ public class RestResource {
       verifyInitialized();
       Long taskId =
             clusterMgr.fixDiskFailures(clusterName,
-                  fixDiskSpec.getNodeGroupName());
+                    fixDiskSpec.getNodeGroupName());
       redirectRequest(taskId, request, response);
    }
 
@@ -581,6 +581,35 @@ public class RestResource {
    public List<ClusterRead> getClusters(
          @RequestParam(value = "details", required = false) Boolean details) {
       return clusterMgr.getClusters((details == null) ? false : details);
+   }
+
+   /**
+    * Add nodeGroup to a cluster
+    * @param nodeGroupAddSpec create specification
+    * @param request
+    * @return Return a response with Accepted status and put task uri in the Location of header that can be used to monitor the progress
+    */
+   @RequestMapping(value = "/cluster/{clusterName}/nodegroups", method = RequestMethod.POST, consumes = "application/json")
+   @ResponseStatus(HttpStatus.ACCEPTED)
+   public void addCluster(@RequestBody NodeGroupAdd nodeGroupAddSpec,
+                          @PathVariable("clusterName") String clusterName,
+                             HttpServletRequest request, HttpServletResponse response)
+           throws Exception {
+      verifyInitialized();
+
+      List<String> failedMsgList = new ArrayList<String>();
+      List<String> warningMsgList = new ArrayList<String>();
+
+      nodeGroupAddSpec.validateNodeGroupAdd(failedMsgList, warningMsgList);
+      NodeGroupCreate[] nodeGroupsAdd = nodeGroupAddSpec.getNodeGroups();
+
+      if (!CommonUtil.validateClusterName(clusterName)) {
+         throw BddException.INVALID_PARAMETER("cluster name", clusterName);
+      }
+      logger.info("call rest for add node groups into a cluster");
+      Long taskId =
+              clusterMgr.addCluster(clusterName, nodeGroupsAdd);
+      redirectRequest(taskId, request, response);
    }
 
    // cloud provider API

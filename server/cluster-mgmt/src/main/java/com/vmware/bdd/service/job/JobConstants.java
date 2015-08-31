@@ -26,6 +26,7 @@ public interface JobConstants {
    public static final String SET_MANUAL_ELASTICITY_JOB_NAME = "setManualElasticityJob";
    public static final String QUERY_CLUSTER_JOB_NAME = "queryClusterJob";
    public static final String SHRINK_CLUSTER_JOB_NAME = "shrinkClusterJob";
+   public static final String ADD_CLUSTER_JOB_NAME = "addClusterJob";
 
    public static final String CLUSTER_SPEC_JOB_PARAM = "clusterSpec";
    public static final String CLUSTER_ADDED_NODES_JOB_PARAM = "clusterAddedNodes";
@@ -42,6 +43,7 @@ public interface JobConstants {
    public static final String VHM_ACTION_JOB_PARAM = "vhmAction";
    public static final String TIMESTAMP_JOB_PARAM = "timeStamp";
    public static final String CLUSTER_BLUEPRINT_JOB_PARAM = "clusterBlueprint";
+   public static final String NODE_GROUP_ADD_JOB_PARAM = "clusterAddNodeGroup";
 
    public static final String CLUSTER_NODES_STATUS = "clusterNodesStatus";
    public static final String CLUSTER_OPERATION_SUCCESS = "cluster.isSuccess";

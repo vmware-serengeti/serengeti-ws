@@ -19,9 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.NetworkAdd;
-import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.apitypes.*;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.VcProviderException;
 import com.vmware.bdd.placement.entity.BaseNode;
@@ -95,7 +93,7 @@ public interface IClusteringService {
     * 
     * call TM to delete VMs
     * 
-    * @param name
+    * @param clusterName
     *           cluster name
     */
    public boolean deleteCluster(String clusterName, List<BaseNode> vNodes,
@@ -191,4 +189,14 @@ public interface IClusteringService {
    public VmEventManager getEventProcessor();
 
    boolean isSupportVHM(String clusterName);
+
+    /**
+     * @param clusterSpec
+     * @return list of VM placement plans
+     */
+
+    public boolean addNodeGroups(ClusterCreate clusterSpec,
+                                       NodeGroupCreate[] nodeGroupsAdd, List<BaseNode> vNodes);
+
+
 }

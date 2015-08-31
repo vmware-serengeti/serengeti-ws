@@ -121,4 +121,17 @@ public class ClusterManagerException extends BddException {
    public static ClusterManagerException NO_NEED_TO_RESIZE(String clusterName, String nodeGroupName, int instanceNum) {
       return new ClusterManagerException(null, "NO_NEED_TO_RESIZE", clusterName, nodeGroupName, instanceNum);
    }
+
+   public static ClusterManagerException NODE_GROUP_HAS_EXISTED(String clusterName, String nodeGroupName) {
+      return new ClusterManagerException(null, "NODE_GROUP_HAS_EXISTED", clusterName, nodeGroupName);
+   }
+
+    public static ClusterManagerException ADD_NODE_GROUP_FAILED(String clusterName) {
+        return new ClusterManagerException(null, "ADD_NODE_GROUP_FAILED", clusterName);
+    }
+
+   public static ClusterManagerException NODE_GROUP_CANNOT_BE_ZERO(String clusterName, String nodeGroupName) {
+      return new ClusterManagerException(null, "NODE_GROUP_CANNOT_BE_ZERO", clusterName, nodeGroupName);
+   }
+
 }

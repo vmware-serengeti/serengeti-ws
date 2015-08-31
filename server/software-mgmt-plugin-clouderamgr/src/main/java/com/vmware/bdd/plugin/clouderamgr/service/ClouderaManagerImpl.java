@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gson.Gson;
+import com.vmware.bdd.software.mgmt.plugin.intf.AbstractSoftwareManager;
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 

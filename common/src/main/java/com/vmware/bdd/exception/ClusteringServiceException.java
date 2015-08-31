@@ -100,6 +100,12 @@ public class ClusteringServiceException extends BddException {
             errorMsg);
    }
 
+    public static ClusteringServiceException ADD_NODE_GROUP_ERROR(
+            String errorMsg) {
+        return new ClusteringServiceException(null, "ADD_NODE_GROUP_ERROR",
+                errorMsg);
+    }
+
    public static ClusteringServiceException CANNOT_FIND_VC_CLUSTER(
          String vcClusterName) {
       return new ClusteringServiceException(null, "CANNOT_FIND_VC_CLUSTER",

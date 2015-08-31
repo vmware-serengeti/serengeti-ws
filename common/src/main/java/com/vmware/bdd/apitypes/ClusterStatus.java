@@ -24,6 +24,7 @@ public enum ClusterStatus {
    UPDATING,
    DELETING,
    STOPPED,
+   ADDING,
    ERROR,
    STOPPING,
    STARTING,

@@ -18,6 +18,8 @@ import java.util.List;
 
 import com.vmware.aurora.composition.concurrent.Scheduler.ProgressCallback;
 import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.NetworkAdd;
+import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.clone.spec.Location;
 import com.vmware.bdd.clone.spec.VmCreateResult;
 import com.vmware.bdd.clone.spec.VmCreateSpec;

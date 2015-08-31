@@ -15,6 +15,8 @@
 package com.vmware.bdd.service.job.software;
 
 import java.util.List;
+
+import com.vmware.bdd.software.mgmt.plugin.intf.AbstractSoftwareManager;
 import mockit.Mock;
 import mockit.MockClass;
 

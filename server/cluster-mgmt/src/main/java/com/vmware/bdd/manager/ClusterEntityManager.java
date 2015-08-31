@@ -237,6 +237,14 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
 
    @Transactional
    @RetryTransaction
+   public void insert(NodeGroupEntity nodegroup) {
+      AuAssert.check(nodegroup != null);
+      logger.info("ClusterEntityManager" + nodegroup);
+      nodeGroupDao.insert(nodegroup);
+   }
+
+   @Transactional
+   @RetryTransaction
    public void delete(NodeEntity node) {
       AuAssert.check(node != null);
       // remove from parent's collection by cascading
