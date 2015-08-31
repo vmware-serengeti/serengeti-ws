@@ -33,6 +33,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
+import com.vmware.bdd.apitypes.*;
+import com.vmware.bdd.placement.entity.BaseNode;
+import com.vmware.vim.binding.vim.Folder;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -269,7 +272,7 @@ public class ClusterManager {
 
       AuAssert.check(jsonStr != null);
       logger.debug("writing cluster manifest in json " + jsonStr + " to file "
-            + file);
+              + file);
       BufferedWriter out = null;
       try {
          out =
@@ -567,14 +570,14 @@ public class ClusterManager {
             clusterNames.add(cluster.getName());
          }
          throw ClusterConfigException.NETWORK_UNACCESSIBLE(networkList,
-               clusterNames);
+                 clusterNames);
       }
    }
 
    private void validateDatastore(List<String> dsNames, List<VcCluster> clusters) {
       // validate if there is any datastore is accessible by one cluster
       logger.info("start to validate accessibility for datastores: " + dsNames
-            + ", and clusters: " + clusters);
+              + ", and clusters: " + clusters);
       boolean found = false;
       for (String dsName : dsNames) {
          for (VcCluster vcCluster : clusters) {
@@ -592,7 +595,7 @@ public class ClusterManager {
             vcClusterNames.add(vcCluster.getName());
          }
          throw ClusterConfigException.DATASTORE_UNACCESSIBLE(vcClusterNames,
-               dsNames);
+                 dsNames);
       }
    }
 
@@ -600,7 +603,7 @@ public class ClusterManager {
       if (specifiedDsNames == null || specifiedDsNames.isEmpty()) {
          specifiedDsNames = new ArrayList<String>();
          specifiedDsNames.addAll(clusterConfigMgr.getDatastoreMgr()
-               .getAllDatastoreNames());
+                 .getAllDatastoreNames());
       }
       return specifiedDsNames;
    }
@@ -652,7 +655,7 @@ public class ClusterManager {
          logger.error("can not config cluster: " + clusterName + ", "
                + cluster.getStatus());
          throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName,
-               "To update a cluster, its status must be RUNNING, CONFIGURE_ERROR or SERVICE_ERROR");
+                 "To update a cluster, its status must be RUNNING, CONFIGURE_ERROR or SERVICE_ERROR");
       }
       clusterConfigMgr.updateAppConfig(clusterName, createSpec);
 
@@ -661,12 +664,12 @@ public class ClusterManager {
             clusterName));
       param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(new Date()));
       param.put(JobConstants.CLUSTER_SUCCESS_STATUS_JOB_PARAM,
-            new JobParameter(ClusterStatus.RUNNING.name()));
+              new JobParameter(ClusterStatus.RUNNING.name()));
       param.put(JobConstants.CLUSTER_FAILURE_STATUS_JOB_PARAM,
-            new JobParameter(ClusterStatus.CONFIGURE_ERROR.name()));
+              new JobParameter(ClusterStatus.CONFIGURE_ERROR.name()));
       JobParameters jobParameters = new JobParameters(param);
       clusterEntityMgr.updateClusterStatus(clusterName,
-            ClusterStatus.CONFIGURING);
+              ClusterStatus.CONFIGURING);
       clusterEntityMgr.cleanupActionError(clusterName);
       try {
          return jobManager.runJob(JobConstants.CONFIG_CLUSTER_JOB_NAME,
@@ -685,12 +688,12 @@ public class ClusterManager {
             clusterName));
       param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(new Date()));
       param.put(JobConstants.CLUSTER_SUCCESS_STATUS_JOB_PARAM,
-            new JobParameter(ClusterStatus.RUNNING.name()));
+              new JobParameter(ClusterStatus.RUNNING.name()));
       param.put(JobConstants.CLUSTER_FAILURE_STATUS_JOB_PARAM,
-            new JobParameter(ClusterStatus.CONFIGURE_ERROR.name()));
+              new JobParameter(ClusterStatus.CONFIGURE_ERROR.name()));
       JobParameters jobParameters = new JobParameters(param);
       clusterEntityMgr.updateClusterStatus(clusterName,
-            ClusterStatus.CONFIGURING);
+              ClusterStatus.CONFIGURING);
       clusterEntityMgr.cleanupActionError(clusterName);
       try {
          return jobManager.runJob("configLdapUserMgmtJob",
@@ -715,12 +718,15 @@ public class ClusterManager {
 
       ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
 
-      if (cluster.getStatus() != ClusterStatus.PROVISION_ERROR) {
-         logger.error("can not resume creation of cluster: " + clusterName
-               + ", " + cluster.getStatus());
-         throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName,
-               "To update a cluster, its status must be PROVISION_ERROR or SERVICE_ERROR");
+      if (cluster.getStatus() != ClusterStatus.ADDING) {
+         if (cluster.getStatus() != ClusterStatus.PROVISION_ERROR) {
+            logger.error("can not resume creation of cluster: " + clusterName
+                    + ", " + cluster.getStatus());
+            throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName,
+                    "To update a cluster, its status must be PROVISION_ERROR or SERVICE_ERROR");
+         }
       }
+
       List<String> dsNames = getUsedDS(cluster.getVcDatastoreNameList());
       if (dsNames.isEmpty()) {
          throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
@@ -773,16 +779,16 @@ public class ClusterManager {
       if (!cluster.getStatus().isStableStatus()) {
          logger.error("cluster: " + clusterName
                + " cannot be deleted, it is in " + cluster.getStatus()
-               + " status");
+                 + " status");
          throw ClusterManagerException.DELETION_NOT_ALLOWED_ERROR(clusterName,
-               "To delete a cluster, its status must be RUNNING, STOPPED, ERROR, PROVISION_ERROR, CONFIGURE_ERROR or UPGRADE_ERROR");
+                 "To delete a cluster, its status must be RUNNING, STOPPED, ERROR, PROVISION_ERROR, CONFIGURE_ERROR or UPGRADE_ERROR");
       }
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
             clusterName));
       param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(new Date()));
       param.put(JobConstants.CLUSTER_FAILURE_STATUS_JOB_PARAM,
-            new JobParameter(ClusterStatus.ERROR.name()));
+              new JobParameter(ClusterStatus.ERROR.name()));
       JobParameters jobParameters = new JobParameters(param);
       clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.DELETING);
       clusterEntityMgr.cleanupActionError(clusterName);
@@ -868,7 +874,7 @@ public class ClusterManager {
                + " cannot be started, it is in " + cluster.getStatus()
                + " status");
          throw ClusterManagerException.START_NOT_ALLOWED_ERROR(clusterName,
-               "To start a cluster, its status must be STOPPED or ERROR");
+                 "To start a cluster, its status must be STOPPED or ERROR");
       }
 
       cluster.setVhmTargetNum(-1);
@@ -876,13 +882,13 @@ public class ClusterManager {
       clusterEntityMgr.cleanupActionError(clusterName);
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
-            clusterName));
+              clusterName));
       param.put(Constants.FORCE_CLUSTER_OPERATION_JOB_PARAM, new JobParameter(String.valueOf(force)));
       param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(new Date()));
       param.put(JobConstants.CLUSTER_SUCCESS_STATUS_JOB_PARAM,
-            new JobParameter(ClusterStatus.RUNNING.name()));
+              new JobParameter(ClusterStatus.RUNNING.name()));
       param.put(JobConstants.CLUSTER_FAILURE_STATUS_JOB_PARAM,
-            new JobParameter(ClusterStatus.ERROR.name()));
+              new JobParameter(ClusterStatus.ERROR.name()));
       JobParameters jobParameters = new JobParameters(param);
       clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.STARTING);
       try {
@@ -920,16 +926,16 @@ public class ClusterManager {
                + " cannot be stopped, it is in " + cluster.getStatus()
                + " status");
          throw ClusterManagerException.STOP_NOT_ALLOWED_ERROR(clusterName,
-               "To stop a cluster, its status must be RUNNING, ERROR, SERVICE_WARNING or SERVICE_STOPPED");
+                 "To stop a cluster, its status must be RUNNING, ERROR, SERVICE_WARNING or SERVICE_STOPPED");
       }
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
             clusterName));
       param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(new Date()));
       param.put(JobConstants.CLUSTER_SUCCESS_STATUS_JOB_PARAM,
-            new JobParameter(ClusterStatus.STOPPED.name()));
+              new JobParameter(ClusterStatus.STOPPED.name()));
       param.put(JobConstants.CLUSTER_FAILURE_STATUS_JOB_PARAM,
-            new JobParameter(ClusterStatus.ERROR.name()));
+              new JobParameter(ClusterStatus.ERROR.name()));
       JobParameters jobParameters = new JobParameters(param);
       clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.STOPPING);
       clusterEntityMgr.cleanupActionError(clusterName);
@@ -946,9 +952,9 @@ public class ClusterManager {
    @ClusterManagerPointcut
    public Long resizeCluster(String clusterName, String nodeGroupName,
          int instanceNum, boolean force) throws Exception {
-      logger.info("ClusterManager, updating node group " + nodeGroupName
-            + " in cluster " + clusterName + " reset instance number to "
-            + instanceNum);
+      logger.debug("ClusterManager, updating node group " + nodeGroupName
+              + " in cluster " + clusterName + " reset instance number to "
+              + instanceNum);
 
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
       if (cluster == null) {
@@ -967,7 +973,6 @@ public class ClusterManager {
       if (vcClusters.isEmpty()) {
          throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
       }
-
       this.resMgr.refreshVcResources();
 
       // validate accessibility
@@ -993,6 +998,7 @@ public class ClusterManager {
          throw ClusterManagerException.ROLES_NOT_SUPPORTED(unsupportedRoles);
       }
 
+      logger.info("check cluster status before resize action:" + cluster.getStatus() );
       if (!cluster.getStatus().isActiveServiceStatus()) {
          logger.error("cluster " + clusterName
                + " can be resized only in RUNNING status, it is now in "
@@ -1151,11 +1157,11 @@ public class ClusterManager {
          logger.error("Cannot change elasticity mode, when cluster "
                + clusterName + " is in " + cluster.getStatus() + " status");
          throw ClusterManagerException.SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(
-               clusterName, "The cluster's status must be RUNNING");
+                 clusterName, "The cluster's status must be RUNNING");
       }
       if (!cluster.getStatus().isActiveServiceStatus()
             && !ClusterStatus.SERVICE_STOPPED.equals(cluster.getStatus())
-            && !ClusterStatus.STOPPED.equals(cluster.getStatus())) {
+              && !ClusterStatus.STOPPED.equals(cluster.getStatus())) {
          logger.error("Cannot change elasticity parameters, when cluster "
                + clusterName + " is in " + cluster.getStatus() + " status");
          throw ClusterManagerException.SET_AUTO_ELASTICITY_NOT_ALLOWED_ERROR(
@@ -1210,7 +1216,7 @@ public class ClusterManager {
       ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
 
       syncSetParam(clusterName, activeComputeNodeNum, minComputeNodeNum, maxComputeNodeNum,
-            enableAuto, ioPriority);
+              enableAuto, ioPriority);
 
       ClusterRead cluster = getClusterByName(clusterName, false);
       // cluster must be running status
@@ -1224,26 +1230,26 @@ public class ClusterManager {
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(new Date()));
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
-            clusterName));
+              clusterName));
       // TODO: transfer SET_TARGET/UNLIMIT from CLI directly
       if (activeComputeNodeNum == null) {
          param.put(JobConstants.VHM_ACTION_JOB_PARAM, new JobParameter(
-               LimitInstruction.actionWaitForManual));
+                 LimitInstruction.actionWaitForManual));
       } else if (activeComputeNodeNum == -1) {
          param.put(JobConstants.VHM_ACTION_JOB_PARAM, new JobParameter(
-               LimitInstruction.actionUnlimit));
+                 LimitInstruction.actionUnlimit));
       } else {
          param.put(JobConstants.VHM_ACTION_JOB_PARAM, new JobParameter(
                LimitInstruction.actionSetTarget));
       }
       if (activeComputeNodeNum != null) {
          param.put(JobConstants.ACTIVE_COMPUTE_NODE_NUMBER_JOB_PARAM,
-               new JobParameter(Long.valueOf(activeComputeNodeNum)));
+                 new JobParameter(Long.valueOf(activeComputeNodeNum)));
       }
       param.put(JobConstants.CLUSTER_SUCCESS_STATUS_JOB_PARAM,
-            new JobParameter(ClusterStatus.RUNNING.name()));
+              new JobParameter(ClusterStatus.RUNNING.name()));
       param.put(JobConstants.CLUSTER_FAILURE_STATUS_JOB_PARAM,
-            new JobParameter(ClusterStatus.RUNNING.name()));
+              new JobParameter(ClusterStatus.RUNNING.name()));
       JobParameters jobParameters = new JobParameters(param);
       try {
          clusterEntityMgr.updateClusterStatus(clusterName,
@@ -1353,7 +1359,7 @@ public class ClusterManager {
 
       if (nonexistentDsNames.length() > 0) {
          nonexistentDsNames.delete(nonexistentDsNames.length() - 1,
-               nonexistentDsNames.length());
+                 nonexistentDsNames.length());
          throw VcProviderException
                .DATASTORE_NOT_FOUND(nonexistentDsNames.toString());
       }
@@ -1410,7 +1416,7 @@ public class ClusterManager {
       }
 
       logger.info("Change all nodes' disk I/O shares to " + ioShares
-            + " in the cluster " + clusterName);
+              + " in the cluster " + clusterName);
 
       // cluster must be in RUNNING or STOPPEED status
       if (!cluster.getStatus().isActiveServiceStatus()
@@ -1418,7 +1424,7 @@ public class ClusterManager {
          String msg = "The cluster's status must be RUNNING or STOPPED";
          logger.error(msg);
          throw ClusterManagerException.PRIORITIZE_CLUSTER_NOT_ALLOWED_ERROR(
-               clusterName, msg);
+                 clusterName, msg);
       }
 
       // get target nodeuster
@@ -1447,7 +1453,7 @@ public class ClusterManager {
             clusterEntityMgr.update(node);
          }
          throw ClusterManagerException.PRIORITIZE_CLUSTER_FAILED(clusterName,
-               failedNodes.size(), targetNodes.size());
+                 failedNodes.size(), targetNodes.size());
       }
 
       // update io shares in db
@@ -1475,7 +1481,7 @@ public class ClusterManager {
 
       if (!oldStatus.isActiveServiceStatus()) {
          throw ClusterHealServiceException.NOT_SUPPORTED(clusterName,
-               "The cluster status must be RUNNING");
+                 "The cluster status must be RUNNING");
       }
 
       List<NodeGroupEntity> nodeGroups;
@@ -1504,7 +1510,7 @@ public class ClusterManager {
 
          workerNodesFound = true;
          for (NodeEntity node : clusterEntityMgr.findAllNodes(clusterName,
-               nodeGroup.getName())) {
+                 nodeGroup.getName())) {
             if (node.isObsoleteNode()) {
                logger.info("Ingore node " + node.getVmName()
                      + ", for it violate VM name convention."
@@ -1513,7 +1519,7 @@ public class ClusterManager {
             }
             if (clusterHealService.hasBadDisks(node.getVmName())) {
                logger.warn("node " + node.getVmName()
-                     + " has bad disks. Fixing it..");
+                       + " has bad disks. Fixing it..");
 
                boolean vmPowerOn =
                      (node.getStatus().ordinal() != NodeStatus.POWERED_OFF
@@ -1539,7 +1545,7 @@ public class ClusterManager {
       if (!workerNodesFound) {
          throw ClusterHealServiceException
                .NOT_SUPPORTED(clusterName,
-                     "only support fixing disk failures for worker/non-management nodes");
+                       "only support fixing disk failures for worker/non-management nodes");
       }
 
       // all target nodes are healthy, simply return
@@ -1587,7 +1593,7 @@ public class ClusterManager {
    public HadoopStack filterDistroFromAppManager(
          SoftwareManager softwareManager, String distroName) {
       return clusterConfigMgr.filterDistroFromAppManager(softwareManager,
-            distroName);
+              distroName);
    }
 
    private void verifyNetworkNamesExsitInDB(Set<String> networkNames,
@@ -1682,6 +1688,87 @@ public class ClusterManager {
          }
       }
       return type;
+   }
+
+   @ClusterManagerPointcut
+   public Long addCluster(String clusterName,
+                          NodeGroupCreate[] nodeGroupsAdd) throws Exception {
+      Long taskId = null;
+      List<BaseNode> vNodes = new ArrayList<BaseNode>();
+      List<String> failedMsgList = new ArrayList<String>();
+      List<String> warningMsgList = new ArrayList<String>();
+
+      ClusterCreate clusterSpec = clusterConfigMgr.getClusterConfig(clusterName);
+      clusterSpec.setNodeGroups(nodeGroupsAdd);
+
+      for (NodeGroupCreate ng : nodeGroupsAdd) {
+         BaseNode node = new BaseNode();
+         NodeGroupEntity group =
+                 clusterEntityMgr.findByName(clusterName, ng.getName());
+         ClusterEntity clusterEntity = clusterEntityMgr.findByName(clusterName);
+
+         if (clusterEntity == null) {
+            throw ClusterConfigException.CLUSTER_CONFIG_NOT_FOUND(clusterName);
+         }
+         if ( 0 == ng.getInstanceNum()) {
+            throw ClusterManagerException.NODE_GROUP_CANNOT_BE_ZERO(clusterName, ng.getName());
+         }
+
+         if (group == null) {
+            NodeGroupEntity addNodeGroupEntity = new NodeGroupEntity();
+            addNodeGroupEntity.setName(ng.getName());
+            addNodeGroupEntity.setRoles((new Gson()).toJson(ng.getRoles()));
+            addNodeGroupEntity.setNodeType(ng.getInstanceType());
+            addNodeGroupEntity.setDefineInstanceNum(ng.getInstanceNum());
+            addNodeGroupEntity.setCpuNum(ng.getCpuNum());
+            addNodeGroupEntity.setMemorySize(ng.getMemCapacityMB());
+            addNodeGroupEntity.setHaFlag(ng.getHaFlag());
+            if (null != ng.getStorage()) {
+               if (ng.getStorage().getType().equals(Datastore.DatastoreType.SHARED.toString())) {
+                  addNodeGroupEntity.setStorageType(Datastore.DatastoreType.SHARED);
+               } else if (ng.getStorage().getType().equals(Datastore.DatastoreType.LOCAL.toString())) {
+                  addNodeGroupEntity.setStorageType(Datastore.DatastoreType.LOCAL);
+               }
+               addNodeGroupEntity.setStorageSize(ng.getStorage().getSizeGB());
+               addNodeGroupEntity.setVcDatastoreNameList(ng.getStorage().getDsNames());
+               addNodeGroupEntity.setDdDatastoreNameList(ng.getStorage().getDsNames4Data());
+               addNodeGroupEntity.setSdDatastoreNameList(ng.getStorage().getDsNames4System());
+            }
+            addNodeGroupEntity.setGroupRacks(ng.getReferredGroup());
+            addNodeGroupEntity.setHadoopConfig((new Gson()).toJson(ng
+                    .getConfiguration()));
+            addNodeGroupEntity.setCluster(clusterEntity);
+            addNodeGroupEntity.setVmFolderPath(clusterEntity);
+
+//            clusterEntity.getNodeGroups().add(addNodeGroupEntity);
+            ng.setVmFolderPath(clusterEntity.getRootFolder() + "/" + ng.getName());
+
+            logger.info("Node group " + ng.getName() + " of cluster "
+                    + clusterName + " does not exist, ready for inserting node group");
+            clusterEntityMgr.insert(addNodeGroupEntity);
+         } else {
+            logger.error("Node group" + ng.getName() + " of cluster "
+                    + clusterName + " has existed, failed to insert node group");
+            throw ClusterManagerException.NODE_GROUP_HAS_EXISTED(clusterName, ng.getName());
+         }
+
+         node.setCluster(clusterSpec);
+         node.setTargetVcCluster(clusterSpec.getVcClusters().get(0).getName());
+         node.setNodeGroup(ng);
+         vNodes.add(node);
+      }
+
+      clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.ADDING);
+      if (clusteringService.addNodeGroups(clusterSpec, nodeGroupsAdd, vNodes)) {
+         taskId = resumeClusterCreation(clusterName);
+      } else {
+         logger.error("Cluster "
+                 + clusterName + " failed to insert node groups.");
+         clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.PROVISION_ERROR);
+         throw ClusterManagerException.ADD_NODE_GROUP_FAILED(clusterName);
+      }
+
+      return taskId;
    }
 
    public void recoverClusters(List<VcClusterMap> clstMaps) throws Exception {

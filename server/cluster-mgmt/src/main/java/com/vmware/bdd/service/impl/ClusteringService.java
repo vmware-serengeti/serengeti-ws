@@ -71,7 +71,6 @@ import com.vmware.bdd.apitypes.IpBlock;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.Priority;
-import com.vmware.bdd.apitypes.StorageRead.DiskScsiControllerType;
 import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.clone.spec.VmCreateResult;
 import com.vmware.bdd.clone.spec.VmCreateSpec;
@@ -234,10 +233,12 @@ public class ClusteringService implements IClusteringService {
       this.rpDao = rpDao;
    }
 
+   @Override
    public String getTemplateVmId() {
       return templateVm.getId();
    }
 
+   @Override
    public String getTemplateVmName() {
       return templateVm.getName();
    }
@@ -276,6 +277,7 @@ public class ClusteringService implements IClusteringService {
       this.softwareManagerCollector = softwareManagerCollector;
    }
 
+   @Override
    public synchronized void init() {
       if (!initialized) {
          // XXX hack to approve bootstrap instance id, should be moved out of Configuration
@@ -377,6 +379,7 @@ public class ClusteringService implements IClusteringService {
 
    }
 
+   @Override
    synchronized public void destroy() {
       Scheduler.shutdown(true);
       processor.stop();
@@ -736,6 +739,7 @@ public class ClusteringService implements IClusteringService {
       getClusterEntityMgr().update(cluster);
    }
 
+   @Override
    @SuppressWarnings("unchecked")
    public boolean setAutoElasticity(String clusterName, boolean refreshAllNodes) {
       logger.info("set auto elasticity for cluster " + clusterName);
@@ -829,31 +833,35 @@ public class ClusteringService implements IClusteringService {
    }
 
    @SuppressWarnings("unchecked")
-   private Map<String, Folder> createVcFolders(ClusterCreate cluster) {
+   private Map<String, Folder> createVcFolders(ClusterCreate cluster, boolean addNodeGroup) {
       logger.info("createVcFolders, start to create cluster Folder.");
       // get all nodegroups
       Callable<Void>[] storeProcedures = new Callable[1];
       Folder clusterFolder = null;
-      if (cluster.getNodeGroups().length > 0) {
-         // create cluster folder first
-         NodeGroupCreate group = cluster.getNodeGroups()[0];
-         String path = group.getVmFolderPath();
-         String[] folderNames = path.split("/");
-         List<String> folderList = new ArrayList<String>();
-         for (int i = 0; i < folderNames.length - 1; i++) {
-            folderList.add(folderNames[i]);
-         }
-         CreateVMFolderSP sp =
-               new CreateVMFolderSP(templateVm.getDatacenter(), null,
-                     folderList);
-         storeProcedures[0] = sp;
-         Map<String, Folder> folders =
-               executeFolderCreationProcedures(cluster, storeProcedures);
-         for (String name : folders.keySet()) {
-            clusterFolder = folders.get(name);
-            break;
+
+      if(!addNodeGroup) {
+         if (cluster.getNodeGroups().length > 0) {
+            // create cluster folder first
+            NodeGroupCreate group = cluster.getNodeGroups()[0];
+            String path = group.getVmFolderPath();
+            String[] folderNames = path.split("/");
+            List<String> folderList = new ArrayList<String>();
+            for (int i = 0; i < folderNames.length - 1; i++) {
+               folderList.add(folderNames[i]);
+            }
+            CreateVMFolderSP sp =
+                    new CreateVMFolderSP(templateVm.getDatacenter(), null,
+                            folderList);
+            storeProcedures[0] = sp;
+            Map<String, Folder> folders =
+                    executeFolderCreationProcedures(cluster, storeProcedures);
+            for (String name : folders.keySet()) {
+               clusterFolder = folders.get(name);
+               break;
+            }
          }
       }
+
       logger.info("createVcFolders, start to create group Folders.");
       storeProcedures = new Callable[cluster.getNodeGroups().length];
       int i = 0;
@@ -977,7 +985,9 @@ public class ClusteringService implements IClusteringService {
             resourcePoolNames = vcClusterRpNamesMap.get(vcCluster);
          }
          String vcRp = baseNode.getTargetRp();
+         logger.info("collectResourcePoolInfo baseNode.getTargetRp()" + vcRp);
          String rpPath = "/" + vcCluster + "/" + vcRp + "/" + uuid;
+         logger.info("collectResourcePoolInfo rpPath" + rpPath);
          long rpHashCode = rpPath.hashCode();
          if (!rpNodeGroupsMap.containsKey(rpHashCode)) {
             nodeGroups = new ArrayList<NodeGroupCreate>();
@@ -1011,7 +1021,7 @@ public class ClusteringService implements IClusteringService {
       return nodeGroupNames;
    }
 
-   private String createVcResourcePools(List<BaseNode> vNodes) {
+   private String createVcResourcePools(List<BaseNode> vNodes, boolean addNodeGroup) {
       logger.info("createVcResourcePools, start to create VC ResourcePool(s).");
       /*
        * define cluster resource pool name.
@@ -1039,48 +1049,51 @@ public class ClusteringService implements IClusteringService {
                   rpNodeGroupsMap);
 
       try {
-         /*
+         int i = 0;
+         if (!addNodeGroup) {
+                     /*
           * define cluster store procedures of resource pool(s)
           */
-         int resourcePoolNameCount = countResult.get("resourcePoolNameCount");
-         Callable<Void>[] clusterSPs = new Callable[resourcePoolNameCount];
-         int i = 0;
-         for (Entry<String, List<String>> vcClusterRpNamesEntry : vcClusterRpNamesMap
-               .entrySet()) {
-            String vcClusterName = vcClusterRpNamesEntry.getKey();
-            VcCluster vcCluster = VcResourceUtils.findVcCluster(vcClusterName);
-            if (vcCluster == null) {
-               String errorMsg =
-                     "Cannot find the vCenter Server cluster " + vcClusterName
-                           + ".";
-               logger.error(errorMsg);
-               throw ClusteringServiceException
-                     .CANNOT_FIND_VC_CLUSTER(vcClusterName);
-            }
-            List<String> resourcePoolNames = vcClusterRpNamesEntry.getValue();
-            for (String resourcePoolName : resourcePoolNames) {
-               VcResourcePool parentVcResourcePool =
-                     VcResourceUtils.findRPInVCCluster(vcClusterName,
-                           resourcePoolName);
-               if (parentVcResourcePool == null) {
+            int resourcePoolNameCount = countResult.get("resourcePoolNameCount");
+            Callable<Void>[] clusterSPs = new Callable[resourcePoolNameCount];
+            for (Entry<String, List<String>> vcClusterRpNamesEntry : vcClusterRpNamesMap
+                    .entrySet()) {
+               String vcClusterName = vcClusterRpNamesEntry.getKey();
+               VcCluster vcCluster = VcResourceUtils.findVcCluster(vcClusterName);
+               if (vcCluster == null) {
                   String errorMsg =
-                        "Cannot find the vCenter Server resource pool "
-                              + resourcePoolName + ".";
+                          "Cannot find the vCenter Server cluster " + vcClusterName
+                                  + ".";
                   logger.error(errorMsg);
                   throw ClusteringServiceException
-                        .CANNOT_FIND_VC_RESOURCE_POOL(resourcePoolName);
+                          .CANNOT_FIND_VC_CLUSTER(vcClusterName);
                }
-               CreateResourcePoolSP clusterSP =
-                     new CreateResourcePoolSP(parentVcResourcePool,
-                           clusterRpName);
-               clusterSPs[i] = clusterSP;
-               i++;
+               List<String> resourcePoolNames = vcClusterRpNamesEntry.getValue();
+               for (String resourcePoolName : resourcePoolNames) {
+                  VcResourcePool parentVcResourcePool =
+                          VcResourceUtils.findRPInVCCluster(vcClusterName,
+                                  resourcePoolName);
+                  if (parentVcResourcePool == null) {
+                     String errorMsg =
+                             "Cannot find the vCenter Server resource pool "
+                                     + resourcePoolName + ".";
+                     logger.error(errorMsg);
+                     throw ClusteringServiceException
+                             .CANNOT_FIND_VC_RESOURCE_POOL(resourcePoolName);
+                  }
+                  CreateResourcePoolSP clusterSP =
+                          new CreateResourcePoolSP(parentVcResourcePool,
+                                  clusterRpName);
+                  clusterSPs[i] = clusterSP;
+                  i++;
+               }
             }
-         }
 
-         // execute store procedures to create cluster resource pool(s)
-         logger.info("ClusteringService, start to create cluster resource pool(s).");
-         executeResourcePoolStoreProcedures(clusterSPs, "cluster", clusterName);
+            // execute store procedures to create cluster resource pool(s)
+            logger.info("ClusteringService, start to create cluster resource pool(s).");
+            executeResourcePoolStoreProcedures(clusterSPs, "cluster", clusterName);
+
+         }
 
          /*
           * define node group store procedures of resource pool(s)
@@ -1167,8 +1180,8 @@ public class ClusteringService implements IClusteringService {
       }
       updateNicLabels(vNodes);
       allocateStaticIp(vNodes, networkAdds, occupiedIpSets);
-      Map<String, Folder> folders = createVcFolders(vNodes.get(0).getCluster());
-      String clusterRpName = createVcResourcePools(vNodes);
+      Map<String, Folder> folders = createVcFolders(vNodes.get(0).getCluster(), false);
+      String clusterRpName = createVcResourcePools(vNodes, false);
       logger.info("syncCreateVMs, start to create VMs.");
 
       // update vm info in vc cache, in case snapshot is removed by others
@@ -1710,6 +1723,7 @@ public class ClusteringService implements IClusteringService {
       return CommonUtil.getCurrentTimestamp() + " " + throwable.getMessage();
    }
 
+   @Override
    public boolean removeBadNodes(ClusterCreate cluster,
          List<BaseNode> existingNodes, List<BaseNode> deletedNodes,
          Map<String, Set<String>> occupiedIpSets, StatusUpdater statusUpdator) {
@@ -1739,6 +1753,7 @@ public class ClusteringService implements IClusteringService {
       return true;
    }
 
+   @Override
    public List<BaseNode> getBadNodes(ClusterCreate cluster,
          List<BaseNode> existingNodes) {
       return placementService.getBadNodes(cluster, existingNodes);
@@ -1902,6 +1917,7 @@ public class ClusteringService implements IClusteringService {
       }
    }
 
+   @Override
    @SuppressWarnings("unchecked")
    public boolean syncDeleteVMs(List<BaseNode> badNodes,
          StatusUpdater statusUpdator, boolean ignoreUnavailableNodes) {
@@ -1995,7 +2011,7 @@ public class ClusteringService implements IClusteringService {
    public Map<String, String> configIOShares(String clusterName, List<NodeEntity> targetNodes,
          Priority ioShares) {
       AuAssert.check(clusterName != null && targetNodes != null
-            && !targetNodes.isEmpty());
+              && !targetNodes.isEmpty());
 
       Callable<Void>[] storeProcedures = new Callable[targetNodes.size()];
       int i = 0;
@@ -2088,6 +2104,7 @@ public class ClusteringService implements IClusteringService {
       return VcVmUtil.runSPOnSingleVM(node, stopVMSP);
    }
 
+   @Override
    public VmEventManager getEventProcessor() {
       return this.processor;
    }
@@ -2108,6 +2125,35 @@ public class ClusteringService implements IClusteringService {
          return false;
       }
       return true;
+   }
+
+   @Override
+   public boolean addNodeGroups(ClusterCreate clusterSpec, NodeGroupCreate[] nodeGroupsAdd,
+                               List<BaseNode> vNodes) {
+      boolean success = false;
+      List<NodeGroupCreate> newNodeGroups = new ArrayList<NodeGroupCreate>();
+
+      if (clusterSpec != null && clusterSpec.getNodeGroups() != null) {
+         for (NodeGroupCreate ng : clusterSpec.getNodeGroups()) {
+            newNodeGroups.add(ng);
+         }
+      }
+
+      if (nodeGroupsAdd != null) {
+         for (NodeGroupCreate ng : nodeGroupsAdd) {
+            newNodeGroups.add(ng);
+         }
+      }
+
+      if (clusterSpec != null) {
+         clusterSpec.setNodeGroups(newNodeGroups
+                 .toArray(new NodeGroupCreate[newNodeGroups.size()]));
+      }
+
+      createVcFolders(clusterSpec, true);
+      createVcResourcePools(vNodes, true);
+      success = true;
+      return success;
    }
 
    private void checkAndUpdateClusterCloneType(ClusterCreate clusterSpec, Container container) {

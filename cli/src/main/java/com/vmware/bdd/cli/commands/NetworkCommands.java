@@ -112,7 +112,6 @@ public class NetworkCommands implements CommandMarker {
                Constants.PARAMS_EXCLUSION_PAIR_NETWORK_ADD_IP_DHCP
                + Constants.PARAMS_EXCLUSION);
          return;
-//      } else if(!CommandsUtils.isBlank(ip) && dnsType.equals("DYNAMIC")) {
       } else if(!CommandsUtils.isBlank(ip) && NetworkDnsType.DYNAMIC.toString().equals(dnsType)) {
           CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
                   Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,

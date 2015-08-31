@@ -35,6 +35,7 @@ import com.vmware.bdd.plugin.ambari.api.manager.ApiManager_2_0_0;
 import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 import com.vmware.aurora.util.HbaseRegionServerOptsUtil;
 
+import com.vmware.bdd.software.mgmt.plugin.intf.AbstractSoftwareManager;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 
@@ -99,7 +100,7 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 import com.vmware.bdd.software.mgmt.plugin.utils.ReflectionUtils;
 import com.vmware.bdd.software.mgmt.plugin.utils.ValidateRolesUtil;
 
-public class AmbariImpl implements SoftwareManager {
+public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManager {
 
    private static final Logger logger = Logger.getLogger(AmbariImpl.class);
 

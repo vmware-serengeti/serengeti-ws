@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gson.Gson;
+import com.vmware.bdd.software.mgmt.plugin.intf.AbstractSoftwareManager;
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -106,7 +107,7 @@ import com.vmware.bdd.utils.Version;
  * Date: 6/11/14
  * Time: 5:57 PM
  */
-public class ClouderaManagerImpl implements SoftwareManager {
+public class ClouderaManagerImpl extends AbstractSoftwareManager implements SoftwareManager {
 
    private static final Logger logger = Logger.getLogger(ClouderaManagerImpl.class);
 

@@ -15,6 +15,8 @@
 package com.vmware.bdd.service.job.software;
 
 import java.util.List;
+
+import com.vmware.bdd.software.mgmt.plugin.intf.AbstractSoftwareManager;
 import mockit.Mock;
 import mockit.MockClass;
 
@@ -29,7 +31,7 @@ import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
 
 @MockClass(realClass = SoftwareManager.class)
-public class MockSoftwareManager implements SoftwareManager {
+public class MockSoftwareManager extends AbstractSoftwareManager implements SoftwareManager {
    @Mock
    public boolean createCluster(ClusterBlueprint blueprint,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
