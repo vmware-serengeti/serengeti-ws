@@ -27,7 +27,7 @@ public class FakeRequestsResource implements RequestsResource {
 
    @Override
    public Response postRequest(String request) {
-      return BuildResponse.buildResponse("clusters/decommission_requests.json");
+      return BuildResponse.buildResponse("clusters/simple_request.json");
    }
 
    @Override

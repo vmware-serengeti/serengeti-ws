@@ -21,14 +21,13 @@ import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterList;
-<<<<<<< HEAD
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroup;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponent;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponentsRequest;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
-=======
->>>>>>> aac75e0... Don't generate duplicated config group during cluster resize if have the same disk number
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRestartRequiredCompent;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRestartRequiredService;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiService;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
@@ -45,7 +44,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class TestApiManager {
    private ApiManager apiManager;
@@ -60,16 +61,12 @@ public class TestApiManager {
       Mockito.when(apiRootResource.getRootV1()).thenReturn(rootResourceV1);
       AmbariManagerClientbuilder clientbuilder = Mockito.mock(AmbariManagerClientbuilder.class);
       Mockito.when(clientbuilder.build()).thenReturn(apiRootResource);
-<<<<<<< HEAD
       //apiManager = new ApiManager("10.141.72.211", 8080, "admin", "admin");
       apiManager = new ApiManager(clientbuilder);
       hostNames = new ArrayList<String>();
       hostNames.add("host01");
       hostNames.add("host02");
       hostNames.add("host03");
-=======
-      apiManager = new ApiManager(clientbuilder);
->>>>>>> aac75e0... Don't generate duplicated config group during cluster resize if have the same disk number
    }
 
    @AfterMethod
@@ -406,5 +403,48 @@ public class TestApiManager {
    @Test
    public void testGetRegisteredHosts() throws Exception {
       Assert.assertNotNull(apiManager.getRegisteredHosts());
+   }
+
+   @Test
+   public void testRestartRequiredServices() throws Exception {
+      List<ApiRequest> apiRequests = apiManager.restartRequiredServices(clusterName);
+      Assert.assertNotNull(apiRequests);
+   }
+
+   @Test
+   public void testrestartRequiredService() throws Exception {
+      ApiRestartRequiredService apiRestartRequiredService = new ApiRestartRequiredService();
+      apiRestartRequiredService.setName(clusterName);
+
+      List<ApiRestartRequiredCompent> apiRestartRequiredCompents = new ArrayList<ApiRestartRequiredCompent>();
+
+      ApiRestartRequiredCompent apiRestartRequiredCompent_1 = new ApiRestartRequiredCompent();
+      apiRestartRequiredCompent_1.setName("DATANODE");
+      Set<String> hosts_1 = new HashSet<String>();
+      hosts_1.add("127.0.0.1");
+      hosts_1.add("127.0.0.2");
+      apiRestartRequiredCompent_1.setHosts(hosts_1);
+      apiRestartRequiredCompents.add(apiRestartRequiredCompent_1);
+
+      ApiRestartRequiredCompent apiRestartRequiredCompent_2 = new ApiRestartRequiredCompent();
+      apiRestartRequiredCompent_2.setName("NODEMANAGER");
+      Set<String> hosts_2 = new HashSet<String>();
+      hosts_2.add("127.0.0.1");
+      hosts_2.add("127.0.0.2");
+      apiRestartRequiredCompent_1.setHosts(hosts_2);
+      apiRestartRequiredCompents.add(apiRestartRequiredCompent_2);
+
+      apiRestartRequiredService.setApiRestartRequiredCompents(apiRestartRequiredCompents);
+
+      System.out.println(ApiUtils.objectToJson(apiRestartRequiredService));
+      ApiRequest apiRequest = apiManager.restartRequiredService(clusterName, apiRestartRequiredService);
+      Assert.assertNotNull(apiRequest);
+   }
+
+   @Test
+   public void testGetRestartRequiredServices() throws Exception {
+      List<ApiRestartRequiredService> apiRestartRequiredServices = apiManager.getRestartRequiredServices(clusterName);
+      Assert.assertNotNull(apiRestartRequiredServices);
+>>>>>>> 6fe7eab... Add UT for cluster services restart
    }
 }

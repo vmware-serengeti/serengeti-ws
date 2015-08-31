@@ -1,0 +1,1334 @@
+{
+  "items" : [
+    {
+      "HostRoles" : {
+        "cluster_name" : "am_1",
+        "component_name" : "DATANODE",
+        "desired_admin_state" : "INSERVICE",
+        "desired_stack_id" : "HDP-2.2",
+        "desired_state" : "STARTED",
+        "host_name" : "host-131",
+        "maintenance_state" : "OFF",
+        "service_name" : "HDFS",
+        "stack_id" : "HDP-2.2",
+        "stale_configs" : true,
+        "state" : "STARTED",
+        "actual_configs" : {
+          "capacity-scheduler" : {
+            "default" : "1"
+          },
+          "cluster-env" : {
+            "default" : "1"
+          },
+          "core-site" : {
+            "default" : "1"
+          },
+          "hadoop-env" : {
+            "default" : "1"
+          },
+          "hadoop-policy" : {
+            "default" : "1"
+          },
+          "hdfs-log4j" : {
+            "default" : "1"
+          },
+          "hdfs-site" : {
+            "overrides" : {
+              "2" : "worker"
+            },
+            "default" : "1"
+          },
+          "mapred-env" : {
+            "default" : "1"
+          },
+          "mapred-site" : {
+            "default" : "1"
+          },
+          "ranger-hdfs-plugin-properties" : {
+            "default" : "1"
+          },
+          "tez-env" : {
+            "default" : "1"
+          },
+          "tez-site" : {
+            "default" : "1"
+          },
+          "yarn-env" : {
+            "default" : "1"
+          },
+          "yarn-log4j" : {
+            "default" : "1"
+          },
+          "yarn-site" : {
+            "overrides" : {
+              "3" : "worker"
+            },
+            "default" : "1"
+          },
+          "zoo.cfg" : {
+            "default" : "1"
+          },
+          "zookeeper-env" : {
+            "default" : "1"
+          },
+          "zookeeper-log4j" : {
+            "default" : "1"
+          }
+        }
+      },
+      "host" : {
+        "href" : "http://127.0.0.1:8080/api/v1/clusters/am_1/hosts/host-131"
+      }
+    },
+    {
+      "HostRoles" : {
+        "cluster_name" : "am_1",
+        "component_name" : "NODEMANAGER",
+        "desired_admin_state" : "INSERVICE",
+        "desired_stack_id" : "HDP-2.2",
+        "desired_state" : "STARTED",
+        "host_name" : "host-131",
+        "maintenance_state" : "OFF",
+        "service_name" : "YARN",
+        "stack_id" : "HDP-2.2",
+        "stale_configs" : true,
+        "state" : "STARTED",
+        "actual_configs" : {
+          "capacity-scheduler" : {
+            "default" : "1"
+          },
+          "cluster-env" : {
+            "default" : "1"
+          },
+          "core-site" : {
+            "default" : "1"
+          },
+          "hadoop-env" : {
+            "default" : "1"
+          },
+          "hadoop-policy" : {
+            "default" : "1"
+          },
+          "hdfs-log4j" : {
+            "default" : "1"
+          },
+          "hdfs-site" : {
+            "overrides" : {
+              "2" : "worker"
+            },
+            "default" : "1"
+          },
+          "mapred-env" : {
+            "default" : "1"
+          },
+          "mapred-site" : {
+            "default" : "1"
+          },
+          "ranger-hdfs-plugin-properties" : {
+            "default" : "1"
+          },
+          "tez-env" : {
+            "default" : "1"
+          },
+          "tez-site" : {
+            "default" : "1"
+          },
+          "yarn-env" : {
+            "default" : "1"
+          },
+          "yarn-log4j" : {
+            "default" : "1"
+          },
+          "yarn-site" : {
+            "overrides" : {
+              "3" : "worker"
+            },
+            "default" : "1"
+          },
+          "zoo.cfg" : {
+            "default" : "1"
+          },
+          "zookeeper-env" : {
+            "default" : "1"
+          },
+          "zookeeper-log4j" : {
+            "default" : "1"
+          }
+        }
+      },
+      "host" : {
+        "href" : "http://127.0.0.1:8080/api/v1/clusters/am_1/hosts/host-131"
+      }
+    },
+    {
+      "HostRoles" : {
+        "cluster_name" : "am_1",
+        "component_name" : "DATANODE",
+        "desired_admin_state" : "INSERVICE",
+        "desired_stack_id" : "HDP-2.2",
+        "desired_state" : "STARTED",
+        "host_name" : "host-195",
+        "maintenance_state" : "OFF",
+        "service_name" : "HDFS",
+        "stack_id" : "HDP-2.2",
+        "stale_configs" : true,
+        "state" : "STARTED",
+        "actual_configs" : {
+          "capacity-scheduler" : {
+            "default" : "1"
+          },
+          "cluster-env" : {
+            "default" : "1"
+          },
+          "core-site" : {
+            "default" : "1"
+          },
+          "hadoop-env" : {
+            "default" : "1"
+          },
+          "hadoop-policy" : {
+            "default" : "1"
+          },
+          "hdfs-log4j" : {
+            "default" : "1"
+          },
+          "hdfs-site" : {
+            "overrides" : {
+              "7" : "HDFS1"
+            },
+            "default" : "1"
+          },
+          "mapred-env" : {
+            "default" : "1"
+          },
+          "mapred-site" : {
+            "default" : "1"
+          },
+          "ranger-hdfs-plugin-properties" : {
+            "default" : "1"
+          },
+          "tez-env" : {
+            "default" : "1"
+          },
+          "tez-site" : {
+            "default" : "1"
+          },
+          "yarn-env" : {
+            "default" : "1"
+          },
+          "yarn-log4j" : {
+            "default" : "1"
+          },
+          "yarn-site" : {
+            "overrides" : {
+              "6" : "YARN1"
+            },
+            "default" : "1"
+          },
+          "zoo.cfg" : {
+            "default" : "1"
+          },
+          "zookeeper-env" : {
+            "default" : "1"
+          },
+          "zookeeper-log4j" : {
+            "default" : "1"
+          }
+        }
+      },
+      "host" : {
+        "href" : "http://127.0.0.1:8080/api/v1/clusters/am_1/hosts/host-195"
+      }
+    },
+    {
+      "HostRoles" : {
+        "cluster_name" : "am_1",
+        "component_name" : "NODEMANAGER",
+        "desired_admin_state" : "INSERVICE",
+        "desired_stack_id" : "HDP-2.2",
+        "desired_state" : "STARTED",
+        "host_name" : "host-195",
+        "maintenance_state" : "OFF",
+        "service_name" : "YARN",
+        "stack_id" : "HDP-2.2",
+        "stale_configs" : true,
+        "state" : "STARTED",
+        "actual_configs" : {
+          "capacity-scheduler" : {
+            "default" : "1"
+          },
+          "cluster-env" : {
+            "default" : "1"
+          },
+          "core-site" : {
+            "default" : "1"
+          },
+          "hadoop-env" : {
+            "default" : "1"
+          },
+          "hadoop-policy" : {
+            "default" : "1"
+          },
+          "hdfs-log4j" : {
+            "default" : "1"
+          },
+          "hdfs-site" : {
+            "overrides" : {
+              "7" : "HDFS1"
+            },
+            "default" : "1"
+          },
+          "mapred-env" : {
+            "default" : "1"
+          },
+          "mapred-site" : {
+            "default" : "1"
+          },
+          "ranger-hdfs-plugin-properties" : {
+            "default" : "1"
+          },
+          "tez-env" : {
+            "default" : "1"
+          },
+          "tez-site" : {
+            "default" : "1"
+          },
+          "yarn-env" : {
+            "default" : "1"
+          },
+          "yarn-log4j" : {
+            "default" : "1"
+          },
+          "yarn-site" : {
+            "overrides" : {
+              "6" : "YARN1"
+            },
+            "default" : "1"
+          },
+          "zoo.cfg" : {
+            "default" : "1"
+          },
+          "zookeeper-env" : {
+            "default" : "1"
+          },
+          "zookeeper-log4j" : {
+            "default" : "1"
+          }
+        }
+      },
+      "host" : {
+        "href" : "http://127.0.0.1:8080/api/v1/clusters/am_1/hosts/host-195"
+      }
+    },
+    {
+      "HostRoles" : {
+        "cluster_name" : "am_1",
+        "component_name" : "APP_TIMELINE_SERVER",
+        "desired_stack_id" : "HDP-2.2",
+        "desired_state" : "STARTED",
+        "host_name" : "host-249",
+        "maintenance_state" : "OFF",
+        "service_name" : "YARN",
+        "stack_id" : "HDP-2.2",
+        "stale_configs" : true,
+        "state" : "STARTED",
+        "actual_configs" : {
+          "capacity-scheduler" : {
+            "default" : "1"
+          },
+          "cluster-env" : {
+            "default" : "1"
+          },
+          "core-site" : {
+            "default" : "1"
+          },
+          "hadoop-env" : {
+            "default" : "1"
+          },
+          "hadoop-policy" : {
+            "default" : "1"
+          },
+          "hdfs-log4j" : {
+            "default" : "1"
+          },
+          "hdfs-site" : {
+            "overrides" : {
+              "4" : "master"
+            },
+            "default" : "1"
+          },
+          "mapred-env" : {
+            "default" : "1"
+          },
+          "mapred-site" : {
+            "default" : "1"
+          },
+          "ranger-hdfs-plugin-properties" : {
+            "default" : "1"
+          },
+          "tez-env" : {
+            "default" : "1"
+          },
+          "tez-site" : {
+            "default" : "1"
+          },
+          "yarn-env" : {
+            "default" : "1"
+          },
+          "yarn-log4j" : {
+            "default" : "1"
+          },
+          "yarn-site" : {
+            "overrides" : {
+              "5" : "master"
+            },
+            "default" : "1"
+          },
+          "zoo.cfg" : {
+            "default" : "1"
+          },
+          "zookeeper-env" : {
+            "default" : "1"
+          },
+          "zookeeper-log4j" : {
+            "default" : "1"
+          }
+        }
+      },
+      "host" : {
+        "href" : "http://127.0.0.1:8080/api/v1/clusters/am_1/hosts/host-249"
+      }
+    },
+    {
+      "HostRoles" : {
+        "cluster_name" : "am_1",
+        "component_name" : "HDFS_CLIENT",
+        "desired_stack_id" : "HDP-2.2",
+        "desired_state" : "INSTALLED",
+        "host_name" : "host-249",
+        "maintenance_state" : "OFF",
+        "service_name" : "HDFS",
+        "stack_id" : "HDP-2.2",
+        "stale_configs" : true,
+        "state" : "INSTALLED",
+        "actual_configs" : {
+          "capacity-scheduler" : {
+            "default" : "1"
+          },
+          "cluster-env" : {
+            "default" : "1"
+          },
+          "core-site" : {
+            "default" : "1"
+          },
+          "hadoop-env" : {
+            "default" : "1"
+          },
+          "hadoop-policy" : {
+            "default" : "1"
+          },
+          "hdfs-log4j" : {
+            "default" : "1"
+          },
+          "hdfs-site" : {
+            "overrides" : {
+              "4" : "master"
+            },
+            "default" : "1"
+          },
+          "mapred-env" : {
+            "default" : "1"
+          },
+          "mapred-site" : {
+            "default" : "1"
+          },
+          "ranger-hdfs-plugin-properties" : {
+            "default" : "1"
+          },
+          "tez-env" : {
+            "default" : "1"
+          },
+          "tez-site" : {
+            "default" : "1"
+          },
+          "yarn-env" : {
+            "default" : "1"
+          },
+          "yarn-log4j" : {
+            "default" : "1"
+          },
+          "yarn-site" : {
+            "overrides" : {
+              "5" : "master"
+            },
+            "default" : "1"
+          },
+          "zoo.cfg" : {
+            "default" : "1"
+          },
+          "zookeeper-env" : {
+            "default" : "1"
+          },
+          "zookeeper-log4j" : {
+            "default" : "1"
+          }
+        }
+      },
+      "host" : {
+        "href" : "http://127.0.0.1:8080/api/v1/clusters/am_1/hosts/host-249"
+      }
+    },
+    {
+      "HostRoles" : {
+        "cluster_name" : "am_1",
+        "component_name" : "NAMENODE",
+        "desired_stack_id" : "HDP-2.2",
+        "desired_state" : "STARTED",
+        "host_name" : "host-249",
+        "maintenance_state" : "OFF",
+        "service_name" : "HDFS",
+        "stack_id" : "HDP-2.2",
+        "stale_configs" : true,
+        "state" : "STARTED",
+        "actual_configs" : {
+          "capacity-scheduler" : {
+            "default" : "1"
+          },
+          "cluster-env" : {
+            "default" : "1"
+          },
+          "core-site" : {
+            "default" : "1"
+          },
+          "hadoop-env" : {
+            "default" : "1"
+          },
+          "hadoop-policy" : {
+            "default" : "1"
+          },
+          "hdfs-log4j" : {
+            "default" : "1"
+          },
+          "hdfs-site" : {
+            "overrides" : {
+              "4" : "master"
+            },
+            "default" : "1"
+          },
+          "mapred-env" : {
+            "default" : "1"
+          },
+          "mapred-site" : {
+            "default" : "1"
+          },
+          "ranger-hdfs-plugin-properties" : {
+            "default" : "1"
+          },
+          "tez-env" : {
+            "default" : "1"
+          },
+          "tez-site" : {
+            "default" : "1"
+          },
+          "yarn-env" : {
+            "default" : "1"
+          },
+          "yarn-log4j" : {
+            "default" : "1"
+          },
+          "yarn-site" : {
+            "overrides" : {
+              "5" : "master"
+            },
+            "default" : "1"
+          },
+          "zoo.cfg" : {
+            "default" : "1"
+          },
+          "zookeeper-env" : {
+            "default" : "1"
+          },
+          "zookeeper-log4j" : {
+            "default" : "1"
+          }
+        }
+      },
+      "host" : {
+        "href" : "http://127.0.0.1:8080/api/v1/clusters/am_1/hosts/host-249"
+      }
+    },
+    {
+      "HostRoles" : {
+        "cluster_name" : "am_1",
+        "component_name" : "RESOURCEMANAGER",
+        "desired_stack_id" : "HDP-2.2",
+        "desired_state" : "STARTED",
+        "ha_state" : "ACTIVE",
+        "host_name" : "host-249",
+        "maintenance_state" : "OFF",
+        "service_name" : "YARN",
+        "stack_id" : "HDP-2.2",
+        "stale_configs" : true,
+        "state" : "STARTED",
+        "actual_configs" : {
+          "capacity-scheduler" : {
+            "default" : "1"
+          },
+          "cluster-env" : {
+            "default" : "1"
+          },
+          "core-site" : {
+            "default" : "1"
+          },
+          "hadoop-env" : {
+            "default" : "1"
+          },
+          "hadoop-policy" : {
+            "default" : "1"
+          },
+          "hdfs-log4j" : {
+            "default" : "1"
+          },
+          "hdfs-site" : {
+            "overrides" : {
+              "4" : "master"
+            },
+            "default" : "1"
+          },
+          "mapred-env" : {
+            "default" : "1"
+          },
+          "mapred-site" : {
+            "default" : "1"
+          },
+          "ranger-hdfs-plugin-properties" : {
+            "default" : "1"
+          },
+          "tez-env" : {
+            "default" : "1"
+          },
+          "tez-site" : {
+            "default" : "1"
+          },
+          "yarn-env" : {
+            "default" : "1"
+          },
+          "yarn-log4j" : {
+            "default" : "1"
+          },
+          "yarn-site" : {
+            "overrides" : {
+              "5" : "master"
+            },
+            "default" : "1"
+          },
+          "zoo.cfg" : {
+            "default" : "1"
+          },
+          "zookeeper-env" : {
+            "default" : "1"
+          },
+          "zookeeper-log4j" : {
+            "default" : "1"
+          }
+        }
+      },
+      "host" : {
+        "href" : "http://127.0.0.1:8080/api/v1/clusters/am_1/hosts/host-249"
+      }
+    },
+    {
+      "HostRoles" : {
+        "cluster_name" : "am_1",
+        "component_name" : "SECONDARY_NAMENODE",
+        "desired_stack_id" : "HDP-2.2",
+        "desired_state" : "STARTED",
+        "host_name" : "host-249",
+        "maintenance_state" : "OFF",
+        "service_name" : "HDFS",
+        "stack_id" : "HDP-2.2",
+        "stale_configs" : true,
+        "state" : "STARTED",
+        "actual_configs" : {
+          "capacity-scheduler" : {
+            "default" : "1"
+          },
+          "cluster-env" : {
+            "default" : "1"
+          },
+          "core-site" : {
+            "default" : "1"
+          },
+          "hadoop-env" : {
+            "default" : "1"
+          },
+          "hadoop-policy" : {
+            "default" : "1"
+          },
+          "hdfs-log4j" : {
+            "default" : "1"
+          },
+          "hdfs-site" : {
+            "overrides" : {
+              "4" : "master"
+            },
+            "default" : "1"
+          },
+          "mapred-env" : {
+            "default" : "1"
+          },
+          "mapred-site" : {
+            "default" : "1"
+          },
+          "ranger-hdfs-plugin-properties" : {
+            "default" : "1"
+          },
+          "tez-env" : {
+            "default" : "1"
+          },
+          "tez-site" : {
+            "default" : "1"
+          },
+          "yarn-env" : {
+            "default" : "1"
+          },
+          "yarn-log4j" : {
+            "default" : "1"
+          },
+          "yarn-site" : {
+            "overrides" : {
+              "5" : "master"
+            },
+            "default" : "1"
+          },
+          "zoo.cfg" : {
+            "default" : "1"
+          },
+          "zookeeper-env" : {
+            "default" : "1"
+          },
+          "zookeeper-log4j" : {
+            "default" : "1"
+          }
+        }
+      },
+      "host" : {
+        "href" : "http://127.0.0.1:8080/api/v1/clusters/am_1/hosts/host-249"
+      }
+    },
+    {
+      "HostRoles" : {
+        "cluster_name" : "am_1",
+        "component_name" : "DATANODE",
+        "desired_admin_state" : "INSERVICE",
+        "desired_stack_id" : "HDP-2.2",
+        "desired_state" : "STARTED",
+        "host_name" : "host-014",
+        "maintenance_state" : "OFF",
+        "service_name" : "HDFS",
+        "stack_id" : "HDP-2.2",
+        "stale_configs" : true,
+        "state" : "STARTED",
+        "actual_configs" : {
+          "capacity-scheduler" : {
+            "default" : "1"
+          },
+          "cluster-env" : {
+            "default" : "1"
+          },
+          "core-site" : {
+            "default" : "1"
+          },
+          "hadoop-env" : {
+            "default" : "1"
+          },
+          "hadoop-policy" : {
+            "default" : "1"
+          },
+          "hdfs-log4j" : {
+            "default" : "1"
+          },
+          "hdfs-site" : {
+            "overrides" : {
+              "2" : "worker"
+            },
+            "default" : "1"
+          },
+          "mapred-env" : {
+            "default" : "1"
+          },
+          "mapred-site" : {
+            "default" : "1"
+          },
+          "ranger-hdfs-plugin-properties" : {
+            "default" : "1"
+          },
+          "tez-env" : {
+            "default" : "1"
+          },
+          "tez-site" : {
+            "default" : "1"
+          },
+          "yarn-env" : {
+            "default" : "1"
+          },
+          "yarn-log4j" : {
+            "default" : "1"
+          },
+          "yarn-site" : {
+            "overrides" : {
+              "3" : "worker"
+            },
+            "default" : "1"
+          },
+          "zoo.cfg" : {
+            "default" : "1"
+          },
+          "zookeeper-env" : {
+            "default" : "1"
+          },
+          "zookeeper-log4j" : {
+            "default" : "1"
+          }
+        }
+      },
+      "host" : {
+        "href" : "http://127.0.0.1:8080/api/v1/clusters/am_1/hosts/host-014"
+      }
+    },
+    {
+      "HostRoles" : {
+        "cluster_name" : "am_1",
+        "component_name" : "NODEMANAGER",
+        "desired_admin_state" : "INSERVICE",
+        "desired_stack_id" : "HDP-2.2",
+        "desired_state" : "STARTED",
+        "host_name" : "host-014",
+        "maintenance_state" : "OFF",
+        "service_name" : "YARN",
+        "stack_id" : "HDP-2.2",
+        "stale_configs" : true,
+        "state" : "STARTED",
+        "actual_configs" : {
+          "capacity-scheduler" : {
+            "default" : "1"
+          },
+          "cluster-env" : {
+            "default" : "1"
+          },
+          "core-site" : {
+            "default" : "1"
+          },
+          "hadoop-env" : {
+            "default" : "1"
+          },
+          "hadoop-policy" : {
+            "default" : "1"
+          },
+          "hdfs-log4j" : {
+            "default" : "1"
+          },
+          "hdfs-site" : {
+            "overrides" : {
+              "2" : "worker"
+            },
+            "default" : "1"
+          },
+          "mapred-env" : {
+            "default" : "1"
+          },
+          "mapred-site" : {
+            "default" : "1"
+          },
+          "ranger-hdfs-plugin-properties" : {
+            "default" : "1"
+          },
+          "tez-env" : {
+            "default" : "1"
+          },
+          "tez-site" : {
+            "default" : "1"
+          },
+          "yarn-env" : {
+            "default" : "1"
+          },
+          "yarn-log4j" : {
+            "default" : "1"
+          },
+          "yarn-site" : {
+            "overrides" : {
+              "3" : "worker"
+            },
+            "default" : "1"
+          },
+          "zoo.cfg" : {
+            "default" : "1"
+          },
+          "zookeeper-env" : {
+            "default" : "1"
+          },
+          "zookeeper-log4j" : {
+            "default" : "1"
+          }
+        }
+      },
+      "host" : {
+        "href" : "http://127.0.0.1:8080/api/v1/clusters/am_1/hosts/host-014"
+      }
+    },
+    {
+      "HostRoles" : {
+        "cluster_name" : "am_1",
+        "component_name" : "DATANODE",
+        "desired_admin_state" : "INSERVICE",
+        "desired_stack_id" : "HDP-2.2",
+        "desired_state" : "STARTED",
+        "host_name" : "host-050",
+        "maintenance_state" : "OFF",
+        "service_name" : "HDFS",
+        "stack_id" : "HDP-2.2",
+        "stale_configs" : true,
+        "state" : "STARTED",
+        "actual_configs" : {
+          "capacity-scheduler" : {
+            "default" : "1"
+          },
+          "cluster-env" : {
+            "default" : "1"
+          },
+          "core-site" : {
+            "default" : "1"
+          },
+          "hadoop-env" : {
+            "default" : "1"
+          },
+          "hadoop-policy" : {
+            "default" : "1"
+          },
+          "hdfs-log4j" : {
+            "default" : "1"
+          },
+          "hdfs-site" : {
+            "default" : "1"
+          },
+          "mapred-env" : {
+            "default" : "1"
+          },
+          "mapred-site" : {
+            "default" : "1"
+          },
+          "ranger-hdfs-plugin-properties" : {
+            "default" : "1"
+          },
+          "tez-env" : {
+            "default" : "1"
+          },
+          "tez-site" : {
+            "default" : "1"
+          },
+          "yarn-env" : {
+            "default" : "1"
+          },
+          "yarn-log4j" : {
+            "default" : "1"
+          },
+          "yarn-site" : {
+            "default" : "1"
+          },
+          "zoo.cfg" : {
+            "default" : "1"
+          },
+          "zookeeper-env" : {
+            "default" : "1"
+          },
+          "zookeeper-log4j" : {
+            "default" : "1"
+          }
+        }
+      },
+      "host" : {
+        "href" : "http://127.0.0.1:8080/api/v1/clusters/am_1/hosts/host-050"
+      }
+    },
+    {
+      "HostRoles" : {
+        "cluster_name" : "am_1",
+        "component_name" : "NODEMANAGER",
+        "desired_admin_state" : "INSERVICE",
+        "desired_stack_id" : "HDP-2.2",
+        "desired_state" : "STARTED",
+        "host_name" : "host-050",
+        "maintenance_state" : "OFF",
+        "service_name" : "YARN",
+        "stack_id" : "HDP-2.2",
+        "stale_configs" : true,
+        "state" : "STARTED",
+        "actual_configs" : {
+          "capacity-scheduler" : {
+            "default" : "1"
+          },
+          "cluster-env" : {
+            "default" : "1"
+          },
+          "core-site" : {
+            "default" : "1"
+          },
+          "hadoop-env" : {
+            "default" : "1"
+          },
+          "hadoop-policy" : {
+            "default" : "1"
+          },
+          "hdfs-log4j" : {
+            "default" : "1"
+          },
+          "hdfs-site" : {
+            "default" : "1"
+          },
+          "mapred-env" : {
+            "default" : "1"
+          },
+          "mapred-site" : {
+            "default" : "1"
+          },
+          "ranger-hdfs-plugin-properties" : {
+            "default" : "1"
+          },
+          "tez-env" : {
+            "default" : "1"
+          },
+          "tez-site" : {
+            "default" : "1"
+          },
+          "yarn-env" : {
+            "default" : "1"
+          },
+          "yarn-log4j" : {
+            "default" : "1"
+          },
+          "yarn-site" : {
+            "default" : "1"
+          },
+          "zoo.cfg" : {
+            "default" : "1"
+          },
+          "zookeeper-env" : {
+            "default" : "1"
+          },
+          "zookeeper-log4j" : {
+            "default" : "1"
+          }
+        }
+      },
+      "host" : {
+        "href" : "http://127.0.0.1:8080/api/v1/clusters/am_1/hosts/host-050"
+      }
+    },
+    {
+      "HostRoles" : {
+        "cluster_name" : "am_1",
+        "component_name" : "DATANODE",
+        "desired_admin_state" : "INSERVICE",
+        "desired_stack_id" : "HDP-2.2",
+        "desired_state" : "STARTED",
+        "host_name" : "host-076",
+        "maintenance_state" : "OFF",
+        "service_name" : "HDFS",
+        "stack_id" : "HDP-2.2",
+        "stale_configs" : true,
+        "state" : "STARTED",
+        "actual_configs" : {
+          "capacity-scheduler" : {
+            "default" : "1"
+          },
+          "cluster-env" : {
+            "default" : "1"
+          },
+          "core-site" : {
+            "default" : "1"
+          },
+          "hadoop-env" : {
+            "default" : "1"
+          },
+          "hadoop-policy" : {
+            "default" : "1"
+          },
+          "hdfs-log4j" : {
+            "default" : "1"
+          },
+          "hdfs-site" : {
+            "overrides" : {
+              "2" : "worker"
+            },
+            "default" : "1"
+          },
+          "mapred-env" : {
+            "default" : "1"
+          },
+          "mapred-site" : {
+            "default" : "1"
+          },
+          "ranger-hdfs-plugin-properties" : {
+            "default" : "1"
+          },
+          "tez-env" : {
+            "default" : "1"
+          },
+          "tez-site" : {
+            "default" : "1"
+          },
+          "yarn-env" : {
+            "default" : "1"
+          },
+          "yarn-log4j" : {
+            "default" : "1"
+          },
+          "yarn-site" : {
+            "overrides" : {
+              "3" : "worker"
+            },
+            "default" : "1"
+          },
+          "zoo.cfg" : {
+            "default" : "1"
+          },
+          "zookeeper-env" : {
+            "default" : "1"
+          },
+          "zookeeper-log4j" : {
+            "default" : "1"
+          }
+        }
+      },
+      "host" : {
+        "href" : "http://127.0.0.1:8080/api/v1/clusters/am_1/hosts/host-076"
+      }
+    },
+    {
+      "HostRoles" : {
+        "cluster_name" : "am_1",
+        "component_name" : "NODEMANAGER",
+        "desired_admin_state" : "INSERVICE",
+        "desired_stack_id" : "HDP-2.2",
+        "desired_state" : "STARTED",
+        "host_name" : "host-076",
+        "maintenance_state" : "OFF",
+        "service_name" : "YARN",
+        "stack_id" : "HDP-2.2",
+        "stale_configs" : true,
+        "state" : "STARTED",
+        "actual_configs" : {
+          "capacity-scheduler" : {
+            "default" : "1"
+          },
+          "cluster-env" : {
+            "default" : "1"
+          },
+          "core-site" : {
+            "default" : "1"
+          },
+          "hadoop-env" : {
+            "default" : "1"
+          },
+          "hadoop-policy" : {
+            "default" : "1"
+          },
+          "hdfs-log4j" : {
+            "default" : "1"
+          },
+          "hdfs-site" : {
+            "overrides" : {
+              "2" : "worker"
+            },
+            "default" : "1"
+          },
+          "mapred-env" : {
+            "default" : "1"
+          },
+          "mapred-site" : {
+            "default" : "1"
+          },
+          "ranger-hdfs-plugin-properties" : {
+            "default" : "1"
+          },
+          "tez-env" : {
+            "default" : "1"
+          },
+          "tez-site" : {
+            "default" : "1"
+          },
+          "yarn-env" : {
+            "default" : "1"
+          },
+          "yarn-log4j" : {
+            "default" : "1"
+          },
+          "yarn-site" : {
+            "overrides" : {
+              "3" : "worker"
+            },
+            "default" : "1"
+          },
+          "zoo.cfg" : {
+            "default" : "1"
+          },
+          "zookeeper-env" : {
+            "default" : "1"
+          },
+          "zookeeper-log4j" : {
+            "default" : "1"
+          }
+        }
+      },
+      "host" : {
+        "href" : "http://127.0.0.1:8080/api/v1/clusters/am_1/hosts/host-076"
+      }
+    },
+    {
+      "HostRoles" : {
+        "cluster_name" : "am_1",
+        "component_name" : "HDFS_CLIENT",
+        "desired_stack_id" : "HDP-2.2",
+        "desired_state" : "INSTALLED",
+        "host_name" : "host-187",
+        "maintenance_state" : "OFF",
+        "service_name" : "HDFS",
+        "stack_id" : "HDP-2.2",
+        "stale_configs" : true,
+        "state" : "INSTALLED",
+        "actual_configs" : {
+          "capacity-scheduler" : {
+            "default" : "1"
+          },
+          "cluster-env" : {
+            "default" : "1"
+          },
+          "core-site" : {
+            "default" : "1"
+          },
+          "hadoop-env" : {
+            "default" : "1"
+          },
+          "hadoop-policy" : {
+            "default" : "1"
+          },
+          "hdfs-log4j" : {
+            "default" : "1"
+          },
+          "hdfs-site" : {
+            "default" : "1"
+          },
+          "mapred-env" : {
+            "default" : "1"
+          },
+          "mapred-site" : {
+            "default" : "1"
+          },
+          "ranger-hdfs-plugin-properties" : {
+            "default" : "1"
+          },
+          "tez-env" : {
+            "default" : "1"
+          },
+          "tez-site" : {
+            "default" : "1"
+          },
+          "yarn-env" : {
+            "default" : "1"
+          },
+          "yarn-log4j" : {
+            "default" : "1"
+          },
+          "yarn-site" : {
+            "default" : "1"
+          },
+          "zoo.cfg" : {
+            "default" : "1"
+          },
+          "zookeeper-env" : {
+            "default" : "1"
+          },
+          "zookeeper-log4j" : {
+            "default" : "1"
+          }
+        }
+      },
+      "host" : {
+        "href" : "http://127.0.0.1:8080/api/v1/clusters/am_1/hosts/host-187"
+      }
+    },
+    {
+      "HostRoles" : {
+        "cluster_name" : "am_1",
+        "component_name" : "YARN_CLIENT",
+        "desired_stack_id" : "HDP-2.2",
+        "desired_state" : "INSTALLED",
+        "host_name" : "host-187",
+        "maintenance_state" : "OFF",
+        "service_name" : "YARN",
+        "stack_id" : "HDP-2.2",
+        "stale_configs" : true,
+        "state" : "INSTALLED",
+        "actual_configs" : {
+          "capacity-scheduler" : {
+            "default" : "1"
+          },
+          "cluster-env" : {
+            "default" : "1"
+          },
+          "core-site" : {
+            "default" : "1"
+          },
+          "hadoop-env" : {
+            "default" : "1"
+          },
+          "hadoop-policy" : {
+            "default" : "1"
+          },
+          "hdfs-log4j" : {
+            "default" : "1"
+          },
+          "hdfs-site" : {
+            "default" : "1"
+          },
+          "mapred-env" : {
+            "default" : "1"
+          },
+          "mapred-site" : {
+            "default" : "1"
+          },
+          "ranger-hdfs-plugin-properties" : {
+            "default" : "1"
+          },
+          "tez-env" : {
+            "default" : "1"
+          },
+          "tez-site" : {
+            "default" : "1"
+          },
+          "yarn-env" : {
+            "default" : "1"
+          },
+          "yarn-log4j" : {
+            "default" : "1"
+          },
+          "yarn-site" : {
+            "default" : "1"
+          },
+          "zoo.cfg" : {
+            "default" : "1"
+          },
+          "zookeeper-env" : {
+            "default" : "1"
+          },
+          "zookeeper-log4j" : {
+            "default" : "1"
+          }
+        }
+      },
+      "host" : {
+        "href" : "http://127.0.0.1:8080/api/v1/clusters/am_1/hosts/host-187"
+      }
+    }
+  ]
+}
