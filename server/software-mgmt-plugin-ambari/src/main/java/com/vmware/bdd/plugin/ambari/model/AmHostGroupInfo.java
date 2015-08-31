@@ -163,7 +163,7 @@ public class AmHostGroupInfo {
    private void addNewHost2Tag(String host) {
       for (String tag : this.tag2Hosts.keySet()) {
          Set<String> hosts = this.tag2Hosts.get(tag);
-         if (hosts != null) {
+         if (hosts == null) {
             hosts = new HashSet<String> ();
          }
          hosts.add(host);

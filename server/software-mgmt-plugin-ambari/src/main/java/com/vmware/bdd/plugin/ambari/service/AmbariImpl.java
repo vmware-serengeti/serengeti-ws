@@ -1212,7 +1212,8 @@ public class AmbariImpl implements SoftwareManager {
       List<AmNodeGroupDef> nodeGroups = clusterDef.getNodeGroupsByNodes(targetNodeDefs);
       List<AmHostGroupInfo> amHostGroupsInfo = clusterDef.getAmHostGroupsInfoByNodeGroups(nodeGroups, configTypeToService);
 
-      ApiConfigGroupList apiConfigGroupList = apiManager.getConfigGroupsList(clusterDef.getName());
+      String clusterName = clusterDef.getName();
+      ApiConfigGroupList apiConfigGroupList = apiManager.getConfigGroupsList(clusterName);
       for (ApiConfigGroup group : apiConfigGroupList.getConfigGroups()) {
          logger.info("ApiConfigGroup from ambari server: " + ApiUtils.objectToJson(group));
 
@@ -1240,9 +1241,15 @@ public class AmbariImpl implements SoftwareManager {
                logger.info("Add hosts " + ApiUtils.objectToJson(newHosts) +" to config group " + configGroupName + " tag " + configGroupTag + ".");
                updateConfigGroup(apiConfigGroupInfo, newHosts);
                amHostGroupInfo.removeOldTag(configGroupTag);
-            } else if (amHostGroupInfo.getNodeGroupName().equals(apiConfigGroupInfo.getGroupName())) {
+            } else if (configGroupName.equals(amHostGroupInfo.getNodeGroupName())) {
                // Update config group name to GROUP_NAME_vol* of Ambari server if it is the same config group
                logger.info("Just update config group name " + configGroupName + " to " + amHostGroupInfo.getConfigGroupName());
+               apiConfigGroupInfo.setGroupName(amHostGroupInfo.getConfigGroupName());
+               updateConfigGroup(apiConfigGroupInfo, newHosts);
+               amHostGroupInfo.removeOldTag(configGroupTag);
+            } else if (configGroupName.equals(clusterName + ":" + amHostGroupInfo.getNodeGroupName())) { // For Ambari version >= 2.0, the config group name is like <CLUSTER_NAME>:<GROUP_NAME>
+               // Update config group name to GROUP_NAME_vol* of Ambari server if it is the same config group
+               logger.info("Just update config group name " + clusterName + ":" + amHostGroupInfo.getNodeGroupName() + " to " + amHostGroupInfo.getConfigGroupName());
                apiConfigGroupInfo.setGroupName(amHostGroupInfo.getConfigGroupName());
                updateConfigGroup(apiConfigGroupInfo, newHosts);
                amHostGroupInfo.removeOldTag(configGroupTag);
