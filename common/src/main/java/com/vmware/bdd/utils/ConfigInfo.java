@@ -38,7 +38,6 @@ public class ConfigInfo {
    private static String serengetiUUID;
    private static boolean initUUID;
    private static boolean deployAsVApp;
-   private static String templateVmName;
    private static boolean justUpgraded;
 
    static {
@@ -55,7 +54,6 @@ public class ConfigInfo {
       serengetiUUID = Configuration.getString(SERENGETI_UUID_KEY);
       initUUID = Configuration.getBoolean(SERENGETI_INITIALIZE_UUID, true);
       deployAsVApp = Configuration.getBoolean("deploy_as_vapp");
-      templateVmName = Configuration.getString("template_vm_name");
       justUpgraded = Configuration.getBoolean(SERENGETI_JUST_UPGRADED, false);
    }
 
@@ -128,10 +126,6 @@ public class ConfigInfo {
    public static void setJustUpgraded(boolean justUpgraded) {
       ConfigInfo.justUpgraded = justUpgraded;
       Configuration.setBoolean(SERENGETI_JUST_UPGRADED, justUpgraded);
-   }
-
-   public static String getTemplateVmName() {
-      return templateVmName;
    }
 
    public static void save() {

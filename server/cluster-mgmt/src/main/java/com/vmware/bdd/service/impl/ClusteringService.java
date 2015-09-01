@@ -245,14 +245,17 @@ public class ClusteringService implements IClusteringService {
       this.softwareManagerCollector = softwareManagerCollector;
    }
 
+   @Override
    public boolean isInited() {
       return inited;
    }
 
+   @Override
    public Throwable getInitError() {
       return initError;
    }
 
+   @Override
    public synchronized void init() {
       if (!inited) {
          try {
@@ -278,20 +281,17 @@ public class ClusteringService implements IClusteringService {
             int poolSize = Configuration.getInt("serengeti.scheduler.poolsize", Constants.DEFAULT_SCHEDULER_POOL_SIZE);
             Scheduler.init(poolSize, poolSize);
 
-            String concurrency =
-                  Configuration
-                        .getNonEmptyString("serengeti.singlevm.concurrency");
-            if (concurrency != null) {
-               cloneConcurrency = Integer.parseInt(concurrency);
-            } else {
-               cloneConcurrency = 1;
-            }
+            cloneConcurrency = Configuration.getInt("serengeti.singlevm.concurrency", 1);
 
             // refresh the cluster nodes once on bde startup,
             // then add the periodic processing with default 5 minute interval
             clusterNodeUpdator.syncAllClusters();
 
+            // initialize uuid
             initUUID();
+
+            // refresh node templates on BDE startup
+            nodeTemplateService.refreshNodeTemplates();
 
             clusterInitializerService.transformClusterStatus();
             elasticityScheduleMgr.start();
@@ -348,6 +348,7 @@ public class ClusteringService implements IClusteringService {
 
    }
 
+   @Override
    synchronized public void destroy() {
       Scheduler.shutdown(true);
       processor.stop();
@@ -690,6 +691,7 @@ public class ClusteringService implements IClusteringService {
       getClusterEntityMgr().update(cluster);
    }
 
+   @Override
    @SuppressWarnings("unchecked")
    public boolean setAutoElasticity(String clusterName, boolean refreshAllNodes) {
       logger.info("set auto elasticity for cluster " + clusterName);
@@ -1655,6 +1657,7 @@ public class ClusteringService implements IClusteringService {
       return CommonUtil.getCurrentTimestamp() + " " + throwable.getMessage();
    }
 
+   @Override
    public boolean removeBadNodes(ClusterCreate cluster,
          List<BaseNode> existingNodes, List<BaseNode> deletedNodes,
          Map<String, Set<String>> occupiedIpSets, StatusUpdater statusUpdator) {
@@ -1684,6 +1687,7 @@ public class ClusteringService implements IClusteringService {
       return true;
    }
 
+   @Override
    public List<BaseNode> getBadNodes(ClusterCreate cluster,
          List<BaseNode> existingNodes) {
       return placementService.getBadNodes(cluster, existingNodes);
@@ -1847,6 +1851,7 @@ public class ClusteringService implements IClusteringService {
       }
    }
 
+   @Override
    @SuppressWarnings("unchecked")
    public boolean syncDeleteVMs(List<BaseNode> badNodes,
          StatusUpdater statusUpdator, boolean ignoreUnavailableNodes) {
@@ -2036,6 +2041,7 @@ public class ClusteringService implements IClusteringService {
       return VcVmUtil.runSPOnSingleVM(node, stopVMSP);
    }
 
+   @Override
    public VmEventManager getEventProcessor() {
       return this.processor;
    }

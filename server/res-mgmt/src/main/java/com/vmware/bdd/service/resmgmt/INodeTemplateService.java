@@ -22,6 +22,7 @@ import com.vmware.bdd.apitypes.VirtualMachineRead;
 
 public interface INodeTemplateService {
 
+   public void refreshNodeTemplates();
    public List<VirtualMachineRead> getAllNodeTemplates();
    public VcVirtualMachine getNodeTemplateVMByMoid(String moid);
    public VcVirtualMachine getNodeTemplateVMByName(String templateName);

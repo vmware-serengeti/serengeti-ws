@@ -87,6 +87,7 @@ public class NodeTemplateService implements INodeTemplateService {
       return getNodeTemplateVMByMoid(moid).getName();
    }
 
+   @Override
    @Transactional
    public List<VirtualMachineRead> getAllNodeTemplates() {
       refreshNodeTemplates();
@@ -111,6 +112,7 @@ public class NodeTemplateService implements INodeTemplateService {
    /*
     * Detect the latest node templates from vCenter and save to db.
     */
+   @Override
    @Transactional
    public synchronized void refreshNodeTemplates() {
       long curTime = System.currentTimeMillis() / 1000;
