@@ -14,24 +14,21 @@
  ***************************************************************************/
 package com.vmware.aurora.vc;
 
+import com.vmware.aurora.exception.VcException;
+import com.vmware.aurora.stats.Profiler;
+import com.vmware.aurora.stats.StatsType;
+import com.vmware.aurora.util.AuAssert;
+import com.vmware.aurora.util.worker.CmsWorker;
+import com.vmware.aurora.vc.VcObjectImpl.UpdateType;
+import com.vmware.vim.binding.vmodl.ManagedObject;
+import com.vmware.vim.binding.vmodl.ManagedObjectReference;
+import org.apache.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
-import org.apache.log4j.Logger;
-
-import com.vmware.aurora.exception.VcException;
-import com.vmware.aurora.stats.Profiler;
-import com.vmware.aurora.stats.StatsType;
-import com.vmware.aurora.util.AuAssert;
-import com.vmware.aurora.util.CmsWorker;
-import com.vmware.aurora.util.CmsWorker.WorkQueue;
-import com.vmware.aurora.util.CmsWorker.WorkerThread;
-import com.vmware.aurora.vc.VcObjectImpl.UpdateType;
-import com.vmware.vim.binding.vmodl.ManagedObject;
-import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 
 /**
  * {@link VcCache} maintains an in-memory cache for vc objects.
@@ -131,7 +128,6 @@ public class VcCache {
    private VcObject
    getObject(ManagedObjectReference moRef) {
       // Should not call get object from the VcObject cache worker thread itself.
-      AuAssert.check(!WorkerThread.VC_QUERY_THREAD.isCurrentThread());
       VcObject obj = lookupVcObject(moRef);
       if (obj != null) {
          Profiler.inc(StatsType.VC_GET_HIT, obj);
@@ -151,7 +147,6 @@ public class VcCache {
    protected VcObject
    getUpdate(ManagedObjectReference moRef, EnumSet<UpdateType> updates) {
       // Should not call get object from the VcObject cache worker thread itself.
-      AuAssert.check(!WorkerThread.VC_QUERY_THREAD.isCurrentThread());
       return requestObject(moRef, true, updates, true);
    }
 
@@ -240,7 +235,7 @@ public class VcCache {
       }
       if (isNewRequest) {
          // post request without holding objCache lock as we may block here
-         CmsWorker.addRequest(WorkQueue.VC_QUERY_NO_DELAY, req);
+         CmsWorker.addRequest(CmsWorker.WorkQueue.VC_QUERY_NO_DELAY, req);
       }
 
       if (waitForRequest && req != null) {

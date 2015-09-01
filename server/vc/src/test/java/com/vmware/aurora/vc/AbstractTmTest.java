@@ -20,7 +20,7 @@ import org.testng.annotations.BeforeClass;
 import com.google.gson.internal.Pair;
 
 import com.vmware.aurora.global.Configuration;
-import com.vmware.aurora.util.CmsWorker;
+import com.vmware.aurora.util.worker.CmsWorker;
 
 import com.vmware.aurora.vc.vcevent.VcEventRouter;
 import com.vmware.aurora.vc.vcservice.VcContext;
@@ -45,7 +45,7 @@ abstract public class AbstractTmTest {
       VcContext.initVcContext();
       new VcEventRouter();
 
-      CmsWorker.addPeriodic(new VcInventory.SyncInventoryRequest());
+//      CmsWorker.addPeriodic(new SyncInventoryRequest());
       VcInventory.loadInventory();
       try {
          Thread.sleep(1000);

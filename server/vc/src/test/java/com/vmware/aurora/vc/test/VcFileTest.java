@@ -14,31 +14,14 @@
  ***************************************************************************/
 package com.vmware.aurora.vc.test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.testng.annotations.Test;
-
-import com.vmware.aurora.global.DiskSize;
-import com.vmware.aurora.util.AuAssert;
-import com.vmware.aurora.vc.DeviceId;
 import com.vmware.aurora.vc.VcCluster;
-import com.vmware.aurora.vc.VcDatacenter;
 import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcFileManager;
 import com.vmware.aurora.vc.VcInventory;
 import com.vmware.aurora.vc.VcNetwork;
 import com.vmware.aurora.vc.VcResourcePool;
-import com.vmware.aurora.vc.VcSnapshot;
-import com.vmware.aurora.vc.VcVirtualMachine;
-import com.vmware.aurora.vc.VmConfigUtil;
-import com.vmware.vim.binding.impl.vim.vm.ConfigSpecImpl;
-import com.vmware.vim.binding.vim.vm.ConfigSpec;
-import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
-import com.vmware.vim.binding.vim.vm.device.VirtualDeviceSpec;
-import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
 
 /**
  * Test code to enumerate resource pools.

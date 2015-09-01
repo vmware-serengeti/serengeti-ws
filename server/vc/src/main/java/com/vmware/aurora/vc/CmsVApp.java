@@ -17,6 +17,8 @@ package com.vmware.aurora.vc;
 import java.io.Serializable;
 import java.util.List;
 
+import com.vmware.aurora.util.worker.CmsWorker;
+import com.vmware.aurora.util.worker.Request;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.exception.AuroraException;
@@ -24,10 +26,9 @@ import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.stats.Profiler;
 import com.vmware.aurora.stats.StatsType;
 import com.vmware.aurora.util.AuAssert;
-import com.vmware.aurora.util.CmsWorker.Request;
-import com.vmware.aurora.util.CmsWorker.WorkQueue;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
+import com.vmware.aurora.util.worker.CmsWorker.WorkQueue;
 import com.vmware.vim.binding.impl.vim.vApp.ProductInfoImpl;
 import com.vmware.vim.binding.impl.vim.vApp.ProductSpecImpl;
 import com.vmware.vim.binding.impl.vim.vApp.PropertyInfoImpl;
@@ -196,7 +197,7 @@ public class CmsVApp implements Serializable {
    }
 
    public synchronized static void startUpdateCmsProperty() {
-      WorkQueue.VC_TASK_NO_DELAY.getQ().add(new UpdateCmsPropertyRequest());
+      CmsWorker.addRequest(WorkQueue.VC_TASK_NO_DELAY, new UpdateCmsPropertyRequest());
    }
 
    /*

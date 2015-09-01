@@ -19,7 +19,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.vmware.aurora.global.Configuration;
-import com.vmware.aurora.util.CmsWorker;
+import com.vmware.aurora.util.worker.CmsWorker;
 import com.vmware.aurora.vc.VcInventory;
 import com.vmware.aurora.vc.vcservice.VcContext;
 
@@ -51,7 +51,7 @@ public abstract class BaseResourceTest {
          //Configuration.approveBootstrapInstanceId(Configuration.BootstrapUsage.FINALIZED);
 
          VcContext.initVcContext();
-         CmsWorker.addPeriodic(new VcInventory.SyncInventoryRequest());
+//         CmsWorker.addPeriodic(new SyncInventoryRequest());
          if (VcContext.isServiceConnected()) {
             VcInventory.loadInventory();
          }

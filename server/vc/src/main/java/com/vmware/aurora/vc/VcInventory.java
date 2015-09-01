@@ -21,10 +21,10 @@ import java.util.List;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.stats.Profiler;
 import com.vmware.aurora.stats.StatsType;
-import com.vmware.aurora.util.CmsWorker;
-import com.vmware.aurora.util.CmsWorker.PeriodicRequest;
-import com.vmware.aurora.util.CmsWorker.SimpleRequest;
-import com.vmware.aurora.util.CmsWorker.WorkQueue;
+import com.vmware.aurora.util.worker.CmsWorker;
+import com.vmware.aurora.util.worker.CmsWorker.WorkQueue;
+import com.vmware.aurora.util.worker.PeriodicRequest;
+import com.vmware.aurora.util.worker.SimpleRequest;
 import com.vmware.aurora.vc.VcObject.VcObjectType;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
@@ -66,7 +66,7 @@ public class VcInventory {
       }
 
       protected void add(SyncRequest request) {
-         queue.getQ().add(request);
+         CmsWorker.addRequest(queue, request);
       }
 
       /**
@@ -119,7 +119,7 @@ public class VcInventory {
             }
          });
          for (ManagedObjectReference dc : dcList) {
-            queue.getQ().add(new VcDatacenterImpl.SyncRequest(dc, queue, forceLoad, syncSet));
+            CmsWorker.addRequest(queue, new VcDatacenterImpl.SyncRequest(dc, queue, forceLoad, syncSet));
          }
          return true;
       }
@@ -132,18 +132,15 @@ public class VcInventory {
    public static class SyncInventoryRequest extends PeriodicRequest {
       private final static WorkQueue SYNC_INVENTORY_WORK_QUEUE = WorkQueue.VC_CACHE_TWO_MIN_DELAY;
 
+      private final static long SYNC_INTERVAL_IN_MILLISEC=Configuration.getInt(Constants.VC_INVENTORY_SYNC_INTERVAL_IN_SECOND, 120) * 1000;
+
       public SyncInventoryRequest() {
          super(Profiler.getStatsEntry(StatsType.VCSYNC_INVENTORY_PERIOD),
-               SYNC_INVENTORY_WORK_QUEUE);
+               SYNC_INVENTORY_WORK_QUEUE, SYNC_INTERVAL_IN_MILLISEC);
 
-         int sync_interval = Configuration.getInt(Constants.VC_INVENTORY_SYNC_INTERVAL_IN_SECOND, 120);
-
-         if(sync_interval > 0) {
             if(LOGGER.isInfoEnabled()) {
-               LOGGER.info("reset vc inventory sync's interval to " + sync_interval);
+               LOGGER.info("set vc inventory sync's interval to " + SYNC_INTERVAL_IN_MILLISEC);
             }
-            SYNC_INVENTORY_WORK_QUEUE.getQ().setScanInterval(sync_interval);
-         }
       }
 
       @Override
@@ -170,8 +167,8 @@ public class VcInventory {
     */
    public static void loadInventory() {
       CmsWorker.addRequest(WorkQueue.VC_CACHE_NO_DELAY,
-                           new SyncRootRequest(WorkQueue.VC_CACHE_NO_DELAY, true,
-                                               EnumSet.allOf(VcObjectType.class)));
+            new SyncRootRequest(WorkQueue.VC_CACHE_NO_DELAY, true,
+                  EnumSet.allOf(VcObjectType.class)));
    }
 
    /**

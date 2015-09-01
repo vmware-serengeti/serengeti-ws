@@ -50,7 +50,7 @@ import com.vmware.aurora.composition.VmSchema;
 import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Scheduler;
 import com.vmware.aurora.global.Configuration;
-import com.vmware.aurora.util.CmsWorker;
+import com.vmware.aurora.util.worker.CmsWorker;
 import com.vmware.aurora.vc.*;
 import com.vmware.aurora.vc.vcevent.VcEventRouter;
 import com.vmware.aurora.vc.vcservice.VcContext;
@@ -147,6 +147,9 @@ public class ClusteringService implements IClusteringService {
    private ClusterManager clusterManager;
 
    private SoftwareManagerCollector softwareManagerCollector;
+
+   @Autowired
+   private CmsWorker cmsWorker;
 
    @Autowired
    public void setClusterManager(ClusterManager clusterManager) {
@@ -315,10 +318,10 @@ public class ClusteringService implements IClusteringService {
             ClusterNodeUpdator nodeUpdator = new ClusterNodeUpdator(getLockClusterEntityMgr());
             // refresh the cluster nodes once on bde startup, till now the vc cache has
             // been loaded, so it should be fast to do it
-            logger.info("refresh the cluster nodes once on bde startup...");
-            nodeUpdator.executeOnce();
+//            logger.info("refresh the cluster nodes once on bde startup...");
+//            nodeUpdator.executeOnce();
             // then add the periodic processing with default 5 minute interval
-            CmsWorker.addPeriodic(nodeUpdator);
+            cmsWorker.addPeriodic(nodeUpdator);
 
             prepareTemplateVM();
             loadTemplateNetworkLable();

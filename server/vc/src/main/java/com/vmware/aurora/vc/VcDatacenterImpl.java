@@ -1,6 +1,6 @@
 package com.vmware.aurora.vc;
 
-import com.vmware.aurora.util.CmsWorker;
+import com.vmware.aurora.util.worker.CmsWorker;
 import com.vmware.vim.binding.vim.ClusterComputeResource;
 import com.vmware.vim.binding.vim.Datacenter;
 import com.vmware.vim.binding.vim.Folder;

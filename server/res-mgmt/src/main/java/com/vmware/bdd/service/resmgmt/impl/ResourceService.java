@@ -33,7 +33,6 @@ import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.vc.VcCluster;
 import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcHost;
-import com.vmware.aurora.vc.VcInventory;
 import com.vmware.aurora.vc.VcNetwork;
 import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.aurora.vc.vcservice.VcContext;

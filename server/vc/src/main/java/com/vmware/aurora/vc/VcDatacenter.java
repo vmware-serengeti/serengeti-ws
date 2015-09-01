@@ -14,17 +14,10 @@
  ***************************************************************************/
 package com.vmware.aurora.vc;
 
-import java.util.EnumSet;
-import java.util.List;
-
-import com.vmware.aurora.util.CmsWorker.WorkQueue;
-import com.vmware.vim.binding.vim.ClusterComputeResource;
-import com.vmware.vim.binding.vim.Datacenter;
 import com.vmware.vim.binding.vim.Folder;
-import com.vmware.vim.binding.vim.VirtualMachine;
-import com.vmware.vim.binding.vmodl.ManagedObject;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
-import com.vmware.vim.binding.vmodl.fault.ManagedObjectNotFound;
+
+import java.util.List;
 
 public interface VcDatacenter extends VcObject {
 
