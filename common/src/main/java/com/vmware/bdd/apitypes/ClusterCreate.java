@@ -62,9 +62,6 @@ public class ClusterCreate implements Serializable {
    private Set<String> externalDatanodes;
 
    @Expose
-   @SerializedName("groups")
-   private NodeGroupCreate[] nodeGroups;
-   @Expose
    private String distro;
    @Expose
    @SerializedName("distro_vendor")
@@ -79,7 +76,6 @@ public class ClusterCreate implements Serializable {
    @Expose
    @SerializedName("no_proxy")
    private String noProxy;
-   private List<String> rpNames;
    @Expose
    @SerializedName("vc_clusters")
    private List<VcCluster> vcClusters;
@@ -87,10 +83,21 @@ public class ClusterCreate implements Serializable {
    @SerializedName("template_name")
    private String templateName;
    @Expose
+   private String clusterCloneType;
+   @Expose
    @SerializedName("deploy_policy")
    @Deprecated
    private String deployPolicy;
+
+   private List<String> rpNames;
    private List<String> dsNames;
+
+   private String password;
+
+   @Expose
+   private String localRepoURL;
+
+   private String hostnamePrefix;
 
    private Map<NetTrafficType, List<String>> networkConfig;
 
@@ -121,6 +128,10 @@ public class ClusterCreate implements Serializable {
    // private Set<String> imagestorePattern;
 
    @Expose
+   @SerializedName("groups")
+   private NodeGroupCreate[] nodeGroups;
+
+   @Expose
    @SerializedName("cluster_configuration")
    private Map<String, Object> configuration;
 
@@ -133,16 +144,6 @@ public class ClusterCreate implements Serializable {
    // This means whether this object already contains the cluster definition.
    // If not, will load the default spec file.
    private Boolean specFile = false;
-
-   private String password;
-
-   @Expose
-   private String localRepoURL;
-
-   @Expose
-   private String clusterCloneType;
-
-   private String hostnamePrefix;
 
    public ClusterCreate() {
    }

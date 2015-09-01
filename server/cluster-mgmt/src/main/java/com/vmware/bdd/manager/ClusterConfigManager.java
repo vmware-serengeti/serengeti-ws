@@ -780,7 +780,7 @@ public class ClusterConfigManager {
       Gson gson =
             new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
       String manifest = gson.toJson(clusterConfig);
-      logger.debug("final cluster manifest " + manifest);
+      logger.debug("final cluster spec: " + manifest);
       return clusterConfig;
    }
 
