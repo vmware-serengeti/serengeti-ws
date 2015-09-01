@@ -22,7 +22,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.vmware.aurora.util.CmsWorker.SimpleRequest;
+import com.vmware.aurora.util.worker.SimpleRequest;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.command.CommandUtil;

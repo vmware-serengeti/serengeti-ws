@@ -25,8 +25,8 @@ import org.apache.log4j.Logger;
 
 import com.vmware.aurora.exception.AuroraException;
 import com.vmware.aurora.global.Configuration;
-import com.vmware.aurora.util.CmsWorker;
-import com.vmware.aurora.util.CmsWorker.WorkQueue;
+import com.vmware.aurora.util.worker.CmsWorker;
+import com.vmware.aurora.util.worker.CmsWorker.WorkQueue;
 import com.vmware.aurora.vc.MoUtil;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcHost;

@@ -14,21 +14,21 @@
  ***************************************************************************/
 package com.vmware.aurora.vc;
 
-import java.util.EnumSet;
-import java.util.concurrent.ConcurrentMap;
-
 import com.vmware.aurora.exception.AuroraException;
 import com.vmware.aurora.exception.VcException;
 import com.vmware.aurora.stats.Profiler;
 import com.vmware.aurora.stats.StatsType;
 import com.vmware.aurora.util.AuAssert;
-import com.vmware.aurora.util.CmsWorker.Request;
+import com.vmware.aurora.util.worker.Request;
 import com.vmware.aurora.vc.VcCache.IVcCacheObject;
 import com.vmware.aurora.vc.VcObjectImpl.UpdateType;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 import com.vmware.vim.binding.vmodl.fault.ManagedObjectNotFound;
+
+import java.util.EnumSet;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Request for a VC object.

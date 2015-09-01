@@ -15,3 +15,5 @@ lib/vlsi/*.jar
 **.pmd
 **.checkstyle
 **.log
+
+.reviewboardrc
