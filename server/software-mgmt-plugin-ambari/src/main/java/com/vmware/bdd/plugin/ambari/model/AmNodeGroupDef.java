@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gson.annotations.Expose;
-
 import com.vmware.bdd.apitypes.LatencyPriority;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostGroup;
 
@@ -37,6 +36,10 @@ public class AmNodeGroupDef implements Serializable {
 
    @Expose
    private int instanceNum;
+
+   private String clusterName;
+
+   private String ambariServerVersion;
 
    public LatencyPriority getLatencySensitivity() {
       return latencySensitivity;
@@ -99,6 +102,22 @@ public class AmNodeGroupDef implements Serializable {
       this.configurations = configurations;
    }
 
+   public String getClusterName() {
+      return clusterName;
+   }
+
+   public void setClusterName(String clusterName) {
+      this.clusterName = clusterName;
+   }
+
+   public String getAmbariServerVersion() {
+      return ambariServerVersion;
+   }
+
+   public void setAmbariServerVersion(String ambariServerVersion) {
+      this.ambariServerVersion = ambariServerVersion;
+   }
+
    public List<AmNodeDef> getNodes() {
       return nodes;
    }
@@ -150,7 +169,7 @@ public class AmNodeGroupDef implements Serializable {
 
       // Set the name of Ambari hostGroup to the nodeGroup name from spec file if all nodes have the same volumes count
       if (amHostGroupsInfoMap.size() == 1) {
-         amHostGroupsInfoMap.get(this.nodes.get(0).getVolumesCount()).updateConfigGroupName(this.getName());
+         amHostGroupsInfoMap.get(this.nodes.get(0).getVolumesCount()).updateConfigGroupName(this);
       }
 
       List<AmHostGroupInfo> amHostGroupsInfo = new ArrayList<AmHostGroupInfo>();

@@ -24,6 +24,7 @@ import java.util.Set;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHost;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostGroup;
+import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 
 public class AmHostGroupInfo {
 
@@ -44,9 +45,20 @@ public class AmHostGroupInfo {
    // Just for cluster resize
    private Map<String, Set<String>> tag2Hosts = new HashMap<String, Set<String>> ();
 
+   private String ambariServerVersion;
+
    public AmHostGroupInfo(AmNodeDef node, AmNodeGroupDef nodeGroup, Map<String, String> configTypeToService) {
-      // Generate a new Ambari hostGroup with name <NODE_GROUP_NAME>_vol<VOLUMES_COUNT> to distinguish different volumes of all nodes in the same group from spec file for Ambari Blueprint
-      this.configGroupName = nodeGroup.getName() + "_vol" + node.getVolumesCount();
+
+      this.ambariServerVersion = nodeGroup.getAmbariServerVersion();
+
+      // Generate a new Ambari hostGroup with config group name <NODE_GROUP_NAME>_vol<VOLUMES_COUNT> to distinguish different volumes of all nodes in the same group from spec file for Ambari Blueprint
+      String configGroupName = nodeGroup.getName() + "_vol" + node.getVolumesCount();
+
+      // Set config group name to  <CLUSTER_NAME>:<NODE_GROUP_NAME>_vol<VOLUMES_COUNT> if Ambari server version >＝ 2.0
+      if (!AmUtils.isAmbariServerBelow_2_0_0(this.ambariServerVersion)) {
+         configGroupName = nodeGroup.getClusterName() + ":" + nodeGroup.getName() + "_vol" + node.getVolumesCount();
+      }
+      this.configGroupName = configGroupName;
 
       this.nodeGroupName = nodeGroup.getName();
       this.cardinality = 1;
@@ -154,10 +166,10 @@ public class AmHostGroupInfo {
    }
 
    public void addNewHost(AmNodeDef node) {
-     this.cardinality = this.cardinality + 1;
-     String host = node.getFqdn();
-     this.hosts.add(host);
-     addNewHost2Tag(host);
+      String host = node.getFqdn();
+      this.hosts.add(host);
+      this.cardinality = this.hosts.size();
+      addNewHost2Tag(host);
    }
 
    private void addNewHost2Tag(String host) {
@@ -175,8 +187,14 @@ public class AmHostGroupInfo {
       return String.valueOf(this.cardinality);
    }
 
-   public void updateConfigGroupName(String configGroupame) {
-      this.configGroupName = configGroupame;
+   public void updateConfigGroupName(AmNodeGroupDef nodeGroup) {
+      String configGroupName = nodeGroup.getName();
+
+      if (!AmUtils.isAmbariServerBelow_2_0_0(this.ambariServerVersion)) {
+         configGroupName = nodeGroup.getClusterName() + ":" + nodeGroup.getName();
+      }
+
+      this.configGroupName = configGroupName;
    }
 
    public ApiHostGroup toApiHostGroupForClusterBlueprint() {
