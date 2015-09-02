@@ -297,4 +297,10 @@ public class MockSoftwareManager extends AbstractSoftwareManager implements Soft
       // TODO Auto-generated method stub
       return false;
    }
+
+   @Override
+   public void restartClusterRequiredServices(ClusterBlueprint blueprint,
+         ClusterReportQueue reports) throws Exception {
+      // TODO Auto-generated method stub
+   }
 }

@@ -380,5 +380,11 @@ public class DefaultSoftwareManagerImpl extends AbstractSoftwareManager implemen
       return false;
    }
 
+   @Override
+   public void restartClusterRequiredServices(ClusterBlueprint blueprint,
+         ClusterReportQueue reports) throws Exception {
+      // TODO Auto-generated method stub
+   }
+
 }
 

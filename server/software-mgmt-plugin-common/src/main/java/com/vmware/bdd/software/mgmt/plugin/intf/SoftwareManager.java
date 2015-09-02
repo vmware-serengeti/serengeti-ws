@@ -15,6 +15,7 @@
 package com.vmware.bdd.software.mgmt.plugin.intf;
 
 import java.util.List;
+
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
@@ -315,5 +316,7 @@ public interface SoftwareManager {
    boolean twoDataDisksRequired(NodeGroupInfo group);
 
    boolean hasMountPointStartwithDatax(String clusterName);
+
+   void restartClusterRequiredServices(ClusterBlueprint blueprint, ClusterReportQueue reports) throws Exception;
 
 }

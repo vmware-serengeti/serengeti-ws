@@ -1969,4 +1969,12 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
 
       return hasMountPointStartwithDatax;
    }
+
+   @Override
+   public void restartClusterRequiredServices(ClusterBlueprint blueprint, ClusterReportQueue reports) throws Exception { 
+      String ambariServerVersion = getVersion();
+      AmClusterDef clusterDef = new AmClusterDef(blueprint, privateKey, ambariServerVersion);
+      restartRequiredServices(clusterDef, reports);
+   }
+
 }

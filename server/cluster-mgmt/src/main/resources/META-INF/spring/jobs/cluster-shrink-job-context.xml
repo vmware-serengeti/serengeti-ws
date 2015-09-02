@@ -23,6 +23,16 @@
     <beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
     <beans:property name="clusterEntityManager" ref="clusterEntityManager" />
 </beans:bean>
+<beans:bean name="restartRequiredServicesTasklet"
+            class="com.vmware.bdd.service.job.ClusterRequiredServicesRestartStep">
+    <beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+    <beans:property name="clusterEntityManager" ref="clusterEntityManager" />
+	<beans:property name="clusterRequiredServicesRestartService" ref="clusterRequiredServicesRestartService" />
+</beans:bean>
+
+<beans:bean id="clusterRequiredServicesRestartService" class="com.vmware.bdd.service.impl.ClusterRequiredServicesRestartService">
+</beans:bean>
+
 
 <job id="shrinkClusterJob" job-repository="jobRepository">
     <step id="decommissionSingleNode" next="deleteSingleVMStep">
@@ -31,8 +41,14 @@
             <listener ref="stepListener" />
         </listeners>
     </step>
-    <step id="deleteSingleVMStep">
+    <step id="deleteSingleVMStep" next="restartRequiredServices">
         <tasklet ref="deleteSingleVMTasklet" />
+        <listeners>
+            <listener ref="stepListener" />
+        </listeners>
+    </step>
+    <step id="restartRequiredServices">
+        <tasklet ref="restartRequiredServicesTasklet" />
         <listeners>
             <listener ref="stepListener" />
         </listeners>
