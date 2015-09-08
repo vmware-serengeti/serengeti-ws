@@ -1,0 +1,55 @@
+{
+  "groups": [
+    {
+      "name" : "zookeeper",
+      "roles" : [
+        "ZOOKEEPER_SERVER",
+        "HDFS_CLIENT",
+        "METRICS_MONITOR"
+      ],
+      "instance_type":SMALL,
+      "instance_num":3,
+      "ha" : "on"
+    },
+    {
+      "name": "master",
+      "roles": [
+        "NAMENODE",
+        "RESOURCEMANAGER",
+        "SECONDARY_NAMENODE",
+        "HISTORYSERVER",
+        "APP_TIMELINE_SERVER",
+        "METRICS_COLLECTOR"
+      ],
+      "instance_type":MEDIUM,
+      "instance_num":1,
+      "ha" : "on"
+    },
+    {
+      "name": "worker",
+      "roles": [
+        "DATANODE",
+        "NODEMANAGER",
+        "METRICS_MONITOR"
+      ],
+      "instance_type":SMALL,
+      "instance_num":3,
+      "ha": "off"
+    },
+    {
+      "name": "client",
+      "roles": [
+        "HDFS_CLIENT",
+        "YARN_CLIENT",
+        "MAPREDUCE2_CLIENT",
+        "ZOOKEEPER_CLIENT",
+        "TEZ_CLIENT",
+        "METRICS_MONITOR",
+        "NFS_GATEWAY"
+      ],
+      "instance_type":SMALL,
+      "instance_num":1,
+      "ha": "off"
+    }
+  ]
+}

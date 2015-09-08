@@ -43,7 +43,7 @@ public class ClusterSpecFactory {
    }
 
    private enum HDP_VERSION {
-      V1, V2_0, V2_1, V2_2, UNKNOWN
+      V1, V2_0, V2_1, V2_2, V2_3, UNKNOWN
    }
    private static final Logger logger = Logger
          .getLogger(ClusterSpecFactory.class);
@@ -88,6 +88,8 @@ public class ClusterSpecFactory {
          "am-hdp-2-1-hdfs-yarn-template-spec.json";
    private static final String AM_HDP_2_2_HDFS_YARN_TEMPLATE_SPEC =
          "am-hdp-2-2-hdfs-yarn-template-spec.json";
+   private static final String AM_HDP_2_3_HDFS_YARN_TEMPLATE_SPEC =
+         "am-hdp-2-3-hdfs-yarn-template-spec.json";
    private static final String AM_HDP_CUSTOMIZED_HDFS_YARN_TEMPLATE_SPEC =
          "am-hdp-customized-hdfs-yarn-template-spec.json";
    private static final String AM_HDP_V1_HBASE_TEMPLATE_SPEC =
@@ -98,6 +100,8 @@ public class ClusterSpecFactory {
          "am-hdp-2-1-hbase-template-spec.json";
    private static final String AM_HDP_2_2_HBASE_TEMPLATE_SPEC =
          "am-hdp-2-2-hbase-template-spec.json";
+   private static final String AM_HDP_2_3_HBASE_TEMPLATE_SPEC =
+         "am-hdp-2-3-hbase-template-spec.json";
    private static final String AM_HDP_CUSTOMIZED_HBASE_TEMPLATE_SPEC =
          "am-hdp-customized-hbase-template-spec.json";
    private static final String AM_HDFS_PURE_HBASE_TEMPLATE_SPEC =
@@ -205,6 +209,8 @@ public class ClusterSpecFactory {
                   return loadFromFile(locateSpecFile(AM_HDP_2_1_HDFS_YARN_TEMPLATE_SPEC, appManagerType));
                } else if (hdpVersion == HDP_VERSION.V2_2) {
                   return loadFromFile(locateSpecFile(AM_HDP_2_2_HDFS_YARN_TEMPLATE_SPEC, appManagerType));
+               } else if (hdpVersion == HDP_VERSION.V2_3) {
+                  return loadFromFile(locateSpecFile(AM_HDP_2_3_HDFS_YARN_TEMPLATE_SPEC, appManagerType));
                } else {
                   return loadFromFile(locateSpecFile(AM_HDP_CUSTOMIZED_HDFS_YARN_TEMPLATE_SPEC, appManagerType));
                }
@@ -227,6 +233,8 @@ public class ClusterSpecFactory {
                   return loadFromFile(locateSpecFile(AM_HDP_2_1_HDFS_YARN_TEMPLATE_SPEC, appManagerType));
                } else if (hdpVersion == HDP_VERSION.V2_2) {
                   return loadFromFile(locateSpecFile(AM_HDP_2_2_HDFS_YARN_TEMPLATE_SPEC, appManagerType));
+               } else if (hdpVersion == HDP_VERSION.V2_3) {
+                  return loadFromFile(locateSpecFile(AM_HDP_2_3_HDFS_YARN_TEMPLATE_SPEC, appManagerType));
                } else {
                   return loadFromFile(locateSpecFile(AM_HDP_CUSTOMIZED_HDFS_YARN_TEMPLATE_SPEC, appManagerType));
                }
@@ -242,6 +250,8 @@ public class ClusterSpecFactory {
                      return loadFromFile(locateSpecFile(AM_HDP_2_1_HBASE_TEMPLATE_SPEC, appManagerType));
                   } else if (hdpVersion == HDP_VERSION.V2_2){
                      return loadFromFile(locateSpecFile(AM_HDP_2_2_HBASE_TEMPLATE_SPEC, appManagerType));
+                  } else if (hdpVersion == HDP_VERSION.V2_3){
+                     return loadFromFile(locateSpecFile(AM_HDP_2_3_HBASE_TEMPLATE_SPEC, appManagerType));
                   } else {
                      return loadFromFile(locateSpecFile(AM_HDP_CUSTOMIZED_HBASE_TEMPLATE_SPEC, appManagerType));
                   }
@@ -349,6 +359,8 @@ public class ClusterSpecFactory {
             return HDP_VERSION.V2_1;
          } else if (Version.compare(distroVersion, "2.2") >= 0 && Version.compare(distroVersion, "2.3") < 0) {
             return HDP_VERSION.V2_2;
+         } else if (Version.compare(distroVersion, "2.3") >= 0 && Version.compare(distroVersion, "2.4") < 0) {
+            return HDP_VERSION.V2_3;
          } else {
             return HDP_VERSION.UNKNOWN;
          }

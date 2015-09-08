@@ -3,9 +3,7 @@
   {
     "name" : "zookeeper",
       "roles" : [
-        "ZOOKEEPER_SERVER",
-        "HDFS_CLIENT",
-        "METRICS_MONITOR"
+        "ZOOKEEPER_SERVER"
       ],
       "instanceType":"SMALL",
       "instanceNum":3,
@@ -22,8 +20,7 @@
       "RESOURCEMANAGER",
       "SECONDARY_NAMENODE",
       "HISTORYSERVER",
-      "APP_TIMELINE_SERVER",
-      "METRICS_COLLECTOR"
+      "APP_TIMELINE_SERVER"
     ],
     "instanceType":"MEDIUM",
     "instanceNum":1,
@@ -41,8 +38,7 @@
   {
     "name": "data",
     "roles": [
-      "DATANODE",
-      "METRICS_MONITOR"
+      "DATANODE"
     ],
     "instanceType":"SMALL",
     "instanceNum":3,
@@ -61,8 +57,7 @@
     "name": "compute",
     "roles": [
       "NODEMANAGER",
-      "HDFS_CLIENT",
-      "METRICS_MONITOR"
+      "HDFS_CLIENT"
     ],
     "instanceType":"SMALL",
     "instanceNum":3,
@@ -84,9 +79,7 @@
       "YARN_CLIENT",
       "MAPREDUCE2_CLIENT",
       "ZOOKEEPER_CLIENT",
-      "TEZ_CLIENT",
-      "METRICS_MONITOR",
-      "NFS_GATEWAY"
+      "TEZ_CLIENT"
     ],
     "instanceType":"SMALL",
     "instanceNum":1,
