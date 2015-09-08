@@ -23,14 +23,19 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
+import com.vmware.bdd.manager.concurrent.AsyncExecutors;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vmware.aurora.vc.VcCache;
@@ -510,17 +515,49 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
       update(node);
    }
-
    @Transactional
    @RetryTransaction
    public void syncUp(String clusterName, boolean updateClusterStatus) {
+      if (logger.isDebugEnabled()) {
+         logger.debug("start to sync cluster: " + clusterName);
+      }
+
       List<NodeEntity> nodes = findAllNodes(clusterName);
 
       boolean allNodesDown = true;
+      List<Future<NodeEntity>> refreshedNodeList = new ArrayList<>();
       for (NodeEntity node : nodes) {
-         refreshNodeStatus(node, false);
-         if (node.getStatus().ordinal() >= NodeStatus.POWERED_ON.ordinal()) {
-            allNodesDown = false;
+         refreshedNodeList.add(asyncRefreshNodeStatus(node));
+      }
+
+      //wait all node refresh is done
+      while (refreshedNodeList.size() > 0) {
+         for (Iterator<Future<NodeEntity>> futureItr = refreshedNodeList.iterator(); futureItr.hasNext(); ) {
+            Future<NodeEntity> refreshedNodeFuture = futureItr.next();
+            if(refreshedNodeFuture.isDone()) {
+               try {
+                  NodeEntity refreshedNode = refreshedNodeFuture.get();
+                  if (logger.isDebugEnabled()) {
+                     logger.debug("got sync node result: " + refreshedNode.getVmName());
+                  }
+
+                  if (refreshedNode.getStatus().ordinal() >= NodeStatus.POWERED_ON.ordinal()) {
+                     allNodesDown = false;
+                  }
+               } catch (InterruptedException e) {
+                  logger.error("failed to get async refresh node result", e);
+               } catch (ExecutionException e) {
+                  logger.error("failed to get async refresh node result", e);
+               } finally {
+                  futureItr.remove();
+               }
+            }
+         }
+
+         try {
+            Thread.sleep(50);
+         } catch (InterruptedException e) {
+            //nothing to do
          }
       }
 
@@ -531,6 +568,22 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
             cluster.setStatus(ClusterStatus.STOPPED);
          }
       }
+   }
+
+   @Async(AsyncExecutors.CLUSTER_NODE_SYNC_EXEC)
+   public void asyncSyncUp(String clusterName, boolean updateClusterStatus) {
+      syncUp(clusterName, updateClusterStatus);
+   }
+
+   @Transactional
+   @RetryTransaction
+   @Async(AsyncExecutors.CLUSTER_NODE_SYNC_EXEC)
+   public Future<NodeEntity> asyncRefreshNodeStatus(NodeEntity nodeEntity) {
+      refreshNodeStatus(nodeEntity, false);
+      if (logger.isDebugEnabled()) {
+         logger.debug("finish to sync node: " + nodeEntity.getVmName());
+      }
+      return new AsyncResult<NodeEntity>(nodeEntity);
    }
 
    @Transactional
