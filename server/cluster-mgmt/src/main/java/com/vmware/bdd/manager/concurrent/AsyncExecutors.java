@@ -20,23 +20,42 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Created by xiaoliangl on 9/8/15.
  */
 @Component
 public class AsyncExecutors {
-   public static final String CLUSTER_NODE_SYNC_EXEC = "CLUSTER_NODE_SYNC_EXEC";
+   public static final String CLUSTER_SYNC_EXEC = "clusterSyncExec";
+   public static final String NODE_SYNC_EXEC = "nodeSyncExec";
+
    static final String SHUTDOWN = "shutdown";
 
-   @Bean(name = CLUSTER_NODE_SYNC_EXEC, destroyMethod = SHUTDOWN)
-   @Qualifier(CLUSTER_NODE_SYNC_EXEC)
-   public Executor vcQueryExec() {
+   @Bean(name = CLUSTER_SYNC_EXEC, destroyMethod = SHUTDOWN)
+   @Qualifier(CLUSTER_SYNC_EXEC)
+   public Executor clusterSyncExec() {
       ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-      executor.setCorePoolSize(1);
-      executor.setMaxPoolSize(25);
+      executor.setCorePoolSize(2);
+      executor.setMaxPoolSize(20);
+      executor.setQueueCapacity(200);
+      executor.setThreadNamePrefix(CLUSTER_SYNC_EXEC + "-");
+      executor.setKeepAliveSeconds(120);
+      executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+      executor.initialize();
+      return executor;
+   }
+
+   @Bean(name = NODE_SYNC_EXEC, destroyMethod = SHUTDOWN)
+   @Qualifier(NODE_SYNC_EXEC)
+   public Executor nodeSyncExec() {
+      ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+      executor.setCorePoolSize(10);
+      executor.setMaxPoolSize(100);
       executor.setQueueCapacity(1000);
-      executor.setThreadNamePrefix(CLUSTER_NODE_SYNC_EXEC + "-");
+      executor.setThreadNamePrefix(NODE_SYNC_EXEC + "-");
+      executor.setKeepAliveSeconds(120);
+      executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
       executor.initialize();
       return executor;
    }

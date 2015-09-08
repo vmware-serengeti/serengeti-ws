@@ -19,6 +19,7 @@ import java.util.Map;
 
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterStatus;
+import com.vmware.bdd.apitypes.NodeRead;
 import com.vmware.bdd.dal.IServerInfoDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.DiskEntity;
@@ -89,7 +90,7 @@ public interface IClusterEntityManager {
 
    public void setClusterStatus(String clusterName, ClusterReport report);
 
-   public void syncUp(String clusterName, boolean updateClusterStatus);
+//   public void syncUp(String clusterName, boolean updateClusterStatus);
 
    public void removeVmReference(String vmId);
 
@@ -147,5 +148,5 @@ public interface IClusterEntityManager {
 
    public Map<String, String> findUserMgmtCfg(String clusterName);
 
-   void asyncSyncUp(String clusterName, boolean updateClusterStatus);
+   NodeRead refreshNodeStatus(String vmName, boolean inSession);
 }

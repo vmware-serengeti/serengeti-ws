@@ -36,37 +36,19 @@ public class ClusterNodeUpdator implements Runnable {
    @Autowired
    private IConcurrentLockedClusterEntityManager lockMgr;
 
-   /*
-    * default constructor
-    */
-   public ClusterNodeUpdator() {
-   }
-
    @Scheduled(initialDelay = 0l, fixedDelay = FIVE_MINS_IN_MILLI_SEC)
    public void run() {
-      LOGGER.info("start sync all clusters' nodes");
       List<ClusterEntity> clusters = entityMgr.findAllClusters();
       for (ClusterEntity cluster : clusters) {
          if (cluster.getStatus().isStableStatus()) {
-            long timeMillis = 0l;
-            if(LOGGER.isDebugEnabled()) {
-               timeMillis = System.currentTimeMillis();
-            }
-
-            syncUp(cluster.getName());
+            lockMgr.asyncSyncUp(cluster.getName(), true);
 
             if(LOGGER.isDebugEnabled()) {
-               LOGGER.debug("syncing cluster " + cluster.getName() + " finished in milliseconds: " + (System.currentTimeMillis() - timeMillis));
-            } else {
-               LOGGER.info("syncing cluster " + cluster.getName() + " finished");
+               LOGGER.info("submit sync cluster task: " + cluster.getName());
             }
          }
       }
 
-      LOGGER.info("finish sync all clusters' nodes");
-   }
-
-   public void syncUp(String clusterName) {
-      lockMgr.syncUp(clusterName, true);
+      LOGGER.info("submit sync all cluster tasks.");
    }
 }
