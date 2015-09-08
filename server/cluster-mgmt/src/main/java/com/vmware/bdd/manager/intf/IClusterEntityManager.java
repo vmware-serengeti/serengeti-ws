@@ -146,4 +146,6 @@ public interface IClusterEntityManager {
    public void updateNodeAction(NodeEntity node, String action);
 
    public Map<String, String> findUserMgmtCfg(String clusterName);
-   }
+
+   void asyncSyncUp(String clusterName, boolean updateClusterStatus);
+}

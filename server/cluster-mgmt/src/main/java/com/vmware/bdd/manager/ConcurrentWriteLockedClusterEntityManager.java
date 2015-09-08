@@ -47,7 +47,7 @@ public class ConcurrentWriteLockedClusterEntityManager implements
    @Override
    @ClusterEntityConcurrentWriteLock
    public void syncUp(String clusterName, boolean updateClusterStatus) {
-      clusterEntityMgr.syncUp(clusterName, updateClusterStatus);
+      clusterEntityMgr.asyncSyncUp(clusterName, updateClusterStatus);
    }
 
    @Override

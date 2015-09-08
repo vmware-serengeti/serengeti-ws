@@ -66,7 +66,6 @@ import com.vmware.bdd.placement.util.PlacementUtil;
 import com.vmware.bdd.service.IClusterInitializerService;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.event.VmEventManager;
-import com.vmware.bdd.service.job.ClusterNodeUpdator;
 import com.vmware.bdd.service.job.NodeOperationStatus;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.resmgmt.INetworkService;
@@ -284,13 +283,10 @@ public class ClusteringService implements IClusteringService {
                cloneConcurrency = 1;
             }
 
-            ClusterNodeUpdator nodeUpdator = new ClusterNodeUpdator(getLockClusterEntityMgr());
             // refresh the cluster nodes once on bde startup, till now the vc cache has
             // been loaded, so it should be fast to do it
-//            logger.info("refresh the cluster nodes once on bde startup...");
-//            nodeUpdator.executeOnce();
             // then add the periodic processing with default 5 minute interval
-            cmsWorker.addPeriodic(nodeUpdator);
+//            cmsWorker.addPeriodic(clusterNodeUpdator);
 
             initUUID();
 

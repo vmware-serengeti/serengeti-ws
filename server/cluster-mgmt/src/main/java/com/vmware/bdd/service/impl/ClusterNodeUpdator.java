@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.bdd.service.job;
+package com.vmware.bdd.service.impl;
 
 import java.util.List;
 
@@ -22,21 +22,28 @@ import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
-public class ClusterNodeUpdator extends PeriodicRequest {
+@Component
+public class ClusterNodeUpdator implements Runnable {
    private final static Logger LOGGER = Logger.getLogger(ClusterNodeUpdator.class);
-   
-   private IClusterEntityManager entityMgr;
-   private IConcurrentLockedClusterEntityManager lockMgr;
    private final static long FIVE_MINS_IN_MILLI_SEC = 5 * 60 * 1000;
-   
-   public ClusterNodeUpdator(IConcurrentLockedClusterEntityManager lockMgr) {
-      super(WorkQueue.VC_TASK_FIVE_MIN_DELAY, FIVE_MINS_IN_MILLI_SEC);
-      this.lockMgr = lockMgr;
-      this.entityMgr = lockMgr.getClusterEntityMgr();
+
+   @Autowired
+   private IClusterEntityManager entityMgr;
+   @Autowired
+   private IConcurrentLockedClusterEntityManager lockMgr;
+
+   /*
+    * default constructor
+    */
+   public ClusterNodeUpdator() {
    }
 
-   public boolean executeOnce() {
+   @Scheduled(initialDelay = 0l, fixedDelay = FIVE_MINS_IN_MILLI_SEC)
+   public void run() {
       LOGGER.info("start sync all clusters' nodes");
       List<ClusterEntity> clusters = entityMgr.findAllClusters();
       for (ClusterEntity cluster : clusters) {
@@ -57,7 +64,6 @@ public class ClusterNodeUpdator extends PeriodicRequest {
       }
 
       LOGGER.info("finish sync all clusters' nodes");
-      return true;
    }
 
    public void syncUp(String clusterName) {

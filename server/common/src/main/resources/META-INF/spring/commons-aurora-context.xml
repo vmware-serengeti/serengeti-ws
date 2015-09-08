@@ -9,6 +9,8 @@
 
     <context:component-scan base-package="com.vmware.aurora" />
 
+    <task:annotation-driven scheduler="vcCacheScheduler"/>
+
     <!--task:executor id="vcQueryExec" pool-size="5-25" queue-capacity="5000" keep-alive="120" rejection-policy="CALLER_RUNS"/>
 
     <task:executor id="vcCacheExec" pool-size="1-5" queue-capacity="1000" keep-alive="120" rejection-policy="CALLER_RUNS"/>

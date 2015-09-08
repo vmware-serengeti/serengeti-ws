@@ -37,9 +37,6 @@ public abstract class PeriodicRequest extends SimpleRequest {
    }
 
    abstract protected boolean executeOnce();
-   protected boolean isContinue() {
-      return true;
-   }
 
    @Override
    final protected boolean execute() {
@@ -50,19 +47,7 @@ public abstract class PeriodicRequest extends SimpleRequest {
          CmsWorker.logger.error("error executing periodic req " + e);
          done = true;
       }
-      if (isContinue()) {
-         if (done) {
-            // Schedule the next execution of this request.
-//            CmsWorker.DelayedReqQueue q = queue.getQ();
-//            q.add(this);
-            return true;
-         }
-         // will be rescheduled
-         return false;
-      } else {
-         // do not reschedule
-         return true;
-      }
+      return done;
    }
 
    /**
