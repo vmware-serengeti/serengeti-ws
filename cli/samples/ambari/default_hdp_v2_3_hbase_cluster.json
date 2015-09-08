@@ -1,0 +1,91 @@
+{
+  "nodeGroups":[
+    {
+      "name":"zookeeper",
+      "roles":[
+        "ZOOKEEPER_SERVER",
+        "HDFS_CLIENT",
+        "METRICS_MONITOR"
+      ],
+      "instanceType":"SMALL",
+      "instanceNum":3,
+      "storage" : {
+        "type" : "shared",
+        "sizeGB" : 20
+      },
+      "haFlag":"on"
+    },
+    {
+      "name":"master",
+      "roles":[
+        "NAMENODE",
+        "RESOURCEMANAGER",
+        "SECONDARY_NAMENODE",
+        "HBASE_MASTER",
+        "HISTORYSERVER",
+        "APP_TIMELINE_SERVER",
+        "METRICS_COLLECTOR"
+      ],
+      "instanceType":"MEDIUM",
+      "instanceNum":1,
+      "storage": {
+        "type": "SHARED",
+        "sizeGB": 50
+      },
+      "haFlag":"on",
+      "configuration": {
+        "hdfs-site": {
+          // service level configurations
+        }
+      }
+    },
+    {
+      "name":"worker",
+      "roles":[
+        "DATANODE",
+        "NODEMANAGER",
+        "HBASE_REGIONSERVER",
+        "METRICS_MONITOR"
+      ],
+      "instanceType":"SMALL",
+      "instanceNum":3,
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 50
+      },
+      "haFlag":"off",
+      "configuration": {
+        "hdfs-site": {
+          // service level configurations
+        }
+      }
+    },
+    {
+      "name":"client",
+      "roles":[
+        "HDFS_CLIENT",
+        "HBASE_CLIENT",
+        "MAPREDUCE2_CLIENT",
+        "ZOOKEEPER_CLIENT",
+        "YARN_CLIENT",
+        "METRICS_MONITOR",
+        "NFS_GATEWAY"
+      ],
+      "instanceType":"SMALL",
+      "instanceNum":1,
+      "storage": {
+        "type": "LOCAL",
+        "sizeGB": 50
+      },
+      "haFlag":"off"
+    }
+  ],
+  "configuration": {
+    "core-site": {
+      // service level configurations
+    },
+    "hdfs-site": {
+      // service level configurations
+    }
+  }
+}
