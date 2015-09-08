@@ -55,9 +55,8 @@ public class MockClusterEntityManager extends
          String nodeAction, boolean inSession) {
    }
 
-   @Override
+  /* @Override
    public void syncUp(String clusterName, boolean updateClusterStatus) {
-      // TODO Auto-generated method stub
       try {
          started = true;
          Thread.sleep(200);
@@ -65,7 +64,7 @@ public class MockClusterEntityManager extends
       } catch (Exception e) {
          e.printStackTrace();
       }
-   }
+   }*/
 
    public void removeVmReference(String vmId) {
    }

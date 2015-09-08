@@ -14,7 +14,11 @@
  ***************************************************************************/
 package com.vmware.bdd.manager;
 
+import com.vmware.bdd.manager.concurrent.AsyncExecutors;
+import com.vmware.bdd.service.impl.ClusterSyncService;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.vmware.bdd.aop.annotation.ClusterEntityConcurrentWriteLock;
@@ -26,7 +30,12 @@ import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 @Component
 public class ConcurrentWriteLockedClusterEntityManager implements
       IConcurrentLockedClusterEntityManager {
+   private static final Logger logger = Logger.getLogger(ConcurrentWriteLockedClusterEntityManager.class);
+
    private IClusterEntityManager clusterEntityMgr;
+
+   @Autowired
+   private ClusterSyncService clusterSyncService;
 
    public IClusterEntityManager getClusterEntityMgr() {
       return clusterEntityMgr;
@@ -47,7 +56,14 @@ public class ConcurrentWriteLockedClusterEntityManager implements
    @Override
    @ClusterEntityConcurrentWriteLock
    public void syncUp(String clusterName, boolean updateClusterStatus) {
-      clusterEntityMgr.asyncSyncUp(clusterName, updateClusterStatus);
+      clusterSyncService.syncUp(clusterName, updateClusterStatus);
+   }
+
+   @Override
+   @ClusterEntityConcurrentWriteLock
+   @Async(AsyncExecutors.CLUSTER_SYNC_EXEC)
+   public void asyncSyncUp(String clusterName, boolean updateClusterStatus) {
+      clusterSyncService.syncUp(clusterName, updateClusterStatus);
    }
 
    @Override

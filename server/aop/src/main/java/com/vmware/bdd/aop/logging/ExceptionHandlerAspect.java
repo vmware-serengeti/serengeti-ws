@@ -48,7 +48,7 @@ public class ExceptionHandlerAspect {
    public void logException(Throwable t) throws Throwable {
       logger.info("Aspect for exception handling");
       BddException ex = BddException.wrapIfNeeded(t, "Service AOP.");
-      logger.error("Service error", ex);
+      logger.error("Service error", t);
       throw t;
    }
 

@@ -33,6 +33,8 @@ public interface ILockedClusterEntityManager {
 
    public void syncUpNode(String clusterName, String nodeName);
 
+   void asyncSyncUp(String clusterName, boolean updateClusterStatus);
+
    public void refreshNodeByMobId(String clusterName, String vmId,
          boolean inSession);
 

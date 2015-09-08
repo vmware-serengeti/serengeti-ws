@@ -14,54 +14,15 @@
  ***************************************************************************/
 package com.vmware.bdd.manager;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-
-import com.vmware.bdd.manager.concurrent.AsyncExecutors;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.hibernate.Hibernate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.aop.annotation.RetryTransaction;
-import com.vmware.bdd.apitypes.ClusterRead;
-import com.vmware.bdd.apitypes.ClusterStatus;
-import com.vmware.bdd.apitypes.NodeGroupRead;
-import com.vmware.bdd.apitypes.NodeStatus;
-import com.vmware.bdd.apitypes.ResourcePoolRead;
-import com.vmware.bdd.dal.IClusterDAO;
-import com.vmware.bdd.dal.INetworkDAO;
-import com.vmware.bdd.dal.INodeDAO;
-import com.vmware.bdd.dal.INodeGroupDAO;
-import com.vmware.bdd.dal.INodeTemplateDAO;
-import com.vmware.bdd.dal.IServerInfoDAO;
-import com.vmware.bdd.entity.ClusterEntity;
-import com.vmware.bdd.entity.DiskEntity;
-import com.vmware.bdd.entity.NicEntity;
-import com.vmware.bdd.entity.NodeEntity;
-import com.vmware.bdd.entity.NodeGroupEntity;
-import com.vmware.bdd.entity.ServerInfoEntity;
-import com.vmware.bdd.entity.VcResourcePoolEntity;
+import com.vmware.bdd.apitypes.*;
+import com.vmware.bdd.dal.*;
+import com.vmware.bdd.entity.*;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
-import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
@@ -73,12 +34,15 @@ import com.vmware.bdd.software.mgmt.thrift.GroupData;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 import com.vmware.bdd.software.mgmt.thrift.ServerData;
 import com.vmware.bdd.usermgmt.UserMgmtConstants;
-import com.vmware.bdd.utils.AuAssert;
-import com.vmware.bdd.utils.ClusterUtil;
-import com.vmware.bdd.utils.CommonUtil;
-import com.vmware.bdd.utils.Constants;
-import com.vmware.bdd.utils.InfrastructureConfigUtils;
-import com.vmware.bdd.utils.VcVmUtil;
+import com.vmware.bdd.utils.*;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.hibernate.Hibernate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
+import java.util.*;
 
 @Transactional(readOnly = true)
 public class ClusterEntityManager implements IClusterEntityManager, Observer {
@@ -521,49 +485,17 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
       update(node);
    }
-   @Transactional
+
+/*   @Transactional
    @RetryTransaction
    public void syncUp(String clusterName, boolean updateClusterStatus) {
-      if (logger.isDebugEnabled()) {
-         logger.debug("start to sync cluster: " + clusterName);
-      }
-
       List<NodeEntity> nodes = findAllNodes(clusterName);
 
       boolean allNodesDown = true;
-      List<Future<NodeEntity>> refreshedNodeList = new ArrayList<>();
       for (NodeEntity node : nodes) {
-         refreshedNodeList.add(asyncRefreshNodeStatus(node));
-      }
-
-      //wait all node refresh is done
-      while (refreshedNodeList.size() > 0) {
-         for (Iterator<Future<NodeEntity>> futureItr = refreshedNodeList.iterator(); futureItr.hasNext(); ) {
-            Future<NodeEntity> refreshedNodeFuture = futureItr.next();
-            if(refreshedNodeFuture.isDone()) {
-               try {
-                  NodeEntity refreshedNode = refreshedNodeFuture.get();
-                  if (logger.isDebugEnabled()) {
-                     logger.debug("got sync node result: " + refreshedNode.getVmName());
-                  }
-
-                  if (refreshedNode.getStatus().ordinal() >= NodeStatus.POWERED_ON.ordinal()) {
-                     allNodesDown = false;
-                  }
-               } catch (InterruptedException e) {
-                  logger.error("failed to get async refresh node result", e);
-               } catch (ExecutionException e) {
-                  logger.error("failed to get async refresh node result", e);
-               } finally {
-                  futureItr.remove();
-               }
-            }
-         }
-
-         try {
-            Thread.sleep(50);
-         } catch (InterruptedException e) {
-            //nothing to do
+         refreshNodeStatus(node, false);
+         if (node.getStatus().ordinal() >= NodeStatus.POWERED_ON.ordinal()) {
+            allNodesDown = false;
          }
       }
 
@@ -574,23 +506,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
             cluster.setStatus(ClusterStatus.STOPPED);
          }
       }
-   }
-
-   @Async(AsyncExecutors.CLUSTER_NODE_SYNC_EXEC)
-   public void asyncSyncUp(String clusterName, boolean updateClusterStatus) {
-      syncUp(clusterName, updateClusterStatus);
-   }
-
-   @Transactional
-   @RetryTransaction
-   @Async(AsyncExecutors.CLUSTER_NODE_SYNC_EXEC)
-   public Future<NodeEntity> asyncRefreshNodeStatus(NodeEntity nodeEntity) {
-      refreshNodeStatus(nodeEntity, false);
-      if (logger.isDebugEnabled()) {
-         logger.debug("finish to sync node: " + nodeEntity.getVmName());
-      }
-      return new AsyncResult<NodeEntity>(nodeEntity);
-   }
+   }*/
 
    @Transactional
    @RetryTransaction
@@ -620,6 +536,14 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
                .getPortGroup());
       }
       return portGroups;
+   }
+
+   @Transactional
+   public NodeRead refreshNodeStatus(String vmName, boolean inSession) {
+      NodeEntity nodeEntity = nodeDao.findByName(vmName);
+      refreshNodeStatus(nodeEntity, inSession);
+
+      return nodeEntity.toNodeRead(false);
    }
 
    private void refreshNodeStatus(NodeEntity node, boolean inSession) {

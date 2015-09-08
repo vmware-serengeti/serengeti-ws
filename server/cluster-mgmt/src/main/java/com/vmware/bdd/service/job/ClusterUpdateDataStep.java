@@ -129,7 +129,7 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
        */
       if (chunkContext.getStepContext().getJobName()
             .equals(JobConstants.RESUME_CLUSTER_JOB_NAME)) {
-         clusterEntityMgr.syncUp(clusterName, false);
+         lockClusterEntityMgr.syncUp(clusterName, false);
       }
       return RepeatStatus.FINISHED;
    }
