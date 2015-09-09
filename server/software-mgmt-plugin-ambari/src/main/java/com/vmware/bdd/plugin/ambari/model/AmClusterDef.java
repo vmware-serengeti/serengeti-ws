@@ -109,8 +109,6 @@ public class AmClusterDef implements Serializable {
          nodeGroupDef.setName(group.getName());
          nodeGroupDef.setInstanceNum(group.getInstanceNum());
          nodeGroupDef.setRoles(group.getRoles());
-         nodeGroupDef.setLatencySensitivity(group.getLatencySensitivity());
-         nodeGroupDef.setMemSize(group.getMemorySize());
          nodeGroupDef.setConfigurations(AmUtils.toAmConfigurations(group.getConfiguration()));
          nodeGroupDef.setClusterName(this.name);
          nodeGroupDef.setAmbariServerVersion(ambariServerVersion);
