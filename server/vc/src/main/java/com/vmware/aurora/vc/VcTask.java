@@ -31,9 +31,11 @@ import com.vmware.vim.binding.vim.fault.TaskInProgress;
 import com.vmware.vim.binding.vim.host.DatastoreBrowser.SearchResults;
 import com.vmware.vim.binding.vmodl.ManagedObject;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
+import org.apache.log4j.Logger;
 
 @SuppressWarnings("serial")
 public class VcTask extends VcObjectImpl {
+   private static final Logger logger = Logger.getLogger(VcTask.class);
    /**
     * All VC tasks. The "targetClass" is the {@link VcObject} class
     * corresponding to the (new) {@link ManagedObject} as the result of
@@ -330,11 +332,15 @@ public class VcTask extends VcObjectImpl {
       }
       // callback should be invoked successfully exactly once
       if (!callbackInvoked) {
+         logger.debug("start callback.completeCB for task: " + getMoRef().getValue());
          callback.completeCB(this);
          callbackInvoked = true;
+         logger.debug("finish callback.completeCB for task: " + getMoRef().getValue());
       }
       if (sync) {
+         logger.debug("start callback.syncCB for task: " + getMoRef().getValue());
          callback.syncCB();
+         logger.debug("finish callback.syncCB for task: " + getMoRef().getValue());
       }
    }
 
@@ -401,6 +407,9 @@ public class VcTask extends VcObjectImpl {
          default:
             AuAssert.check(false);
          }
+         if(logger.isDebugEnabled()) {
+            logger.debug("task " + getMoRef().getValue() + " state: " + state);
+         }
          /*
           * TODO: taskInfo reload might not be always necessary. If the task has
           * no result, callers likely care only about success/error state which
@@ -411,7 +420,9 @@ public class VcTask extends VcObjectImpl {
       }
 
       AuAssert.check(taskCompleted());
-      logger.debug("task " + type + "completed");
+      if(logger.isDebugEnabled()) {
+         logger.debug("task " + getMoRef() + " completed");
+      }
       completionTimeNanos = waitFinishedNanos;
       assistBadTaskCompletion();
 
@@ -428,8 +439,14 @@ public class VcTask extends VcObjectImpl {
                // We should refresh during event processing, but current event processing code
                // lives in CMS project, which won't be used by Serengeti.
                if (type == TaskType.CloneVm || type == TaskType.CreateVm) {
+                  if(logger.isDebugEnabled()) {
+                     logger.debug("start to refreshRP for created VM");
+                  }
                   VcVirtualMachineImpl vm = (VcVirtualMachineImpl)result;
                   vm.refreshRP();
+                  if(logger.isDebugEnabled()) {
+                     logger.debug("finish refreshRP for created VM");
+                  }
                }
             }
             AuAssert.check(type.getTargetClass().isInstance(result));
@@ -438,8 +455,10 @@ public class VcTask extends VcObjectImpl {
          }
       }
 
+      logger.debug("start to invoking callbacks for task " + getMoRef());
       invokeCallbacks(true);
       Profiler.pop(oldSrc);
+      logger.debug("invoked callbacks for task " + getMoRef());
       return result;
    }
 

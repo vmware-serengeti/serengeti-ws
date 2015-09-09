@@ -422,6 +422,8 @@ public class ClusterManager {
 
    @ClusterManagerPointcut
    public Long createCluster(ClusterCreate createSpec, org.apache.commons.configuration.Configuration newParams) throws Exception {
+      logger.debug("entering createCluster: " + createSpec.getName());
+
       SoftwareManager softMgr = softwareManagerCollector.getSoftwareManager(createSpec.getAppManager());
       // @ Todo if specify hadoop stack, we can get hadoop stack by stack name. Otherwise, we will get a default hadoop stack.
       HadoopStack stack = clusterConfigMgr.filterDistroFromAppManager(softMgr, createSpec.getDistro());
