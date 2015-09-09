@@ -47,15 +47,18 @@ public class AmHostGroupInfo {
 
    private String ambariServerVersion;
 
+   private Map<String, String> configTypeToService;
+
    public AmHostGroupInfo(AmNodeDef node, AmNodeGroupDef nodeGroup, Map<String, String> configTypeToService) {
 
       this.ambariServerVersion = nodeGroup.getAmbariServerVersion();
+      this.configTypeToService = configTypeToService;
 
       // Generate a new Ambari hostGroup with config group name <NODE_GROUP_NAME>_vol<VOLUMES_COUNT> to distinguish different volumes of all nodes in the same group from spec file for Ambari Blueprint
       String configGroupName = nodeGroup.getName() + "_vol" + node.getVolumesCount();
 
       // Set config group name to <CLUSTER_NAME>:<NODE_GROUP_NAME>_vol<VOLUMES_COUNT> if Ambari server version >= 2.0
-      if (!AmUtils.isAmbariServerBelow_2_0_0(this.ambariServerVersion)) {
+      if (!AmUtils.isAmbariServerBelow_2_0_0(this.ambariServerVersion) && this.configTypeToService != null) {
          configGroupName = nodeGroup.getClusterName() + ":" + nodeGroup.getName() + "_vol" + node.getVolumesCount();
       }
       this.configGroupName = configGroupName;
@@ -78,7 +81,7 @@ public class AmHostGroupInfo {
       hosts.add(node.getFqdn());
       this.hosts = hosts;
 
-      if (configTypeToService != null) {
+      if (this.configTypeToService != null) {
          for(String service : getServices(configTypeToService, configurations)) {
             this.tag2Hosts.put(service, hosts);
          }
@@ -190,7 +193,7 @@ public class AmHostGroupInfo {
    public void updateConfigGroupName(AmNodeGroupDef nodeGroup) {
       String configGroupName = nodeGroup.getName();
 
-      if (!AmUtils.isAmbariServerBelow_2_0_0(this.ambariServerVersion)) {
+      if (!AmUtils.isAmbariServerBelow_2_0_0(this.ambariServerVersion) && this.configTypeToService != null) {
          configGroupName = nodeGroup.getClusterName() + ":" + nodeGroup.getName();
       }
 
