@@ -682,6 +682,8 @@ public class ClusterConfigManager {
       groupEntity.setSwapRatio(group.getSwapRatio());
       groupEntity.setName(group.getName());
       groupEntity.setNodeType(group.getInstanceType());
+      groupEntity.setReservedCpu_ratio(group.getReservedCpu_ratio());
+      groupEntity.setReservedMem_ratio(group.getReservedMem_ratio());
 
       PlacementPolicy policies = group.getPlacementPolicies();
       if (policies != null) {

@@ -41,29 +41,6 @@ public class AmNodeGroupDef implements Serializable {
 
    private String ambariServerVersion;
 
-   public LatencyPriority getLatencySensitivity() {
-      return latencySensitivity;
-   }
-
-   public void setLatencySensitivity(
-         LatencyPriority latencySensitivity) {
-      this.latencySensitivity = latencySensitivity;
-   }
-
-   @Expose
-   private LatencyPriority latencySensitivity;
-
-   public int getMemSize() {
-      return memSize;
-   }
-
-   public void setMemSize(int memSize) {
-      this.memSize = memSize;
-   }
-
-   @Expose
-   private int memSize;
-
    @Expose
    private List<Map<String, Object>> configurations;
 
