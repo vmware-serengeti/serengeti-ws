@@ -1071,4 +1071,13 @@ public class RestClient {
       }
    }
 
+   public void updateWithQueryStrings(Object entity, final String path, Map<String, String> queryStrings,
+                                      final HttpMethod verb, PrettyOutput... prettyOutput) {
+      String queryString = "";
+      if (queryStrings != null && !queryStrings.isEmpty()) {
+         queryString = buildQueryStrings(queryStrings);
+      }
+      update(entity, path + queryString, verb, prettyOutput);
+   }
+
 }

@@ -152,19 +152,11 @@ public class ClusterCommandsTest extends MockRestServer {
                 HttpMethod.PUT, HttpStatus.NO_CONTENT, "5");
 
         //invalid instance num
-<<<<<<< HEAD
-        clusterCommands.resizeCluster("cluster1", "NodeGroup1", -1,0,0);
-        clusterCommands.resizeCluster("cluster1", "NodeGroup1", 0,0,0);
-
-       //normal case
-        clusterCommands.resizeCluster("cluster1", "NodeGroup1", 5,0,0);
-=======
        clusterCommands.resizeCluster("cluster1", "NodeGroup1", -1,0,0, false, false);
        clusterCommands.resizeCluster("cluster1", "NodeGroup1", 0,0,0, false, false);
 
         //normal case
         clusterCommands.resizeCluster("cluster1", "NodeGroup1", 5,0,0, false, false);
->>>>>>> cd5f434... add skipRefreshVc for cluster create/resize/resume
 
         //zookeeper resize case
         setup();
@@ -172,11 +164,7 @@ public class ClusterCommandsTest extends MockRestServer {
               mapper.writeValueAsString(cr1));
         this.buildReqRespWithoutRespBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1/nodegroup/NodeGroup2/instancenum",
                 HttpMethod.PUT, HttpStatus.NO_CONTENT, "5");
-<<<<<<< HEAD
-        clusterCommands.resizeCluster("cluster1", "NodeGroup2", 5,0,0);
-=======
         clusterCommands.resizeCluster("cluster1", "NodeGroup2", 5,0,0, false, false);
->>>>>>> cd5f434... add skipRefreshVc for cluster create/resize/resume
 
         CookieCache.clear();
     }
@@ -253,11 +241,7 @@ public class ClusterCommandsTest extends MockRestServer {
         this.buildReqRespWithoutReqBody("https://127.0.0.1:8443/serengeti/api/cluster/cluster1/nodegroup/ng1/instancenum",
                 HttpMethod.PUT, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
 
-<<<<<<< HEAD
-        clusterCommands.resizeCluster("cluster1", "ng1", 5,0,0);
-=======
         clusterCommands.resizeCluster("cluster1", "ng1", 5, 0, 0, false, false);
->>>>>>> cd5f434... add skipRefreshVc for cluster create/resize/resume
         CookieCache.clear();
     }
 
