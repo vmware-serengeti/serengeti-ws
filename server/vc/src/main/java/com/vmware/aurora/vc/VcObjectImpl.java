@@ -129,12 +129,16 @@ public abstract class VcObjectImpl implements VcObject {
       try {
          ManagedObject mo = getManagedObject();
          if (updates.contains(UpdateType.CONFIG)) {
+            logger.debug("start updateConfig for " + getMoRef().getValue());
             Profiler.inc(StatsType.VC_UPDATE_CONFIG, this);
             update(mo);
+            logger.debug("finish updateConfig for " + getMoRef().getValue());
          }
          if (updates.contains(UpdateType.RUNTIME)) {
+            logger.debug("start updateRuntime for " + getMoRef().getValue());
             Profiler.inc(StatsType.VC_UPDATE_RUNTIME, this);
             updateRuntime(mo);
+            logger.debug("finish updateRuntime for " + getMoRef().getValue());
          }
       } catch (ManagedObjectNotFound mnf) {
          if (mnf.getObj().equals(moRef)) {
