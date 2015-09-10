@@ -1881,6 +1881,8 @@ public class ClusterCommands implements CommandMarker {
       try {
           if (resume) {
               resumeCreateCluster(name);
+              CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
+                      Constants.OUTPUT_OP_ADD + Constants.OUTPUT_OP_RESULT_SUCCEEDED);
               return;
           }
 
@@ -1922,11 +1924,10 @@ public class ClusterCommands implements CommandMarker {
                       Constants.PARAM_NODEGROUP + Constants.PARAM_NOT_CONTAIN_BLANK_SPACE);
               return;
           }
-//          nodeGroupAdd.setName(name);
 
           restClient.addNodeGroups(name, nodeGroupAdd);
           CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
-                  Constants.OUTPUT_OP_ADD);
+                  Constants.OUTPUT_OP_ADD + Constants.OUTPUT_OP_RESULT_SUCCEEDED);
       } catch (Exception e) {
           CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                   Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());

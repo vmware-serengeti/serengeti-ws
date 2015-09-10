@@ -1740,7 +1740,6 @@ public class ClusterManager {
             addNodeGroupEntity.setCluster(clusterEntity);
             addNodeGroupEntity.setVmFolderPath(clusterEntity);
 
-//            clusterEntity.getNodeGroups().add(addNodeGroupEntity);
             ng.setVmFolderPath(clusterEntity.getRootFolder() + "/" + ng.getName());
 
             logger.info("Node group " + ng.getName() + " of cluster "
