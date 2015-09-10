@@ -334,7 +334,7 @@ public class SoftwareManagerCollector implements InitializingBean {
    }
 
    public synchronized void loadSoftwareManagers() {
-
+      logger.info("load software managers!");
       boolean defaultMgrExists = false;
       List<AppManagerEntity> appManagers = appManagerService.findAll();
       for (AppManagerEntity appManager : appManagers) {

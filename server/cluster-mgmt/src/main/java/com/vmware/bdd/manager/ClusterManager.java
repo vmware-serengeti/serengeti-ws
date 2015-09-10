@@ -368,10 +368,19 @@ public class ClusterManager {
    }
 
    public List<ClusterRead> getClusters(Boolean realTime) {
+      logger.info("start getClusters.");
       List<ClusterRead> clusters = new ArrayList<ClusterRead>();
       List<ClusterEntity> clusterEntities = clusterEntityMgr.findAllClusters();
+
+      if(logger.isDebugEnabled()) {
+         logger.debug("after finallAllClusters");
+      }
+
       for (ClusterEntity entity : clusterEntities) {
          clusters.add(getClusterByName(entity.getName(), realTime));
+         if(logger.isDebugEnabled()) {
+            logger.debug("getClusterByName finished: " + entity.getName());
+         }
       }
       return clusters;
    }
