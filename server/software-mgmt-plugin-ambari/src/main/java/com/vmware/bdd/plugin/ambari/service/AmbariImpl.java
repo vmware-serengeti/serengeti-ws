@@ -719,7 +719,7 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
                && group.getRoles().contains(
                HadoopRole.HBASE_REGIONSERVER_ROLE.toString())) {
             logger.info("Start to set hbase region opts");
-            setHbase_AmbariRegionServer_Opts(configList, group);
+            setHbaseAmbariRegionServerOpts(configList, group);
             break;
          }
       }
@@ -729,7 +729,7 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
     * @param configList
     * @param group
     */
-   private void setHbase_AmbariRegionServer_Opts(List<ApiConfiguration> configList, NodeGroupInfo group){
+   private void setHbaseAmbariRegionServerOpts(List<ApiConfiguration> configList, NodeGroupInfo group){
       String configurationType = "hbase-env";
       Map<String, Object> conf = group.getConfiguration();
       if (conf == null) {

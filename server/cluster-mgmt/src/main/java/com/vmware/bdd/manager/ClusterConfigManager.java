@@ -318,7 +318,7 @@ public class ClusterConfigManager {
                String groupRoles = group.getRoles();
                if((group.getLatencySensitivity() == LatencyPriority.HIGH)
                      && ((groupRoles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE.toString())))){
-                     setHbase_RegionServer_Opts(cluster, group);
+                     setHbaseRegionServerOpts(cluster, group);
                      if (cluster.getConfiguration() != null
                            && cluster.getConfiguration().size() > 0) {
                         clusterEntity.setHadoopConfig((new Gson()).toJson(cluster
@@ -367,7 +367,7 @@ public class ClusterConfigManager {
     * @param cluster
     * @param ng
     */
-   private void setHbase_RegionServer_Opts(ClusterCreate cluster, NodeGroupEntity ng) {
+   private void setHbaseRegionServerOpts(ClusterCreate cluster, NodeGroupEntity ng) {
       Map<String, Object> conf = cluster.getConfiguration();
       if (conf == null) {
          conf = new HashMap<String, Object>();
