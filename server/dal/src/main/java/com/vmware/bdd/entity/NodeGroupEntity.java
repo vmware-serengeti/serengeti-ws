@@ -63,13 +63,13 @@ public class NodeGroupEntity extends EntityBase {
    @Column(name = "memory")
    private int memorySize;
 
-   @Column(name = "reservedCpu_ratio")
+   @Column(name = "reservedcpu_ratio")
    private Float reservedCpu_ratio;
 
-   @Column(name = "reservedMem_ratio")
+   @Column(name = "reservedmem_ratio")
    private Float reservedMem_ratio;
 
-   @Column(name = "latencySensitivity")
+   @Column(name = "latencysensitivity")
    private LatencyPriority latencySensitivity;
 
    @Column(name = "swap_ratio")

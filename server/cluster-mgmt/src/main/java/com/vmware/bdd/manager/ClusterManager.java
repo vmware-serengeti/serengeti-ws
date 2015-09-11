@@ -365,11 +365,8 @@ public class ClusterManager {
       spec.setSharedDatastorePattern(null);
       spec.setLocalDatastorePattern(null);
       spec.setNetworkings(null);
-      spec.setRpNames(null);
-      spec.setDsNames(null);
       spec.setNetworkConfig(null);
       spec.setName(null);
-      spec.setDistro(null);
       spec.setValidateConfig(null);
       spec.setSpecFile(null);
       spec.setTopologyPolicy(null);
@@ -379,6 +376,7 @@ public class ClusterManager {
       spec.setDistroVendor(null);
       spec.setDistroVersion(null);
       spec.setPassword(null);
+      spec.setHostnamePrefix(null);
       NodeGroupCreate[] groups = spec.getNodeGroups();
       if (groups != null) {
          for (NodeGroupCreate group : groups) {
