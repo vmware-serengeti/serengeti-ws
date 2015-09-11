@@ -46,7 +46,7 @@
         "NODEMANAGER",
         "METRICS_MONITOR"
       ],
-      "instanceType":"SMALL",
+      "instanceType":"LARGE",
       "instanceNum":3,
       "storage": {
         "type": "LOCAL",
@@ -71,7 +71,7 @@
         "METRICS_MONITOR",
         "NFS_GATEWAY"
       ],
-      "instanceType":"SMALL",
+      "instanceType":"MEDIUM",
       "instanceNum":1,
       "storage": {
         "type": "LOCAL",
