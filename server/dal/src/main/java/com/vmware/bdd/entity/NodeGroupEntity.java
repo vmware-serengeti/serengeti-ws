@@ -32,6 +32,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.apache.log4j.Logger;
 import org.hibernate.annotations.Type;
 
 import com.google.gson.Gson;
@@ -53,6 +54,7 @@ import com.vmware.bdd.utils.AuAssert;
 @SequenceGenerator(name = "IdSequence", sequenceName = "node_group_seq", allocationSize = 1)
 @Table(name = "node_group")
 public class NodeGroupEntity extends EntityBase {
+   private final static Logger LOGGER = Logger.getLogger(NodeGroupEntity.class);
 
    @Column(name = "name", nullable = false)
    private String name;
@@ -443,12 +445,23 @@ public class NodeGroupEntity extends EntityBase {
       nodeGroupRead.setStorage(storage);
 
       List<NodeRead> nodeList = new ArrayList<NodeRead>();
+
+      if(LOGGER.isDebugEnabled()) {
+         LOGGER.debug("before convert nodes.");
+      }
       for (NodeEntity node : this.nodes) {
+         if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("node is: " + node.getVmName());
+         }
          if (ignoreObsoleteNode && (node.isObsoleteNode() 
                || node.isDisconnected())) {
             continue;
          }
          nodeList.add(node.toNodeRead(true));
+
+         if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("node is converted: " + node.getVmName());
+         }
       }
       nodeGroupRead.setInstances(nodeList);
 

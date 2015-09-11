@@ -313,11 +313,19 @@ public class ClusterManager {
          throw BddException.NOT_FOUND("Cluster", clusterName);
       }
 
+      if(logger.isDebugEnabled()) {
+         logger.debug("clusterEntityMgr.findByName is done: " + clusterName);
+      }
+
       // return the latest data from db
       if (realTime
             && cluster.getStatus().isSyncServiceStatus()) {
             // for not running cluster, we don't sync up status from chef
          refreshClusterStatus(clusterName);
+
+         if(logger.isDebugEnabled()) {
+            logger.debug("refreshClusterStatus is done: " + clusterName);
+         }
       }
 
       return clusterEntityMgr.toClusterRead(clusterName);

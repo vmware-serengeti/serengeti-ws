@@ -731,6 +731,10 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
          clusterRead.setClusterCloneType(Constants.CLUSTER_CLONE_TYPE_FAST_CLONE);
       }
 
+      if (logger.isDebugEnabled()) {
+         logger.debug("before get softwareMgr");
+      }
+
       SoftwareManager softMgr = null;
       try {
          softMgr =
@@ -741,8 +745,15 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
          // do not throw exception for exporting cluster info
       }
 
+      if (logger.isDebugEnabled()) {
+         logger.debug("after get softwareMgr");
+      }
+
       List<NodeGroupRead> groupList = new ArrayList<NodeGroupRead>();
       for (NodeGroupEntity group : cluster.getNodeGroups()) {
+         if (logger.isDebugEnabled()) {
+            logger.debug("convert node group: " + group.getName());
+         }
          NodeGroupRead groupRead = group.toNodeGroupRead(ignoreObsoleteNode);
          groupRead.setComputeOnly(false);
          try {
