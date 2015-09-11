@@ -16,19 +16,18 @@ package com.vmware.bdd.service.impl;
 
 import java.util.List;
 
-import com.vmware.aurora.util.worker.PeriodicRequest;
-import com.vmware.aurora.util.worker.CmsWorker.WorkQueue;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
+import com.vmware.bdd.service.ClusterNodeUpdator;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ClusterNodeUpdator implements Runnable {
-   private final static Logger LOGGER = Logger.getLogger(ClusterNodeUpdator.class);
+public class ClusterNodeUpdatorImpl implements ClusterNodeUpdator {
+   private final static Logger LOGGER = Logger.getLogger(ClusterNodeUpdatorImpl.class);
    private final static long FIVE_MINS_IN_MILLI_SEC = 5 * 60 * 1000;
 
    @Autowired
@@ -36,8 +35,8 @@ public class ClusterNodeUpdator implements Runnable {
    @Autowired
    private IConcurrentLockedClusterEntityManager lockMgr;
 
-   @Scheduled(initialDelay = 0l, fixedDelay = FIVE_MINS_IN_MILLI_SEC)
-   public void run() {
+   @Scheduled(initialDelay = FIVE_MINS_IN_MILLI_SEC, fixedDelay = FIVE_MINS_IN_MILLI_SEC)
+   public void syncAllClusters() {
       List<ClusterEntity> clusters = entityMgr.findAllClusters();
       for (ClusterEntity cluster : clusters) {
          if (cluster.getStatus().isStableStatus()) {

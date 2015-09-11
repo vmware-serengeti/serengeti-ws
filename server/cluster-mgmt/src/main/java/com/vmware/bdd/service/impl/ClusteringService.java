@@ -63,6 +63,7 @@ import com.vmware.bdd.placement.exception.PlacementException;
 import com.vmware.bdd.placement.interfaces.IPlacementService;
 import com.vmware.bdd.placement.util.ContainerToStringHelper;
 import com.vmware.bdd.placement.util.PlacementUtil;
+import com.vmware.bdd.service.ClusterNodeUpdator;
 import com.vmware.bdd.service.IClusterInitializerService;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.event.VmEventManager;
@@ -120,7 +121,7 @@ public class ClusteringService implements IClusteringService {
    private INodeTemplateService nodeTemplateService;
 
    private volatile boolean inited = false;
-   private Throwable initError;
+   private volatile Throwable initError;
 
    private int cloneConcurrency;
    private VmEventManager processor;
@@ -130,6 +131,9 @@ public class ClusteringService implements IClusteringService {
    private ClusterManager clusterManager;
 
    private SoftwareManagerCollector softwareManagerCollector;
+
+   @Autowired
+   private ClusterNodeUpdator clusterNodeUpdator;
 
    @Autowired
    private CmsWorker cmsWorker;
@@ -283,10 +287,9 @@ public class ClusteringService implements IClusteringService {
                cloneConcurrency = 1;
             }
 
-            // refresh the cluster nodes once on bde startup, till now the vc cache has
-            // been loaded, so it should be fast to do it
+            // refresh the cluster nodes once on bde startup,
             // then add the periodic processing with default 5 minute interval
-//            cmsWorker.addPeriodic(clusterNodeUpdator);
+            clusterNodeUpdator.syncAllClusters();
 
             initUUID();
 
