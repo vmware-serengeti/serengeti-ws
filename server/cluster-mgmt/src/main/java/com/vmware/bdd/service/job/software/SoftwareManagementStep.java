@@ -24,6 +24,7 @@ import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.utils.JobUtils;
+
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -44,8 +45,10 @@ import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.job.TrackableTasklet;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.SyncHostsUtils;
+import com.vmware.bdd.utils.Version;
 
 public class SoftwareManagementStep extends TrackableTasklet {
    private static final Logger logger = Logger
@@ -238,6 +241,17 @@ public class SoftwareManagementStep extends TrackableTasklet {
                      clusterName);
          putIntoJobExecutionContext(chunkContext,
                JobConstants.CLUSTER_BLUEPRINT_JOB_PARAM, clusterBlueprint);
+      }
+
+      // This is for Ambari version >= 2.1 only.
+      String appMgrType = softwareMgr.getType();
+      if (appMgrType.equalsIgnoreCase(Constants.AMBARI_PLUGIN_TYPE)
+            && (managementOperation.equals(ManagementOperation.CREATE) || managementOperation.equals(ManagementOperation.RESIZE) || managementOperation.equals(ManagementOperation.RESUME))
+            && Version.compare(softwareMgr.getVersion(), "2.1") >= 0) {
+         if (clusterBlueprint.hasTopologyPolicy()) {
+            Map<String, String> rackTopology = this.clusterManager.getRackTopology(clusterName, null);
+            clusterBlueprint.setRackTopology(rackTopology);
+         }
       }
 
       task =

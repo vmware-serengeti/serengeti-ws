@@ -98,4 +98,10 @@ public class FakeClusterHostsResource implements HostsResource {
       return null;
    }
 
+   @Override
+   public Response setRackInfo(String hostsRackInfo) {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
 }

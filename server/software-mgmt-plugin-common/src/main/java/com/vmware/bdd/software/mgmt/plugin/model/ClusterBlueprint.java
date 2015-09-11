@@ -49,6 +49,7 @@ public class ClusterBlueprint implements Serializable {
    private String externalSecondaryNamenode;
    private Set<String> externalDatanodes;
 
+   private Map<String, String> rackTopology;
 
    public String getName() {
       return name;
@@ -151,6 +152,14 @@ public class ClusterBlueprint implements Serializable {
          return false;
       }
       return true;
+   }
+
+   public Map<String, String> getRackTopology() {
+      return rackTopology;
+   }
+
+   public void setRackTopology(Map<String, String> rackTopology) {
+      this.rackTopology = rackTopology;
    }
 
 }
