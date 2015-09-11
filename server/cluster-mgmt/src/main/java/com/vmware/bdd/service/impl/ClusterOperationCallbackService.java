@@ -25,10 +25,10 @@ public class ClusterOperationCallbackService implements IClusterOperationCallbac
    private static final Logger logger = Logger.getLogger(ClusterOperationCallbackService.class);
 
    @Override
-   public boolean invoke(String phase, String clusterName, String clusterOperation, String appMgrType, String vendorName, String distroVersion, String softwareMgrVersion) {
-      AuAssert.check(phase != null && clusterName != null && clusterOperation != null && appMgrType != null && vendorName != null && distroVersion != null);
+   public boolean invoke(String phase, String clusterName, String clusterOperation, String appMgrType, String appMgrVersion, String vendorName, String distroVersion) {
+      AuAssert.check(phase != null && clusterName != null && clusterOperation != null && appMgrType != null && appMgrVersion != null && vendorName != null && distroVersion != null);
 
-      ClusterOperationCallbackSP clusterOperationCallbackSP = new ClusterOperationCallbackSP(phase, clusterName, clusterOperation, appMgrType, vendorName, distroVersion, softwareMgrVersion);
+      ClusterOperationCallbackSP clusterOperationCallbackSP = new ClusterOperationCallbackSP(phase, clusterName, clusterOperation, appMgrType, appMgrVersion, vendorName, distroVersion);
       try {
          if (clusterOperationCallbackSP.invoke()) {
             logger.info(phase + " for cluster " + clusterName + " succeed. ");
