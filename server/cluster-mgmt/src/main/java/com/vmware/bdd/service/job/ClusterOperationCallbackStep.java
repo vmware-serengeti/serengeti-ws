@@ -54,10 +54,10 @@ public class ClusterOperationCallbackStep extends TrackableTasklet {
       HadoopStack hadoopStack = clusterBlueprint.getHadoopStack();
       String vendorName = hadoopStack.getVendor();
       String distroVersion = hadoopStack.getFullVersion();
-      String softwareMgrVersion = softwareMgr.getVersion();
+      String appMgrVersion = softwareMgr.getVersion();
 
       // This is a patch for Ambari version < 2.1  only. Ambari Blueprint API doesn't support configuring Rack Topology.
-      if (appMgrType.equalsIgnoreCase(Constants.AMBARI_PLUGIN_TYPE) && Version.compare(softwareMgr.getVersion(), "2.1") < 0) {
+      if (appMgrType.equalsIgnoreCase(Constants.AMBARI_PLUGIN_TYPE) && Version.compare(appMgrVersion, "2.1") < 0) {
          if (clusterBlueprint.hasTopologyPolicy()) {
             Map<String, String> rackTopology = this.clusterManager.getRackTopology(clusterName, null);
             String filename = Constants.CLUSTER_RACK_TOPOLOGY_FILE_PATH + clusterName
@@ -76,7 +76,7 @@ public class ClusterOperationCallbackStep extends TrackableTasklet {
          }
       }
 
-      clusterOperationCallbackService.invoke(phase, clusterName, managementOperation.toString(), appMgrType, vendorName, distroVersion, softwareMgrVersion);
+      clusterOperationCallbackService.invoke(phase, clusterName, managementOperation.toString(), appMgrType, appMgrVersion, vendorName, distroVersion);
 
       return RepeatStatus.FINISHED;
    }

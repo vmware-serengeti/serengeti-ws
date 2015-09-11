@@ -16,5 +16,5 @@ package com.vmware.bdd.service;
 
 public interface IClusterOperationCallbackService {
 
-   public boolean invoke(String phase, String clusterName, String operation, String appMgrType, String vendorName, String distroVersion, String softwareMgrVersion);
+   public boolean invoke(String phase, String clusterName, String operation, String appMgrType, String appMgrVersion, String vendorName, String distroVersion);
 }
