@@ -1,6 +1,6 @@
 /*
  * **************************************************************************
- *  * Copyright (c) 2014-2015 VMware, Inc. All Rights Reserved.
+ *  * Copyright (c) 2015 VMware, Inc. All Rights Reserved.
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
  *  * You may obtain a copy of the License at
@@ -14,38 +14,23 @@
  *  * limitations under the License.
  *  **************************************************************************
  */
-
 package com.vmware.bdd.plugin.ambari.api.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceInfo;
 
-/**
- * Created by qjin on 7/7/14.
- */
-public class ApiBody {
-   @Expose
-   @SerializedName("ServiceInfo")
-   private ApiServiceInfo serviceInfo;
+public class ApiBodyHostsInfo {
 
    @Expose
-   @SerializedName("Hosts")
-   private ApiBodyHostsInfo hostsInfo;
+   @SerializedName("rack_info")
+   private String rackInfo;
 
-   public ApiServiceInfo getServiceInfo() {
-      return serviceInfo;
+   public String getRackInfo() {
+      return rackInfo;
    }
 
-   public void setServiceInfo(ApiServiceInfo serviceInfo) {
-      this.serviceInfo = serviceInfo;
+   public void setRackInfo(String rackInfo) {
+      this.rackInfo = rackInfo;
    }
 
-   public ApiBodyHostsInfo getHostsInfo() {
-      return hostsInfo;
-   }
-
-   public void setHostsInfo(ApiBodyHostsInfo hostsInfo) {
-      this.hostsInfo = hostsInfo;
-   }
 }

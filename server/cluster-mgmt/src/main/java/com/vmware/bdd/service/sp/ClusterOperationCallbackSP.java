@@ -35,8 +35,9 @@ public class ClusterOperationCallbackSP implements Callable<Void> {
    private String vendorName;
    private String distroVersion;
    private int clusterOperationCallbackTimeout;
+   private String softwareMgrVersion;
 
-   public ClusterOperationCallbackSP(String phase, String clusterName, String clusterOperation, String appMgrName, String vendorName, String distroVersion) {
+   public ClusterOperationCallbackSP(String phase, String clusterName, String clusterOperation, String appMgrName, String vendorName, String distroVersion, String softwareMgrVersion) {
       this.phase = phase;
       this.clusterName = clusterName;
       this.clusterOperation = clusterOperation.toLowerCase();
@@ -44,6 +45,7 @@ public class ClusterOperationCallbackSP implements Callable<Void> {
       this.vendorName = vendorName;
       this.distroVersion = distroVersion;
       this.clusterOperationCallbackTimeout = Configuration.getInt(Constants.CLUSTER_OPERATION_CALLBACK_TIMEOUT_SECONDS, Constants.CLUSTER_OPERATION_CALLBACK_TIMEOUT_SECONDS_DEFAULT);
+      this.softwareMgrVersion = softwareMgrVersion;
    }
 
    @Override
@@ -54,7 +56,7 @@ public class ClusterOperationCallbackSP implements Callable<Void> {
 
    public boolean invoke() throws Exception {
 
-      String clusterOperationCallbackcommand = Constants.CLUSTER_OPERATION_CALLBACK_SCRIPT_FILE_NAME + " " + phase + " " + clusterName + " " + clusterOperation + " " + appMgrName + " " + vendorName + " " + distroVersion;
+      String clusterOperationCallbackcommand = Constants.CLUSTER_OPERATION_CALLBACK_SCRIPT_FILE_NAME + " " + phase + " " + clusterName + " " + clusterOperation + " " + appMgrName + " " + vendorName + " " + distroVersion + " " + softwareMgrVersion;
 
       try {
          logger.info("Executing cluster operation hooks: " + clusterOperationCallbackcommand);

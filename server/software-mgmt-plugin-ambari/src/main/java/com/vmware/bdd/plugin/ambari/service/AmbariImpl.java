@@ -34,8 +34,8 @@ import com.vmware.bdd.plugin.ambari.api.manager.ApiManager_1_7_0;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager_2_0_0;
 import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 import com.vmware.aurora.util.HbaseRegionServerOptsUtil;
-
 import com.vmware.bdd.software.mgmt.plugin.intf.AbstractSoftwareManager;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 
@@ -363,6 +363,10 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
             createBlueprint(clusterDef, reportQueue);
 
             provisionWithBlueprint(clusterDef, reportQueue);
+
+            setClusterHostsRackInfo(clusterDef);
+
+            restartRequiredServices(clusterDef, reportQueue);
          }
 
       } catch (Exception e) {
@@ -370,6 +374,22 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
          logger.error(errorMessage);
 
          throw SoftwareManagementPluginException.CREATE_CLUSTER_EXCEPTION(e, Constants.AMBARI_PLUGIN_NAME, clusterDef.getName());
+      }
+   }
+
+   private void setClusterHostsRackInfo(final AmClusterDef clusterDef) throws SoftwareManagementPluginException {
+      setClusterHostsRackInfo(clusterDef, null);
+   }
+
+   private void setClusterHostsRackInfo(final AmClusterDef clusterDef, final List<String> addedNodeNames) throws SoftwareManagementPluginException {
+      Map<String, Set<String>> rackHostsMap = clusterDef.getRackHostsMap(addedNodeNames);
+
+      if (rackHostsMap == null) {
+         return;
+      }
+
+      for (String rackinfo : rackHostsMap.keySet()) {
+         apiManager.setClusterHostsRackInfo(clusterDef.getName(), rackinfo, rackHostsMap.get(rackinfo));
       }
    }
 
@@ -801,7 +821,7 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
       boolean success = false;
       AmClusterDef clusterDef = null;
       try {
-         clusterDef = new AmClusterDef(blueprint, privateKey);
+         clusterDef = new AmClusterDef(blueprint, privateKey, getVersion());
 
          String clusterName = clusterDef.getName();
 
@@ -1004,7 +1024,13 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
          ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName(), addedNodeNames, forceScaleOut);
 
          bootstrap(clusterDef, addedNodeNames, reports, forceScaleOut);
+
          provisionComponents(clusterDef, addedNodeNames, reports);
+
+         setClusterHostsRackInfo(clusterDef, addedNodeNames);
+
+         restartRequiredServices(clusterDef, reports);
+
          success = true;
 
          clusterDef.getCurrentReport().setNodesAction("", addedNodeNames);
@@ -1068,8 +1094,7 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
       // add configurations
       configNodes(clusterDef, configTypeToService, targetNodeDefs);
       installComponents(clusterDef, reports, apiHostComponentsRequest, targetHostNames);
-      boolean isResized = (startAllComponents(clusterDef, componentToInfo, apiHostComponentsRequest, targetHostNames, reports) && restartRequiredServices(clusterDef, reports));
-      return isResized;
+      return startAllComponents(clusterDef, componentToInfo, apiHostComponentsRequest, targetHostNames, reports);
    }
 
    private boolean restartRequiredServices(AmClusterDef clusterDef, ClusterReportQueue reports) throws Exception {
@@ -1725,7 +1750,7 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
 
       logger.info("Begin decommission host " + nodeName);
       try {
-         clusterDef = new AmClusterDef(blueprint, privateKey);
+         clusterDef = new AmClusterDef(blueprint, privateKey, getVersion());
 
          //decommission components
          logger.info("decommission components");

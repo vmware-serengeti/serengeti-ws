@@ -17,18 +17,18 @@ package com.vmware.bdd.plugin.ambari.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gson.annotations.Expose;
 import com.vmware.aurora.global.Configuration;
-import com.vmware.bdd.apitypes.LatencyPriority;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprintInfo;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostGroup;
-import com.vmware.bdd.plugin.ambari.spectypes.HadoopRole;
 import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 import com.vmware.bdd.plugin.ambari.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
@@ -75,14 +75,12 @@ public class AmClusterDef implements Serializable {
 
    private static final Map<String, String> serviceName2ServiceUserConfigName;
 
+   private Map<String, String> rackTopology;
+
    static {
       serviceName2ServiceUserConfigName = new HashMap<>();
       serviceName2ServiceUserConfigName.put("HDFS", "hdfs");
       serviceName2ServiceUserConfigName.put("YARN", "yarn");
-   }
-
-   public AmClusterDef(ClusterBlueprint blueprint, String privateKey) {
-      this(blueprint, privateKey, null);
    }
 
    public AmClusterDef(ClusterBlueprint blueprint, String privateKey, String ambariServerVersion) {
@@ -93,9 +91,10 @@ public class AmClusterDef implements Serializable {
       this.user = Constants.AMBARI_SSH_USER;
       this.currentReport = new ClusterReport(blueprint);
       this.ambariServerVersion = ambariServerVersion;
+      this.rackTopology = blueprint.getRackTopology();
 
       HdfsVersion hdfs = getDefaultHdfsVersion(this.version);
-      if (blueprint.hasTopologyPolicy()) {
+      if (blueprint.hasTopologyPolicy() && !AmUtils.isAmbariServerGreaterOrEquals_2_1_0(ambariServerVersion)) {
          setRackTopologyFileName(blueprint);
       }
       setAdditionalConfigurations(blueprint, ambariServerVersion);
@@ -291,6 +290,14 @@ public class AmClusterDef implements Serializable {
       this.nodeGroups = nodeGroups;
    }
 
+   public Map<String, String> getRackTopology() {
+      return rackTopology;
+   }
+
+   public void setRackTopology(Map<String, String> rackTopology) {
+      this.rackTopology = rackTopology;
+   }
+
    public ApiBootstrap toApiBootStrap() {
       return toApiBootStrap(null);
    }
@@ -432,6 +439,35 @@ public class AmClusterDef implements Serializable {
          amHostGroupsInfo.addAll(nodeGroup.generateHostGroupsInfo(configTypeToService));
       }
       return amHostGroupsInfo;
+   }
+
+   public Map<String, Set<String>> getRackHostsMap(List<String> addedNodeNames) {
+      if (!AmUtils.isAmbariServerGreaterOrEquals_2_1_0(ambariServerVersion)) {
+         return null;
+      }
+
+      Map<String, Set<String>> rackHostsMap = new HashMap<String, Set<String>> ();
+
+      List<AmNodeDef> nodes = getNodes();
+      for (AmNodeDef node : nodes) {
+
+         // This logic is just for cluster resize
+         if (addedNodeNames != null && !addedNodeNames.contains(node.getName())) {
+            continue;
+         }
+
+         String rack = this.rackTopology.get(node.getIp());
+         if (rack != null) {
+            Set<String> hosts = rackHostsMap.get(rack);
+            if (hosts == null) {
+               hosts = new HashSet<String> ();
+            }
+            hosts.add(node.getFqdn());
+            rackHostsMap.put(rack, hosts);
+         }
+      }
+
+      return rackHostsMap;
    }
 
    private boolean isNodeGenerateFromExternalNamenode(AmNodeDef node) {

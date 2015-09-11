@@ -1,24 +1,45 @@
+/***************************************************************************
+ * Copyright (c) 2015 VMware, Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.api.manager;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.vmware.bdd.plugin.ambari.api.exception.AmbariApiException;
-
+import com.vmware.bdd.plugin.ambari.api.model.ApiBody;
+import com.vmware.bdd.plugin.ambari.api.model.ApiBodyHostsInfo;
+import com.vmware.bdd.plugin.ambari.api.model.ApiPutRequest;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiAlert;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceAlert;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceAlertList;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceStatus;
+import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiPostRequestInfo;
 import com.vmware.bdd.plugin.ambari.api.model.stack2.*;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import javax.ws.rs.core.Response;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by qjin on 5/12/15.
@@ -100,7 +121,7 @@ public class ApiManager_2_0_0 extends ApiManager {
 
    @Override
    public ApiStackServiceList getStackServiceList(String stackName,
-                                                  String stackVersion) throws AmbariApiException {
+         String stackVersion) throws AmbariApiException {
       Response response = null;
       try {
          response = apiResourceRootV1.getStacksResource()
@@ -132,8 +153,8 @@ public class ApiManager_2_0_0 extends ApiManager {
 
    @Override
    public ApiStackService getStackService(String stackName,
-                                          String stackVersion, String stackServiceName)
-         throws AmbariApiException {
+         String stackVersion, String stackServiceName)
+               throws AmbariApiException {
       Response response = null;
       try {
          response = apiResourceRootV1.getStacksResource()
@@ -153,8 +174,8 @@ public class ApiManager_2_0_0 extends ApiManager {
 
    @Override
    public ApiStackComponentList getStackComponentList(String stackName,
-                                                      String stackVersion, String stackServiceName)
-         throws AmbariApiException {
+         String stackVersion, String stackServiceName)
+               throws AmbariApiException {
       Response response = null;
       try {
          response = apiResourceRootV1.getStacksResource()
@@ -175,8 +196,8 @@ public class ApiManager_2_0_0 extends ApiManager {
 
    @Override
    public ApiStackComponent getStackComponent(String stackName,
-                                              String stackVersion, String stackServiceName, String stackComponentName)
-         throws AmbariApiException {
+         String stackVersion, String stackServiceName, String stackComponentName)
+               throws AmbariApiException {
       Response response = null;
       try {
          response = apiResourceRootV1.getStacksResource()
@@ -197,13 +218,13 @@ public class ApiManager_2_0_0 extends ApiManager {
 
    @Override
    public ApiStackServiceList getStackWithCompAndConfigs(String stackName,
-                                                         String stackVersion) throws AmbariApiException {
+         String stackVersion) throws AmbariApiException {
       return getServicesWithFilter(stackName, stackVersion, "configurations/StackConfigurations,components/StackServiceComponents");
    }
 
    @Override
    public ApiStackServiceList getServicesWithFilter(String stackName,
-                                                    String stackVersion, String filter) throws AmbariApiException {
+         String stackVersion, String filter) throws AmbariApiException {
       Response response = null;
       try {
          response = apiResourceRootV1.getStacksResource()
@@ -224,8 +245,8 @@ public class ApiManager_2_0_0 extends ApiManager {
    }
 
    private ApiStackService getServiceWithFilter(String stackName,
-                                                  String stackVersion, String serviceName, String filter)
-         throws AmbariApiException {
+         String stackVersion, String serviceName, String filter)
+               throws AmbariApiException {
       Response response = null;
       try {
          response = apiResourceRootV1.getStacksResource()
@@ -247,7 +268,7 @@ public class ApiManager_2_0_0 extends ApiManager {
    @Override
    public List<ApiConfiguration> getServiceConfiguration(String stackName,
          String stackVersion, String serviceName)
-         throws AmbariApiException {
+               throws AmbariApiException {
       Response response = null;
       try {
          response = apiResourceRootV1.getStacksResource()
@@ -262,7 +283,7 @@ public class ApiManager_2_0_0 extends ApiManager {
       List<ApiConfiguration> apiConfigurationInfo =
             gson.fromJson(apiStackServiceWithComponentsJson,
                   new TypeToken<List<ApiConfiguration>>() {
-                  }.getType());
+            }.getType());
       return apiConfigurationInfo;
    }
 
@@ -309,6 +330,37 @@ public class ApiManager_2_0_0 extends ApiManager {
          }
       }
       return ServiceStatus.UNKONWN;
+   }
+
+   @Override
+   public void setClusterHostsRackInfo(String clusterName, String rackInfo, Set<String> hosts) {
+      logger.info("Ambari is setting hosts rack info in cluster " + clusterName);
+
+      if (hosts.isEmpty()) {
+         return;
+      }
+
+      ApiBody body = new ApiBody();
+      ApiBodyHostsInfo apiBodyHostsInfo = new ApiBodyHostsInfo();
+      apiBodyHostsInfo.setRackInfo(rackInfo);
+      body.setHostsInfo(apiBodyHostsInfo);
+
+      ApiPostRequestInfo requestInfo = new ApiPostRequestInfo();
+      requestInfo.setContext("Set Rack");
+      String query = "Hosts/host_name.in(" + StringUtils.join(hosts, ",") + ")";
+      requestInfo.setQuery(query);
+
+      ApiPutRequest setHostsRackInfoRequest = new ApiPutRequest(requestInfo, body);
+      String request = ApiUtils.objectToJson(setHostsRackInfoRequest);
+      logger.info("The setting hosts rack info request content is " + request);
+
+      Response response = null;
+      try {
+         response = apiResourceRootV1.getClustersResource().getHostsResource(clusterName).setRackInfo(request);
+      } catch (Exception e) {
+         throw AmbariApiException.CANNOT_CONNECT_AMBARI_SERVER(e);
+      }
+      handleAmbariResponse(response);
    }
 
    private ApiServiceAlertList getServicesWithAlert(String clusterName) throws AmbariApiException {

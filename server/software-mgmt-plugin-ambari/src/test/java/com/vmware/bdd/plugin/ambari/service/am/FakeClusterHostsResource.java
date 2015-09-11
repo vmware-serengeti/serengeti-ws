@@ -98,4 +98,10 @@ public class FakeClusterHostsResource implements HostsResource {
       return BuildResponse.buildResponse("cluster/hosts/host_components.json");
    }
 
+   @Override
+   public Response setRackInfo(String hostsRackInfo) {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
 }

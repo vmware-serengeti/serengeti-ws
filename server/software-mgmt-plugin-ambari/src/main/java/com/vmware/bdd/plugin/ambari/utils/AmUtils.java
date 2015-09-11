@@ -74,14 +74,14 @@ public class AmUtils {
             //for HDFS/HBASE we also need to change related field in xml files
             //Reference: http://docs.hortonworks.com/HDPDocuments/HDP1/HDP-1.3.3/bk_using_Ambari_book/content/ambari-chap3-7-1_2x.html
             switch (serviceUserConfig.getKey()) {
-               case "HDFS":
-                  updateConfigInConfiguration(configuration, "hdfs-site", "dfs.permissions.superusergroup", serviceUser);
-                  //the administrators config need to have a whitespace in front of the service user
-                  updateConfigInConfiguration(configuration, "hdfs-site", "dfs.cluster.administrators", " " + serviceUser);
-                  break;
-               case "HBASE":
-                  updateConfigInConfiguration(configuration, "", "dfs.block.local-path-access.user", serviceUser);
-                  break;
+            case "HDFS":
+               updateConfigInConfiguration(configuration, "hdfs-site", "dfs.permissions.superusergroup", serviceUser);
+               //the administrators config need to have a whitespace in front of the service user
+               updateConfigInConfiguration(configuration, "hdfs-site", "dfs.cluster.administrators", " " + serviceUser);
+               break;
+            case "HBASE":
+               updateConfigInConfiguration(configuration, "", "dfs.block.local-path-access.user", serviceUser);
+               break;
             }
          }
       }
@@ -125,7 +125,7 @@ public class AmUtils {
             if (nodeConfiguration.containsKey(configurationType)) {
                Map<String, String> properties =
                      (Map<String, String>) nodeConfiguration
-                           .get(configurationType);
+                     .get(configurationType);
                properties.putAll(property);
                isContainsKey = true;
             }
@@ -162,10 +162,11 @@ public class AmUtils {
 
    public static boolean isAmbariServerBelow_2_0_0(String ambariServerVersion) {
       //When server version is invalid, using the 1.x.x api as default
-      if (ambariServerVersion == null || ambariServerVersion.split("\\.").length != 3) {
-         return true;
-      }
-      return Integer.parseInt(ambariServerVersion.split("\\.")[0]) < 2;
+      return Version.compare(ambariServerVersion, "2.0") < 0;
+   }
+
+   public static boolean isAmbariServerGreaterOrEquals_2_1_0(String ambariServerVersion) {
+      return Version.compare(ambariServerVersion, "2.1") >= 0;
    }
 
    public static boolean containsRole(ClusterBlueprint blueprint, String role) {

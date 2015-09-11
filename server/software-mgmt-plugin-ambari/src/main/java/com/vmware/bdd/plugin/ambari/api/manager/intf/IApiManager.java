@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2014-2015 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@ package com.vmware.bdd.plugin.ambari.api.manager.intf;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.vmware.bdd.plugin.ambari.api.exception.AmbariApiException;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
@@ -172,5 +173,7 @@ public interface IApiManager {
    public List<ApiRequest> restartRequiredServices(String clusterName) throws AmbariApiException;
 
    public ApiRequest restartRequiredService(String clusterName, ApiRestartRequiredService apiRestartRequiredService) throws AmbariApiException;
+
+   public void setClusterHostsRackInfo(String clusterName, String rackInfo, Set<String> hosts);
 
 }

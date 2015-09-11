@@ -17,6 +17,7 @@ package com.vmware.bdd.service.job;
 import java.util.Map;
 
 import com.vmware.bdd.utils.JobUtils;
+
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.Version;
 
 public class ClusterOperationCallbackStep extends TrackableTasklet {
 
@@ -52,9 +54,10 @@ public class ClusterOperationCallbackStep extends TrackableTasklet {
       HadoopStack hadoopStack = clusterBlueprint.getHadoopStack();
       String vendorName = hadoopStack.getVendor();
       String distroVersion = hadoopStack.getFullVersion();
+      String softwareMgrVersion = softwareMgr.getVersion();
 
-      // This is a patch for Ambari only. Ambari Blueprint API doesn't support configuring Rack Topology.
-      if (appMgrType.equalsIgnoreCase(Constants.AMBARI_PLUGIN_TYPE)) {
+      // This is a patch for Ambari version < 2.1  only. Ambari Blueprint API doesn't support configuring Rack Topology.
+      if (appMgrType.equalsIgnoreCase(Constants.AMBARI_PLUGIN_TYPE) && Version.compare(softwareMgr.getVersion(), "2.1") < 0) {
          if (clusterBlueprint.hasTopologyPolicy()) {
             Map<String, String> rackTopology = this.clusterManager.getRackTopology(clusterName, null);
             String filename = Constants.CLUSTER_RACK_TOPOLOGY_FILE_PATH + clusterName
@@ -73,7 +76,7 @@ public class ClusterOperationCallbackStep extends TrackableTasklet {
          }
       }
 
-      clusterOperationCallbackService.invoke(phase, clusterName, managementOperation.toString(), appMgrType, vendorName, distroVersion);
+      clusterOperationCallbackService.invoke(phase, clusterName, managementOperation.toString(), appMgrType, vendorName, distroVersion, softwareMgrVersion);
 
       return RepeatStatus.FINISHED;
    }
