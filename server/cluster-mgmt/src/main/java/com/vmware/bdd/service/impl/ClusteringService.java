@@ -818,6 +818,7 @@ public class ClusteringService implements IClusteringService {
             // create cluster folder first
             NodeGroupCreate group = cluster.getNodeGroups()[0];
             String path = group.getVmFolderPath();
+            logger.info("create folderName" + path);
             String[] folderNames = path.split("/");
             List<String> folderList = new ArrayList<String>();
             for (int i = 0; i < folderNames.length - 1; i++) {
@@ -1785,7 +1786,7 @@ public class ClusteringService implements IClusteringService {
 
    private void deleteChildRps(String hadoopClusterName, List<BaseNode> vNodes) {
       logger.info("Start to delete child resource pools for cluster: "
-            + hadoopClusterName);
+              + hadoopClusterName);
       Map<String, Map<String, VcResourcePool>> clusterMap =
             new HashMap<String, Map<String, VcResourcePool>>();
       for (BaseNode node : vNodes) {
@@ -2132,9 +2133,12 @@ public class ClusteringService implements IClusteringService {
                  .toArray(new NodeGroupCreate[newNodeGroups.size()]));
       }
 
-      createVcFolders(clusterSpec, true);
-      createVcResourcePools(vNodes, true);
-      success = true;
+      if(null != createVcFolders(clusterSpec, true)) {
+         if(null != createVcResourcePools(vNodes, true)) {
+            success = true;
+         }
+      }
+
       return success;
    }
 

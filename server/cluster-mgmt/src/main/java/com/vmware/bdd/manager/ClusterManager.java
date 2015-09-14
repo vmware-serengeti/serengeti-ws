@@ -33,8 +33,12 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
+import com.vmware.aurora.vc.VcResourcePool;
 import com.vmware.bdd.apitypes.*;
+import com.vmware.bdd.exception.*;
 import com.vmware.bdd.placement.entity.BaseNode;
+import com.vmware.bdd.service.impl.ClusteringService;
+import com.vmware.bdd.utils.*;
 import com.vmware.vim.binding.vim.Folder;
 import org.apache.commons.collections.CollectionUtils;
 import com.vmware.bdd.service.resmgmt.IVcInventorySyncService;
@@ -74,12 +78,6 @@ import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
-import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.exception.ClusterConfigException;
-import com.vmware.bdd.exception.ClusterHealServiceException;
-import com.vmware.bdd.exception.ClusterManagerException;
-import com.vmware.bdd.exception.VcProviderException;
-import com.vmware.bdd.exception.WarningMessageException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.IClusterHealService;
 import com.vmware.bdd.service.IClusteringService;
@@ -98,13 +96,6 @@ import com.vmware.bdd.specpolicy.CommonClusterExpandPolicy;
 import com.vmware.bdd.spectypes.IronfanStack;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.usermgmt.UserMgmtConstants;
-import com.vmware.bdd.utils.AuAssert;
-import com.vmware.bdd.utils.ClusterUtil;
-import com.vmware.bdd.utils.CommonUtil;
-import com.vmware.bdd.utils.Constants;
-import com.vmware.bdd.utils.JobUtils;
-import com.vmware.bdd.utils.ValidationUtils;
-import com.vmware.bdd.utils.Version;
 
 public class ClusterManager {
    static final Logger logger = Logger.getLogger(ClusterManager.class);
@@ -1749,10 +1740,17 @@ public class ClusterManager {
                           NodeGroupCreate[] nodeGroupsAdd) throws Exception {
       Long taskId = null;
       List<BaseNode> vNodes = new ArrayList<BaseNode>();
-      List<String> failedMsgList = new ArrayList<String>();
-      List<String> warningMsgList = new ArrayList<String>();
+      String rpNames = null;
 
       ClusterCreate clusterSpec = clusterConfigMgr.getClusterConfig(clusterName);
+      List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(clusterName);
+
+      for(NodeEntity node: nodes) {
+         rpNames = node.getVcRp().getVcResourcePool();
+         if (null != rpNames)
+            break;
+      }
+
       clusterSpec.setNodeGroups(nodeGroupsAdd);
 
       for (NodeGroupCreate ng : nodeGroupsAdd) {
@@ -1765,7 +1763,7 @@ public class ClusterManager {
             throw ClusterConfigException.CLUSTER_CONFIG_NOT_FOUND(clusterName);
          }
          if ( 0 == ng.getInstanceNum()) {
-            throw ClusterManagerException.NODE_GROUP_CANNOT_BE_ZERO(clusterName, ng.getName());
+            throw ClusterManagerException.NODE_GROUP_CANNOT_BE_ZERO(clusterName);
          }
 
          if (group == null) {
@@ -1808,10 +1806,13 @@ public class ClusterManager {
          node.setCluster(clusterSpec);
          node.setTargetVcCluster(clusterSpec.getVcClusters().get(0).getName());
          node.setNodeGroup(ng);
+
+         node.setTargetRp(rpNames);
          vNodes.add(node);
       }
 
       clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.ADDING);
+
       if (clusteringService.addNodeGroups(clusterSpec, nodeGroupsAdd, vNodes)) {
          taskId = resumeClusterCreation(clusterName);
       } else {
