@@ -56,7 +56,7 @@ public class Container implements IContainer {
    }
 
    @Override
-   public void SetTemplateNode(BaseNode template) {
+   public void setTemplateNode(BaseNode template) {
       AuAssert.check(template.getDisks() != null
             && template.getDisks().size() == 1);
       this.templateNode = template;

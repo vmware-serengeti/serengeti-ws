@@ -1406,7 +1406,7 @@ public class ClusteringService implements IClusteringService {
       }
 
       VcVirtualMachine templateVm = getTemplateVM(clusterSpec.getTemplateName());
-      container.SetTemplateNode(createBaseNodeFromTemplateVm(templateVm));
+      container.setTemplateNode(createBaseNodeFromTemplateVm(templateVm));
       if (clusterSpec.getHostToRackMap() != null
             && clusterSpec.getHostToRackMap().size() != 0) {
          container.addRackMap(clusterSpec.getHostToRackMap());

@@ -24,6 +24,8 @@ public interface INodeTemplateService {
 
    public void refreshNodeTemplates();
    public List<VirtualMachineRead> getAllNodeTemplates();
+   public VirtualMachineRead getNodeTemplateByMoid(String moid);
+   public VirtualMachineRead getNodeTemplateByName(String moid);
    public VcVirtualMachine getNodeTemplateVMByMoid(String moid);
    public VcVirtualMachine getNodeTemplateVMByName(String templateName);
    public String getNodeTemplateNameByMoid(String moid);

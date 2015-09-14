@@ -37,7 +37,7 @@ public class TestPlacementService {
                   .getAbstractDatacenter(TestPlacementUtil.DATACENTER_SPEC);
 
       Container container = new Container(dc);
-      container.SetTemplateNode(TestPlacementUtil.getTemplateNode());
+      container.setTemplateNode(TestPlacementUtil.getTemplateNode());
 
       PlacementService service = new PlacementService();
 
@@ -58,7 +58,7 @@ public class TestPlacementService {
                   .getAbstractDatacenter(TestPlacementUtil.DATACENTER_SPEC);
 
       Container container = new Container(dc);
-      container.SetTemplateNode(TestPlacementUtil.getTemplateNode());
+      container.setTemplateNode(TestPlacementUtil.getTemplateNode());
 
       PlacementService service = new PlacementService();
 
@@ -100,7 +100,7 @@ public class TestPlacementService {
                   .getAbstractDatacenter(TestPlacementUtil.DATACENTER_SPEC);
 
       Container container = new Container(dc);
-      container.SetTemplateNode(TestPlacementUtil.getTemplateNode());
+      container.setTemplateNode(TestPlacementUtil.getTemplateNode());
 
       List<BaseNode> existedNodes =
             TestPlacementUtil
@@ -138,7 +138,7 @@ public class TestPlacementService {
                   .getAbstractDatacenter(TestPlacementUtil.RESIZE_DATACENTER_SPEC);
 
       Container container = new Container(dc);
-      container.SetTemplateNode(TestPlacementUtil.getTemplateNode());
+      container.setTemplateNode(TestPlacementUtil.getTemplateNode());
 
       List<BaseNode> existedNodes =
             TestPlacementUtil
@@ -181,7 +181,7 @@ public class TestPlacementService {
                   .getAbstractDatacenter(TestPlacementUtil.RESIZE_DATACENTER_SPEC);
 
       Container container = new Container(dc);
-      container.SetTemplateNode(TestPlacementUtil.getTemplateNode());
+      container.setTemplateNode(TestPlacementUtil.getTemplateNode());
       container.addRackMap(cluster.getHostToRackMap());
 
       PlacementService service = new PlacementService();
@@ -218,7 +218,7 @@ public class TestPlacementService {
                   .getAbstractDatacenter(TestPlacementUtil.RESIZE_DATACENTER_SPEC);
 
       Container container = new Container(dc);
-      container.SetTemplateNode(TestPlacementUtil.getTemplateNode());
+      container.setTemplateNode(TestPlacementUtil.getTemplateNode());
       container.addRackMap(cluster.getHostToRackMap());
 
       PlacementService service = new PlacementService();
@@ -254,7 +254,7 @@ public class TestPlacementService {
                   .getAbstractDatacenter(TestPlacementUtil.DATACENTER_SPEC);
 
       Container container = new Container(dc);
-      container.SetTemplateNode(TestPlacementUtil.getTemplateNode());
+      container.setTemplateNode(TestPlacementUtil.getTemplateNode());
       List<AbstractHost> allHosts = container.getAllHosts();
       AbstractHost host = allHosts.get(0);
       container.removeHost(host.getName());
@@ -296,7 +296,7 @@ public class TestPlacementService {
                   .getAbstractDatacenter(TestPlacementUtil.RACK_FAILURE_DATACENTER_SPEC);
 
       Container container = new Container(dc);
-      container.SetTemplateNode(TestPlacementUtil.getTemplateNode());
+      container.setTemplateNode(TestPlacementUtil.getTemplateNode());
       container.addRackMap(cluster.getHostToRackMap());
 
       PlacementService service = new PlacementService();

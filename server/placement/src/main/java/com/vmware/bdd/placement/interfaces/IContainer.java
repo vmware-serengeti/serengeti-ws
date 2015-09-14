@@ -36,7 +36,7 @@ public interface IContainer {
     *
     * @param template
     */
-   public void SetTemplateNode(BaseNode template);
+   public void setTemplateNode(BaseNode template);
 
    BaseNode getTemplateNode();
 

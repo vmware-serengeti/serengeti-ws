@@ -47,15 +47,18 @@ public class NodeTemplateService implements INodeTemplateService {
    @Autowired
    private INodeTemplateDAO nodeTemplateDAO;
 
+   @Override
    public VcVirtualMachine getNodeTemplateVMByName(String templateName) {
       String moid = getNodeTemplateIdByName(templateName);
       return getNodeTemplateVMByMoid(moid);
    }
 
+   @Override
    public VcVirtualMachine getNodeTemplateVMByMoid(String moid) {
       return VcResourceUtils.findVM(moid);
    }
 
+   @Override
    public String getNodeTemplateIdByName(String templateName) {
       logger.info("finding node template moid by name " + templateName);
       refreshNodeTemplates();
@@ -85,6 +88,17 @@ public class NodeTemplateService implements INodeTemplateService {
    @Override
    public String getNodeTemplateNameByMoid(String moid) {
       return getNodeTemplateVMByMoid(moid).getName();
+   }
+
+   @Override
+   public VirtualMachineRead getNodeTemplateByMoid(String moid) {
+      return toVirtualMachineRead(nodeTemplateDAO.findByMoid(moid));
+   }
+
+   @Override
+   public VirtualMachineRead getNodeTemplateByName(String name) {
+      String moid = getNodeTemplateIdByName(name);
+      return getNodeTemplateByMoid(moid);
    }
 
    @Override
