@@ -442,7 +442,7 @@ public class AmClusterDef implements Serializable {
    }
 
    public Map<String, Set<String>> getRackHostsMap(List<String> addedNodeNames) {
-      if (!AmUtils.isAmbariServerGreaterOrEquals_2_1_0(ambariServerVersion)) {
+      if (this.rackTopology == null || !AmUtils.isAmbariServerGreaterOrEquals_2_1_0(ambariServerVersion)) {
          return null;
       }
 
