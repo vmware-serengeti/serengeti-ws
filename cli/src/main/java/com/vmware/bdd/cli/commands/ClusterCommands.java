@@ -1874,15 +1874,13 @@ public class ClusterCommands implements CommandMarker {
    @CliCommand(value = "cluster add", help = "Add element to hadoop cluster")
    public void addCluster(
         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
-        @CliOption(key = { "nodeGroup" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "node group") final boolean nodeGroup,
+        @CliOption(key = { "nodeGroup" }, mandatory = true, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "node group") final boolean nodeGroup,
         @CliOption(key = { "specFile" }, mandatory = true, help = "The spec file name path") final String specFilePath,
         @CliOption(key = { "resume" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to resume cluster creation") final boolean resume
     ) {
       try {
           if (resume) {
               resumeCreateCluster(name);
-              CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
-                      Constants.OUTPUT_OP_ADD + Constants.OUTPUT_OP_RESULT_SUCCEEDED);
               return;
           }
 
@@ -1927,7 +1925,7 @@ public class ClusterCommands implements CommandMarker {
 
           restClient.addNodeGroups(name, nodeGroupAdd);
           CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
-                  Constants.OUTPUT_OP_ADD + Constants.OUTPUT_OP_RESULT_SUCCEEDED);
+                  Constants.OUTPUT_OP_RESULT_ADD);
       } catch (Exception e) {
           CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                   Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());

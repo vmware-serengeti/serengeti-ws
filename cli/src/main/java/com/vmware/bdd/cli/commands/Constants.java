@@ -181,7 +181,7 @@ public class Constants {
    public static final String PARAM_NO_DEFAULT_DISTRO = "no default distro. Install a distribution and/or specify the distribution with the --distro parameter.";
    public static final String PARAM_NOT_CONTAIN_HORIZONTAL_LINE = " cannot contain '-'.";
    public static final String PARAM_NOT_CONTAIN_BLANK_SPACE = " cannot contain blank space.";
-   public static final String PARAM_NOT_CONTAIN_SPECFILE = "You should specify --specfile .";
+   public static final String PARAM_NOT_CONTAIN_SPECFILE = "You should specify --specFile .";
    public static final String PARAM_SHOULD_SPECIFY_DISK = "You should specify --disk .";
    public static final String PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP = "If the cluster is MRv1, then it must have compute only node group(s), and set/resetParam is only applicable to compute only node groups. On the other hand, we do not support elasticity on MRv2 (YARN) clusters yet.";
    public static final String PARAM_SHOULD_BE_LESS_THAN_DEPLOYED = "should be less than or equal to deployed compute only nodes:";
