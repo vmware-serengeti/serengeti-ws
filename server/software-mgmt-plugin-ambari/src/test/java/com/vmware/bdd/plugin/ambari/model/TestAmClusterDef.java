@@ -42,7 +42,7 @@ public class TestAmClusterDef {
    public void testBluePrintToAmCluster() throws IOException {
       blueprint.getHadoopStack().setDistro("HDP", "2.1");
 
-      AmClusterDef clusterDef = new AmClusterDef(blueprint, null);
+      AmClusterDef clusterDef = new AmClusterDef(blueprint, null, "1.7");
       Assert.assertTrue(clusterDef.getVersion().equals("2.1"));
 
       Gson gson = new Gson();
