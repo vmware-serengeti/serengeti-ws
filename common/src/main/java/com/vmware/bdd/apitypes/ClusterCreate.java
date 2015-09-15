@@ -583,11 +583,16 @@ public class ClusterCreate implements Serializable {
    private void validateMemRatio(NodeGroupCreate[] nodeGroups,
          List<String> failedMsgList) {
       boolean validated = true;
+      boolean valiadtedLatency = true;
       StringBuilder invalidNodeGroupNames = new StringBuilder();
       for (NodeGroupCreate nodeGroup : nodeGroups) {
          if (nodeGroup.getReservedMem_ratio() < 0
                ||nodeGroup.getReservedCpu_ratio() > 1) {
             validated = false;
+            invalidNodeGroupNames.append(nodeGroup.getName()).append(",");
+         }else if(nodeGroup.getLatencySensitivity()==LatencyPriority.HIGH
+               && nodeGroup.getReservedMem_ratio() != 1){
+            valiadtedLatency = false;
             invalidNodeGroupNames.append(nodeGroup.getName()).append(",");
          }
       }
@@ -598,6 +603,16 @@ public class ClusterCreate implements Serializable {
          failedMsgList
                .add(errorMsgBuff
                      .append("The 'reservedMem_ratio' must be equal to or greater than 0, and less than or equal to 1 in group ")
+                     .append(invalidNodeGroupNames.toString()).append(".")
+                     .toString());
+      }
+      if (!valiadtedLatency) {
+         StringBuilder errorMsgBuff = new StringBuilder();
+         invalidNodeGroupNames.delete(invalidNodeGroupNames.length() - 1,
+               invalidNodeGroupNames.length());
+         failedMsgList
+               .add(errorMsgBuff
+                     .append("The 'reservedMem_ratio' must be equal 1 when latencySensitivity is set to HIGH in group ")
                      .append(invalidNodeGroupNames.toString()).append(".")
                      .toString());
       }
