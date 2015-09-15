@@ -69,6 +69,7 @@ public class NodeGroupEntity extends EntityBase {
    @Column(name = "reservedmem_ratio")
    private Float reservedMem_ratio;
 
+   @Enumerated(EnumType.STRING)
    @Column(name = "latencysensitivity")
    private LatencyPriority latencySensitivity;
 
