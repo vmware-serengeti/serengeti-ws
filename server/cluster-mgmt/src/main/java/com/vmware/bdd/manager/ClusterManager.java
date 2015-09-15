@@ -1707,7 +1707,7 @@ public class ClusterManager {
             throw ClusterConfigException.CLUSTER_CONFIG_NOT_FOUND(clusterName);
          }
          if ( 0 == ng.getInstanceNum()) {
-            throw ClusterManagerException.NODE_GROUP_CANNOT_BE_ZERO(clusterName);
+            throw ClusterManagerException.NODE_GROUP_CANNOT_BE_ZERO(ng.getName());
          }
 
          if (group == null) {
