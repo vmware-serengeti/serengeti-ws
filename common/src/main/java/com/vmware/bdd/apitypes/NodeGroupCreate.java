@@ -62,11 +62,11 @@ public class NodeGroupCreate {
    @SerializedName("latencySensitivity")
    private LatencyPriority latencySensitivity;
    @Expose
-   @SerializedName("reservedCpu_ratio")
-   private Float reservedCpu_ratio=0F;
+   @SerializedName("reservedCpuRatio")
+   private Float reservedCpuRatio =0F;
    @Expose
-   @SerializedName("reservedMem_ratio")
-   private Float reservedMem_ratio=0F;
+   @SerializedName("reservedMemRatio")
+   private Float reservedMemRatio =0F;
    @Expose
    @SerializedName("swap_ratio")
    private Float swapRatio = 1F;
@@ -98,8 +98,8 @@ public class NodeGroupCreate {
       this.memCapacityMB = group.memCapacityMB;
       this.swapRatio = group.swapRatio;
       this.latencySensitivity = group.latencySensitivity;
-      this.reservedCpu_ratio = group.reservedCpu_ratio;
-      this.reservedMem_ratio = group.reservedMem_ratio;
+      this.reservedCpuRatio = group.reservedCpuRatio;
+      this.reservedMemRatio = group.reservedMemRatio;
       this.name = group.name;
       this.roles = group.roles;
       this.rpNames = group.rpNames;
@@ -132,8 +132,8 @@ public class NodeGroupCreate {
       }else {
          nodeGroupInfo.setLatencySensitivity(LatencyPriority.NORMAL);
       }
-      nodeGroupInfo.setReservedCpu_ratio(reservedCpu_ratio);
-      nodeGroupInfo.setReservedMem_ratio(reservedMem_ratio);
+      nodeGroupInfo.setReservedCpu_ratio(reservedCpuRatio);
+      nodeGroupInfo.setReservedMem_ratio(reservedMemRatio);
 
       nodeGroupInfo.setNodes(null);
       return nodeGroupInfo;
@@ -244,13 +244,15 @@ public class NodeGroupCreate {
 
    public void setLatencySensitivity(LatencyPriority latencySensitivity) { this.latencySensitivity = latencySensitivity; }
 
-   public Float getReservedCpu_ratio() { return reservedCpu_ratio; }
+   public Float getReservedCpuRatio() { return reservedCpuRatio; }
 
-   public void setReservedCpu_ratio(Float reservedCpu_ratio) { this.reservedCpu_ratio = reservedCpu_ratio; }
+   public void setReservedCpuRatio(
+         Float reservedCpuRatio) { this.reservedCpuRatio = reservedCpuRatio; }
 
-   public Float getReservedMem_ratio() { return reservedMem_ratio; }
+   public Float getReservedMemRatio() { return reservedMemRatio; }
 
-   public void setReservedMem_ratio(Float reservedMem_ratio) { this.reservedMem_ratio = reservedMem_ratio; }
+   public void setReservedMemRatio(
+         Float reservedMemRatio) { this.reservedMemRatio = reservedMemRatio; }
 
    @RestIgnore
    public List<VcCluster> getVcClusters(ClusterCreate cluster) {

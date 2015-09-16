@@ -755,6 +755,7 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
             if (tmp.getApiConfigurationInfo().getType()
                   .contains(configurationType)) {
                hbase_env_template = tmp.getApiConfigurationInfo().getPropertyValue();
+               hbase_env_template = hbase_env_template.replaceAll(" -XX:CMSInitiatingOccupancyFraction=\\d\\d ", " ");
                hbase_env_template = hbase_env_template + HbaseRegionServerOptsUtil
                            .getAmbariHbaseRegionServerStringParameter();
                break;

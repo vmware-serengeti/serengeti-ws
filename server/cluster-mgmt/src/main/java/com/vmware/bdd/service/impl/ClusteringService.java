@@ -1499,8 +1499,8 @@ public class ClusteringService implements IClusteringService {
 
       //Check nodegroup reserved cpu&mem ratio, then set the node's cpuReservationMHz = vcpuNum * ESXcpuMhz*ratio
       for (BaseNode current : baseNodes) {
-         Float cpuRatio = current.getNodeGroup().getReservedCpu_ratio();
-         Float memRatio = current.getNodeGroup().getReservedMem_ratio();
+         Float cpuRatio = current.getNodeGroup().getReservedCpuRatio();
+         Float memRatio = current.getNodeGroup().getReservedMemRatio();
          //if ReservedCpu_ratio is set, caculate the reservedCpu for vm
          if ( cpuRatio != null  && cpuRatio > 0 && cpuRatio <= 1) {
             if (current.getTargetHost() != null) {

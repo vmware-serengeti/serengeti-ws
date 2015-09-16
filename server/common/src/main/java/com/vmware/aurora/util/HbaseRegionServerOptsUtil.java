@@ -54,8 +54,7 @@ public final class HbaseRegionServerOptsUtil {
 
    //Get Hbase_RegionServer_OPTS string parameter for Ambari cluster
    public static String getAmbariHbaseRegionServerStringParameter() {
-      String parameter = " export HBASE_REGIONSERVER_OPTS="
-            + "\"-Xmx{{regionserver_heapsize}} -Xms{{regionserver_heapsize}} -Xmn{{regionserver_xmn_size}} "
+      String parameter = "export HBASE_REGIONSERVER_OPTS=\"$HBASE_REGIONSERVER_OPTS "
             + getHbaseRegionServerStringParameter()
             + "\"\n";
       return parameter;
