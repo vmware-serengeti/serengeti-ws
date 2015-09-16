@@ -562,8 +562,8 @@ public class ClusterCreate implements Serializable {
       boolean validated = true;
       StringBuilder invalidNodeGroupNames = new StringBuilder();
       for (NodeGroupCreate nodeGroup : nodeGroups) {
-         if (nodeGroup.getReservedCpu_ratio() < 0
-               ||nodeGroup.getReservedCpu_ratio() > 1) {
+         if (nodeGroup.getReservedCpuRatio() < 0
+               ||nodeGroup.getReservedCpuRatio() > 1) {
             validated = false;
             invalidNodeGroupNames.append(nodeGroup.getName()).append(",");
          }
@@ -586,12 +586,12 @@ public class ClusterCreate implements Serializable {
       boolean valiadtedLatency = true;
       StringBuilder invalidNodeGroupNames = new StringBuilder();
       for (NodeGroupCreate nodeGroup : nodeGroups) {
-         if (nodeGroup.getReservedMem_ratio() < 0
-               ||nodeGroup.getReservedCpu_ratio() > 1) {
+         if (nodeGroup.getReservedMemRatio() < 0
+               ||nodeGroup.getReservedCpuRatio() > 1) {
             validated = false;
             invalidNodeGroupNames.append(nodeGroup.getName()).append(",");
          }else if(nodeGroup.getLatencySensitivity()==LatencyPriority.HIGH
-               && nodeGroup.getReservedMem_ratio() != 1){
+               && nodeGroup.getReservedMemRatio() != 1){
             valiadtedLatency = false;
             invalidNodeGroupNames.append(nodeGroup.getName()).append(",");
          }

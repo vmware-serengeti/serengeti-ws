@@ -684,8 +684,8 @@ public class ClusterConfigManager {
       groupEntity.setSwapRatio(group.getSwapRatio());
       groupEntity.setName(group.getName());
       groupEntity.setNodeType(group.getInstanceType());
-      groupEntity.setReservedCpu_ratio(group.getReservedCpu_ratio());
-      groupEntity.setReservedMem_ratio(group.getReservedMem_ratio());
+      groupEntity.setReservedCpu_ratio(group.getReservedCpuRatio());
+      groupEntity.setReservedMem_ratio(group.getReservedMemRatio());
 
       PlacementPolicy policies = group.getPlacementPolicies();
       if (policies != null) {
@@ -764,8 +764,8 @@ public class ClusterConfigManager {
          groupEntity.setLatencySensitivity(latencySensitivity);
       else
          groupEntity.setLatencySensitivity(LatencyPriority.NORMAL);
-      groupEntity.setReservedCpu_ratio(group.getReservedCpu_ratio());
-      groupEntity.setReservedMem_ratio(group.getReservedMem_ratio());
+      groupEntity.setReservedCpu_ratio(group.getReservedCpuRatio());
+      groupEntity.setReservedMem_ratio(group.getReservedMemRatio());
       if (group.getConfiguration() != null
             && group.getConfiguration().size() > 0) {
          groupEntity.setHadoopConfig(gson.toJson(group.getConfiguration()));
@@ -1076,8 +1076,8 @@ public class ClusterConfigManager {
       expandGroupStorage(ngEntity, group);
       group.setHaFlag(ngEntity.getHaFlag());
       group.setLatencySensitivity(ngEntity.getLatencySensitivity());
-      group.setReservedCpu_ratio(ngEntity.getReservedCpu_ratio());
-      group.setReservedMem_ratio(ngEntity.getReservedMem_ratio());
+      group.setReservedCpuRatio(ngEntity.getReservedCpu_ratio());
+      group.setReservedMemRatio(ngEntity.getReservedMem_ratio());
       if (ngEntity.getHadoopConfig() != null) {
          Map<String, Object> hadoopConfig =
                (new Gson()).fromJson(ngEntity.getHadoopConfig(), Map.class);
