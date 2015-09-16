@@ -155,6 +155,7 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
                success = softwareManager.scaleOutCluster(clusterBlueprint, addedNodes, queue, force);
                break;
             case ADD:
+               AuAssert.check(chunkContext != null);
                List<String> addedNodeGroups = getNewNodeGroupVmNames(chunkContext, clusterBlueprint);
                success = softwareManager.scaleOutCluster(clusterBlueprint, addedNodeGroups, queue, force);
             default:
@@ -223,17 +224,11 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
          nodeGroupNames.add(nodeGroupName);
       }
 
-      long oldInstanceNum = 0;
-
       List<String> addedNodeNames = new ArrayList<String>();
-      for (String groupName:nodeGroupNames) {
+      for (String groupName : nodeGroupNames) {
          for (NodeGroupInfo group : clusterBlueprint.getNodeGroups()) {
             if (group.getName().equals(groupName)) {
                for (NodeInfo node: group.getNodes()) {
-                  long index = CommonUtil.getVmIndex(node.getName());
-                  if (index < oldInstanceNum) {
-                     continue;
-                  }
                   if (JobUtils.getJobParameterForceClusterOperation(chunkContext)) {
                      NodeStatus status = lockedClusterEntityManager.getClusterEntityMgr().findNodeByName(node.getName()).getStatus();
                      logger.info(String.format("node %1s's status is %2s", node.getName(), status.name()));

@@ -26,11 +26,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.vmware.bdd.apitypes.*;
+import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import jline.console.ConsoleReader;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -1879,18 +1881,12 @@ public class ClusterCommands implements CommandMarker {
       return warningMsg;
    }
 
-   @CliCommand(value = "cluster expend", help = "Add element to hadoop cluster")
+   @CliCommand(value = "cluster expand", help = "Add element to hadoop cluster")
    public void addCluster(
         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
-        @CliOption(key = { "specFile" }, mandatory = false, help = "The spec file name path") final String specFilePath,
-        @CliOption(key = { "resume" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to resume cluster creation") final boolean resume
+        @CliOption(key = { "specFile" }, mandatory = false, help = "The spec file name path") final String specFilePath
     ) {
       try {
-          if (resume) {
-              resumeCreateCluster(name);
-              return;
-          }
-
           if (specFilePath == null) {
               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                       Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
@@ -1898,6 +1894,7 @@ public class ClusterCommands implements CommandMarker {
               return;
           }
           ClusterRead cluster = restClient.get(name, false);
+
           if (cluster == null) {
               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                       Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
