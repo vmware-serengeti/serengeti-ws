@@ -70,8 +70,6 @@ public interface IClusterEntityManager {
 
    public void delete(ClusterEntity cluster);
 
-   public void delete(NodeGroupEntity group);
-
    public void updateClusterStatus(String clusterName, ClusterStatus status);
 
    public void updateNodesActionForUpgrade(String clusterName, String action);
