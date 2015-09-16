@@ -584,7 +584,7 @@ public class RestResource {
       }
       logger.info("call rest for add node groups into a cluster");
       Long taskId =
-              clusterMgr.addCluster(clusterName, nodeGroupsAdd);
+              clusterMgr.expandCluster(clusterName, nodeGroupsAdd);
       redirectRequest(taskId, request, response);
    }
 

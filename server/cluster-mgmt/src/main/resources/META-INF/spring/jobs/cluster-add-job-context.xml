@@ -59,7 +59,7 @@
 		<beans:property name="phase" value="post-software-provision" />
 	</beans:bean>
 
-	<job id="addClusterJob" job-repository="jobRepository">
+	<job id="expandClusterJob" job-repository="jobRepository">
 		<step id="removeBadNodeStep" next="updateResumeClusterDataStep1">
 			<tasklet ref="resumeClusterRemoveBadNodeTasklet" />
 			<listeners>

@@ -707,7 +707,7 @@ public class ClusterManager {
 
       ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
 
-      if (cluster.getStatus() != ClusterStatus.ADDING) {
+      if (cluster.getStatus() != ClusterStatus.EXPANDING) {
          if (cluster.getStatus() != ClusterStatus.PROVISION_ERROR) {
             logger.error("can not resume creation of cluster: " + clusterName
                     + ", " + cluster.getStatus());
@@ -1680,14 +1680,20 @@ public class ClusterManager {
    }
 
    @ClusterManagerPointcut
-   public Long addCluster(String clusterName,
+   public Long expandCluster(String clusterName,
                           NodeGroupCreate[] nodeGroupsAdd) throws Exception {
       Long taskId = null;
       List<BaseNode> vNodes = new ArrayList<BaseNode>();
       String rpNames = null;
+      boolean readyExpand = false;
 
       ClusterCreate clusterSpec = clusterConfigMgr.getClusterConfig(clusterName);
       List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(clusterName);
+      ClusterEntity clusterEntity = clusterEntityMgr.findByName(clusterName);
+
+      if (clusterEntity == null) {
+         throw ClusterConfigException.CLUSTER_CONFIG_NOT_FOUND(clusterName);
+      }
 
       for(NodeEntity node: nodes) {
          rpNames = node.getVcRp().getVcResourcePool();
@@ -1699,16 +1705,19 @@ public class ClusterManager {
 
       for (NodeGroupCreate ng : nodeGroupsAdd) {
          BaseNode node = new BaseNode();
-         NodeGroupEntity group =
-                 clusterEntityMgr.findByName(clusterName, ng.getName());
-         ClusterEntity clusterEntity = clusterEntityMgr.findByName(clusterName);
-
-         if (clusterEntity == null) {
-            throw ClusterConfigException.CLUSTER_CONFIG_NOT_FOUND(clusterName);
-         }
          if ( 0 == ng.getInstanceNum()) {
             throw ClusterManagerException.NODE_GROUP_CANNOT_BE_ZERO(ng.getName());
          }
+         node.setCluster(clusterSpec);
+         node.setTargetVcCluster(clusterSpec.getVcClusters().get(0).getName());
+         node.setNodeGroup(ng);
+         node.setTargetRp(rpNames);
+         vNodes.add(node);
+      }
+
+      for (NodeGroupCreate ng : nodeGroupsAdd) {
+         NodeGroupEntity group =
+                 clusterEntityMgr.findByName(clusterName, ng.getName());
 
          if (group == null) {
             NodeGroupEntity addNodeGroupEntity = new NodeGroupEntity();
@@ -1737,51 +1746,49 @@ public class ClusterManager {
             addNodeGroupEntity.setVmFolderPath(clusterEntity);
 
             ng.setVmFolderPath(clusterEntity.getRootFolder() + "/" + ng.getName());
-
-            logger.info("Node group " + ng.getName() + " of cluster "
-                    + clusterName + " does not exist, ready for inserting node group");
             clusterEntityMgr.insert(addNodeGroupEntity);
-         } else {
+
+            readyExpand = true;
+
+         } else if (group != null && !ClusterStatus.PROVISION_ERROR.equals(clusterEntity.getStatus())){
+            readyExpand = false;
             logger.error("Node group" + ng.getName() + " of cluster "
                     + clusterName + " has existed, failed to insert node group");
             throw ClusterManagerException.NODE_GROUP_HAS_EXISTED(clusterName, ng.getName());
+         } else if (group != null && ClusterStatus.PROVISION_ERROR.equals(clusterEntity.getStatus())) {
+            readyExpand = true;
          }
-
-         node.setCluster(clusterSpec);
-         node.setTargetVcCluster(clusterSpec.getVcClusters().get(0).getName());
-         node.setNodeGroup(ng);
-
-         node.setTargetRp(rpNames);
-         vNodes.add(node);
       }
 
-      clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.ADDING);
+      if(readyExpand) {
+         clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.EXPANDING);
 
-      if (clusteringService.addNodeGroups(clusterSpec, nodeGroupsAdd, vNodes)) {
-         taskId = clusterAddExecute(clusterName, nodeGroupsAdd);
+         if (clusteringService.addNodeGroups(clusterSpec, nodeGroupsAdd, vNodes)) {
+            taskId = clusterExpandExecute(clusterEntity, nodeGroupsAdd);
+         } else {
+            logger.error("Cluster "
+                    + clusterName + " failed to insert node groups.");
+            clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.PROVISION_ERROR);
+            throw ClusterManagerException.ADD_NODE_GROUP_FAILED(clusterName);
+         }
       } else {
-         logger.error("Cluster "
-                 + clusterName + " failed to insert node groups.");
          clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.PROVISION_ERROR);
-         throw ClusterManagerException.ADD_NODE_GROUP_FAILED(clusterName);
       }
 
       return taskId;
    }
 
-   public Long clusterAddExecute(String clusterName, NodeGroupCreate[] nodeGroupsAdd) throws Exception {
-      logger.info("ClusterManager, add node group for cluster " + clusterName);
+   public Long clusterExpandExecute(ClusterEntity cluster, NodeGroupCreate[] nodeGroupsAdd) throws Exception {
 
-      ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
+      String clusterName = cluster.getName();
 
-      if (cluster == null) {
-         logger.error("cluster " + clusterName + " does not exist");
-         throw BddException.NOT_FOUND("Cluster", clusterName);
+      StringBuffer nodeGroupNameList = new StringBuffer();
+      for(NodeGroupCreate nodeGroup: nodeGroupsAdd) {
+         nodeGroupNameList.append(nodeGroup.getName());
+         nodeGroupNameList.append(",");
       }
 
-      ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
-
-      if (cluster.getStatus() != ClusterStatus.ADDING) {
+      if (cluster.getStatus() != ClusterStatus.EXPANDING) {
          if (cluster.getStatus() != ClusterStatus.PROVISION_ERROR) {
             logger.error("can not add node group for cluster: " + clusterName
                     + ", " + cluster.getStatus());
@@ -1805,12 +1812,6 @@ public class ClusterManager {
       validateDatastore(dsNames, vcClusters);
       validateNetworkAccessibility(cluster.getName(), cluster.fetchNetworkNameList(), vcClusters);
 
-      StringBuffer nodeGroupNameList = new StringBuffer();
-      for(NodeGroupCreate nodeGroup: nodeGroupsAdd) {
-         nodeGroupNameList.append(nodeGroup.getName());
-         nodeGroupNameList.append(",");
-      }
-      logger.info("nodeGroupNameList.toString()" + nodeGroupNameList.toString());
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.NEW_NODE_GROUP_LIST_JOB_PARAM, new JobParameter(
               nodeGroupNameList.toString()));
@@ -1826,7 +1827,7 @@ public class ClusterManager {
               ClusterStatus.PROVISIONING);
       clusterEntityMgr.cleanupActionError(clusterName);
       try {
-         return jobManager.runJob(JobConstants.ADD_CLUSTER_JOB_NAME,
+         return jobManager.runJob(JobConstants.EXPAND_CLUSTER_JOB_NAME,
                  jobParameters);
       } catch (Exception e) {
          logger.error("Failed to add node group for cluster "
