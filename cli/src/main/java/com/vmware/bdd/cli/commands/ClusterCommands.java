@@ -1874,8 +1874,8 @@ public class ClusterCommands implements CommandMarker {
    @CliCommand(value = "cluster add", help = "Add element to hadoop cluster")
    public void addCluster(
         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
-        @CliOption(key = { "nodeGroup" }, mandatory = true, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "node group") final boolean nodeGroup,
-        @CliOption(key = { "specFile" }, mandatory = true, help = "The spec file name path") final String specFilePath,
+        @CliOption(key = { "nodeGroup" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "node group") final boolean nodeGroup,
+        @CliOption(key = { "specFile" }, mandatory = false, help = "The spec file name path") final String specFilePath,
         @CliOption(key = { "resume" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to resume cluster creation") final boolean resume
     ) {
       try {
