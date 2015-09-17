@@ -21,6 +21,9 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import com.sun.net.httpserver.Headers;
@@ -59,7 +62,7 @@ public class LoginClientImplTest {
    public void testLogin(String userName,
                          String passWord,
                          int responseCode,
-                         String sessionId) throws IOException {
+                         String sessionId) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
       LoginTestTemplate testTemplate = new LoginTestTemplate(userName, passWord, responseCode, sessionId);
       testTemplate.start();
 

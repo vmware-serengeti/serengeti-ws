@@ -21,6 +21,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -49,6 +52,16 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 public class CommonUtil {
 
    static final Logger logger = Logger.getLogger(CommonUtil.class);
+
+   /*
+   * Set file permission to 600
+   */
+   public static void setOwnerOnlyReadWrite(String filename) throws IOException {
+      Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+      perms.add(PosixFilePermission.OWNER_READ);
+      perms.add(PosixFilePermission.OWNER_WRITE);
+      Files.setPosixFilePermissions(Paths.get(filename), perms);
+   }
 
    public static String getConfDir() {
       String homeDir = System.getProperties().getProperty("serengeti.home.dir");

@@ -14,71 +14,30 @@
  *****************************************************************************/
 package com.vmware.bdd.cli.rest;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.attribute.PosixFilePermission;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.Map.Entry;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
-
-import com.vmware.bdd.cli.auth.LoginClientImpl;
-import com.vmware.bdd.cli.auth.LoginResponse;
-import jline.console.ConsoleReader;
-
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.log4j.Logger;
-import org.fusesource.jansi.AnsiConsole;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpMessageConverterExtractor;
-import org.springframework.web.client.ResponseExtractor;
-import org.springframework.web.client.RestTemplate;
-
 import com.vmware.bdd.apitypes.Connect;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Status;
 import com.vmware.bdd.apitypes.TaskRead.Type;
+import com.vmware.bdd.cli.auth.LoginClientImpl;
+import com.vmware.bdd.cli.auth.LoginResponse;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
 import com.vmware.bdd.cli.commands.CookieCache;
-import com.vmware.bdd.cli.config.RunWayConfig;
-import com.vmware.bdd.cli.config.RunWayConfig.RunType;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.utils.CommonUtil;
+import org.apache.log4j.Logger;
+import org.fusesource.jansi.AnsiConsole;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * RestClient provides common rest apis required by resource operations.
@@ -96,10 +55,6 @@ public class RestClient {
 
    @Autowired
    private LoginClientImpl loginClient;
-
-   static {
-      trustSSLCertificate();
-   }
 
    private RestClient() {
    }
@@ -768,281 +723,4 @@ public class RestClient {
       }
       return true;
    }
-
-   /*
-    * It will be trusted if users type 'yes' after CLI is aware of new SSL certificate. 
-    */
-   private static void trustSSLCertificate() {
-      String errorMsg = "";
-      try {
-         KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-         TrustManagerFactory tmf =
-               TrustManagerFactory.getInstance(TrustManagerFactory
-                     .getDefaultAlgorithm());
-         tmf.init(keyStore);
-         SSLContext ctx = SSLContext.getInstance("SSL");
-         ctx.init(new KeyManager[0],
-               new TrustManager[] { new DefaultTrustManager(keyStore) },
-               new SecureRandom());
-         SSLContext.setDefault(ctx);
-         HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-            @Override
-            public boolean verify(String string, SSLSession ssls) {
-               return true;
-            }
-         });
-      } catch (KeyStoreException e) {
-         errorMsg = "Key Store error: " + e.getMessage();
-      } catch (KeyManagementException e) {
-         errorMsg = "SSL Certificate error: " + e.getMessage();
-      } catch (NoSuchAlgorithmException e) {
-         errorMsg = "SSL Algorithm error: " + e.getMessage();
-      } finally {
-         if (!CommandsUtils.isBlank(errorMsg)) {
-            System.out.println(errorMsg);
-            logger.error(errorMsg);
-         }
-      }
-   }
-
-   private static class DefaultTrustManager implements X509TrustManager {
-
-      private KeyStore keyStore;
-      private static final char[] DEFAULT_PASSWORD = "changeit".toCharArray();
-      private static final String KEY_STORE_FILE = "serengeti.keystore";
-      private static final String KEY_STORE_PASSWORD_KEY = "keystore_pswd";
-      private static final int KEY_STORE_PASSWORD_LENGTH = 8;
-
-      public DefaultTrustManager (KeyStore keyStore) {
-         this.keyStore = keyStore;
-      }
-
-      @Override
-      public void checkClientTrusted(X509Certificate[] chain, String authType)
-            throws CertificateException {
-      }
-
-      @Override
-      public void checkServerTrusted(X509Certificate[] chain, String authType)
-            throws CertificateException {
-         String errorMsg = "";
-         InputStream in = null;
-         OutputStream out = null;
-
-         // load key store file
-         try {
-            char[] pwd = readKeyStorePwd();
-            File file = new File(KEY_STORE_FILE);
-
-            if (!file.isFile()) {
-               char SEP = File.separatorChar;
-               file = new File(System.getProperty("java.home") + SEP + "lib"
-                           + SEP + "security" + SEP + "cacerts");
-               if (file.isFile()) {
-                  // keystore password of cacerts file is DEFAULT_PASSWORD
-                  keyStore.load(new FileInputStream(file), DEFAULT_PASSWORD);
-               }
-            } else {
-               keyStore.load(new FileInputStream(file), pwd);
-            }
-
-            // show certificate informations
-            MessageDigest sha1 = MessageDigest.getInstance("SHA1");
-            MessageDigest md5 = MessageDigest.getInstance("MD5");
-            String md5Fingerprint = "";
-            String sha1Fingerprint = "";
-            SimpleDateFormat dateFormate = new SimpleDateFormat("yyyy/MM/dd");
-            for (int i = 0; i < chain.length; i++) {
-               X509Certificate cert = chain[i];
-               sha1.update(cert.getEncoded());
-               md5.update(cert.getEncoded());
-               md5Fingerprint = toHexString(md5.digest());
-               sha1Fingerprint = toHexString(sha1.digest());
-               if (keyStore.getCertificate(md5Fingerprint) != null) {
-                  if (i == chain.length - 1) {
-                     return;
-                  } else {
-                     continue;
-                  }
-               }
-               System.out.println();
-               System.out.println("Server Certificate");
-               System.out
-                     .println("================================================================");
-               System.out.println("Subject:  " + cert.getSubjectDN());
-               System.out.println("Issuer:  " + cert.getIssuerDN());
-               System.out.println("SHA Fingerprint:  " + sha1Fingerprint);
-               System.out.println("MD5 Fingerprint:  " + md5Fingerprint);
-               System.out.println("Issued on:  "
-                     + dateFormate.format(cert.getNotBefore()));
-               System.out.println("Expires on:  "
-                     + dateFormate.format(cert.getNotAfter()));
-               System.out.println("Signature:  " + cert.getSignature());
-               System.out.println();
-               if (checkExpired(cert.getNotBefore(), cert.getNotAfter())) {
-                  throw new CertificateException(
-                          "The security certificate has expired.");
-               }
-               ConsoleReader reader = new ConsoleReader();
-               // Set prompt message
-               reader.setPrompt(Constants.PARAM_PROMPT_ADD_CERTIFICATE_MESSAGE);
-               // Read user input
-               String readMsg = "";
-               if (RunWayConfig.getRunType().equals(RunType.MANUAL)) {
-                  readMsg = reader.readLine().trim();
-               } else {
-                  readMsg = "yes";
-               }
-               if ("yes".equalsIgnoreCase(readMsg) || "y".equalsIgnoreCase(readMsg)) {
-                  {
-                     // add new certificate into key store file.
-                     keyStore.setCertificateEntry(md5Fingerprint, cert);
-                     out = new FileOutputStream(KEY_STORE_FILE);
-                     keyStore.store(out, pwd);
-                     // save keystore password
-                     saveKeyStorePwd(pwd);
-                  }
-               } else {
-                  if (i == chain.length - 1) {
-                     throw new CertificateException(
-                           "Could not find a valid certificate in the keystore.");
-                  } else {
-                     continue;
-                  }
-               }
-            }
-         } catch (FileNotFoundException e) {
-            errorMsg = "Cannot find the keystore file: " + e.getMessage();
-         } catch (NoSuchAlgorithmException e) {
-            errorMsg = "SSL Algorithm not supported: " + e.getMessage();
-         } catch (IOException e) {
-            e.printStackTrace();
-            errorMsg = "IO error: " + e.getMessage();
-         } catch (KeyStoreException e) {
-            errorMsg = "Keystore error: " + e.getMessage();
-         } catch (ConfigurationException e) {
-            errorMsg = "cli.properties access error: " + e.getMessage();
-         } finally {
-            if (!CommandsUtils.isBlank(errorMsg)) {
-               System.out.println(errorMsg);
-               logger.error(errorMsg);
-            }
-            if (in != null) {
-               try {
-                  in.close();
-               } catch (IOException e) {
-                  logger.warn("Input stream of serengeti.keystore close failed.");
-               }
-            }
-            if (out != null) {
-               try {
-                  out.close();
-               } catch (IOException e) {
-                  logger.warn("Output stream of serengeti.keystore close failed.");
-               }
-            }
-         }
-      }
-
-      private boolean checkExpired(Date notBefore, Date notAfter) {
-         Date now = new Date();
-         if (now.before(notBefore) || now.after(notAfter)) {
-            return true;
-         }
-         return false;
-      }
-
-      private PropertiesConfiguration loadCLIProperty() throws ConfigurationException {
-         PropertiesConfiguration properties = new PropertiesConfiguration();
-         File file = new File(Constants.PROPERTY_FILE);
-         properties.setFile(file);
-         if (file.isFile()) {
-            properties.load();
-         }
-         return properties;
-      }
-      private char[] readKeyStorePwd() throws IOException, ConfigurationException {
-         PropertiesConfiguration properties = loadCLIProperty();
-         String password = properties.getString(KEY_STORE_PASSWORD_KEY);
-         if (password == null) {
-            // generate a random keystore password
-            password = CommonUtil.randomString(KEY_STORE_PASSWORD_LENGTH);
-         }
-         return password.toCharArray();
-      }
-
-      private void saveKeyStorePwd(char[] password) throws IOException, ConfigurationException {
-         PropertiesConfiguration properties = loadCLIProperty();
-         properties.setProperty(KEY_STORE_PASSWORD_KEY, new String(password));
-         properties.save();
-
-         // set file permission to 600 to protect keystore password
-         setOwnerOnlyReadWrite(Constants.PROPERTY_FILE);
-         setOwnerOnlyReadWrite(Constants.CLI_HISTORY_FILE);
-         setOwnerOnlyReadWrite(KEY_STORE_FILE);
-      }
-
-      @Override
-      public X509Certificate[] getAcceptedIssuers() {
-         return null;
-      }
-
-      /*
-       * Set file permission to 600
-       */
-      private void setOwnerOnlyReadWrite(String filename) throws IOException {
-         Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
-         perms.add(PosixFilePermission.OWNER_READ);
-         perms.add(PosixFilePermission.OWNER_WRITE);
-         Files.setPosixFilePermissions(Paths.get(filename), perms);
-      }
-   }
-
-   private static final char[] HEXDIGITS = "0123456789abcdef".toCharArray();
-
-   /*
-    * transfer a byte array to a hexadecimal string 
-    */
-   private static String toHexString(byte[] bytes) {
-      StringBuilder sb = new StringBuilder(bytes.length * 3);
-      for (int b : bytes) {
-         b &= 0xff;
-         sb.append(HEXDIGITS[b >> 4]);
-         sb.append(HEXDIGITS[b & 15]);
-         sb.append(':');
-      }
-      if (sb.length() > 0) {
-         sb.delete(sb.length() - 1, sb.length());
-      }
-      return sb.toString().toUpperCase();
-   }
-
-   private class ResponseEntityResponseExtractor<T> implements
-         ResponseExtractor<ResponseEntity<T>> {
-
-      private final HttpMessageConverterExtractor<T> delegate;
-
-      public ResponseEntityResponseExtractor(Class<T> responseType) {
-         if (responseType != null && !Void.class.equals(responseType)) {
-            this.delegate =
-                  new HttpMessageConverterExtractor<T>(responseType,
-                        client.getMessageConverters());
-         } else {
-            this.delegate = null;
-         }
-      }
-
-      public ResponseEntity<T> extractData(ClientHttpResponse response)
-            throws IOException {
-         if (this.delegate != null) {
-            T body = this.delegate.extractData(response);
-            return new ResponseEntity<T>(body, response.getHeaders(),
-                  response.getStatusCode());
-         } else {
-            return new ResponseEntity<T>(response.getHeaders(),
-                  response.getStatusCode());
-         }
-      }
-   }
-
 }

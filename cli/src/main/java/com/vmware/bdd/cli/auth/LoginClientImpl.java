@@ -15,16 +15,20 @@
 package com.vmware.bdd.cli.auth;
 
 import com.vmware.bdd.cli.commands.Constants;
-import com.vmware.bdd.utils.CommonUtil;
-
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.*;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 
 /**
  * Http Login Client
@@ -34,8 +38,8 @@ public class LoginClientImpl {
    private final static Logger LOGGER = Logger.getLogger(LoginClientImpl.class);
    protected static final String SET_COOKIE_HEADER = "Set-Cookie";
 
-   private HttpClient client1 = new HttpClient();
-
+   @Autowired
+   private HttpClient client1;
    /**
     *
     * attempt login by posting credentials to serengeti server
@@ -47,34 +51,33 @@ public class LoginClientImpl {
     */
    public LoginResponse login(final String serengetiURL, String userName, String password) throws IOException {
       String url = serengetiURL + Constants.REST_PATH_LOGIN;
-      PostMethod loginPost = new PostMethod(url);
+      HttpPost loginPost = new HttpPost(url);
 
-      //handling non-ascii username and password. Encoding by Apache HTTP Client.
-      loginPost.addRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
 
       NameValuePair[] loginCredentials = new NameValuePair[] {
-            new NameValuePair("j_username", userName) ,
-            new NameValuePair("j_password", password)
+            new BasicNameValuePair("j_username", userName) ,
+            new BasicNameValuePair("j_password", password)
       };
 
-      loginPost.setRequestBody(loginCredentials);
+      //handling non-ascii username and password. Encoding by Apache HTTP Client.
+      HttpEntity requestEntity = new UrlEncodedFormEntity(Arrays.asList(loginCredentials),
+            Charset.forName("UTF-8"));
+      loginPost.setEntity(requestEntity);
 
-//      client1.getHostConfiguration().setProxy("127.0.0.1", 8810);
-
-      int responseCode = client1.executeMethod(loginPost);
-
-      LOGGER.debug("resp code is: " + responseCode);
+      HttpResponse response = client1.execute(loginPost);
+      LOGGER.debug("resp code is: " + response.getStatusLine());
+      int responseCode = response.getStatusLine().getStatusCode();
 
       LoginResponse loginResponse;
-      if (responseCode == org.apache.commons.httpclient.HttpStatus.SC_OK) {
+      if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
          //normal response
          String cookieValue = null;
-         Header setCookieHeader = loginPost.getResponseHeader(SET_COOKIE_HEADER);
+         Header[] setCookieHeaders = response.getHeaders(SET_COOKIE_HEADER);
 
-         if(setCookieHeader != null) {
-            cookieValue = setCookieHeader.getValue();
+         if(ArrayUtils.isNotEmpty(setCookieHeaders)) {
+            cookieValue = setCookieHeaders[0].getValue();
 
-            if (!CommonUtil.isBlank(cookieValue) && cookieValue.contains(";")) {
+            if (StringUtils.isNotBlank(cookieValue) && cookieValue.contains(";")) {
                cookieValue = cookieValue.split(";")[0];
             }
          }

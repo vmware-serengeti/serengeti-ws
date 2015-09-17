@@ -21,7 +21,7 @@ public class PspConfiguration {
    /**
     * Application defined cipher suites and protocols
     */
-   private final String[] CIPHER_SUITES = {
+   public final static String[] CIPHER_SUITES = {
          "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA",
          "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
          "TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA",
@@ -35,7 +35,14 @@ public class PspConfiguration {
          "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
          "TLS_DHE_DSS_WITH_AES_128_CBC_SHA"};
 
-   private final String[] SSL_PROTOCOLS = {"TLSv1", "TLSv1.1", "TLSv1.2" };
+   public final static String[] WEAK_CIPHER_SUITES = {
+         "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
+         "TLS_RSA_WITH_AES_128_CBC_SHA",
+         "TLS_DHE_DSS_WITH_AES_128_CBC_SHA",
+         "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
+         "TLS_DHE_DSS_WITH_AES_128_CBC_SHA"};
+
+   public final static String[] SSL_PROTOCOLS = {"TLSv1.1", "TLSv1.2" };
 
    private String[] supportedCipherSuites;
    private String[] supportedProtocols;
