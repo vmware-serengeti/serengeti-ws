@@ -154,6 +154,7 @@ public class AmClusterDef implements Serializable {
          externalNameNodeGroup.setConfigurations(AmUtils.toAmConfigurations(null));
          externalNameNodeGroup.setRoles(namenodeRoles);
          externalNameNodeGroup.setInstanceNum(1);
+         externalNameNodeGroup.setAmbariServerVersion(ambariServerVersion);
 
          List<AmNodeDef> externalNameNodes = new ArrayList<AmNodeDef>();
          externalNameNodes.add(namenodeDef);
