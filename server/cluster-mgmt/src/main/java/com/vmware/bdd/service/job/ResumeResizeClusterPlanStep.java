@@ -17,6 +17,7 @@ package com.vmware.bdd.service.job;
 import java.util.List;
 import java.util.UUID;
 
+import com.vmware.bdd.manager.ClusterConfigManager;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 

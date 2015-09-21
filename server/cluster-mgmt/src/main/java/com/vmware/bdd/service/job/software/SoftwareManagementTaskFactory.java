@@ -14,6 +14,9 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job.software;
 
+import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.manager.ClusterConfigManager;
+import com.vmware.bdd.manager.ClusterManager;
 import org.springframework.batch.core.scope.context.ChunkContext;
 
 import com.vmware.bdd.command.ClusterCmdUtil;

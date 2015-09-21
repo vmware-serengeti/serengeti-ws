@@ -20,9 +20,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
+import com.vmware.bdd.manager.ClusterConfigManager;
 import com.vmware.bdd.utils.JobUtils;
 
 import org.apache.log4j.Logger;
@@ -103,7 +105,7 @@ public class SoftwareManagementStep extends TrackableTasklet {
       }
       String jobName = chunkContext.getStepContext().getJobName();
       logger.info("target : " + targetName + ", operation: "
-            + managementOperation + ", jobname: " + jobName);
+              + managementOperation + ", jobname: " + jobName);
 
       serviceSyncup.syncUp(clusterName);
       logger.debug("Try to sync up service status for cluster " + clusterName);
@@ -121,7 +123,7 @@ public class SoftwareManagementStep extends TrackableTasklet {
          return RepeatStatus.FINISHED;
       }
 
-      // Only check host time for cluster config, disk fix, scale up (management
+       // Only check host time for cluster config, disk fix, scale up (management
       // operation configure), start (management operation start) and create
       // (resume only)
       SoftwareManager softwareMgr = null;
@@ -136,6 +138,7 @@ public class SoftwareManagementStep extends TrackableTasklet {
       }
       if (ManagementOperation.CONFIGURE.equals(managementOperation)
             || ManagementOperation.START.equals(managementOperation)
+            || ManagementOperation.ADD.equals(managementOperation)
             || JobConstants.RESUME_CLUSTER_JOB_NAME.equals(jobName)) {
          logger.info("Start to check host time.");
          List<NodeEntity> nodes =
@@ -220,8 +223,8 @@ public class SoftwareManagementStep extends TrackableTasklet {
 
       task =
             SoftwareManagementTaskFactory.createThriftTask(targetName,
-                  specFilePath, statusUpdater, managementOperation,
-                  lockClusterEntityMgr);
+                    specFilePath, statusUpdater, managementOperation,
+                    lockClusterEntityMgr);
       return task;
    }
 
@@ -256,8 +259,8 @@ public class SoftwareManagementStep extends TrackableTasklet {
 
       task =
             SoftwareManagementTaskFactory.createExternalMgtTask(targetName,
-                  managementOperation, clusterBlueprint, statusUpdater,
-                  lockClusterEntityMgr, softwareMgr, chunkContext);
+                    managementOperation, clusterBlueprint, statusUpdater,
+                    lockClusterEntityMgr, softwareMgr, chunkContext);
       return task;
    }
 
@@ -284,7 +287,7 @@ public class SoftwareManagementStep extends TrackableTasklet {
       this.managementOperation = managementOperation;
    }
 
-   /**
+    /**
     * @return the checkVMStatus
     */
    public boolean isCheckVMStatus() {

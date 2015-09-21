@@ -1871,10 +1871,9 @@ public class ClusterCommands implements CommandMarker {
       return warningMsg;
    }
 
-   @CliCommand(value = "cluster add", help = "Add element to hadoop cluster")
+   @CliCommand(value = "cluster expend", help = "Add element to hadoop cluster")
    public void addCluster(
         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
-        @CliOption(key = { "nodeGroup" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "node group") final boolean nodeGroup,
         @CliOption(key = { "specFile" }, mandatory = false, help = "The spec file name path") final String specFilePath,
         @CliOption(key = { "resume" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "flag to resume cluster creation") final boolean resume
     ) {
@@ -1884,12 +1883,6 @@ public class ClusterCommands implements CommandMarker {
               return;
           }
 
-          if (!nodeGroup) {
-              CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                      Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
-                      Constants.PARAM_NOT_CONTAIN_SPECFILE);
-              return;
-          }
           if (specFilePath == null) {
               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
                       Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,

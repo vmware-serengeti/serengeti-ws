@@ -32,6 +32,7 @@ public enum ManagementOperation {
    DESTROY,
    CONFIGURE,
    RESUME,
-   RESIZE
+   RESIZE,
+   ADD
 
 }
