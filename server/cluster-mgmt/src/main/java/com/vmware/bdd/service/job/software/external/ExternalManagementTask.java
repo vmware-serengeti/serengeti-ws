@@ -19,7 +19,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeStatus;
+import com.vmware.bdd.manager.ClusterConfigManager;
+import com.vmware.bdd.manager.ClusterEntityManager;
+import com.vmware.bdd.manager.ClusterManager;
+import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.utils.JobUtils;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -91,7 +97,7 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
       try {
          switch(managementOperation) {
             case CREATE:
-               success = softwareManager.createCluster(clusterBlueprint, queue);
+                  success = softwareManager.createCluster(clusterBlueprint, queue);
                break;
             case CONFIGURE:
                success = softwareManager.reconfigCluster(clusterBlueprint, queue);
@@ -148,6 +154,9 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
                List<String> addedNodes = getResizedVmNames(chunkContext, clusterBlueprint);
                success = softwareManager.scaleOutCluster(clusterBlueprint, addedNodes, queue, force);
                break;
+            case ADD:
+               List<String> addedNodeGroups = getNewNodeGroupVmNames(chunkContext, clusterBlueprint);
+               success = softwareManager.scaleOutCluster(clusterBlueprint, addedNodeGroups, queue, force);
             default:
                success = true;
          }
@@ -200,6 +209,44 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
             }
          }
       }
+
+      return addedNodeNames;
+   }
+
+   private List<String> getNewNodeGroupVmNames(ChunkContext chunkContext,
+                                          ClusterBlueprint clusterBlueprint) {
+      List<String> nodeGroupNames = new ArrayList<String>();
+      String nodeGroupNameList =
+              TrackableTasklet.getJobParameters(chunkContext).getString(
+                      JobConstants.NEW_NODE_GROUP_LIST_JOB_PARAM);
+      for (String nodeGroupName : nodeGroupNameList.split(",")){
+         nodeGroupNames.add(nodeGroupName);
+      }
+
+      long oldInstanceNum = 0;
+
+      List<String> addedNodeNames = new ArrayList<String>();
+      for (String groupName:nodeGroupNames) {
+         for (NodeGroupInfo group : clusterBlueprint.getNodeGroups()) {
+            if (group.getName().equals(groupName)) {
+               for (NodeInfo node: group.getNodes()) {
+                  long index = CommonUtil.getVmIndex(node.getName());
+                  if (index < oldInstanceNum) {
+                     continue;
+                  }
+                  if (JobUtils.getJobParameterForceClusterOperation(chunkContext)) {
+                     NodeStatus status = lockedClusterEntityManager.getClusterEntityMgr().findNodeByName(node.getName()).getStatus();
+                     logger.info(String.format("node %1s's status is %2s", node.getName(), status.name()));
+                     if ((status != NodeStatus.VM_READY) && (status != NodeStatus.BOOTSTRAP_FAILED)) {
+                        continue;
+                     }
+                  }
+                  addedNodeNames.add(node.getName());
+               }
+            }
+         }
+      }
+
 
       return addedNodeNames;
    }

@@ -1814,7 +1814,7 @@ public class ClusterManager {
       clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.ADDING);
 
       if (clusteringService.addNodeGroups(clusterSpec, nodeGroupsAdd, vNodes)) {
-         taskId = resumeClusterCreation(clusterName);
+         taskId = clusterAddExecute(clusterName, nodeGroupsAdd);
       } else {
          logger.error("Cluster "
                  + clusterName + " failed to insert node groups.");
@@ -1823,6 +1823,74 @@ public class ClusterManager {
       }
 
       return taskId;
+   }
+
+   public Long clusterAddExecute(String clusterName, NodeGroupCreate[] nodeGroupsAdd) throws Exception {
+      logger.info("ClusterManager, add node group for cluster " + clusterName);
+
+      ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
+
+      if (cluster == null) {
+         logger.error("cluster " + clusterName + " does not exist");
+         throw BddException.NOT_FOUND("Cluster", clusterName);
+      }
+
+      ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
+
+      if (cluster.getStatus() != ClusterStatus.ADDING) {
+         if (cluster.getStatus() != ClusterStatus.PROVISION_ERROR) {
+            logger.error("can not add node group for cluster: " + clusterName
+                    + ", " + cluster.getStatus());
+            throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName,
+                    "To update a cluster, its status must be PROVISION_ERROR or SERVICE_ERROR");
+         }
+      }
+
+      List<String> dsNames = getUsedDS(cluster.getVcDatastoreNameList());
+      if (dsNames.isEmpty()) {
+         throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
+      }
+      List<VcCluster> vcClusters = getUsedVcClusters(cluster.getVcRpNameList());
+      if (vcClusters.isEmpty()) {
+         throw ClusterConfigException.NO_DATASTORE_ADDED();
+      }
+
+      this.resMgr.refreshVcResources();
+
+      // validate accessibility
+      validateDatastore(dsNames, vcClusters);
+      validateNetworkAccessibility(cluster.getName(), cluster.fetchNetworkNameList(), vcClusters);
+
+      StringBuffer nodeGroupNameList = new StringBuffer();
+      for(NodeGroupCreate nodeGroup: nodeGroupsAdd) {
+         nodeGroupNameList.append(nodeGroup.getName());
+         nodeGroupNameList.append(",");
+      }
+      logger.info("nodeGroupNameList.toString()" + nodeGroupNameList.toString());
+      Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
+      param.put(JobConstants.NEW_NODE_GROUP_LIST_JOB_PARAM, new JobParameter(
+              nodeGroupNameList.toString()));
+      param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
+              clusterName));
+      param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(new Date()));
+      param.put(JobConstants.CLUSTER_SUCCESS_STATUS_JOB_PARAM,
+              new JobParameter(ClusterStatus.RUNNING.name()));
+      param.put(JobConstants.CLUSTER_FAILURE_STATUS_JOB_PARAM,
+              new JobParameter(ClusterStatus.PROVISION_ERROR.name()));
+      JobParameters jobParameters = new JobParameters(param);
+      clusterEntityMgr.updateClusterStatus(clusterName,
+              ClusterStatus.PROVISIONING);
+      clusterEntityMgr.cleanupActionError(clusterName);
+      try {
+         return jobManager.runJob(JobConstants.ADD_CLUSTER_JOB_NAME,
+                 jobParameters);
+      } catch (Exception e) {
+         logger.error("Failed to add node group for cluster "
+                 + clusterName, e);
+         clusterEntityMgr.updateClusterStatus(clusterName,
+                 ClusterStatus.PROVISION_ERROR);
+         throw e;
+      }
    }
 
    public void recoverClusters(List<VcClusterMap> clstMaps) throws Exception {

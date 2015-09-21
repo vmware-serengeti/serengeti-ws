@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/batch"
+			 xmlns:beans="http://www.springframework.org/schema/beans"
+			 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans.xsd
+   http://www.springframework.org/schema/batch
+   http://www.springframework.org/schema/batch/spring-batch.xsd">
+
+	<beans:import resource="classpath*:/META-INF/spring/jobs/common-job-context.xml" />
+
+	<beans:bean name="resumeClusterRemoveBadNodeTasklet"
+				class="com.vmware.bdd.service.job.ResumeClusterRemoveBadNodeStep">
+		<beans:property name="clusteringService" ref="clusteringService" />
+		<beans:property name="configMgr" ref="clusterConfigMgr" />
+		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+	</beans:bean>
+	<beans:bean name="setPasswordForClusterResumeTasklet"
+				class="com.vmware.bdd.service.job.SetPasswordForNewNodesStep">
+		<beans:property name="configMgr" ref="clusterConfigMgr" />
+		<beans:property name="setPasswordService" ref="setPasswordService" />
+		<beans:property name="managementOperation" value="RESUME" />
+	</beans:bean>
+	<beans:bean name="softwareAddClusterTasklet"
+				class="com.vmware.bdd.service.job.software.SoftwareManagementStep">
+		<beans:property name="clusterManager" ref="clusterManager" />
+		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
+		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
+		<beans:property name="managementOperation" value="ADD" />
+	</beans:bean>
+	<beans:bean name="configLocalRepoForClusterResumeTasklet"
+				class="com.vmware.bdd.service.job.ConfigLocalRepoStep">
+		<beans:property name="clusterManager" ref="clusterManager" />
+		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
+		<beans:property name="setLocalRepoService" ref="setNodeLocalRepoService"/>
+		<beans:property name="managementOperation" value="RESUME" />
+	</beans:bean>
+	<beans:bean name="EnableLdapForNewNodesResumeStep"
+				class="com.vmware.bdd.service.job.EnableLdapForNewNodesStep">
+		<beans:property name="clusterLdapUserMgmtCfgService">
+			<beans:ref bean="clusterLdapUserMgmtCfgService" />
+		</beans:property>
+		<beans:property name="clusterEntityMgr" ref="clusterEntityManager" />
+		<beans:property name="managementOperation" value="RESUME" />
+	</beans:bean>
+	<beans:bean name="generateHostnameWhenClusterResumeTasklet"
+				class="com.vmware.bdd.service.job.GenerateHostnameStep">
+		<beans:property name="generateHostnameSerivce" ref="generateHostnameService" />
+	</beans:bean>
+	<beans:bean name="generateHostnameFailedWhenClusterResumeTasklet"
+				class="com.vmware.bdd.service.job.GenerateHostnameFailedStep">
+		<beans:property name="generateHostnameSerivce" ref="generateHostnameService" />
+	</beans:bean>
+	<beans:bean name="postSoftwareProvisionWhenResumeTasklet"
+				class="com.vmware.bdd.service.job.ClusterOperationCallbackStep">
+		<beans:property name="clusterManager" ref="clusterManager" />
+		<beans:property name="clusterOperationCallbackService" ref="clusterOperationCallbackService" />
+		<beans:property name="managementOperation" value="RESUME" />
+		<beans:property name="phase" value="post-software-provision" />
+	</beans:bean>
+
+	<job id="addClusterJob" job-repository="jobRepository">
+		<step id="removeBadNodeStep" next="updateResumeClusterDataStep1">
+			<tasklet ref="resumeClusterRemoveBadNodeTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="updateResumeClusterDataStep1" next="nodeStatusVerifyStep1">
+			<tasklet ref="updateClusterDataTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="nodeStatusVerifyStep1" next="resumePlanStep">
+			<tasklet ref="clusterNodeStatusVerifyTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="resumePlanStep" next="updateResumeClusterDataStep2">
+			<tasklet ref="resumeResizeClusterPlanTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="updateResumeClusterDataStep2" next="resumeCreateVMStep">
+			<tasklet ref="updateClusterDataTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="resumeCreateVMStep" next="updateResumeClusterDataStep3">
+			<tasklet ref="createClusterVMTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="updateResumeClusterDataStep3" next="nodeStatusVerifyStep2">
+			<tasklet ref="updateClusterDataTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="nodeStatusVerifyStep2" next="setPasswordForAllNodesStep">
+			<tasklet ref="clusterNodeStatusVerifyTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="setPasswordForAllNodesStep" next="postSetPasswordForAllNodesStep">
+			<tasklet ref="setPasswordForClusterResumeTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="postSetPasswordForAllNodesStep" next="generateHostnameWhenClusterResumeStep">
+			<tasklet ref="postSetPasswordTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="generateHostnameWhenClusterResumeStep" next="generateHostnameFailedWhenClusterResumeStep">
+			<tasklet ref="generateHostnameWhenClusterResumeTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="generateHostnameFailedWhenClusterResumeStep" next="configLocalRepoResumeStep">
+			<tasklet ref="generateHostnameFailedWhenClusterResumeTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="configLocalRepoResumeStep" next="configLdapUserMgmtResumeStep">
+			<tasklet ref="configLocalRepoForClusterResumeTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="configLdapUserMgmtResumeStep" next="preSoftwareProvisionWhenResumeStep">
+			<tasklet ref="EnableLdapForNewNodesResumeStep" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="preSoftwareProvisionWhenResumeStep" next="softwareAddClusterStep">
+			<tasklet ref="preSoftwareProvisionWhenResumeTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="softwareAddClusterStep" next="setAutoElasticityResumeStep">
+			<tasklet ref="softwareAddClusterTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="setAutoElasticityResumeStep" next="postSoftwareProvisionWhenResumeStep">
+			<tasklet ref="setAutoElasticityTaskletRefreshAllNodes" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+		<step id="postSoftwareProvisionWhenResumeStep">
+			<tasklet ref="postSoftwareProvisionWhenResumeTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+
+		<listeners>
+			<listener ref="createClusterJobListener" />
+		</listeners>
+	</job>
+</beans:beans>
