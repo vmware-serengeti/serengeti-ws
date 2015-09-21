@@ -560,9 +560,9 @@ public class ClusterHealService implements IClusterHealService {
 
       // delete old vm and rename new vm in the prePowerOn
       ReplaceVmPrePowerOn prePowerOn =
-            new ReplaceVmPrePowerOn(isMapDistro, node.getMoId(), node.getVmName(),
+            new ReplaceVmPrePowerOn(node.getMoId(), node.getVmName(),
                   clusterSpec.getNodeGroup(groupName).getStorage().getShares(),
-                  createSchema.networkSchema, createSchema.diskSchema, ha, ft);
+                  createSchema.networkSchema, createSchema.diskSchema, ha, ft, isMapDistro);
 
       // power on the new vm, but not wait for ip address here. we have startVmStep to wait for ip
       String newVmName = node.getVmName();
@@ -718,11 +718,12 @@ public class ClusterHealService implements IClusterHealService {
       List<DiskSpec> fullDiskList = getReplacedFullDisks(node.getVmName(), replacementDisks);
 
       VmSchema createSchema = VcVmUtil.getVmSchema(spec, groupName, fullDiskList, clusteringService.getTemplateVmId(), Constants.ROOT_SNAPSTHOT_NAME);
+      boolean isMapDistro = clusterEntityMgr.findByName(clusterName).getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR);
 
       ReplaceVmBadDisksSP replaceVmDisksPrePowerOnSP = new ReplaceVmBadDisksSP(node.getMoId(),
             createSchema.diskSchema, VcVmUtil.getTargetRp(spec.getName(), groupName, node),
             getTargetDatastore(fullDiskList),
-            getBadDataDiskEntities(node.getVmName()));
+            getBadDataDiskEntities(node.getVmName()), isMapDistro);
 
       try {
          Callable<Void>[] storeProceduresArray = new Callable[1];

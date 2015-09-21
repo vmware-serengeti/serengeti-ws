@@ -50,8 +50,8 @@ public class ReplaceVmPrePowerOn implements IPrePostPowerOn {
    private boolean ft;
    private boolean isMapDistro;
 
-   public ReplaceVmPrePowerOn(boolean isMapDistro, String vmId, String newName, Priority ioShares,
-         NetworkSchema networkSchema, DiskSchema diskSchema, boolean ha, boolean ft) {
+   public ReplaceVmPrePowerOn(String vmId, String newName, Priority ioShares,
+         NetworkSchema networkSchema, DiskSchema diskSchema, boolean ha, boolean ft, boolean isMapDistro) {
       this.oldVmId = vmId;
       this.newName = newName;
       this.ioShares = ioShares;

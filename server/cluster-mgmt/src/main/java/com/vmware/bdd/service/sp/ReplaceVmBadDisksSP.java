@@ -52,8 +52,10 @@ public class ReplaceVmBadDisksSP implements Callable<Void> {
    private VcDatastore targetDs;
    private List<DiskEntity> badDataDiskEntities;
    private VcVirtualMachine vm;
+   private boolean isMapDistro;
 
-   public ReplaceVmBadDisksSP(String vmId, DiskSchema diskSchema, VcResourcePool targetRp, VcDatastore targetDs, List<DiskEntity> badDataDiskEntities) {
+   public ReplaceVmBadDisksSP(String vmId, DiskSchema diskSchema, VcResourcePool targetRp, VcDatastore targetDs, List<DiskEntity> badDataDiskEntities, boolean isMapDistro) {
+      this.isMapDistro = isMapDistro;
       this.vmId = vmId;
       this.diskSchema = diskSchema;
       this.targetRp = targetRp;
@@ -169,8 +171,8 @@ public class ReplaceVmBadDisksSP implements Callable<Void> {
 
             VcVmUtil.addBootupUUID(bootupConfigs);
 
-            // disk fix does support MapR distro, just set this flag to "false"
-            bootupConfigs.put(Constants.GUEST_VARIABLE_RESERVE_RAW_DISKS, String.valueOf(false));
+            // disk fix support MapR distro
+            bootupConfigs.put(Constants.GUEST_VARIABLE_RESERVE_RAW_DISKS, String.valueOf(isMapDistro));
             bootupConfigs.put(Constants.GUEST_VARIABLE_VOLUMES, VcVmUtil.getVolumes(vm.getId(), diskSchema.getDisks()));
 
             vm.setGuestConfigs(bootupConfigs);
