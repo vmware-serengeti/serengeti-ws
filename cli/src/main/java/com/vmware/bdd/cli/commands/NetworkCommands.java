@@ -47,7 +47,7 @@ public class NetworkCommands implements CommandMarker {
    private NetworkRestClient networkRestClient;
 
    private String networkName;
-   
+
    // Define network type
    private enum NetworkType {
       DHCP, IP
@@ -72,7 +72,7 @@ public class NetworkCommands implements CommandMarker {
     * <p>
     * Add function of network command.
     * </p>
-    * 
+    *
     * @param name
     *           Customize the network's name.
     * @param portGroup
@@ -100,8 +100,7 @@ public class NetworkCommands implements CommandMarker {
          @CliOption(key = { "ip" }, mandatory = false, help = "The IP address") final String ip,
          @CliOption(key = { "gateway" }, mandatory = false, help = "The gateway IP") final String gateway,
          @CliOption(key = { "mask" }, mandatory = false, help = "The subnet mask") final String mask,
-         @CliOption(key = { "dnsType" }, mandatory = false, specifiedDefaultValue = "NORMAL", unspecifiedDefaultValue = "NORMAL", help = "The type of DNS server: NORMAL, DYNAMIC or OTHERS") final String dnsType,
-         @CliOption(key = { "generateHostname" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Generate hostname for each VMs. This option only applies to normal DNS.") final Boolean generateHostname) {
+         @CliOption(key = { "dnsType" }, mandatory = false, specifiedDefaultValue = "NORMAL", unspecifiedDefaultValue = "NORMAL", help = "The type of DNS server: NORMAL, DYNAMIC or OTHERS") final String dnsType) {
 
       NetworkType operType = null;
       if (!CommandsUtils.isBlank(ip) && dhcp) {
@@ -123,7 +122,7 @@ public class NetworkCommands implements CommandMarker {
 
       try {
          addNetwork(operType, name, portGroup, ip, dhcp, dns, sedDNS, gateway,
-               mask, NetworkDnsType.valueOf(dnsType.toUpperCase()), generateHostname);
+               mask, NetworkDnsType.valueOf(dnsType.toUpperCase()));
       } catch (IllegalArgumentException ex) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
                Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
@@ -135,7 +134,7 @@ public class NetworkCommands implements CommandMarker {
     * <p>
     * Delete a network from Serengeti by name
     * </p>
-    * 
+    *
     * @param name
     *           Customize the network's name
     */
@@ -154,17 +153,17 @@ public class NetworkCommands implements CommandMarker {
                e.getMessage());
       }
    }
- 
+
    /**
     * <p>
     * get network information from Serengeti
     * </p>
-    * 
+    *
     * @param name
     *           Customize the network's name
     * @param detail
     *           The detail flag
-    * 
+    *
     */
    @CliCommand(value = "network list", help = "Get network information from Serengeti")
    public void getNetwork(
@@ -190,8 +189,7 @@ public class NetworkCommands implements CommandMarker {
    public void modifyNetwork(
          @CliOption(key = { "name" }, mandatory = true, help = "The network name") final String name,
          @CliOption(key = { "addIP" }, mandatory = false, help = "The ip information") final String ip,
-         @CliOption(key = { "dnsType" }, mandatory = false, specifiedDefaultValue = "NORMAL", help = "The type of DNS server: NORMAL, DYNAMIC or OTHERS") final String dnsType,
-         @CliOption(key = { "generateHostname" }, mandatory = false, specifiedDefaultValue = "true", help = "Generate hostname for each VMs. This option only applies to normal DNS.") final Boolean generateHostname) {
+         @CliOption(key = { "dnsType" }, mandatory = false, specifiedDefaultValue = "NORMAL", help = "The type of DNS server: NORMAL, DYNAMIC or OTHERS") final String dnsType) {
 
       NetworkAdd networkAdd = new NetworkAdd();
       networkAdd.setName(name);
@@ -204,9 +202,6 @@ public class NetworkCommands implements CommandMarker {
          }
          if (dnsType != null) {
             networkAdd.setDnsType(NetworkDnsType.valueOf(dnsType.toUpperCase()));
-         }
-         if (generateHostname != null) {
-            networkAdd.setIsGenerateHostname(generateHostname);
          }
          networkRestClient.update(networkAdd);
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NETWORK,
@@ -224,32 +219,31 @@ public class NetworkCommands implements CommandMarker {
    private void addNetwork(NetworkType operType, final String name,
          final String portGroup, final String ip, final boolean dhcp,
          final String dns, final String sedDNS, final String gateway,
-         final String mask, final NetworkDnsType dnsType, final Boolean generateHostname) {
+         final String mask, final NetworkDnsType dnsType) {
 
       switch (operType) {
       case IP:
          try {
             addNetworkByIPModel(operType, name, portGroup, ip, dns, sedDNS,
-                  gateway, mask, dnsType, generateHostname);
+                  gateway, mask, dnsType);
          } catch (UnknownHostException e) {
              CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
                      Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL, Constants.OUTPUT_UNKNOWN_HOST);
          }
          break;
       case DHCP:
-         addNetworkByDHCPModel(operType, name, portGroup, dhcp, dnsType, generateHostname);
+         addNetworkByDHCPModel(operType, name, portGroup, dhcp, dnsType);
       }
 
    }
 
     private void addNetworkByDHCPModel(NetworkType operType, final String name,
-                                       final String portGroup, final boolean dhcp, final NetworkDnsType dnsType, final Boolean generateHostname) {
+                                       final String portGroup, final boolean dhcp, final NetworkDnsType dnsType) {
         NetworkAdd networkAdd = new NetworkAdd();
         networkAdd.setName(name);
         networkAdd.setPortGroup(portGroup);
         networkAdd.setDhcp(true);
         networkAdd.setDnsType(dnsType);
-        networkAdd.setIsGenerateHostname(generateHostname);
 
         //rest invocation
         try {
@@ -264,7 +258,7 @@ public class NetworkCommands implements CommandMarker {
 
    private void addNetworkByIPModel(NetworkType operType, final String name,
          final String portGroup, final String ip, final String dns,
-         final String sedDNS, final String gateway, final String mask, final NetworkDnsType dnsType, final Boolean generateHostname)
+         final String sedDNS, final String gateway, final String mask, final NetworkDnsType dnsType)
          throws UnknownHostException {
 
       // validate the network add command option.
@@ -279,7 +273,6 @@ public class NetworkCommands implements CommandMarker {
          networkAdd.setGateway(gateway);
          networkAdd.setNetmask(mask);
          networkAdd.setDnsType(dnsType);
-         networkAdd.setIsGenerateHostname(generateHostname);
 
          //rest invocation
          try {
@@ -310,7 +303,7 @@ public class NetworkCommands implements CommandMarker {
          IpBlock ipBlock = null;
          for (Iterator<String> iterator = ipList.iterator(); iterator.hasNext();) {
 
-            String ipRangeStr = (String) iterator.next();
+            String ipRangeStr = iterator.next();
             if (ipPattern.matcher(ipRangeStr).matches()) {
                ipBlock = new IpBlock();
                ipBlock.setBeginIp(ipRangeStr);
@@ -335,7 +328,7 @@ public class NetworkCommands implements CommandMarker {
    private boolean validateAddNetworkOptionByIP(final String ip,
          final String dns, final String sedDNS, final String gateway,
          final String mask) {
-      
+
       if (!validateIP(ip, Constants.OUTPUT_OP_ADD)) {
          return false;
       }
@@ -370,7 +363,7 @@ public class NetworkCommands implements CommandMarker {
       }
 
       for (Iterator<String> iterator = ipPrarams.iterator(); iterator.hasNext();) {
-         String ipParam = (String) iterator.next();
+         String ipParam = iterator.next();
          if (!ipPattern.matcher(ipParam).matches()
                && !ipSegPattern.matcher(ipParam).matches()) {
             StringBuilder errorMessage = new StringBuilder().append(Constants.PARAMS_NETWORK_ADD_FORMAT_ERROR);

@@ -109,7 +109,7 @@ public class NetworkEntity extends EntityBase implements Comparable<NetworkEntit
    }
 
    public NetworkEntity(String name, String portGroup,
-         AllocType allocType, String netmask, String gateway, String dns1, String dns2, NetworkDnsType dnsType, Boolean isGenerateHostname) {
+         AllocType allocType, String netmask, String gateway, String dns1, String dns2, NetworkDnsType dnsType) {
       this.name = name;
       this.portGroup = portGroup;
       this.ipBlocks = new ArrayList<IpBlockEntity>();
@@ -120,9 +120,7 @@ public class NetworkEntity extends EntityBase implements Comparable<NetworkEntit
       this.dns2 = dns2;
       this.total = 0L;
       this.free = 0L;
-      this.dnsType = dnsType;
-      this.isGenerateHostname = isGenerateHostname;
-
+      setDnsType(dnsType);
       validate();
    }
 
@@ -317,6 +315,11 @@ public class NetworkEntity extends EntityBase implements Comparable<NetworkEntit
 
    public void setDnsType(NetworkDnsType dnsType) {
       this.dnsType = dnsType;
+      if (NetworkDnsType.isOthers(dnsType) || NetworkDnsType.isDynamic(dnsType)) {
+         this.isGenerateHostname = true;
+      } else {
+         this.isGenerateHostname = false;
+      }
    }
 
    public Boolean getIsGenerateHostname() {

@@ -791,9 +791,6 @@ public class RestResource {
       if (na.getDnsType() == null) {
          missingParameters.add("dnsType");
       }
-      if (na.getIsGenerateHostname() == null) {
-         missingParameters.add("generateHostname");
-      }
       if (!missingParameters.isEmpty()) {
          throw BddException.MISSING_PARAMETER(missingParameters);
       }
@@ -807,7 +804,7 @@ public class RestResource {
       }
 
       if (na.getIsDhcp()) {
-         networkSvc.addDhcpNetwork(na.getName(), na.getPortGroup(), na.getDnsType(), na.getIsGenerateHostname());
+         networkSvc.addDhcpNetwork(na.getName(), na.getPortGroup(), na.getDnsType());
       } else {
          if (!IpAddressUtil.isValidNetmask(na.getNetmask())) {
             throw BddException.INVALID_PARAMETER("netmask", na.getNetmask());
@@ -826,7 +823,7 @@ public class RestResource {
          IpAddressUtil.verifyIPBlocks(na.getIpBlocks(), netmask);
          networkSvc.addIpPoolNetwork(na.getName(), na.getPortGroup(),
                na.getNetmask(), na.getGateway(), na.getDns1(), na.getDns2(),
-               na.getIpBlocks(), na.getDnsType(), na.getIsGenerateHostname());
+               na.getIpBlocks(), na.getDnsType());
       }
    }
 
@@ -847,8 +844,8 @@ public class RestResource {
             || !CommonUtil.validateResourceName(networkName)) {
          throw BddException.INVALID_PARAMETER("network name", networkName);
       }
-      if (networkAdd.getIpBlocks() == null && networkAdd.getDnsType() == null && networkAdd.getIsGenerateHostname() == null) {
-         throw BddException.INVALID_OPTIONS_WHEN_UPDATE_NETWORK(new String[]{"addIP", "dnsType", "generateHostname"});
+      if (networkAdd.getIpBlocks() == null && networkAdd.getDnsType() == null) {
+         throw BddException.INVALID_OPTIONS_WHEN_UPDATE_NETWORK(new String[]{"addIP", "dnsType"});
       }
       if (networkAdd.getDnsType() != null && !CommonUtil.validateDnsType(networkAdd.getDnsType())) {
          throw BddException.INVALID_DNS_TYPE(networkAdd.getDnsType());

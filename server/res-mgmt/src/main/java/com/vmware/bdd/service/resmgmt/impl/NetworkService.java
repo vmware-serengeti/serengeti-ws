@@ -114,18 +114,15 @@ public class NetworkService implements Serializable, INetworkService {
    @Override
    @Transactional
    public synchronized NetworkEntity addDhcpNetwork(final String name,
-         final String portGroup, final NetworkDnsType dnsType, boolean isGenerateHostname) {
+         final String portGroup, final NetworkDnsType dnsType) {
       validateNetworkName(name);
       if (!resService.isNetworkExistInVc(portGroup)) {
          throw VcProviderException.NETWORK_NOT_FOUND(portGroup);
       }
       try {
-         if (NetworkDnsType.isOthers(dnsType) || NetworkDnsType.isDynamic(dnsType)) {
-            isGenerateHostname = true;
-         }
          NetworkEntity network =
                new NetworkEntity(name, portGroup, AllocType.DHCP, null, null,
-                     null, null, dnsType, isGenerateHostname);
+                     null, null, dnsType);
          networkDao.insert(network);
          network.validate();
          return network;
@@ -148,18 +145,15 @@ public class NetworkService implements Serializable, INetworkService {
    public synchronized NetworkEntity addIpPoolNetwork(final String name,
          final String portGroup, final String netmask, final String gateway,
          final String dns1, final String dns2, final List<IpBlock> ipBlocks,
-         final NetworkDnsType dnsType, boolean isGenerateHostname) {
+         final NetworkDnsType dnsType) {
       try {
          validateNetworkName(name);
          if (!resService.isNetworkExistInVc(portGroup)) {
             throw VcProviderException.NETWORK_NOT_FOUND(portGroup);
          }
-         if (NetworkDnsType.isOthers(dnsType) || NetworkDnsType.isDynamic(dnsType)) {
-            isGenerateHostname = true;
-         }
          NetworkEntity network =
                new NetworkEntity(name, portGroup, AllocType.IP_POOL, netmask,
-                     gateway, dns1, dns2, dnsType, isGenerateHostname);
+                     gateway, dns1, dns2, dnsType);
          networkDao.insert(network);
          List<IpBlockEntity> blocks =
                new ArrayList<IpBlockEntity>(ipBlocks.size());
@@ -283,7 +277,7 @@ public class NetworkService implements Serializable, INetworkService {
     * (non-Javadoc)
     *
     * @see
-    * com.vmware.bdd.manager.INetworkService#increaseIPs(java.lang.String, 
+    * com.vmware.bdd.manager.INetworkService#increaseIPs(java.lang.String,
     * java.util.List<com.vmware.bdd.apitypes.IpBlock>)
     */
    @Override
@@ -294,11 +288,11 @@ public class NetworkService implements Serializable, INetworkService {
          throw NetworkException.NOT_FOUND("Network", networkName);
       }
 
-      // Do not allow updating dnsType and isGenerateHostname if the network has been used
+      // Do not allow updating dnsType if the network has been used
       NetworkDnsType dnsType = networkAdd.getDnsType();
-      Boolean isGenerateHostname = networkAdd.getIsGenerateHostname();
-      if (dnsType !=  null || isGenerateHostname != null) {
+      if (dnsType !=  null) {
          assertNetworkNotUsed(network);
+         networkDao.setDnsType(network, dnsType);
       }
 
       // Add IP block when the type is static
@@ -322,21 +316,6 @@ public class NetworkService implements Serializable, INetworkService {
          checkIpBlockOverlap(networkName, blocks, network.getPortGroup());
          networkDao.addIpBlocks(network, blocks);
       }
-
-      if (dnsType == null) {
-         dnsType = network.getDnsType();
-      } else {
-         networkDao.setDnsType(network, dnsType);
-      }
-
-      if (NetworkDnsType.isOthers(dnsType) || NetworkDnsType.isDynamic(dnsType)) {
-         isGenerateHostname = true;
-      } else {
-         if (isGenerateHostname == null) {
-            isGenerateHostname = network.getIsGenerateHostname();
-         }
-      }
-      networkDao.setIsGenerateHostname(network, isGenerateHostname);
 
       network.validate();
    }

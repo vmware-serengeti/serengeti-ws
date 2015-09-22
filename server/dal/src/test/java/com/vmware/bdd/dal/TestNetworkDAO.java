@@ -86,7 +86,7 @@ public class TestNetworkDAO {
       final String dns2 = "4.4.4.4";
 
       NetworkEntity network = new NetworkEntity(portGroup, portGroup, allocType,
-            netmask, gateway, dns1, dns2, NetworkDnsType.NORMAL, false);
+            netmask, gateway, dns1, dns2, NetworkDnsType.NORMAL);
       networkDao.insert(network);
       Long ipBase = IpAddressUtil.getAddressAsLong(InetAddress.getByName("192.168.1.1"));
       List<IpBlockEntity> ipBlocks = new ArrayList<IpBlockEntity>();
@@ -114,10 +114,10 @@ public class TestNetworkDAO {
     * and free request until an 'out of IP' exception thrown (P(alloc) >
     * P(free), then the process will eventually converge). And then free all the
     * allocated IPs for all the requesters.
-    * 
+    *
     * The expected result is: the final IP blocks in the table should have only
     * one b block which match the original one.
-    * 
+    *
     * @throws UnknownHostException
     */
    @Test(groups = { "testNetworkEntity" }, dependsOnMethods = { "testInsert" })
@@ -135,7 +135,7 @@ public class TestNetworkDAO {
             .getAddressAsLong(InetAddress.getByName("0.2.0.0"));
 
       NetworkEntity network = new NetworkEntity(portGroup, portGroup, allocType,
-            netmask, gateway, dns1, dns2, NetworkDnsType.NORMAL, false);
+            netmask, gateway, dns1, dns2, NetworkDnsType.NORMAL);
       IpBlockEntity originalBlock = new IpBlockEntity(network,
             IpBlockEntity.FREE_BLOCK_OWNER_ID, BlockType.FREE, beginIp, endIp);
       networkDao.insert(network);

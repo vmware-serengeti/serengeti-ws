@@ -71,7 +71,7 @@ public class TestIpBlockEntity {
    private List<IpBlockEntity> genRandBlocks(int count) {
       List<IpBlockEntity> blocks = new ArrayList<IpBlockEntity>(count);
       NetworkEntity network = new NetworkEntity("net1", "vmnet1", AllocType.IP_POOL,
-            "255.255.255.0", "192.168.1.1", "8.8.8.8", null, null, false);
+            "255.255.255.0", "192.168.1.1", "8.8.8.8", null, null);
 
       Long[] owners = { 1L, 2L, 3L, 4L, 5L };
       BlockType[] blockTypes = { BlockType.ASSIGNED, BlockType.FREE };
@@ -95,7 +95,7 @@ public class TestIpBlockEntity {
 
    /**
     * Split the block randomly, the original block is kept unchanged.
-    * 
+    *
     * @param block
     *           original block
     * @return the split block(s)
@@ -131,7 +131,7 @@ public class TestIpBlockEntity {
 
    /**
     * Randomly expand a block in-place.
-    * 
+    *
     * @return expanded block
     */
    private IpBlockEntity randExpand(IpBlockEntity block, long min, long max) {
@@ -173,7 +173,7 @@ public class TestIpBlockEntity {
    /**
     * Split a block randomly into optionally overlapped pieces and randomly
     * group them into several groups.
-    * 
+    *
     * @param original
     *           original block
     * @param splitLevel
@@ -241,7 +241,7 @@ public class TestIpBlockEntity {
    @Test
    public void testMergeBasic() {
       NetworkEntity network = new NetworkEntity("net1", "vmnet1", AllocType.IP_POOL,
-            "255.255.255.0", "192.168.1.1", "8.8.8.8", null, null, false);
+            "255.255.255.0", "192.168.1.1", "8.8.8.8", null, null);
       IpBlockEntity blk1 = new IpBlockEntity(network, 1L, BlockType.ASSIGNED, 1L, 3L);
       IpBlockEntity blk2 = new IpBlockEntity(network, 1L, BlockType.ASSIGNED, 4L, 6L);
       IpBlockEntity blk3 = new IpBlockEntity(network, 1L, BlockType.ASSIGNED, 5L, 10L);
@@ -267,7 +267,7 @@ public class TestIpBlockEntity {
    @Test(enabled=false)
    private void doMergeRandomTest(boolean allowOverlap) {
       IpBlockEntity original = new IpBlockEntity(new NetworkEntity("net1", "vmnet1",
-            AllocType.IP_POOL, "255.255.255.0", "192.168.1.1", "8.8.8.8", null, null, allowOverlap), 1L,
+            AllocType.IP_POOL, "255.255.255.0", "192.168.1.1", "8.8.8.8", null, null), 1L,
             BlockType.ASSIGNED, 1L, 1L << 17/* 131072 */);
 
       List<IpBlockEntity> allBlocks = new ArrayList<IpBlockEntity>();
@@ -292,7 +292,7 @@ public class TestIpBlockEntity {
    @Test
    public void testSubtractBasic() {
       NetworkEntity network = new NetworkEntity("net1", "vmnet1", AllocType.IP_POOL,
-            "255.255.255.0", "192.168.1.1", "8.8.8.8", null, null, false);;
+            "255.255.255.0", "192.168.1.1", "8.8.8.8", null, null);;
 
       List<IpBlockEntity> setA = new ArrayList<IpBlockEntity>();
       setA.add(new IpBlockEntity(network, 1L, BlockType.ASSIGNED, 1L, 10L));
@@ -337,7 +337,7 @@ public class TestIpBlockEntity {
    @Test(enabled=false)
    private void doSubtractRandomTest(boolean allowOverlap) {
       IpBlockEntity original = new IpBlockEntity(new NetworkEntity("net1", "vmnet1",
-            AllocType.IP_POOL, "255.255.255.0", "192.168.1.1", "8.8.8.8", null, null, allowOverlap), 1L,
+            AllocType.IP_POOL, "255.255.255.0", "192.168.1.1", "8.8.8.8", null, null), 1L,
             BlockType.ASSIGNED, 1L, 1L << 15);
 
       List<IpBlockEntity> setA = new ArrayList<IpBlockEntity>();

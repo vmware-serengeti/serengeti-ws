@@ -72,7 +72,7 @@ public class NetworkServiceTest {
       };
       networkSvc.setResService(resService);
       networkSvc.setNetworkDao(networkDao);
-      networkSvc.addDhcpNetwork("defaultNetwork", "network1", null, false);
+      networkSvc.addDhcpNetwork("defaultNetwork", "network1", null);
       new Verifications() {
          {
             networkDao.insert(withAny(new NetworkEntity()));
@@ -93,7 +93,7 @@ public class NetworkServiceTest {
       List<IpBlock> ipBlocks = new ArrayList<IpBlock>();
       ipBlocks.add(new IpBlock("192.168.1.1", "192.168.1.10"));
       networkSvc.addIpPoolNetwork("staticNetwork", "network2", "255.255.255.0",
-            "192.168.1.254", "8.8.8.8", "4.4.4.4", ipBlocks, null, false);
+            "192.168.1.254", "8.8.8.8", "4.4.4.4", ipBlocks, null);
 
       new Verifications() {
          {
@@ -116,7 +116,7 @@ public class NetworkServiceTest {
       networkSvc.setResService(resService);
       networkSvc.setNetworkDao(networkDao);
       networkSvc.setClusterDAO(clusterDAO);
-      networkSvc.addDhcpNetwork("defaultNetwork3", "network3", null, false);
+      networkSvc.addDhcpNetwork("defaultNetwork3", "network3", null);
       new Verifications() {
          {
             networkDao.insert(withAny(new NetworkEntity()));
@@ -197,7 +197,6 @@ public class NetworkServiceTest {
          }
          {
             networkDao.addIpBlocks(network, network.getIpBlocks());
-            networkDao.setIsGenerateHostname(network, anyBoolean);
          }
       };
       NetworkAdd networkAdd = new NetworkAdd();

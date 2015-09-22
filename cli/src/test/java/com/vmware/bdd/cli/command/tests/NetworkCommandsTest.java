@@ -74,33 +74,33 @@ public class NetworkCommandsTest extends MockRestServer {
       List<String> list = null;
       list = testIpGroupFormat("192.168.0.12,192.168.0.12,192.168.0.12-200");
       for (Iterator<String> iterator = list.iterator(); iterator.hasNext();) {
-         String string = (String) iterator.next();
+         String string = iterator.next();
          assertEquals(ipPattern.matcher(string).matches()
                || ipSegPattern.matcher(string).matches(), true);
       }
       list = testIpGroupFormat("192.168.0.12,192.168.0.12,192.168.0.12");
       for (Iterator<String> iterator = list.iterator(); iterator.hasNext();) {
-         String string = (String) iterator.next();
+         String string = iterator.next();
          assertEquals(ipPattern.matcher(string).matches()
                || ipSegPattern.matcher(string).matches(), true);
       }
       list = testIpGroupFormat("192.168.0.12-30,192.168.0.12-80,192.168.0.12-90");
       for (Iterator<String> iterator = list.iterator(); iterator.hasNext();) {
-         String string = (String) iterator.next();
+         String string = iterator.next();
          assertEquals(ipPattern.matcher(string).matches()
                || ipSegPattern.matcher(string).matches(), true);
       }
 
       list = testIpGroupFormat("192.168.0.12, ");
       for (Iterator<String> iterator = list.iterator(); iterator.hasNext();) {
-         String string = (String) iterator.next();
+         String string = iterator.next();
          assertEquals(ipPattern.matcher(string).matches()
                || ipSegPattern.matcher(string).matches(), true);
       }
 
       list = testIpGroupFormat("192.168.0.12,256.117.6.12-300");
       for (Iterator<String> iterator = list.iterator(); iterator.hasNext();) {
-         String string = (String) iterator.next();
+         String string = iterator.next();
          if (ipPattern.matcher(string).matches()
                || ipSegPattern.matcher(string).matches())
             assertEquals(ipPattern.matcher(string).matches()
@@ -112,21 +112,21 @@ public class NetworkCommandsTest extends MockRestServer {
 
       list = testIpGroupFormat(",");
       for (Iterator<String> iterator = list.iterator(); iterator.hasNext();) {
-         String string = (String) iterator.next();
+         String string = iterator.next();
          assertEquals(ipPattern.matcher(string).matches()
                || ipSegPattern.matcher(string).matches(), false);
       }
 
       list = testIpGroupFormat("123444");
       for (Iterator<String> iterator = list.iterator(); iterator.hasNext();) {
-         String string = (String) iterator.next();
+         String string = iterator.next();
          assertEquals(ipPattern.matcher(string).matches()
                || ipSegPattern.matcher(string).matches(), false);
       }
 
       list = testIpGroupFormat("aa,bb");
       for (Iterator<String> iterator = list.iterator(); iterator.hasNext();) {
-         String string = (String) iterator.next();
+         String string = iterator.next();
          assertEquals(ipPattern.matcher(string).matches()
                || ipSegPattern.matcher(string).matches(), false);
       }
@@ -141,7 +141,7 @@ public class NetworkCommandsTest extends MockRestServer {
             HttpStatus.NO_CONTENT, "");
       networkCommands.addNetwork("name", "portGroup", false, "192.168.0.12",
             "192.168.0.13", "192.168.0.1,192.167.0.4-100", "192.168.1.1",
-            "255.255.255.0", NetworkDnsType.NORMAL.toString(), false);
+            "255.255.255.0", NetworkDnsType.NORMAL.toString());
       CookieCache.clear();
    }
 
@@ -155,10 +155,10 @@ public class NetworkCommandsTest extends MockRestServer {
       buildReqRespWithoutReqBody(
             "https://127.0.0.1:8443/serengeti/api/networks", HttpMethod.POST,
             HttpStatus.BAD_REQUEST, mapper.writeValueAsString(errorMsg));
-      
+
       networkCommands.addNetwork("name", "portGroup", false, "192.168.0.12",
             "192.168.0.13", "192.168.0.1,192.168.3.4-100", "192.168.7.1",
-            "255.255.255.0", NetworkDnsType.NORMAL.toString(), false);
+            "255.255.255.0", NetworkDnsType.NORMAL.toString());
       CookieCache.clear();
    }
 
@@ -168,7 +168,7 @@ public class NetworkCommandsTest extends MockRestServer {
       buildReqRespWithoutReqBody(
             "https://127.0.0.1:8443/serengeti/api/network/staticNetwork", HttpMethod.PUT,
             HttpStatus.NO_CONTENT, "");
-      networkCommands.modifyNetwork("staticNetwork","192.168.0.2-100", NetworkDnsType.NORMAL.toString(), false);
+      networkCommands.modifyNetwork("staticNetwork","192.168.0.2-100", NetworkDnsType.NORMAL.toString());
       CookieCache.clear();
    }
 
@@ -181,14 +181,14 @@ public class NetworkCommandsTest extends MockRestServer {
       networkCommands.deleteNetwork("name");
       CookieCache.clear();
    }
-   
+
    @Test
    public void testDeleteNetworkFailure() throws Exception {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
       BddErrorMessage errorMsg = new BddErrorMessage();
       errorMsg.setMessage("not found");
       ObjectMapper mapper = new ObjectMapper();
-      
+
       buildReqRespWithoutReqBody(
             "https://127.0.0.1:8443/serengeti/api/network/name",
             HttpMethod.DELETE, HttpStatus.NOT_FOUND, mapper.writeValueAsString(errorMsg));
@@ -320,7 +320,7 @@ public class NetworkCommandsTest extends MockRestServer {
          System.out.println(e.getMessage());
       }
    }
-   
+
    @Test
    public void testGetClusterFailure() throws Exception {
       CookieCache.put("Cookie","JSESSIONID=2AAF431F59ACEE1CC68B43C87772C54F");
