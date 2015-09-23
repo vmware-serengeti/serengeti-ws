@@ -51,6 +51,9 @@ public class SoftwareManagementTaskFactory {
       case RESIZE:
          clusterOperation.setAction(ClusterAction.CREATE);
          break;
+      case EXPAND:
+            clusterOperation.setAction(ClusterAction.CREATE);
+            break;
       case QUERY:
          String clusterName = targetName.split("-")[0];
          boolean needQuery = checkAndResetNodePowerStatusChanged(clusterName, 

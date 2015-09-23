@@ -43,8 +43,8 @@ public interface JobConstants {
    public static final String VHM_ACTION_JOB_PARAM = "vhmAction";
    public static final String TIMESTAMP_JOB_PARAM = "timeStamp";
    public static final String CLUSTER_BLUEPRINT_JOB_PARAM = "clusterBlueprint";
-   public static final String NEW_NODE_GROUP_JOB_PARAM = "clusterAddNodeGroup";
-   public static final String NEW_NODE_GROUP_LIST_JOB_PARAM = "clusterAddNodeGroups";
+   public static final String NEW_NODE_GROUP_JOB_PARAM = "clusterExpandNodeGroup";
+   public static final String NEW_NODE_GROUP_LIST_JOB_PARAM = "clusterExpandNodeGroups";
 
    public static final String CLUSTER_NODES_STATUS = "clusterNodesStatus";
    public static final String CLUSTER_OPERATION_SUCCESS = "cluster.isSuccess";

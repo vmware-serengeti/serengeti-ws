@@ -50,8 +50,9 @@ public class SetPasswordForNewNodesStep extends TrackableTasklet {
       return RepeatStatus.FINISHED;
    }
 
-   private List<NodeEntity> getNodesToBeSetPassword (ChunkContext chunkContext) throws TaskException {
+   protected List<NodeEntity> getNodesToBeSetPassword (ChunkContext chunkContext) throws TaskException {
       List<NodeEntity> toBeSetPassword = null;
+
       if ((managementOperation == ManagementOperation.CREATE) ||
             (managementOperation == ManagementOperation.RESUME)) {
          toBeSetPassword = getClusterEntityMgr().findAllNodes(clusterName);
