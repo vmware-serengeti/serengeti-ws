@@ -1873,15 +1873,15 @@ public class ClusterCommands implements CommandMarker {
       return warningMsg;
    }
 
-   @CliCommand(value = "cluster expand", help = "Add element to hadoop cluster")
-   public void addCluster(
+   @CliCommand(value = "cluster expand", help = "Expand element for existed cluster")
+   public void expandCluster(
         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
         @CliOption(key = { "specFile" }, mandatory = false, help = "The spec file name path") final String specFilePath
     ) {
       try {
           if (specFilePath == null) {
               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                      Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
+                      Constants.OUTPUT_OP_EXPAND, Constants.OUTPUT_OP_RESULT_FAIL,
                       Constants.PARAM_NOT_CONTAIN_SPECFILE);
               return;
           }
@@ -1889,7 +1889,7 @@ public class ClusterCommands implements CommandMarker {
 
           if (cluster == null) {
               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                      Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
+                      Constants.OUTPUT_OP_EXPAND, Constants.OUTPUT_OP_RESULT_FAIL,
                       "cluster " + name + " does not exist.");
               return;
           }
@@ -1903,22 +1903,22 @@ public class ClusterCommands implements CommandMarker {
           // validate the name
           if (name.indexOf("-") != -1) {
               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                      Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
+                      Constants.OUTPUT_OP_EXPAND, Constants.OUTPUT_OP_RESULT_FAIL,
                       Constants.PARAM_NODEGROUP + Constants.PARAM_NOT_CONTAIN_HORIZONTAL_LINE);
               return;
           } else if (name.indexOf(" ") != -1) {
               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                      Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
+                      Constants.OUTPUT_OP_EXPAND, Constants.OUTPUT_OP_RESULT_FAIL,
                       Constants.PARAM_NODEGROUP + Constants.PARAM_NOT_CONTAIN_BLANK_SPACE);
               return;
           }
 
           restClient.addNodeGroups(name, nodeGroupAdd);
           CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
-                  Constants.OUTPUT_OP_RESULT_ADD);
+                  Constants.OUTPUT_OP_RESULT_EXPAND);
       } catch (Exception e) {
           CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                  Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
+                  Constants.OUTPUT_OP_EXPAND, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
           return;
       }
 

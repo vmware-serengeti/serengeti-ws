@@ -98,6 +98,7 @@ public class Constants {
    public static final String OUTPUT_OP_UPDATE = "update";
    public static final String OUTPUT_OP_EXPORT = "export";
    public static final String OUTPUT_OP_ADD = "add";
+   public static final String OUTPUT_OP_EXPAND = "expand";
    public static final String OUTPUT_OP_LIST = "list";
    public static final String OUTPUT_OP_TARGET = "target";
    public static final String OUTPUT_OP_DELETE = "delete";
@@ -121,7 +122,8 @@ public class Constants {
    public static final String OUTPUT_OP_RESULT_STOP = "stopped";
    public static final String OUTPUT_OP_RESULT_RESIZE = "resized";
    public static final String OUTPUT_OP_RESULT_RESUME = "resumed";
-   public static final String OUTPUT_OP_RESULT_ADD = "added";
+   public static final String OUTPUT_OP_RESULT_ADD = "expanded";
+   public static final String OUTPUT_OP_RESULT_EXPAND = "expanded";
    public static final String OUTPUT_OP_RESULT_GET = "got";
    public static final String OUTPUT_OP_RESULT_UPLOAD = "uploaded";
    public static final String OUTPUT_OP_RESULT_RESET = "reset";
