@@ -17,6 +17,10 @@ package com.vmware.bdd.cli.http;
 import com.vmware.bdd.cli.config.CliProperties;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.http.client.HttpClient;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
@@ -71,18 +75,22 @@ public class HttpClientProvider {
          LOGGER.debug("hostname verifier: " + hostnameVerifier);
       }
 
-      PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-      cm.setMaxTotal(20);
-      cm.setDefaultMaxPerRoute(10);
-
       SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
             sslContext, supportedProtocols,supportedCipherSuites,
             getHostnameVerifier(hostnameVerifier));
 
+      Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+            .register("http", PlainConnectionSocketFactory.getSocketFactory())
+            .register("https", socketFactory)
+            .build();
+
+      PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+      cm.setMaxTotal(20);
+      cm.setDefaultMaxPerRoute(10);
 //      HttpHost proxy = new HttpHost("127.0.0.1", 8810, "http");
 //      HttpClient  client1 = HttpClients.custom().setSSLSocketFactory(socketFactory).setProxy(proxy).build();
 
-      HttpClient client1 = HttpClients.custom().setSSLSocketFactory(socketFactory).setConnectionManager(cm).build();
+      HttpClient client1 = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
       return client1;
    }
 
