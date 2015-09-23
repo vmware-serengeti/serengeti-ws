@@ -33,6 +33,6 @@ public enum ManagementOperation {
    CONFIGURE,
    RESUME,
    RESIZE,
-   ADD
+   EXPAND
 
 }

@@ -25,7 +25,6 @@ public enum ClusterStatus {
    DELETING,
    STOPPED,
    EXPANDING,
-   EXPAND_ERROR,
    ERROR,
    STOPPING,
    STARTING,

@@ -49,7 +49,7 @@ public class EnableLdapForNewNodesStep extends TrackableTasklet {
       return RepeatStatus.FINISHED;
    }
 
-   private List<NodeEntity> findNodesToEnableLdap(ChunkContext chunkContext) throws TaskException {
+   protected List<NodeEntity> findNodesToEnableLdap(ChunkContext chunkContext) throws TaskException {
       List<NodeEntity> foundNodeList = null;
       if ((managementOperation == ManagementOperation.CREATE) ||
             (managementOperation == ManagementOperation.RESUME)) {

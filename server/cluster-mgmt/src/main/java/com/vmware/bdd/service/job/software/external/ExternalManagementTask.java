@@ -154,10 +154,10 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
                List<String> addedNodes = getResizedVmNames(chunkContext, clusterBlueprint);
                success = softwareManager.scaleOutCluster(clusterBlueprint, addedNodes, queue, force);
                break;
-            case ADD:
+            case EXPAND:
                AuAssert.check(chunkContext != null);
-               List<String> addedNodeGroups = getNewNodeGroupVmNames(chunkContext, clusterBlueprint);
-               success = softwareManager.scaleOutCluster(clusterBlueprint, addedNodeGroups, queue, force);
+               List<String> addedNode = getNewNodeGroupVmNames(chunkContext, clusterBlueprint);
+               success = softwareManager.scaleOutCluster(clusterBlueprint, addedNode, queue, force);
             default:
                success = true;
          }

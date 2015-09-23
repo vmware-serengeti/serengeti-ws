@@ -138,7 +138,7 @@ public class SoftwareManagementStep extends TrackableTasklet {
       }
       if (ManagementOperation.CONFIGURE.equals(managementOperation)
             || ManagementOperation.START.equals(managementOperation)
-            || ManagementOperation.ADD.equals(managementOperation)
+            || ManagementOperation.EXPAND.equals(managementOperation)
             || JobConstants.RESUME_CLUSTER_JOB_NAME.equals(jobName)) {
          logger.info("Start to check host time.");
          List<NodeEntity> nodes =
@@ -249,7 +249,8 @@ public class SoftwareManagementStep extends TrackableTasklet {
       // This is for Ambari version >= 2.1 only.
       String appMgrType = softwareMgr.getType();
       if (appMgrType.equalsIgnoreCase(Constants.AMBARI_PLUGIN_TYPE)
-            && (managementOperation.equals(ManagementOperation.CREATE) || managementOperation.equals(ManagementOperation.RESIZE) || managementOperation.equals(ManagementOperation.RESUME))
+            && (managementOperation.equals(ManagementOperation.CREATE) || managementOperation.equals(ManagementOperation.RESIZE)
+              || managementOperation.equals(ManagementOperation.RESUME) || managementOperation.equals(ManagementOperation.EXPAND) )
             && Version.compare(softwareMgr.getVersion(), "2.1") >= 0) {
          if (clusterBlueprint.hasTopologyPolicy()) {
             Map<String, String> rackTopology = this.clusterManager.getRackTopology(clusterName, null);

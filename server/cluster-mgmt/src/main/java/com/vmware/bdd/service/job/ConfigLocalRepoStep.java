@@ -94,7 +94,7 @@ public class ConfigLocalRepoStep extends TrackableTasklet {
       return RepeatStatus.FINISHED;
    }
 
-   private List<NodeEntity> getNodesToBeSetLocalRepo(ChunkContext chunkContext,
+   protected List<NodeEntity> getNodesToBeSetLocalRepo(ChunkContext chunkContext,
          String clusterName) throws TaskException {
       List<NodeEntity> toBeSetLocalRepo = null;
       if ((managementOperation == ManagementOperation.CREATE)
