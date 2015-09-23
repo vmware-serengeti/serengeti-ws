@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.cli.config;
 
+import com.vmware.bdd.cli.commands.CliException;
 import com.vmware.bdd.cli.commands.Constants;
 import com.vmware.bdd.cli.http.HostnameVerifiers;
 import com.vmware.bdd.security.tls.PspConfiguration;
@@ -22,6 +23,8 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -33,6 +36,8 @@ import java.io.IOException;
  */
 @Component
 public class CliProperties {
+   private static Logger LOGGER = Logger.getLogger(CliProperties.class);
+
    private static final String KEY_STORE_PASSWORD_KEY = "keystore_pswd";
    private static final int KEY_STORE_PASSWORD_LENGTH = 8;
    private static final String SUPPORTED_PROTOCOLS = "supported_protocols";
@@ -41,12 +46,20 @@ public class CliProperties {
 
    PropertiesConfiguration properties = new PropertiesConfiguration();
 
+   @Autowired
+   private CliSecureFilesInitiator filesInitiator;
+
    @PostConstruct
-   protected void loadFromFile() throws ConfigurationException {
+   protected void loadFromFile() throws CliException {
       File file = new File(Constants.PROPERTY_FILE);
       properties.setFile(file);
       if (file.isFile()) {
-         properties.load();
+         try {
+            properties.load();
+         } catch (ConfigurationException e) {
+            LOGGER.error("failed to load cli.properties", e);
+            throw new CliException("failed to load cli.properties");
+         }
       }
    }
 
@@ -62,10 +75,6 @@ public class CliProperties {
    public void saveKeyStorePwd(char[] password) throws IOException, ConfigurationException {
       properties.setProperty(KEY_STORE_PASSWORD_KEY, new String(password));
       properties.save();
-
-      // set file permission to 600 to protect keystore password
-      CommonUtil.setOwnerOnlyReadWrite(Constants.PROPERTY_FILE);
-      CommonUtil.setOwnerOnlyReadWrite(Constants.CLI_HISTORY_FILE);
    }
 
    public String[] getSupportedProtocols() {

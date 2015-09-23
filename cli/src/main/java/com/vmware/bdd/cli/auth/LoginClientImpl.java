@@ -64,7 +64,14 @@ public class LoginClientImpl {
             Charset.forName("UTF-8"));
       loginPost.setEntity(requestEntity);
 
-      HttpResponse response = client1.execute(loginPost);
+      HttpResponse response = null;
+
+      try{
+         response = client1.execute(loginPost);
+      } finally {
+         loginPost.releaseConnection();
+      }
+
       LOGGER.debug("resp code is: " + response.getStatusLine());
       int responseCode = response.getStatusLine().getStatusCode();
 

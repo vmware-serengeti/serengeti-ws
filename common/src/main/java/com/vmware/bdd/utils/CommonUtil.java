@@ -57,16 +57,10 @@ public class CommonUtil {
    * Set file permission to 600
    */
    public static void setOwnerOnlyReadWrite(String filename) throws IOException {
-      if(new File(filename).exists()) {
-         Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
-         perms.add(PosixFilePermission.OWNER_READ);
-         perms.add(PosixFilePermission.OWNER_WRITE);
-         Files.setPosixFilePermissions(Paths.get(filename), perms);
-      } else {
-         if(logger.isDebugEnabled()) {
-            logger.debug("file not exists: " + filename);
-         }
-      }
+      Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+      perms.add(PosixFilePermission.OWNER_READ);
+      perms.add(PosixFilePermission.OWNER_WRITE);
+      Files.setPosixFilePermissions(Paths.get(filename), perms);
    }
 
    public static String getConfDir() {

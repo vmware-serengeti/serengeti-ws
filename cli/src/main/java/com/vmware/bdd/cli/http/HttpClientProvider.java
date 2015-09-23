@@ -15,27 +15,23 @@
 package com.vmware.bdd.cli.http;
 
 import com.vmware.bdd.cli.config.CliProperties;
-import com.vmware.bdd.cli.rest.RestClient;
-import com.vmware.bdd.security.tls.PspConfiguration;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.http.HttpHost;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.security.KeyManagementException;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 
@@ -75,14 +71,18 @@ public class HttpClientProvider {
          LOGGER.debug("hostname verifier: " + hostnameVerifier);
       }
 
+      PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+      cm.setMaxTotal(20);
+      cm.setDefaultMaxPerRoute(10);
+
       SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
             sslContext, supportedProtocols,supportedCipherSuites,
             getHostnameVerifier(hostnameVerifier));
 
 //      HttpHost proxy = new HttpHost("127.0.0.1", 8810, "http");
-//         client1 = HttpClients.custom().setSSLSocketFactory(socketFactory).setProxy(proxy).build();
+//      HttpClient  client1 = HttpClients.custom().setSSLSocketFactory(socketFactory).setProxy(proxy).build();
 
-      HttpClient client1 = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
+      HttpClient client1 = HttpClients.custom().setSSLSocketFactory(socketFactory).setConnectionManager(cm).build();
       return client1;
    }
 
