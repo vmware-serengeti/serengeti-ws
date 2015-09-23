@@ -1816,11 +1816,11 @@ public class ClusterManager {
          }
       }
 
+
       if(readyExpand) {
          clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.EXPANDING);
-
          if (clusteringService.addNodeGroups(clusterSpec, nodeGroupsAdd, vNodes)) {
-            taskId = clusterExpandExecute(clusterEntity, nodeGroupsAdd);
+            taskId = clusterExpandExecute(clusterName, nodeGroupsAdd);
          } else {
             logger.error("Cluster "
                     + clusterName + " failed to insert node groups.");
@@ -1834,9 +1834,9 @@ public class ClusterManager {
       return taskId;
    }
 
-   public Long clusterExpandExecute(ClusterEntity cluster, NodeGroupCreate[] nodeGroupsAdd) throws Exception {
+   public Long clusterExpandExecute(String clusterName, NodeGroupCreate[] nodeGroupsAdd) throws Exception {
 
-      String clusterName = cluster.getName();
+      ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
 
       StringBuffer nodeGroupNameList = new StringBuffer();
       for(NodeGroupCreate nodeGroup: nodeGroupsAdd) {
@@ -1849,17 +1849,17 @@ public class ClusterManager {
             logger.error("can not add node group for cluster: " + clusterName
                     + ", " + cluster.getStatus());
             throw ClusterManagerException.UPDATE_NOT_ALLOWED_ERROR(clusterName,
-                    "To update a cluster, its status must be PROVISION_ERROR or SERVICE_ERROR");
+                    "To update a cluster, its status must be PROVISION_ERROR");
          }
       }
 
       List<String> dsNames = getUsedDS(cluster.getVcDatastoreNameList());
       if (dsNames.isEmpty()) {
-         throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
+         throw ClusterConfigException.NO_DATASTORE_ADDED();
       }
       List<VcCluster> vcClusters = getUsedVcClusters(cluster.getVcRpNameList());
       if (vcClusters.isEmpty()) {
-         throw ClusterConfigException.NO_DATASTORE_ADDED();
+         throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
       }
 
       this.resMgr.refreshVcResources();
@@ -1879,8 +1879,6 @@ public class ClusterManager {
       param.put(JobConstants.CLUSTER_FAILURE_STATUS_JOB_PARAM,
               new JobParameter(ClusterStatus.PROVISION_ERROR.name()));
       JobParameters jobParameters = new JobParameters(param);
-      clusterEntityMgr.updateClusterStatus(clusterName,
-              ClusterStatus.PROVISIONING);
       clusterEntityMgr.cleanupActionError(clusterName);
       try {
          return jobManager.runJob(JobConstants.EXPAND_CLUSTER_JOB_NAME,
