@@ -56,7 +56,7 @@ public class SoftwareManagementTaskFactory {
             break;
       case QUERY:
          String clusterName = targetName.split("-")[0];
-         boolean needQuery = checkAndResetNodePowerStatusChanged(clusterName, 
+         boolean needQuery = checkAndResetNodePowerStatusChanged(clusterName,
                lockClusterEntityMgr.getClusterEntityMgr());
          if (needQuery) {
             clusterOperation.setAction(ClusterAction.QUERY);

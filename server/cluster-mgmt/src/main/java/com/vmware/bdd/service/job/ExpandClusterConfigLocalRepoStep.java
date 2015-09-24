@@ -14,23 +14,11 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job;
 
-import com.vmware.aurora.global.Configuration;
-import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.TaskException;
-import com.vmware.bdd.manager.ClusterManager;
-import com.vmware.bdd.manager.SoftwareManagerCollector;
-import com.vmware.bdd.manager.intf.IExclusiveLockedClusterEntityManager;
-import com.vmware.bdd.service.ISetLocalRepoService;
-import com.vmware.bdd.service.job.software.ManagementOperation;
-import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
-import com.vmware.bdd.utils.CommonUtil;
-import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.ClusterUtil;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
-import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,29 +32,24 @@ public class ExpandClusterConfigLocalRepoStep extends ConfigLocalRepoStep {
          String clusterName) throws TaskException {
         List<NodeEntity> toBeSetLocalRepo = null;
         List<NodeEntity> nodesInGroup = null;
-        List<String> nodeGroupNames = new ArrayList<String>();
+        List<NodeEntity> addNodes = new ArrayList<NodeEntity>() ;
+        List<String> nodeGroupNames = null;
 
         String nodeGroupNameList =
                TrackableTasklet.getJobParameters(chunkContext).getString(
                        JobConstants.NEW_NODE_GROUP_LIST_JOB_PARAM);
 
-        logger.info("ExpandClusterConfigLocalRepoStep===getNodesToBeSetPassword");
-        for (String nodeGroupName : nodeGroupNameList.split(",")){
-           nodeGroupNames.add(nodeGroupName);
-        }
+        nodeGroupNames = ClusterUtil.getNodesFromNodeGroups(nodeGroupNameList);
 
         for (String nodeGroupName: nodeGroupNames) {
            nodesInGroup = clusterEntityMgr.findAllNodes(clusterName, nodeGroupName);
-        }
-
-        for (NodeEntity node : nodesInGroup) {
-           if (node.getStatus().ordinal() >= NodeStatus.VM_READY.ordinal()) {
-               if (toBeSetLocalRepo == null) {
-                   toBeSetLocalRepo = new ArrayList<NodeEntity>();
-               }
-               toBeSetLocalRepo.add(node);
+           for(NodeEntity ne: nodesInGroup) {
+               addNodes.add(ne);
            }
         }
+
+        toBeSetLocalRepo = ClusterUtil.getReadyVmFromNodeGroups(addNodes);
+
         return toBeSetLocalRepo;
    }
 

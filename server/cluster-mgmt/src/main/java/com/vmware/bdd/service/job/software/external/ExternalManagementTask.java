@@ -224,6 +224,12 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
          nodeGroupNames.add(nodeGroupName);
       }
 
+      logger.info("getNewNodeGroupVmNames===nodeGroupNameList:" + nodeGroupNameList);
+
+      for (String nodeName: nodeGroupNames) {
+         logger.info("AddedNodeNames:" + nodeName);
+      }
+
       List<String> addedNodeNames = new ArrayList<String>();
       for (String groupName : nodeGroupNames) {
          for (NodeGroupInfo group : clusterBlueprint.getNodeGroups()) {
@@ -242,6 +248,9 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
          }
       }
 
+      for (String nodeName: addedNodeNames) {
+         logger.info("AddedNodeNames:" + nodeName);
+      }
 
       return addedNodeNames;
    }

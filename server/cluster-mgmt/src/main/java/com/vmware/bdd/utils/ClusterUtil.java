@@ -1,5 +1,9 @@
 package com.vmware.bdd.utils;
 
+import com.vmware.bdd.apitypes.NodeStatus;
+import com.vmware.bdd.exception.TaskException;
+import com.vmware.bdd.service.job.JobConstants;
+import com.vmware.bdd.service.job.TrackableTasklet;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.vc.VcCache;
@@ -9,9 +13,16 @@ import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ClusterUtil {
    private static final Logger logger = Logger.getLogger(ClusterUtil.class);
+   @Autowired
+   private IClusterEntityManager clusterEntityMgr;
 
    public static VcVirtualMachine getVcVm(IClusterEntityManager clusterEntityMgr, NodeEntity node) {
       String vmId = node.getMoId();
@@ -62,4 +73,29 @@ public class ClusterUtil {
 
       return vcVm;
    }
+
+   public static List<String> getNodesFromNodeGroups (String nodeGroupNameList) throws TaskException {
+
+
+      List<String> nodeGroupNames = new ArrayList<String>() ;
+
+      for (String nodeGroupName : nodeGroupNameList.split(",")){
+         nodeGroupNames.add(nodeGroupName);
+      }
+      return nodeGroupNames;
+   }
+
+   public static List<NodeEntity> getReadyVmFromNodeGroups (List<NodeEntity> addNodes) throws TaskException {
+      List<NodeEntity> toBeAddNodes = null;
+      for (NodeEntity node : addNodes) {
+         if (node.getStatus().ordinal() >= NodeStatus.VM_READY.ordinal()) {
+            if (toBeAddNodes == null) {
+               toBeAddNodes = new ArrayList<NodeEntity>();
+            }
+            toBeAddNodes.add(node);
+         }
+      }
+      return toBeAddNodes;
+   }
+
 }
