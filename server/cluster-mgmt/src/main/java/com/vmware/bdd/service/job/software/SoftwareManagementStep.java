@@ -138,7 +138,6 @@ public class SoftwareManagementStep extends TrackableTasklet {
       }
       if (ManagementOperation.CONFIGURE.equals(managementOperation)
             || ManagementOperation.START.equals(managementOperation)
-            || ManagementOperation.EXPAND.equals(managementOperation)
             || JobConstants.RESUME_CLUSTER_JOB_NAME.equals(jobName)) {
          logger.info("Start to check host time.");
          List<NodeEntity> nodes =

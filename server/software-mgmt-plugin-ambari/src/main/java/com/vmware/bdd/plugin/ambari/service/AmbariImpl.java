@@ -221,8 +221,8 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
                   apiStackVersionSummary.getApiStackVersionInfo();
             ApiStackVersion apiStackVersion =
                   apiManager.getStackVersion(
-                        apiStackVersionInfoSummary.getStackName(),
-                        apiStackVersionInfoSummary.getStackVersion());
+                          apiStackVersionInfoSummary.getStackName(),
+                          apiStackVersionInfoSummary.getStackVersion());
             ApiStackVersionInfo apiStackVersionInfo =
                   apiStackVersion.getApiStackVersionInfo();
             if (apiStackVersionInfo.isActive()) {
@@ -1019,6 +1019,7 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
          logger.info("Start cluster " + blueprint.getName() + " scale out.");
          setHaseRegionConfig(blueprint);
          logger.info("After config hbase for Blueprint:");
+
          logger.info(ApiUtils.objectToJson(blueprint));
          clusterDef = new AmClusterDef(blueprint, privateKey, getVersion());
 

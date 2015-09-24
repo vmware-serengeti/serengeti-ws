@@ -15,6 +15,7 @@
 		<beans:property name="configMgr" ref="clusterConfigMgr" />
 		<beans:property name="jobExecutionStatusHolder" ref="jobExecutionStatusHolder" />
 	</beans:bean>
+
 	<beans:bean name="setPasswordForClusterExpandTasklet"
 				class="com.vmware.bdd.service.job.SetPasswordForNewExpandNodesStep">
 		<beans:property name="configMgr" ref="clusterConfigMgr" />

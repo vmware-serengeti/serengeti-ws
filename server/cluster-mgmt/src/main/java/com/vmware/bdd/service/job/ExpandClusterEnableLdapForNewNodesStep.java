@@ -14,15 +14,11 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job;
 
-import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.TaskException;
-import com.vmware.bdd.service.impl.ClusterLdapUserMgmtCfgService;
-import com.vmware.bdd.service.job.software.ManagementOperation;
-import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.ClusterUtil;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
-import org.springframework.batch.repeat.RepeatStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,29 +29,23 @@ public class ExpandClusterEnableLdapForNewNodesStep extends EnableLdapForNewNode
    protected List<NodeEntity> findNodesToEnableLdap(ChunkContext chunkContext) throws TaskException {
       List<NodeEntity> foundNodeList = null;
       List<NodeEntity> nodesInGroup = null;
-      List<String> nodeGroupNames = new ArrayList<String>() ;
+      List<NodeEntity> addNodes = new ArrayList<NodeEntity>() ;
+      List<String> nodeGroupNames = null ;
 
       String clusterName = getJobParameters(chunkContext).getString(JobConstants.CLUSTER_NAME_JOB_PARAM);
       String nodeGroupNameList =
               TrackableTasklet.getJobParameters(chunkContext).getString(
                       JobConstants.NEW_NODE_GROUP_LIST_JOB_PARAM);
 
-      for (String nodeGroupName : nodeGroupNameList.split(",")){
-         nodeGroupNames.add(nodeGroupName);
-      }
-
+      nodeGroupNames = ClusterUtil.getNodesFromNodeGroups(nodeGroupNameList);
       for (String nodeGroupName: nodeGroupNames) {
          nodesInGroup = clusterEntityMgr.findAllNodes(clusterName, nodeGroupName);
-      }
-
-      for (NodeEntity node : nodesInGroup) {
-         if (node.getStatus().ordinal() >= NodeStatus.VM_READY.ordinal()) {
-            if (foundNodeList == null) {
-               foundNodeList = new ArrayList<NodeEntity>();
-            }
-            foundNodeList.add(node);
+         for(NodeEntity ne: nodesInGroup) {
+            addNodes.add(ne);
          }
       }
+      foundNodeList = ClusterUtil.getReadyVmFromNodeGroups(addNodes);
+
       return foundNodeList;
    }
 }
