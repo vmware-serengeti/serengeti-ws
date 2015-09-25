@@ -25,7 +25,6 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiConfigGroup;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponent;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponentsRequest;
-import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRestartRequiredCompent;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiRestartRequiredService;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiService;
@@ -445,6 +444,5 @@ public class TestApiManager {
    public void testGetRestartRequiredServices() throws Exception {
       List<ApiRestartRequiredService> apiRestartRequiredServices = apiManager.getRestartRequiredServices(clusterName);
       Assert.assertNotNull(apiRestartRequiredServices);
->>>>>>> 6fe7eab... Add UT for cluster services restart
    }
 }

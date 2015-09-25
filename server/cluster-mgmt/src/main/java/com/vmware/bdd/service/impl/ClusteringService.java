@@ -100,6 +100,7 @@ import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.ClusterUtil;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
@@ -806,6 +807,14 @@ public class ClusteringService implements IClusteringService {
    }
 
    @SuppressWarnings("unchecked")
+   private Map<String, Folder> createVcFolders(ClusterCreate cluster) {
+      return createVcFolders(cluster, false);
+   }
+
+   /*
+    * addNodeGroup means  it's called by expandCluster() to add new node groups
+    */
+   @SuppressWarnings("unchecked")
    private Map<String, Folder> createVcFolders(ClusterCreate cluster, boolean addNodeGroup) {
       logger.info("createVcFolders, start to create cluster Folder.");
       VcVirtualMachine templateVm = getTemplateVM(cluster.getTemplateName());
@@ -996,6 +1005,13 @@ public class ClusteringService implements IClusteringService {
       return nodeGroupNames;
    }
 
+   private String createVcResourcePools(List<BaseNode> vNodes) {
+      return createVcResourcePools(vNodes, false);
+   }
+
+   /*
+    * addNodeGroup means  it's called by expandCluster() to add new node groups
+    */
    private String createVcResourcePools(List<BaseNode> vNodes, boolean addNodeGroup) {
       logger.info("createVcResourcePools, start to create VC ResourcePool(s).");
       /*

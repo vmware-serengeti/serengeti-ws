@@ -19,18 +19,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.NodeGroupCreate;
-import com.vmware.bdd.apitypes.NodeStatus;
-import com.vmware.bdd.manager.ClusterConfigManager;
-import com.vmware.bdd.manager.ClusterEntityManager;
-import com.vmware.bdd.manager.ClusterManager;
-import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.utils.JobUtils;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 
 import com.vmware.aurora.util.AuAssert;
+import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.manager.intf.ILockedClusterEntityManager;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.StatusUpdater;

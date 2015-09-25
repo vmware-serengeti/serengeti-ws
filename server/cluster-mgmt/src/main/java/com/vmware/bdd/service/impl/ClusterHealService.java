@@ -355,7 +355,7 @@ public class ClusterHealService implements IClusterHealService {
    private void findReplacementDisks(String nodeName,
          List<DiskSpec> badDisks, Map<AbstractDatastore, Integer> usage) {
       // reverse sort, in descending order
-      // bin pack problem, place large disk first. 
+      // bin pack problem, place large disk first.
       Collections.sort(badDisks);
 
       for (DiskSpec disk : badDisks) {
@@ -634,6 +634,7 @@ public class ClusterHealService implements IClusterHealService {
       return null;
    }
 
+   @Override
    public void updateData(String clusterName, String groupName,
          String nodeName, String newVmId) {
       NodeEntity node = clusterEntityMgr.findNodeByName(nodeName);
@@ -719,7 +720,7 @@ public class ClusterHealService implements IClusterHealService {
 
       List<DiskSpec> fullDiskList = getReplacedFullDisks(node.getVmName(), replacementDisks);
 
-      VmSchema createSchema = VcVmUtil.getVmSchema(spec, groupName, fullDiskList, clusteringService.getTemplateVmId(), Constants.ROOT_SNAPSTHOT_NAME);
+      VmSchema createSchema = VcVmUtil.getVmSchema(spec, groupName, fullDiskList, node.getNodeGroup().getCluster().getTemplateId(), Constants.ROOT_SNAPSTHOT_NAME);
       boolean isMapDistro = clusterEntityMgr.findByName(clusterName).getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR);
 
       ReplaceVmBadDisksSP replaceVmDisksPrePowerOnSP = new ReplaceVmBadDisksSP(node.getMoId(),

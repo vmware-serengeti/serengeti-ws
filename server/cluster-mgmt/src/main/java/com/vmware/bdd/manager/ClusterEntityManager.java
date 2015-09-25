@@ -24,13 +24,13 @@ import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcVirtualMachine;
 import com.vmware.bdd.aop.annotation.RetryTransaction;
 import com.vmware.bdd.dal.IClusterDAO;
 import com.vmware.bdd.dal.INetworkDAO;
 import com.vmware.bdd.dal.INodeDAO;
 import com.vmware.bdd.dal.INodeGroupDAO;
+import com.vmware.bdd.dal.INodeTemplateDAO;
 import com.vmware.bdd.dal.IServerInfoDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.DiskEntity;
@@ -81,6 +81,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
    private IServerInfoDAO serverInfoDao;
    private SoftwareManagerCollector softwareManagerCollector;
 
+   @Override
    public IServerInfoDAO getServerInfoDao() {
       return serverInfoDao;
    }
@@ -132,18 +133,22 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       this.softwareManagerCollector = softwareManagerCollector;
    }
 
+   @Override
    public ClusterEntity findClusterById(Long id) {
       return clusterDao.findById(id);
    }
 
+   @Override
    public NodeGroupEntity findNodeGroupById(Long id) {
       return nodeGroupDao.findById(id);
    }
 
+   @Override
    public NodeEntity findNodeById(Long id) {
       return nodeDao.findById(id);
    }
 
+   @Override
    public ClusterEntity findByName(String clusterName) {
       return clusterDao.findByName(clusterName);
    }
@@ -163,6 +168,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       return null;
    }
 
+   @Override
    public Map<String, String> findUserMgmtCfg(String clusterName) {
       Map<String, Map<String, String>> infraCfg = findInfraConfig(clusterName);
 
@@ -174,36 +180,44 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
 
    }
 
+   @Override
    public NodeGroupEntity findByName(String clusterName, String groupName) {
       return nodeGroupDao.findByName(clusterDao.findByName(clusterName),
             groupName);
    }
 
+   @Override
    public NodeGroupEntity findByName(ClusterEntity cluster, String groupName) {
       return nodeGroupDao.findByName(cluster, groupName);
    }
 
+   @Override
    public NodeEntity findByName(String clusterName, String groupName,
          String nodeName) {
       return nodeDao.findByName(findByName(clusterName, groupName), nodeName);
    }
 
+   @Override
    public NodeEntity findByName(NodeGroupEntity nodeGroup, String nodeName) {
       return nodeDao.findByName(nodeGroup, nodeName);
    }
 
+   @Override
    public NodeEntity findNodeByName(String nodeName) {
       return nodeDao.findByName(nodeName);
    }
 
+   @Override
    public List<String> findByAppManager(String appManagerName) {
       return clusterDao.findClustersByAppManager(appManagerName);
    }
 
+   @Override
    public List<ClusterEntity> findAllClusters() {
       return clusterDao.findAll();
    }
 
+   @Override
    public List<NodeGroupEntity> findAllGroups(String clusterName) {
       List<ClusterEntity> clusters = new ArrayList<ClusterEntity>();
       ClusterEntity cluster = clusterDao.findByName(clusterName);
@@ -212,15 +226,18 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       return nodeGroupDao.findAllByClusters(clusters);
    }
 
+   @Override
    public List<NodeEntity> findAllNodes(String clusterName) {
       return clusterDao.getAllNodes(clusterName);
    }
 
+   @Override
    public List<NodeEntity> findAllNodes(String clusterName, String groupName) {
       NodeGroupEntity nodeGroup = findByName(clusterName, groupName);
       return new ArrayList<NodeEntity>(nodeGroup.getNodes());
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void insert(ClusterEntity cluster) {
@@ -228,6 +245,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       clusterDao.insert(cluster);
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void insert(NodeEntity node) {
@@ -235,6 +253,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       nodeDao.insert(node);
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void insert(NodeGroupEntity nodegroup) {
@@ -243,6 +262,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       nodeGroupDao.insert(nodegroup);
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void delete(NodeEntity node) {
@@ -253,6 +273,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       nodeDao.delete(node);
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void delete(ClusterEntity cluster) {
@@ -260,12 +281,14 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       clusterDao.delete(cluster);
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void updateClusterStatus(String clusterName, ClusterStatus status) {
       clusterDao.updateStatus(clusterName, status);
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void updateNodesActionForUpgrade(String clusterName, String action) {
@@ -275,6 +298,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void updateNodeActionForUpgrade(NodeEntity node, String action) {
@@ -283,24 +307,28 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void update(ClusterEntity clusterEntity) {
       clusterDao.update(clusterEntity);
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void update(NodeGroupEntity group) {
       nodeGroupDao.update(group);
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void update(NodeEntity node) {
       nodeDao.update(node);
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void updateDisks(String nodeName, List<DiskEntity> diskSets) {
@@ -323,6 +351,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public boolean handleOperationStatus(String clusterName,
@@ -379,6 +408,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       return finished;
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void setClusterStatus(String clusterName, ClusterReport report) {
@@ -420,6 +450,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public boolean handleOperationStatus(String clusterName,
@@ -534,6 +565,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
    }*/
 
+   @Override
    @Transactional
    @RetryTransaction
    public void removeVmReference(String vmId) {
@@ -543,6 +575,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void syncUpNode(String clusterName, String nodeName) {
@@ -552,6 +585,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public List<String> getPortGroupNames(String clusterName) {
@@ -564,6 +598,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       return portGroups;
    }
 
+   @Override
    @Transactional
    public NodeRead refreshNodeStatus(String vmName, boolean inSession) {
       NodeEntity nodeEntity = nodeDao.findByName(vmName);
@@ -615,6 +650,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       update(node);
    }
 
+   @Override
    public ClusterBlueprint toClusterBluePrint(String clusterName) {
       ClusterEntity clusterEntity = findByName(clusterName);
       ClusterBlueprint blueprint = new ClusterBlueprint();
@@ -706,15 +742,18 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
 
    }
 
+   @Override
    public NodeGroupInfo toNodeGroupInfo(String clusterName, String groupName) {
       NodeGroupEntity group = findByName(clusterName, groupName);
       return toNodeGroupInfo(group);
    }
 
+   @Override
    public ClusterRead toClusterRead(String clusterName) {
       return toClusterRead(clusterName, false);
    }
 
+   @Override
    @SuppressWarnings("rawtypes")
    public ClusterRead toClusterRead(String clusterName,
          boolean ignoreObsoleteNode) {
@@ -807,6 +846,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       return clusterRead;
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void refreshNodeByMobId(String vmId, boolean inSession) {
@@ -816,6 +856,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void setNodeConnectionState(String vmName) {
@@ -825,6 +866,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void refreshNodeByMobId(String vmId, String action, boolean inSession) {
@@ -835,10 +877,12 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
    }
 
+   @Override
    public NodeEntity getNodeByMobId(String vmId) {
       return nodeDao.findByMobId(vmId);
    }
 
+   @Override
    @Transactional
    public NodeEntity getNodeWithNicsByMobId(String vmId) {
       NodeEntity nodeEntity = nodeDao.findByMobId(vmId);
@@ -846,14 +890,17 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       return nodeEntity;
    }
 
+   @Override
    public NodeEntity getNodeByVmName(String vmName) {
       return nodeDao.findByName(vmName);
    }
 
+   @Override
    public List<NodeEntity> getNodesByHost(String hostName) {
       return nodeDao.findByHostName(hostName);
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void refreshNodeByVmName(String vmId, String vmName, boolean inSession) {
@@ -864,6 +911,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void refreshNodeByVmName(String vmId, String vmName,
@@ -876,6 +924,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void updateClusterTaskId(String clusterName, Long taskId) {
@@ -884,6 +933,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       clusterDao.update(cluster);
    }
 
+   @Override
    public List<Long> getLatestTaskIds() {
       List<ClusterEntity> clusters = clusterDao.findAll();
       List<Long> taskIds = new ArrayList<Long>(clusters.size());
@@ -895,11 +945,13 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       return taskIds;
    }
 
+   @Override
    public List<DiskEntity> getDisks(String nodeName) {
       NodeEntity node = nodeDao.findByName(nodeName);
       return new ArrayList<DiskEntity>(node.getDisks());
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void cleanupActionError(String clusterName) {
@@ -909,6 +961,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public boolean needUpgrade(String clusterName) {
@@ -926,6 +979,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
             || !allNodesUpgraded;
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public String getServerVersion() {
@@ -938,6 +992,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       return serverVersion;
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void storeClusterLastStatus(String clusterName) {
@@ -948,6 +1003,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    public void cleanupErrorForClusterUpgrade(String clusterName) {
@@ -957,6 +1013,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
    }
 
+   @Override
    @Transactional
    @RetryTransaction
    //Sometimes, set password may take long time to finish, we'd better display the action on the cli
@@ -969,6 +1026,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       update(node);
    }
 
+   @Override
    public void update(Observable o, Object arg) {
       // TODO
    }

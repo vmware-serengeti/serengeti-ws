@@ -19,7 +19,6 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.exception.ClusterConfigException;
-import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 
 import com.vmware.bdd.utils.*;
 
@@ -148,18 +147,6 @@ public class NodeGroupAdd implements Serializable {
               && !warningMsgList.get(0).startsWith("Warning: ")) {
          warningMsgList.set(0, "Warning: " + warningMsgList.get(0));
       }
-   }
-
-   /**
-    * Check if any compute only node group exists.
-    */
-   public boolean containsComputeOnlyNodeGroups(SoftwareManager softwareManager) {
-      for (NodeGroupCreate nodeGroup : this.getNodeGroups()) {
-         if (softwareManager.isComputeOnlyRoles(nodeGroup.getRoles())) {
-            return true;
-         }
-      }
-      return false;
    }
 
    private void checkCPUAndMemory(NodeGroupCreate nodeGroup,
