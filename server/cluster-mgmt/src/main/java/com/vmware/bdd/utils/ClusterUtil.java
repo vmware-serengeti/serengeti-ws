@@ -76,12 +76,12 @@ public class ClusterUtil {
 
    public static List<String> getNodesFromNodeGroups (String nodeGroupNameList) throws TaskException {
 
-
       List<String> nodeGroupNames = new ArrayList<String>() ;
 
       for (String nodeGroupName : nodeGroupNameList.split(",")){
          nodeGroupNames.add(nodeGroupName);
       }
+
       return nodeGroupNames;
    }
 
@@ -97,5 +97,25 @@ public class ClusterUtil {
       }
       return toBeAddNodes;
    }
+
+   public static List<NodeEntity> getVmFromNodeGroups (String nodeGroupNameList, List<NodeEntity> addNodes,
+                                                       IClusterEntityManager clusterEntityMgr, String clusterName) throws TaskException {
+      List<String> nodeGroupNames = null;
+      List<NodeEntity> toBeAddNodes = null;
+      List<NodeEntity> nodesInGroup = null;
+      nodeGroupNames = ClusterUtil.getNodesFromNodeGroups(nodeGroupNameList);
+
+      for (String nodeGroupName: nodeGroupNames) {
+         nodesInGroup = clusterEntityMgr.findAllNodes(clusterName, nodeGroupName);
+         for(NodeEntity ne: nodesInGroup) {
+            addNodes.add(ne);
+         }
+      }
+
+      toBeAddNodes = ClusterUtil.getReadyVmFromNodeGroups(addNodes);
+
+      return toBeAddNodes;
+   }
+
 
 }
