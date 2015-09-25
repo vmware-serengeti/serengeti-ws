@@ -37,14 +37,8 @@ public class ExpandClusterEnableLdapForNewNodesStep extends EnableLdapForNewNode
               TrackableTasklet.getJobParameters(chunkContext).getString(
                       JobConstants.NEW_NODE_GROUP_LIST_JOB_PARAM);
 
-      nodeGroupNames = ClusterUtil.getNodesFromNodeGroups(nodeGroupNameList);
-      for (String nodeGroupName: nodeGroupNames) {
-         nodesInGroup = clusterEntityMgr.findAllNodes(clusterName, nodeGroupName);
-         for(NodeEntity ne: nodesInGroup) {
-            addNodes.add(ne);
-         }
-      }
-      foundNodeList = ClusterUtil.getReadyVmFromNodeGroups(addNodes);
+      foundNodeList = ClusterUtil.getVmFromNodeGroups(nodeGroupNameList,
+              addNodes, clusterEntityMgr, clusterName);
 
       return foundNodeList;
    }

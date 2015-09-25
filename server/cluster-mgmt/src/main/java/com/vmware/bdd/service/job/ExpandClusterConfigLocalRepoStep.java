@@ -39,16 +39,8 @@ public class ExpandClusterConfigLocalRepoStep extends ConfigLocalRepoStep {
                TrackableTasklet.getJobParameters(chunkContext).getString(
                        JobConstants.NEW_NODE_GROUP_LIST_JOB_PARAM);
 
-        nodeGroupNames = ClusterUtil.getNodesFromNodeGroups(nodeGroupNameList);
-
-        for (String nodeGroupName: nodeGroupNames) {
-           nodesInGroup = clusterEntityMgr.findAllNodes(clusterName, nodeGroupName);
-           for(NodeEntity ne: nodesInGroup) {
-               addNodes.add(ne);
-           }
-        }
-
-        toBeSetLocalRepo = ClusterUtil.getReadyVmFromNodeGroups(addNodes);
+       toBeSetLocalRepo = ClusterUtil.getVmFromNodeGroups(nodeGroupNameList,
+               addNodes, clusterEntityMgr, clusterName);
 
         return toBeSetLocalRepo;
    }

@@ -39,14 +39,8 @@ public class SetPasswordForNewExpandNodesStep extends SetPasswordForNewNodesStep
               TrackableTasklet.getJobParameters(chunkContext).getString(
                       JobConstants.NEW_NODE_GROUP_LIST_JOB_PARAM);
 
-      nodeGroupNames = ClusterUtil.getNodesFromNodeGroups(nodeGroupNameList);
-      for (String nodeGroupName: nodeGroupNames) {
-          nodesInGroup = clusterEntityMgr.findAllNodes(clusterName, nodeGroupName);
-         for(NodeEntity ne: nodesInGroup) {
-            addNodes.add(ne);
-         }
-      }
-      toBeSetPassword = ClusterUtil.getReadyVmFromNodeGroups(addNodes);
+      toBeSetPassword = ClusterUtil.getVmFromNodeGroups(nodeGroupNameList,
+              addNodes, clusterEntityMgr, clusterName);
 
       return toBeSetPassword;
    }
