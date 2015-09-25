@@ -69,13 +69,20 @@ public class Container implements IContainer {
    @Override
    public void addResource(VcCluster cluster) {
       AuAssert.check(this.dc.findAbstractCluster(cluster.getName()) == null);
-      logger.info("add vc cluster " + cluster.getName() + " to container");
 
-      // translate datastores
+      if(logger.isInfoEnabled()) {
+         logger.info("add vc cluster " + cluster.getName() + " to container");
+      }
+
+      // translate datastores & cluster
+      AbstractCluster abstractCluster = new AbstractCluster(cluster.getName());
+
+      int count = 0;
+      long size = 0;
       for (VcDatastore datastore : cluster.getAllDatastores()) {
          if (!datastore.isAccessible()
                || !datastore.isInNormalMode()) {
-            logger.info("datastore " + datastore.getName()
+            logger.warn("datastore " + datastore.getName()
                   + " is inaccessible or in maintanence mode. Ignore it.");
             continue;
          }
@@ -83,15 +90,23 @@ public class Container implements IContainer {
             AbstractDatastore ds = new AbstractDatastore(datastore.getName());
             ds.setFreeSpace((int) (datastore.getFreeSpace() / (1024 * 1024 * 1024)));
             this.dc.addDatastore(ds);
+            abstractCluster.addDatastore(ds);
 
-            logger.info("added datastore " + ds.getName() + " with space "
-                  + ds.getFreeSpace() + " to datacenter");
+            count ++;
+            size += ds.getFreeSpace();
+            if(logger.isDebugEnabled()) {
+               logger.debug("added datastore " + ds.getName() + " with space "
+                     + ds.getFreeSpace() + " to datacenter");
+            }
          }
       }
 
-      // translate cluster and hosts
-      AbstractCluster abstractCluster = new AbstractCluster(cluster.getName());
+      if(logger.isInfoEnabled()) {
+         logger.info(String.format("add %1s datastores with %2s free space from cluster %3s to datacenter",
+                     count, size, cluster.getName()));
+      }
 
+      count = 0;
       try {
          // add hosts
          for (VcHost host : cluster.getHosts()) {
@@ -103,24 +118,24 @@ public class Container implements IContainer {
                         this.dc.findAbstractDatastore(datastore.getName());
                   if (ds != null) {
                      abstractHost.addDatastore(ds);
-                     logger.info("added datastore " + ds.getName() + " to host "
-                           + host.getName());
+                     if(logger.isDebugEnabled()) {
+                        logger.debug("added datastore " + ds.getName() + " to host "
+                              + host.getName());
+                     }
                   }
                }
                abstractCluster.addHost(abstractHost);
-               logger.info("added host " + host.getName() + " to container");
+
+               count ++;
+               if (logger.isDebugEnabled()) {
+                  logger.debug("added host " + host.getName() + " to container");
+               }
             }
          }
 
-         // add datastores
-         for (VcDatastore datastore : cluster.getAllDatastores()) {
-            AbstractDatastore ds =
-                  this.dc.findAbstractDatastore(datastore.getName());
-            if (ds != null) {
-               abstractCluster.addDatastore(ds);
-               logger.info("added datastore " + ds.getName() + " with space "
-                     + ds.getFreeSpace() + " to cluster " + cluster.getName());
-            }
+         if(logger.isInfoEnabled()) {
+            logger.info(String.format("add %1s hosts from cluster %2s to datacenter",
+                  count, cluster.getName()));
          }
 
          this.dc.addCluster(abstractCluster);
@@ -224,6 +239,8 @@ public class Container implements IContainer {
    public List<AbstractHost> getAllHosts() {
       return this.dc.getAllHosts();
    }
+
+   public AbstractDatacenter getDc() {return dc;}
 
    @Override
    public Map<String, String> getRackMap() {

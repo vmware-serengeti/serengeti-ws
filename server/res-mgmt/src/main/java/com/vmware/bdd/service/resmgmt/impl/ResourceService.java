@@ -492,7 +492,6 @@ public class ResourceService implements IResourceService {
    @Override
    public List<String> filterHostsByNetwork(List<String> networkList,
          List<com.vmware.bdd.spectypes.VcCluster> clusters) {
-      refreshNetwork();
       Set<String> networkNames = new HashSet<String>();
       networkNames.addAll(networkList);
       Set<String> portGroupNames = new HashSet<String>();
@@ -531,7 +530,6 @@ public class ResourceService implements IResourceService {
    @Override
    public boolean isNetworkAccessibleByCluster(List<String> networkList,
          List<com.vmware.bdd.spectypes.VcCluster> clusters) {
-      refreshNetwork();
 
       Set<String> portGroupNames = new HashSet<String>();
       for (String networkName : networkList) {

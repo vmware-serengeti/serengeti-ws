@@ -14,23 +14,24 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
-import com.vmware.bdd.utils.Constants;
-import org.springframework.batch.core.scope.context.ChunkContext;
-import org.springframework.batch.repeat.RepeatStatus;
-
 import com.google.gson.reflect.TypeToken;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.IClusteringService;
+import com.vmware.bdd.service.resmgmt.IVcInventorySyncService;
+import com.vmware.bdd.service.resmgmt.VC_RESOURCE_TYPE;
+import com.vmware.bdd.service.resmgmt.sync.filter.VcResourceFilters;
+import com.vmware.bdd.spectypes.DiskSpec;
+import com.vmware.bdd.utils.Constants;
+import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.batch.repeat.RepeatStatus;
+
+import java.util.*;
 
 public class CreateClusterVMStep extends TrackableTasklet {
    IClusteringService clusteringService;
+
+   IVcInventorySyncService syncService;
 
    @Override
    public RepeatStatus executeStep(ChunkContext chunkContext,
@@ -45,12 +46,13 @@ public class CreateClusterVMStep extends TrackableTasklet {
             JobConstants.CLUSTER_USED_IP_JOB_PARAM,
             new TypeToken<Map<String, Set<String>>>() {}.getType());
       if (usedIpSets == null) {
-         usedIpSets = new HashMap<String, Set<String>>();
+         usedIpSets = new HashMap<>();
       }
       boolean reserveRawDisks = clusterSpec.getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR);
       boolean success = clusteringService.createVcVms(clusterSpec.getNetworkings(), nodes, usedIpSets, reserveRawDisks, statusUpdator);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_CREATE_VM_OPERATION_SUCCESS, success);
       putIntoJobExecutionContext(chunkContext, JobConstants.CLUSTER_ADDED_NODES_JOB_PARAM, nodes);
+      asyncRefreshUsedResources(nodes);
       UUID reservationId = getFromJobExecutionContext(chunkContext, JobConstants.CLUSTER_RESOURCE_RESERVATION_ID_JOB_PARAM, UUID.class);
       if (reservationId != null) {
          // release the resource reservation since vm is created
@@ -66,6 +68,28 @@ public class CreateClusterVMStep extends TrackableTasklet {
 
    public void setClusteringService(IClusteringService clusteringService) {
       this.clusteringService = clusteringService;
+   }
+
+   public void setSyncService(IVcInventorySyncService syncService) {
+      this.syncService = syncService;
+   }
+
+   public IVcInventorySyncService getSyncService() {
+      return syncService;
+   }
+
+   private void asyncRefreshUsedResources(List<BaseNode> addedNodes) {
+      Set<String> dsNameSet = new HashSet<>();
+      for (BaseNode node: addedNodes) {
+         for(DiskSpec disk : node.getDisks()) {
+            dsNameSet.add(disk.getTargetDs());
+         }
+      }
+
+      String[] dsNames = new String[dsNameSet.size()];
+      dsNameSet.toArray(dsNames);
+
+      syncService.asyncRefreshUsedDatastores(dsNames);
    }
 
 }

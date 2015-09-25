@@ -128,7 +128,7 @@ public class VcInventory {
       }
 
       @Override
-      protected boolean executeOnce() {
+      public boolean executeOnce() {
          EnumSet<VcObjectType> syncSet = EnumSet.of(
                VcObjectType.VC_DATACENTER, VcObjectType.VC_CLUSTER,
                VcObjectType.VC_DATASTORE, VcObjectType.VC_NETWORK,

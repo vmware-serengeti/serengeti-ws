@@ -15,25 +15,6 @@
 
 package com.vmware.bdd.service.impl;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.google.gson.Gson;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
@@ -49,25 +30,11 @@ import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Scheduler;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.util.CmsWorker;
-import com.vmware.aurora.vc.DeviceId;
-import com.vmware.aurora.vc.VcCache;
-import com.vmware.aurora.vc.VcCluster;
-import com.vmware.aurora.vc.VcDatacenter;
-import com.vmware.aurora.vc.VcDatastore;
-import com.vmware.aurora.vc.VcHost;
-import com.vmware.aurora.vc.VcInventory;
-import com.vmware.aurora.vc.VcResourcePool;
-import com.vmware.aurora.vc.VcSnapshot;
-import com.vmware.aurora.vc.VcUtil;
-import com.vmware.aurora.vc.VcVirtualMachine;
+import com.vmware.aurora.vc.*;
 import com.vmware.aurora.vc.vcevent.VcEventRouter;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
-import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.IpBlock;
-import com.vmware.bdd.apitypes.NetworkAdd;
-import com.vmware.bdd.apitypes.NodeGroupCreate;
-import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.apitypes.*;
 import com.vmware.bdd.apitypes.StorageRead.DiskScsiControllerType;
 import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.clone.spec.VmCreateResult;
@@ -91,6 +58,7 @@ import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.placement.exception.PlacementException;
 import com.vmware.bdd.placement.interfaces.IPlacementService;
+import com.vmware.bdd.placement.util.ContainerToStringHelper;
 import com.vmware.bdd.placement.util.PlacementUtil;
 import com.vmware.bdd.service.IClusterInitializerService;
 import com.vmware.bdd.service.IClusteringService;
@@ -100,33 +68,29 @@ import com.vmware.bdd.service.job.NodeOperationStatus;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
-import com.vmware.bdd.service.sp.BaseProgressCallback;
-import com.vmware.bdd.service.sp.ConfigIOShareSP;
-import com.vmware.bdd.service.sp.CreateResourcePoolSP;
-import com.vmware.bdd.service.sp.CreateVmPrePowerOn;
-import com.vmware.bdd.service.sp.DeleteRpSp;
-import com.vmware.bdd.service.sp.DeleteVmByIdSP;
-import com.vmware.bdd.service.sp.NoProgressUpdateCallback;
-import com.vmware.bdd.service.sp.SetAutoElasticitySP;
-import com.vmware.bdd.service.sp.StartVmPostPowerOn;
-import com.vmware.bdd.service.sp.StartVmSP;
-import com.vmware.bdd.service.sp.StopVmSP;
+import com.vmware.bdd.service.sp.*;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.spectypes.HadoopRole;
-import com.vmware.bdd.utils.AuAssert;
-import com.vmware.bdd.utils.CommonUtil;
-import com.vmware.bdd.utils.ConfigInfo;
-import com.vmware.bdd.utils.Constants;
-import com.vmware.bdd.utils.JobUtils;
-import com.vmware.bdd.utils.VcVmUtil;
+import com.vmware.bdd.utils.*;
 import com.vmware.bdd.vmclone.service.intf.IClusterCloneService;
 import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.vm.device.VirtualDevice;
 import com.vmware.vim.binding.vim.vm.device.VirtualDisk;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ClusteringService implements IClusteringService {
    private static final int VC_RP_MAX_NAME_LENGTH = 80;
@@ -146,7 +110,8 @@ public class ClusteringService implements IClusteringService {
    private VcVirtualMachine templateVm;
    private BaseNode templateNode;
    private String templateNetworkLabel;
-   private static boolean initialized = false;
+   private volatile boolean inited = false;
+   private Throwable initError;
    private int cloneConcurrency;
    private VmEventManager processor;
 
@@ -266,53 +231,74 @@ public class ClusteringService implements IClusteringService {
       this.softwareManagerCollector = softwareManagerCollector;
    }
 
+   public boolean isInited() {
+      return inited;
+   }
+
+   public Throwable getInitError() {
+      return initError;
+   }
+
    public synchronized void init() {
-      if (!initialized) {
-         // XXX hack to approve bootstrap instance id, should be moved out of Configuration
-         Configuration
-               .approveBootstrapInstanceId(Configuration.BootstrapUsage.ALLOWED);
-         Configuration
-               .approveBootstrapInstanceId(Configuration.BootstrapUsage.FINALIZED);
-
-         VcContext.initVcContext();
-         new VcEventRouter();
-         CmsWorker.addPeriodic(new VcInventory.SyncInventoryRequest());
-         VcInventory.loadInventory();
+      if (!inited) {
          try {
-            Thread.sleep(1000);
-         } catch (InterruptedException e) {
-            logger.warn("interupted during sleep " + e.getMessage());
-         }
-         startVMEventProcessor();
-         String poolSize =
-               Configuration.getNonEmptyString("serengeti.scheduler.poolsize");
+            // XXX hack to approve bootstrap instance id, should be moved out of Configuration
+            Configuration.approveBootstrapInstanceId(Configuration.BootstrapUsage.ALLOWED);
+            Configuration.approveBootstrapInstanceId(Configuration.BootstrapUsage.FINALIZED);
 
-         if (poolSize == null) {
-            Scheduler.init(Constants.DEFAULT_SCHEDULER_POOL_SIZE,
-                  Constants.DEFAULT_SCHEDULER_POOL_SIZE);
-         } else {
-            Scheduler.init(Integer.parseInt(poolSize),
-                  Integer.parseInt(poolSize));
-         }
+            VcContext.initVcContext();
+            new VcEventRouter();
 
-         String concurrency =
-               Configuration
-                     .getNonEmptyString("serengeti.singlevm.concurrency");
-         if (concurrency != null) {
-            cloneConcurrency = Integer.parseInt(concurrency);
-         } else {
-            cloneConcurrency = 1;
-         }
+            //disable background VC refresh.
+            //CmsWorker.addPeriodic(new VcInventory.SyncInventoryRequest());
+            VcInventory.loadInventory();
 
-         CmsWorker
-               .addPeriodic(new ClusterNodeUpdator(getLockClusterEntityMgr()));
-         prepareTemplateVM();
-         loadTemplateNetworkLable();
-         convertTemplateVm();
-         clusterInitializerService.transformClusterStatus();
-         elasticityScheduleMgr.start();
-         configureAlarm();
-         initialized = true;
+            //why??
+            try {
+               Thread.sleep(1000);
+            } catch (InterruptedException e) {
+               logger.warn("interupted during sleep " + e.getMessage());
+            }
+            startVMEventProcessor();
+            String poolSize =
+                  Configuration.getNonEmptyString("serengeti.scheduler.poolsize");
+
+            if (poolSize == null) {
+               Scheduler.init(Constants.DEFAULT_SCHEDULER_POOL_SIZE,
+                     Constants.DEFAULT_SCHEDULER_POOL_SIZE);
+            } else {
+               Scheduler.init(Integer.parseInt(poolSize),
+                     Integer.parseInt(poolSize));
+            }
+
+            String concurrency =
+                  Configuration
+                        .getNonEmptyString("serengeti.singlevm.concurrency");
+            if (concurrency != null) {
+               cloneConcurrency = Integer.parseInt(concurrency);
+            } else {
+               cloneConcurrency = 1;
+            }
+
+            ClusterNodeUpdator nodeUpdator = new ClusterNodeUpdator(getLockClusterEntityMgr());
+            // refresh the cluster nodes once on bde startup, till now the vc cache has
+            // been loaded, so it should be fast to do it
+            logger.info("refresh the cluster nodes once on bde startup...");
+            nodeUpdator.executeOnce();
+            // then add the periodic processing with default 5 minute interval
+            CmsWorker.addPeriodic(nodeUpdator);
+
+            prepareTemplateVM();
+            loadTemplateNetworkLable();
+            convertTemplateVm();
+            clusterInitializerService.transformClusterStatus();
+            elasticityScheduleMgr.start();
+            configureAlarm();
+            inited = true;
+         } catch (Throwable err) {
+            logger.error("init ClusteringService error", err);
+            initError = err;
+         }
       }
    }
 
@@ -1368,6 +1354,9 @@ public class ClusteringService implements IClusteringService {
          container.addResource(cl);
       }
 
+      logger.info("VC resource container details:" + ContainerToStringHelper.convertToString(container));
+
+      logger.info("check time on hosts.");
       // check time on hosts
       int maxTimeDiffInSec = Constants.MAX_TIME_DIFF_IN_SEC;
       SoftwareManager softMgr =
@@ -1391,6 +1380,7 @@ public class ClusteringService implements IClusteringService {
          container.removeHost(host);
       }
 
+      logger.info("filter hosts by networks.");
       // filter hosts by networks
       List<com.vmware.bdd.spectypes.VcCluster> usedClusters = clusterSpec.getVcClusters();
       List<String> noNetworkHosts = new ArrayList<String>();
@@ -1413,6 +1403,7 @@ public class ClusteringService implements IClusteringService {
          container.addRackMap(clusterSpec.getHostToRackMap());
       }
 
+      logger.info("rack topology file validation.");
       // rack topology file validation
       Set<String> validRacks = new HashSet<String>();
       List<AbstractHost> hosts = container.getAllHosts();
@@ -1432,6 +1423,8 @@ public class ClusteringService implements IClusteringService {
          }
       }
 
+      logger.info("pre-placement task.");
+      //pre-placement task
       List<BaseNode> baseNodes =
             placementService.getPlacementPlan(container, clusterSpec,
                   existedNodes, filteredHosts);
@@ -2025,10 +2018,6 @@ public class ClusteringService implements IClusteringService {
 
    public VmEventManager getEventProcessor() {
       return this.processor;
-   }
-
-   public static boolean isInitialized() {
-      return initialized;
    }
 
    @Override

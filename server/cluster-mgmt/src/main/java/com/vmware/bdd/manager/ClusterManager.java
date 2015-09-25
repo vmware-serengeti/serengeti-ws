@@ -16,48 +16,16 @@
 
 package com.vmware.bdd.manager;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-
-import org.apache.log4j.Logger;
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.vmware.bdd.apitypes.ClusterCreate;
-import com.vmware.bdd.apitypes.ClusterRead;
-import com.vmware.bdd.apitypes.ClusterStatus;
-import com.vmware.bdd.apitypes.LimitInstruction;
-import com.vmware.bdd.apitypes.NodeGroupCreate;
-import com.vmware.bdd.apitypes.NodeGroupRead;
-import com.vmware.bdd.apitypes.NodeRead;
-import com.vmware.bdd.apitypes.NodeStatus;
+import com.vmware.aurora.global.Configuration;
+import com.vmware.bdd.apitypes.*;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
-import com.vmware.bdd.apitypes.Priority;
-import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NetworkEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
-import com.vmware.bdd.exception.BddException;
-import com.vmware.bdd.exception.ClusterConfigException;
-import com.vmware.bdd.exception.ClusterHealServiceException;
-import com.vmware.bdd.exception.ClusterManagerException;
-import com.vmware.bdd.exception.VcProviderException;
+import com.vmware.bdd.exception.*;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.IClusterHealService;
 import com.vmware.bdd.service.IClusteringService;
@@ -65,6 +33,8 @@ import com.vmware.bdd.service.IExecutionService;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourceService;
+import com.vmware.bdd.service.resmgmt.IVcInventorySyncService;
+import com.vmware.bdd.service.resmgmt.sync.filter.VcResourceFilters;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
@@ -72,11 +42,16 @@ import com.vmware.bdd.specpolicy.ClusterSpecFactory;
 import com.vmware.bdd.specpolicy.CommonClusterExpandPolicy;
 import com.vmware.bdd.spectypes.IronfanStack;
 import com.vmware.bdd.spectypes.VcCluster;
-import com.vmware.bdd.utils.AuAssert;
-import com.vmware.bdd.utils.CommonUtil;
-import com.vmware.bdd.utils.Constants;
-import com.vmware.bdd.utils.JobUtils;
-import com.vmware.bdd.utils.ValidationUtils;
+import com.vmware.bdd.utils.*;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.log4j.Logger;
+import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.io.*;
+import java.util.*;
 
 public class ClusterManager {
    static final Logger logger = Logger.getLogger(ClusterManager.class);
@@ -100,7 +75,30 @@ public class ClusterManager {
    private SoftwareManagerCollector softwareManagerCollector;
 
    @Autowired
+   private VcResourceFilterBuilder vcResourceFilterBuilder;
+
+   @Autowired
    private UnsupportedOpsBlocker opsBlocker;
+
+   @Autowired
+   private IVcInventorySyncService syncService;
+
+   private static boolean extraPackagesExisted = false;
+   private static HashSet<String> extraRequiredPackages = getExtraRequiredPackages();
+   private static final String commRegex = "-[0-9]+\\.[0-9]+.*\\.rpm";
+
+   private static HashSet<String> getExtraRequiredPackages() {
+      HashSet<String> hs = new HashSet<String>();
+      String extraPackStr =
+            Configuration.getString(
+                  Constants.SERENGETI_YUM_EXTRA_PACKAGES_CONFIG,
+                  Constants.SERENGETI_YUM_EXTRA_PACKAGES).trim();
+      if (!extraPackStr.isEmpty()) {
+         String[] packs = extraPackStr.split(",");
+         hs.addAll(Arrays.asList(packs));
+      }
+      return hs;
+   }
 
    public JobManager getJobManager() {
       return jobManager;
@@ -389,7 +387,7 @@ public class ClusterManager {
          }
       }*/
       String name = clusterSpec.getName();
-      logger.info("ClusteringService, creating cluster " + name);
+      logger.info("start to create a cluster: " + name);
 
       List<String> dsNames = getUsedDS(clusterSpec.getDsNames());
       if (dsNames.isEmpty()) {
@@ -399,6 +397,11 @@ public class ClusterManager {
       if (vcClusters == null || vcClusters.isEmpty()) {
          throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
       }
+
+      VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
+            getRpNames(clusterSpec.getRpNames()), createSpec.getNetworkNames());
+      syncService.refreshInventory(filters);
+
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
       validateNetworkAccessibility(createSpec.getName(), createSpec.getNetworkNames(), vcClusters);
@@ -473,7 +476,7 @@ public class ClusterManager {
             vcClusterNames.add(vcCluster.getName());
          }
          throw ClusterConfigException.DATASTORE_UNACCESSIBLE(vcClusterNames,
-        		 dsNames);
+               dsNames);
       }
    }
 
@@ -484,6 +487,16 @@ public class ClusterManager {
                .getAllDatastoreNames());
       }
       return specifiedDsNames;
+   }
+
+   private List<String> getRpNames(List<String> rpNames) {
+      if(CollectionUtils.isEmpty(rpNames)) {
+         List<String> newRpNameList = new ArrayList<>();
+         newRpNameList.addAll(clusterConfigMgr.getRpMgr().getAllRPNames());
+         return newRpNameList;
+      }
+
+      return rpNames;
    }
 
    private List<VcCluster> getUsedVcClusters(List<String> rpNames) {
@@ -585,6 +598,11 @@ public class ClusterManager {
       if (vcClusters.isEmpty()) {
          throw ClusterConfigException.NO_DATASTORE_ADDED();
       }
+
+      VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
+            getRpNames(cluster.getVcRpNameList()), cluster.fetchNetworkNameList());
+      syncService.refreshInventory(filters);
+
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
       validateNetworkAccessibility(cluster.getName(), cluster.fetchNetworkNameList(), vcClusters);
@@ -815,6 +833,10 @@ public class ClusterManager {
       if (vcClusters.isEmpty()) {
          throw ClusterConfigException.NO_DATASTORE_ADDED();
       }
+
+      VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
+            getRpNames(cluster.getVcRpNameList()), cluster.fetchNetworkNameList());
+      syncService.refreshInventory(filters);
 
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
