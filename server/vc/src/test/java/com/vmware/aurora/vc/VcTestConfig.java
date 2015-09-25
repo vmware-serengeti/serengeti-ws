@@ -15,6 +15,7 @@
 
 package com.vmware.aurora.vc;
 
+import java.io.FileInputStream;
 import java.util.Properties;
 
 import com.google.gson.internal.Pair;

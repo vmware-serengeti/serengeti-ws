@@ -148,13 +148,4 @@ public class VmCreateSpec implements Location {
    public String getLocation() {
       return targetHost.getName();
    }
-
-   public VcVirtualMachine.CreateSpec toCreateSpec(VcSnapshot snapshot, ConfigSpec configSpec) {
-      return new VcVirtualMachine.CreateSpec(
-            getVmName(), snapshot,
-            getTargetRp(), getTargetDs(),
-            getTargetFolder(), getTargetHost(),
-            getCloneType(), isPersisted(), configSpec
-      );
-   }
 }
