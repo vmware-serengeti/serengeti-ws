@@ -122,7 +122,7 @@ public class Constants {
    public static final String OUTPUT_OP_RESULT_STOP = "stopped";
    public static final String OUTPUT_OP_RESULT_RESIZE = "resized";
    public static final String OUTPUT_OP_RESULT_RESUME = "resumed";
-   public static final String OUTPUT_OP_RESULT_ADD = "expanded";
+   public static final String OUTPUT_OP_RESULT_ADD = "added";
    public static final String OUTPUT_OP_RESULT_EXPAND = "expanded";
    public static final String OUTPUT_OP_RESULT_GET = "got";
    public static final String OUTPUT_OP_RESULT_UPLOAD = "uploaded";
