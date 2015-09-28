@@ -132,6 +132,10 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
 
    private void postUpgradeNode(String clusterName) {
       if (serverVersion.equalsIgnoreCase(Constants.BDE_SERVER_VERSION_2_2)) {
+         /*
+          * When upgrading BDE cluster nodes from 2.1.0 to 2.2.0, the mount point dirs change from /mnt/scsi-xxx-xxx to /mnt/dataX,
+          * Then need to reconfigure the cluster to restart the services on the nodes.
+          */
          SoftwareManager softwareManager = softwareManagerCollector.getSoftwareManagerByClusterName(clusterName);
          ClusterBlueprint blueprint = clusterEntityMgr.toClusterBluePrint(clusterName);
          if (needToRestartCluster(softwareManager, blueprint)) {
