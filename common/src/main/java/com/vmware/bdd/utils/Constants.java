@@ -80,6 +80,7 @@ public class Constants {
    public static final String NODE_ACTION_GENERATE_HOSTNAME_SUCCEED = "Generating hostname succeeded";
    public static final String NODE_ACTION_GENERATE_HOSTNAME_FAILED = "Generating hostname failed";
    public static final String NODE_ACTION_GENERATE_HOSTNAME = "Generating hostname";
+   public static final String NODE_ACTION_REMOVA_BAD_DATA_DISK = "Removing bad data disk";
 
    public static final int VM_POWER_ON_WAITING_SEC = 600;
    public static final int VM_SHUTDOWN_WAITING_SEC = 600;
@@ -182,6 +183,7 @@ public class Constants {
    public static final String NODE_UPGRADE_FILE_PATH = "/opt/serengeti/www/nodeupgrade/";
    public static final String NODE_UPGRADE_TARBALL_FILE_NAME = "serengeti-node-scripts.tar.gz";
    public static final String NODE_UPGRADE_SCRIPT_FILE_NAME = "serengeti-upgrade-node.sh";
+   public static final String REMOVE_BAD_DISK_SCRIPT_FOR_MAPR = "remove_bad_disks_for_mapr.sh";
    public static final String NEED_UPGRADE = "Earlier";
    public static final String MSG_SETTING_UP_PASSWORDLESS_LOGIN = "Setting up passwordless login to ";
    public static final String SERENGETI_TTY_NAME = "serengeti.tty.name";
@@ -190,6 +192,7 @@ public class Constants {
    public static final String SERENGETI_CONCURRENT_JOB_ENABLED = "serengeti.concurrent.job.enabled";
    public static final String SERENGETI_USE_DEFAULT_PASSWORD = "serengeti.use.default.password";
    public static final String SERENGETI_DEFAULT_PASSWORD = "serengeti.default.password";
+   public static final String SERENGETI_UTILS_DIR = "/opt/serengeti/etc/utils/";
    public static final String SERENGETI_SBIN_DIR = "serengeti.sbin.dir";
    public static final String DEFAULT_SERENGETI_SBIN_DIR = "/opt/serengeti/sbin";
    public static final String SERENGETI_HOME = "serengeti.home";

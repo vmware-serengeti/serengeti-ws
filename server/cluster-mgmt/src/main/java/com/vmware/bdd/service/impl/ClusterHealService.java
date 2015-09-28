@@ -723,7 +723,7 @@ public class ClusterHealService implements IClusterHealService {
       VmSchema createSchema = VcVmUtil.getVmSchema(spec, groupName, fullDiskList, node.getNodeGroup().getCluster().getTemplateId(), Constants.ROOT_SNAPSTHOT_NAME);
       boolean isMapDistro = clusterEntityMgr.findByName(clusterName).getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR);
 
-      ReplaceVmBadDisksSP replaceVmDisksPrePowerOnSP = new ReplaceVmBadDisksSP(node.getMoId(),
+      ReplaceVmBadDisksSP replaceVmDisksPrePowerOnSP = new ReplaceVmBadDisksSP(node,
             createSchema.diskSchema, VcVmUtil.getTargetRp(spec.getName(), groupName, node),
             getTargetDatastore(fullDiskList),
             getBadDataDiskEntities(node.getVmName()), isMapDistro);

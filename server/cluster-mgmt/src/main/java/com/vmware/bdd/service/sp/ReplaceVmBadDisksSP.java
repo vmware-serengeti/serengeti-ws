@@ -24,14 +24,19 @@ import java.util.concurrent.Callable;
 import com.vmware.aurora.composition.DiskSchema;
 import com.vmware.aurora.composition.DiskSchemaUtil;
 import com.vmware.bdd.entity.DiskEntity;
+import com.vmware.bdd.entity.NodeEntity;
+import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusterHealServiceException;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.ShellCommandExecutor;
 import com.vmware.bdd.utils.VcVmUtil;
 
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.composition.DiskSchema.Disk;
+import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.vc.DeviceId;
 import com.vmware.aurora.vc.VcCache;
 import com.vmware.aurora.vc.VcDatastore;
@@ -53,14 +58,20 @@ public class ReplaceVmBadDisksSP implements Callable<Void> {
    private List<DiskEntity> badDataDiskEntities;
    private VcVirtualMachine vm;
    private boolean isMapDistro;
+   private String mgtIpV4;
+   private String vmName;
 
-   public ReplaceVmBadDisksSP(String vmId, DiskSchema diskSchema, VcResourcePool targetRp, VcDatastore targetDs, List<DiskEntity> badDataDiskEntities, boolean isMapDistro) {
-      this.isMapDistro = isMapDistro;
-      this.vmId = vmId;
+   private static final int connTimeoutInSec = 600;
+
+   public ReplaceVmBadDisksSP(NodeEntity node, DiskSchema diskSchema, VcResourcePool targetRp, VcDatastore targetDs, List<DiskEntity> badDataDiskEntities, boolean isMapDistro) {
+      this.vmId = node.getMoId();
       this.diskSchema = diskSchema;
       this.targetRp = targetRp;
       this.targetDs = targetDs;
       this.badDataDiskEntities = badDataDiskEntities;
+      this.isMapDistro = isMapDistro;
+      this.mgtIpV4 = node.getPrimaryMgtIpV4();
+      this.vmName = node.getVmName();
    }
 
    @Override
@@ -68,6 +79,10 @@ public class ReplaceVmBadDisksSP implements Callable<Void> {
 
       if (!isVmExisted()) {
          return null;
+      }
+
+      if (isMapDistro) {
+         removeBadDataDisksInMaprCLI();
       }
 
       shutdownVm();
@@ -87,6 +102,28 @@ public class ReplaceVmBadDisksSP implements Callable<Void> {
       } else {
          return true;
       }
+   }
+
+   private void removeBadDataDisksInMaprCLI() {
+      if (Constants.NULL_IPV4_ADDRESS.equals(mgtIpV4)) {
+         return;
+      }
+
+      try {
+         String sshUser = Configuration.getString(Constants.SSH_USER_CONFIG_NAME, Constants.DEFAULT_SSH_USER_NAME);
+         String sudoCmd = CommonUtil.getCustomizedSudoCmd();
+
+         String uploadScriptCmd = "scp " + Constants.SERENGETI_UTILS_DIR + Constants.REMOVE_BAD_DISK_SCRIPT_FOR_MAPR + " " + sshUser + "@" + mgtIpV4 + ":/tmp/";
+         ShellCommandExecutor.execCmd(uploadScriptCmd, null, null, connTimeoutInSec, Constants.NODE_ACTION_REMOVA_BAD_DATA_DISK);
+
+         String removeBadDataDiskCmd = "ssh -tt " + sshUser + "@" + mgtIpV4 + " '" + sudoCmd + " bash /tmp/" + Constants.REMOVE_BAD_DISK_SCRIPT_FOR_MAPR + " " + mgtIpV4 + "'";
+         ShellCommandExecutor.execCmd(removeBadDataDiskCmd, null, null, connTimeoutInSec, Constants.NODE_ACTION_REMOVA_BAD_DATA_DISK);
+
+      } catch (Exception e) {
+         logger.error("Failed to remove bad data disk on cluster node " + vmName);
+         throw BddException.INTERNAL(e, e.getMessage());
+      }
+
    }
 
    private void shutdownVm() {
