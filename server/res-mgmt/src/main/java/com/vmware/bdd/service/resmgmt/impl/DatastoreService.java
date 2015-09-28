@@ -15,6 +15,7 @@
 package com.vmware.bdd.service.resmgmt.impl;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vmware.bdd.apitypes.DatastoreAdd;
 import com.vmware.bdd.apitypes.DatastoreRead;
 import com.vmware.bdd.apitypes.DatastoreReadDetail;
+import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.dal.IClusterDAO;
 import com.vmware.bdd.dal.IDatastoreDAO;
@@ -261,6 +263,13 @@ public class DatastoreService implements IDatastoreService {
       final List<VcDatastoreEntity> entities = dsDao.findByName(name);
       if (entities.isEmpty()) {
          throw VcProviderException.DATASTORE_NOT_FOUND(name);
+      }
+
+      List<String> provisioningClusterList = getClusterDao().findClusterByStatus(
+                                                EnumSet.of(ClusterStatus.PROVISIONING, ClusterStatus.EXPANDING));
+      if (!provisioningClusterList.isEmpty()) {
+         logger.error("cannot remove datastore, since some clusters are under provisioning.");
+         throw VcProviderException.CLUSTER_UNDER_PROVISIONING();
       }
 
       final Set<String> patterns = new HashSet<String>();

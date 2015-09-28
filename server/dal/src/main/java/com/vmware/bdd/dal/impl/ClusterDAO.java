@@ -15,12 +15,14 @@
 package com.vmware.bdd.dal.impl;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -151,6 +153,37 @@ public class ClusterDAO extends BaseDAO<ClusterEntity> implements IClusterDAO {
       criteria.setProjection(Projections.property("infraConfig"));
 
       return (String) criteria.uniqueResult();
+   }
+
+   @Override
+   public List<String> findClusterByStatus(ClusterStatus status) {
+      List<String> clusterNames = new ArrayList<String>();
+      List<ClusterEntity> clusterList = findByCriteria(Restrictions.eq("status", status));
+      if (clusterList != null) {
+         for (ClusterEntity cluster : clusterList) {
+            clusterNames.add(cluster.getName());
+         }
+      }
+      return clusterNames;
+   }
+
+   @Override
+   public List<String> findClusterByStatus(EnumSet<ClusterStatus> statusSet) {
+      List<String> clusterNames = new ArrayList<String>();
+      if (statusSet != null && statusSet.size() > 0) {
+         List<Criterion> criterionList = new ArrayList<Criterion>();
+         for (ClusterStatus status : statusSet) {
+            criterionList.add(Restrictions.eq("status", status));
+         }
+         Criterion finalCriterion = Restrictions.or(criterionList.toArray(new Criterion[criterionList.size()]));
+         List<ClusterEntity> clusterList = findByCriteria(finalCriterion);
+         if (clusterList != null) {
+            for (ClusterEntity cluster : clusterList) {
+               clusterNames.add(cluster.getName());
+            }
+         }
+      }
+      return clusterNames;
    }
 
 }

@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.dal;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
@@ -35,6 +36,10 @@ public interface IClusterDAO extends IBaseDAO<ClusterEntity> {
    List<String> findClustersByUsedResourcePool(String rpName);
 
    List<String> findClustersByUsedDatastores(Set<String> patterns);
+
+   List<String> findClusterByStatus(ClusterStatus status);
+
+   List<String> findClusterByStatus(EnumSet<ClusterStatus> statusSet);
 
    List<String> findClustersByAppManager(String appManagerName);
 

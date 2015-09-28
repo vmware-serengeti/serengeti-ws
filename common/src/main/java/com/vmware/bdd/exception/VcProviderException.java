@@ -111,4 +111,8 @@ public class VcProviderException extends BddException {
    public static VcProviderException AUTO_RP_NAME_NOT_FOUND() {
       return new VcProviderException(null, "AUTO_RP_NAME_NOT_FOUND");
    }
+
+   public static VcProviderException CLUSTER_UNDER_PROVISIONING() {
+      return new VcProviderException(null, "CLUSTER_UNDER_PROVISIONING");
+   }
 }
