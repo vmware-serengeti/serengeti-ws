@@ -144,6 +144,7 @@ create table node_group (
    primary key (id),
    foreign key(cluster_id) references cluster(id) ON DELETE CASCADE
 );
+create index ng_cluster_id on node_group(cluster_id);
 
 create sequence node_group_association_seq;
 create table node_group_association (
@@ -179,6 +180,7 @@ create table node (
    foreign key(node_group_id) references node_group(id) ON DELETE CASCADE,
    foreign key(vc_rp_id) references vc_resource_pool(id) ON DELETE CASCADE
 );
+create index node_ng_id on node(node_group_id);
 
 create sequence disk_seq;
 create table disk (
@@ -196,6 +198,7 @@ create table disk (
    primary key (id),
    foreign key(node_id) references node(id) ON DELETE CASCADE
 );
+create index disk_node_id on disk(node_id);
 
 create sequence nic_seq;
 create table nic (
@@ -212,6 +215,7 @@ create table nic (
    foreign key(node_id) references node(id) ON DELETE CASCADE,
    foreign key(network_id) references network(id)
 );
+create index nic_node_id on nic(node_id);
 
 create sequence rack_seq;
 create table rack (

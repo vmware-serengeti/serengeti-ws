@@ -353,13 +353,14 @@ public class ClusterManager {
       }
 
       // return the latest data from db
+      java.util.Date startTime = new java.util.Date();
       if (realTime
             && cluster.getStatus().isSyncServiceStatus()) {
             // for not running cluster, we don't sync up status from chef
          refreshClusterStatus(clusterName);
       }
-
-      return clusterEntityMgr.toClusterRead(clusterName);
+      logger.debug("refreshClusterStatus time: " + (new java.util.Date().getTime()-startTime.getTime()));
+      return clusterEntityMgr.toClusterRead(clusterName, realTime);
    }
 
    public ClusterCreate getClusterSpec(String clusterName) {
@@ -404,11 +405,15 @@ public class ClusterManager {
    }
 
    public List<ClusterRead> getClusters(Boolean realTime) {
+      java.util.Date startTime = new java.util.Date();
+
       List<ClusterRead> clusters = new ArrayList<ClusterRead>();
       List<ClusterEntity> clusterEntities = clusterEntityMgr.findAllClusters();
+      logger.debug("findAllClusters time:" +(new java.util.Date().getTime()-startTime.getTime()));
       for (ClusterEntity entity : clusterEntities) {
          clusters.add(getClusterByName(entity.getName(), realTime));
       }
+      logger.debug("getClusters total time:" +(new java.util.Date().getTime()-startTime.getTime()));
       return clusters;
    }
 
@@ -1613,7 +1618,7 @@ public class ClusterManager {
    }
 
    public Map<String, String> getRackTopology(String clusterName, String topology) {
-     ClusterRead cluster = clusterEntityMgr.toClusterRead(clusterName);
+     ClusterRead cluster = clusterEntityMgr.toClusterRead(clusterName, true);
       Set<String> hosts = new HashSet<String>();
       List<NodeRead> nodes = new ArrayList<NodeRead>();
       for (NodeGroupRead nodeGroup : cluster.getNodeGroups()) {

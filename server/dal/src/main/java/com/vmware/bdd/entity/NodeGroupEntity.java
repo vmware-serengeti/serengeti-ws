@@ -443,12 +443,7 @@ public class NodeGroupEntity extends EntityBase {
    }
 
    // this method should be called inside a transaction
-   public NodeGroupRead toNodeGroupRead() {
-      return toNodeGroupRead(false);
-   }
-
-   // this method should be called inside a transaction
-   public NodeGroupRead toNodeGroupRead(boolean ignoreObsoleteNode) {
+   public NodeGroupRead toNodeGroupRead(boolean withNodesList, boolean ignoreObsoleteNode) {
       NodeGroupRead nodeGroupRead = new NodeGroupRead();
       nodeGroupRead.setName(this.name);
       nodeGroupRead.setCpuNum(this.cpuNum);
@@ -480,15 +475,17 @@ public class NodeGroupEntity extends EntityBase {
 
       nodeGroupRead.setStorage(storage);
 
-      List<NodeRead> nodeList = new ArrayList<NodeRead>();
-      for (NodeEntity node : this.nodes) {
-         if (ignoreObsoleteNode && (node.isObsoleteNode() 
-               || node.isDisconnected())) {
-            continue;
+      if(withNodesList) {
+         List<NodeRead> nodeList = new ArrayList<NodeRead>();
+         for (NodeEntity node : this.nodes) {
+            if (ignoreObsoleteNode && (node.isObsoleteNode()
+                  || node.isDisconnected())) {
+               continue;
+            }
+            nodeList.add(node.toNodeRead(true));
          }
-         nodeList.add(node.toNodeRead(true));
+         nodeGroupRead.setInstances(nodeList);
       }
-      nodeGroupRead.setInstances(nodeList);
 
       List<GroupAssociation> associations = new ArrayList<GroupAssociation>();
       for (NodeGroupAssociation relation : groupAssociations) {

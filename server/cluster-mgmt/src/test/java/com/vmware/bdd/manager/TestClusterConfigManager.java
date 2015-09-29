@@ -573,7 +573,7 @@ public class TestClusterConfigManager {
       cluster = clusterEntityMgr.findByName("my-cluster-external-hdfs");
       Assert.assertTrue(cluster != null);
       Assert.assertEquals(cluster.getAdvancedProperties(), "{\"ExternalHDFS\":\"hdfs://168.192.0.70:8020\"}");
-      ClusterRead clusterRead = clusterEntityMgr.toClusterRead("my-cluster-external-hdfs");
+      ClusterRead clusterRead = clusterEntityMgr.toClusterRead("my-cluster-external-hdfs", true);
       Assert.assertEquals(clusterRead.getExternalHDFS(), "hdfs://168.192.0.70:8020");
 
       ClusterCreate attrs =
@@ -639,7 +639,7 @@ public class TestClusterConfigManager {
             cluster.getAdvancedProperties(),
             "{\"ExternalMapReduce\":\"192.168.0.1:8021\",\"ExternalHDFS\":\"hdfs://192.168.0.2:8020\"}");
       ClusterRead clusterRead =
-            clusterEntityMgr.toClusterRead("my-cluster-external-mr");
+            clusterEntityMgr.toClusterRead("my-cluster-external-mr", true);
       Assert.assertEquals(clusterRead.getExternalHDFS(),
             "hdfs://192.168.0.2:8020");
       Assert.assertEquals(clusterRead.getExternalMapReduce(),

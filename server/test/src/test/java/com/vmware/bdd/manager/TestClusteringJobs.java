@@ -712,7 +712,7 @@ public class TestClusteringJobs extends
             clusterEntityMgr.findByName(TEST_STATIC_IP_CLUSTER_NAME);
       assertTrue(cluster != null);
       ClusterRead clusterRead =
-            clusterEntityMgr.toClusterRead(TEST_STATIC_IP_CLUSTER_NAME);
+            clusterEntityMgr.toClusterRead(TEST_STATIC_IP_CLUSTER_NAME, true);
       assertTrue("parse ClusterRead object from cluster entity should work.",
             clusterRead != null);
       logger.info((new Gson()).toJson(clusterRead));

@@ -749,13 +749,13 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
    }
 
    @Override
-   public ClusterRead toClusterRead(String clusterName) {
-      return toClusterRead(clusterName, false);
+   public ClusterRead toClusterRead(String clusterName, boolean withNodesList) {
+      return toClusterRead(clusterName, withNodesList, false);
    }
 
    @Override
    @SuppressWarnings("rawtypes")
-   public ClusterRead toClusterRead(String clusterName,
+   public ClusterRead toClusterRead(String clusterName, boolean withNodesList,
          boolean ignoreObsoleteNode) {
       ClusterEntity cluster = findByName(clusterName);
       if (cluster == null) {
@@ -812,7 +812,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
 
       List<NodeGroupRead> groupList = new ArrayList<NodeGroupRead>();
       for (NodeGroupEntity group : cluster.getNodeGroups()) {
-         NodeGroupRead groupRead = group.toNodeGroupRead(ignoreObsoleteNode);
+         NodeGroupRead groupRead = group.toNodeGroupRead(withNodesList, ignoreObsoleteNode);
          groupRead.setComputeOnly(false);
          try {
             groupRead.setComputeOnly(softMgr.isComputeOnlyRoles(groupRead

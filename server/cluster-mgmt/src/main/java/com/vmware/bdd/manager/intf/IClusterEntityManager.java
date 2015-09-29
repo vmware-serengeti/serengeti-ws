@@ -104,9 +104,9 @@ public interface IClusterEntityManager {
 
    public NodeGroupInfo toNodeGroupInfo(String clusterName, String groupName);
 
-   public ClusterRead toClusterRead(String clusterName);
+   public ClusterRead toClusterRead(String clusterName, boolean withNodesList);
 
-   public ClusterRead toClusterRead(String clusterName,
+   public ClusterRead toClusterRead(String clusterName, boolean withNodesList,
          boolean ignoreObsoleteNode);
 
    public void refreshNodeByMobId(String vmId, boolean inSession);
