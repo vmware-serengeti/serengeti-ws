@@ -700,10 +700,14 @@ public class RestClient {
 
       Set<Entry<String, String>> entryset = queryStrings.entrySet();
       for (Entry<String, String> entry : entryset) {
-         stringBuilder.append(entry.getKey() + "=" + entry.getValue());
+         stringBuilder.append(entry.getKey() + "=" + entry.getValue() + "&");
       }
-
-      return stringBuilder.toString();
+      int length = stringBuilder.length();
+      if (stringBuilder.charAt(length - 1) == '&') {
+         return stringBuilder.substring(0, length - 1);
+      } else {
+         return stringBuilder.toString();
+      }
    }
 
    /**

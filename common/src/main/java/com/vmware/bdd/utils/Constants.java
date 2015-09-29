@@ -64,6 +64,8 @@ public class Constants {
    public static final String GUEST_VARIABLE_NIC_DEVICES = "nics";
    public static final String GUEST_VARIABLE_RESERVE_RAW_DISKS = "reserveRawDisks";
    public static final String GUEST_VARIABLE_VOLUMES = "volumes";
+   public static final String GUEST_VARIABLE_DNS_TYPE = "dnsType";
+   public static final String GUEST_VARIABLE_DHCP_HOSTNAME = "dhcpHostname";
 
    public static final String MANAGEMENT_SERVER_IP = "managementServerIP";
    public static final String NULL_IPV4_ADDRESS = "0.0.0.0";
@@ -207,6 +209,9 @@ public class Constants {
    public static final String MSG_SETTING_UP_PASSWORDLESS_LOGIN = "Setting up passwordless login to ";
    public static final String SERENGETI_TTY_NAME = "serengeti.tty.name";
    public static final String SERENGETI_DEFAULT_TTY_NAME = "tty1";
+   public static final String SERENGETI_CLONE_MODE = "serengeti.clone.mode";
+   public static final String SERENGETI_CONCURRENT_JOB_ENABLED = "serengeti.concurrent.job.enabled";
+   public static final String SERENGETI_USE_DEFAULT_PASSWORD = "serengeti.use.default.password";
    public static final String SERENGETI_DEFAULT_PASSWORD = "serengeti.default.password";
    public static final String SERENGETI_SBIN_DIR = "serengeti.sbin.dir";
    public static final String DEFAULT_SERENGETI_SBIN_DIR = "/opt/serengeti/sbin";
@@ -220,6 +225,8 @@ public class Constants {
    public static final String SERENGETI_PRIVATE_KEY_FILE = "/home/serengeti/.ssh/id_rsa";
    public static final String VM_DISK_FORMAT_STATUS_KEY = "guestinfo.DiskFormatCode";
    public static final String VM_DISK_FORMAT_ERROR_KEY = "guestinfo.disk.format.status";
+   public static final String VM_FQDN_REGISTER_STATUS_KEY = "guestinfo.FqdnRegisterCode";
+   public static final String VM_FQDN_REGISTER_ERROR_KEY = "guestinfo.fqdn.register.status";
    public static final String APPMANAGER_KEYSTORE_PATH = "/opt/serengeti/.certs/";
    public static final String APPMANAGER_KEYSTORE_FILE = "appmanagers.jks";
    public static final char[] APPMANAGER_KEYSTORE_PASSWORD = "changeit".toCharArray();
@@ -248,4 +255,14 @@ public class Constants {
    public static final String SERENGETI_YUM_EXTRA_PACKAGES = "mailx,wsdl4j";
    public static final String SERENGETI_YUM_EXTRA_PACKAGES_CONFIG = "serengeti.yum.extra.pakcages.config";
 
+   public static final String CLUSTER_OPERATION_CALLBACK_TIMEOUT_SECONDS = "cluster.operation.callback.timeout";
+   public static final int CLUSTER_OPERATION_CALLBACK_TIMEOUT_SECONDS_DEFAULT = 3600;
+   public static final String CLUSTER_OPERATION_CALLBACK_DESCRIPTION = "cluster operation callback";
+   public static final String CLUSTER_OPERATION_CALLBACK_SCRIPT_FILE_NAME = "/opt/serengeti/sbin/serengeti-provision-hook.sh";
+   
+   public static final String CLUSTER_RACK_TOPOLOGY_FILE_PATH = "/opt/serengeti/www/topology/";
+   public static final String CLUSTER_RACK_TOPOLOGY_FILE_SUFFIX = ".topology.data";
+
+   public static final String FORCE_CLUSTER_OPERATION_IGNORE_EXCEPTION = "The above error is ignored because the force flag is set.";
+   public static final String SERENGETI_DISABLE_SWAPDISK = "serengeti.disable.swapdisk";
 }

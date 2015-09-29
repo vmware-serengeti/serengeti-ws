@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vmware.bdd.utils.JobUtils;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 
@@ -102,7 +103,8 @@ public class ExternalManagementTask implements ISoftwareManagementTask {
                success = softwareManager.deleteCluster(clusterBlueprint, queue);
                break;
             case START:
-               success = softwareManager.startCluster(clusterBlueprint, queue);
+               boolean forceStart = JobUtils.getJobParameterForceClusterOperation(chunkContext);
+               success = softwareManager.startCluster(clusterBlueprint, queue, forceStart);
                break;
             case STOP:
                success = softwareManager.onStopCluster(clusterBlueprint,queue);

@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job;
 
+import com.vmware.bdd.utils.JobUtils;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 
@@ -53,14 +54,20 @@ public class ClusterNodeStatusVerifyStep extends TrackableTasklet {
          // throw creation exception here, and query detail node error message from node entity
          throw ClusteringServiceException.VM_CREATION_FAILED(clusterName);
       }
+      boolean forceStart = JobUtils.getJobParameterForceClusterOperation(chunkContext);
       if (managementOperation != null) {
          Boolean success =
             getFromJobExecutionContext(chunkContext,
                   JobConstants.CLUSTER_OPERATION_SUCCESS, Boolean.class);
          if ((success != null && !success)
                || (verifyStatus == null || !verifyStatus)) {
+            logger.error("operation is " + managementOperation + " forceStart is: " + forceStart);
             // throw creation exception here, and query detail node error message from node entity
-            throw ClusteringServiceException.CLUSTER_OPERATION_FAILED(clusterName);
+            JobUtils.forceClusterOperationRecordError(forceStart, logger);
+            if (!forceStart || !managementOperation.equals(ManagementOperation.START)) {
+               //if is start custer, force to start the cluster even met failures
+               throw ClusteringServiceException.CLUSTER_OPERATION_FAILED(clusterName);
+            }
          }
       }
       return RepeatStatus.FINISHED;

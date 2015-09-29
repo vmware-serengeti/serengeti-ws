@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gson.annotations.Expose;
+import com.vmware.bdd.apitypes.TopologyType;
 
 public class ClusterBlueprint implements Serializable {
 
@@ -41,6 +42,7 @@ public class ClusterBlueprint implements Serializable {
 
    private String externalHDFS;
    private String externalMapReduce;
+   private TopologyType topologyPolicy;
    private boolean needToValidateConfig;
 
 
@@ -106,5 +108,20 @@ public class ClusterBlueprint implements Serializable {
 
    public void setNeedToValidateConfig(boolean needToValidateConfig) {
       this.needToValidateConfig = needToValidateConfig;
+   }
+
+   public TopologyType getTopologyPolicy() {
+      return topologyPolicy;
+   }
+
+   public void setTopologyPolicy(TopologyType topologyPolicy) {
+      this.topologyPolicy = topologyPolicy;
+   }
+
+   public boolean hasTopologyPolicy() {
+      if (this.topologyPolicy == null || this.topologyPolicy.equals(TopologyType.NONE)) {
+         return false;
+      }
+      return true;
    }
 }

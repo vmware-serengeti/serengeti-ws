@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2015 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,7 +47,7 @@ public interface ServicesResource {
          @PathParam(Parameters.STACK_SERVICE_NAME) String stackServiceName,
          @QueryParam("fields") String fields);
 
-   @Path("/{stackServiceName}/serviceComponents")
+   @Path("/{stackServiceName}/components")
    public ComponentsResource getComponentsResource(@PathParam(Parameters.STACK_SERVICE_NAME) String stackServiceName);
 
 }

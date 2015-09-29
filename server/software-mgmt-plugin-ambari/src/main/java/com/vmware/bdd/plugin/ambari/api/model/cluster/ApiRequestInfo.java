@@ -100,6 +100,10 @@ public class ApiRequestInfo {
    @SerializedName("context")
    private String context;
 
+   @Expose
+   @SerializedName("operation_level")
+   private ApiOperationLevel operationLevel;
+
    public Long getRequestId() {
       return requestId;
    }
@@ -258,5 +262,13 @@ public class ApiRequestInfo {
 
    public void setStatus(String status) {
       this.status = status;
+   }
+
+   public ApiOperationLevel getOperationLevel() {
+      return operationLevel;
+   }
+
+   public void setOperationLevel(ApiOperationLevel operationLevel) {
+      this.operationLevel = operationLevel;
    }
 }

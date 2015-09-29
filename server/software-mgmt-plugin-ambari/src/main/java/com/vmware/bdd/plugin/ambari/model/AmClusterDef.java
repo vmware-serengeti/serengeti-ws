@@ -16,10 +16,12 @@ package com.vmware.bdd.plugin.ambari.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.google.gson.annotations.Expose;
+import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprintInfo;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
@@ -59,6 +61,8 @@ public class AmClusterDef implements Serializable {
 
    private ClusterReport currentReport;
 
+   private String ambariServerVersion;
+
    @Expose
    private List<Map<String, Object>> configurations;
 
@@ -73,11 +77,15 @@ public class AmClusterDef implements Serializable {
       this.sshKey = privateKey;
       this.user = Constants.AMBARI_SSH_USER;
       this.currentReport = new ClusterReport(blueprint);
-      this.configurations =
-            AmUtils.toAmConfigurations(blueprint.getConfiguration());
+      this.ambariServerVersion = ambariServerVersion;
 
       this.nodes = new ArrayList<AmNodeDef>();
       HdfsVersion hdfs = getDefaultHdfsVersion(this.version);
+      if (blueprint.hasTopologyPolicy()) {
+         setRackTopologyFileName(blueprint);
+      }
+      setAdditionalConfigurations(blueprint, ambariServerVersion);
+      this.configurations = AmUtils.toAmConfigurations(blueprint.getConfiguration());
       for (NodeGroupInfo group : blueprint.getNodeGroups()) {
          for (NodeInfo node : group.getNodes()) {
             AmNodeDef nodeDef = new AmNodeDef();
@@ -189,6 +197,9 @@ public class AmClusterDef implements Serializable {
       apiBootstrap.setHosts(hosts);
       apiBootstrap.setSshKey(sshKey);
       apiBootstrap.setUser(user);
+      if (!AmUtils.isAmbariServerBelow_2_0_0(ambariServerVersion)) {
+         apiBootstrap.setUserRunAs(Configuration.getString("ambari.user_run_as"));
+      }
       return apiBootstrap;
    }
 
@@ -208,6 +219,14 @@ public class AmClusterDef implements Serializable {
       }
       apiBlueprint.setApiHostGroups(apiHostGroups);
       return apiBlueprint;
+   }
+
+   public String getAmbariServerVersion() {
+      return ambariServerVersion;
+   }
+
+   public void setAmbariServerVersion(String ambariServerVersion) {
+      this.ambariServerVersion = ambariServerVersion;
    }
 
    public ApiClusterBlueprint toApiClusterBlueprint() {
@@ -230,4 +249,71 @@ public class AmClusterDef implements Serializable {
       }
    }
 
+   @SuppressWarnings("unchecked")
+   private void setRackTopologyFileName(ClusterBlueprint blueprint) {
+      String rackTopologyFileName = "/etc/hadoop/conf/topology.sh";
+      Map<String, Object> conf = blueprint.getConfiguration();
+      if (conf == null) {
+         conf = new HashMap<String, Object>();
+         blueprint.setConfiguration(conf);
+      }
+
+      Map<String, Object> confCoreSite = (Map<String, Object>) conf.get("core-site");
+      if (confCoreSite == null) {
+         confCoreSite = new HashMap<String, Object>();
+         conf.put("core-site", confCoreSite);
+      }
+      if (confCoreSite.get("net.topology.script.file.name") == null) {
+         confCoreSite.put("net.topology.script.file.name", rackTopologyFileName);
+      }
+      if (confCoreSite.get("topology.script.file.name") == null) {
+         confCoreSite.put("topology.script.file.name", rackTopologyFileName);
+      }
+   }
+
+   private void setAdditionalConfigurations(ClusterBlueprint blueprint, String ambariServerVersion) {
+      if (AmUtils.isAmbariServerBelow_2_0_0(ambariServerVersion) ||
+            !AmUtils.containsRole(blueprint, "RESOURCEMANAGER")) {
+         return;
+      }
+
+      Map<String, Object> conf = blueprint.getConfiguration();
+      if (conf == null) {
+         conf = new HashMap<String, Object>();
+         blueprint.setConfiguration(conf);
+      }
+
+      Map<String, Object> confYarnSite = (Map<String, Object>) conf.get("yarn-site");
+      if (confYarnSite == null) {
+         confYarnSite = new HashMap<String, Object>();
+         conf.put("yarn-site", confYarnSite);
+      }
+
+      if (confYarnSite.get("yarn.resourcemanager.webapp.https.address") == null) {
+         List<String> fqdnsOfRoleResourcemanager = getFqdnsWithRole(blueprint, "RESOURCEMANAGER");
+         if (!fqdnsOfRoleResourcemanager.isEmpty()) {
+            confYarnSite.put("yarn.resourcemanager.webapp.https.address", fqdnsOfRoleResourcemanager.get(0) + ":8090");
+         }
+      }
+      if (confYarnSite.get("yarn.resourcemanager.zk-address") == null) {
+         List<String> fqdnsOfRoleZookeeperServer = getFqdnsWithRole(blueprint, "ZOOKEEPER_SERVER");
+         if (!fqdnsOfRoleZookeeperServer.isEmpty()) {
+            confYarnSite.put("yarn.resourcemanager.zk-address", fqdnsOfRoleZookeeperServer.get(0) + ":2181");
+         }
+      }
+   }
+
+   private List<String> getFqdnsWithRole(ClusterBlueprint blueprint, String role) {
+      List<String> fqdns = new ArrayList<String>();
+
+      for (NodeGroupInfo group : blueprint.getNodeGroups()) {
+         if (group.getRoles().contains(role)) {
+            for (NodeInfo node : group.getNodes()) {
+               fqdns.add(node.getHostname());
+            }
+         }
+      }
+
+      return fqdns;
+   }
 }

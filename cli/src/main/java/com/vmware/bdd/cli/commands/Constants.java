@@ -279,4 +279,5 @@ public class Constants {
 
    public static final String LOGIN_USERNAME = "username";
    public static final String LOGIN_PASSWORD = "password";
+   public static final String FORCE_CLUSTER_OPERATION_KEY = "force";
 }

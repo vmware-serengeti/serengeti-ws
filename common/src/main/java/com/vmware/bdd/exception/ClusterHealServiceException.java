@@ -75,4 +75,16 @@ public class ClusterHealServiceException extends BddException {
    public static ClusterHealServiceException ERROR_STATUS(String nodeName, String errMsg) {
       return new ClusterHealServiceException(null, "ERROR_STATUS", nodeName, errMsg);
    }
+
+   public static ClusterHealServiceException FAILED_TO_DETACH_VIRTUALDISK(String vmdkPath, String vmName) {
+      return new ClusterHealServiceException(null, "FAILED_TO_DETACH_VIRTUALDISK", vmdkPath, vmName);
+   }
+
+   public static ClusterHealServiceException FAILED_TO_REPLACE_BAD_DATA_DISKS(String vmName) {
+      return new ClusterHealServiceException(null, "FAILED_TO_REPLACE_BAD_DATA_DISKS", vmName);
+   }
+
+   public static ClusterHealServiceException TARGET_VC_HOST_NOT_FOUND(String hostName, String vmName) {
+      return new ClusterHealServiceException(null, "TARGET_VC_HOST_NOT_FOUND", hostName, vmName);
+   }
 }

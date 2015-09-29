@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.aurora.global.Configuration;
+import com.vmware.bdd.utils.Constants;
 import org.apache.log4j.Logger;
 
 import com.google.gson.internal.Pair;
@@ -182,13 +184,18 @@ public class PlacementPlanner implements IPlacementPlanner {
       List<DiskSpec> disks = new ArrayList<DiskSpec>();
 
       DiskSpec systemDisk = new DiskSpec(templateNode.getDisks().get(0));
+
+      // use swap disk by default
+      boolean disableSwap = Configuration.getBoolean(Constants.SERENGETI_DISABLE_SWAPDISK, false);
+      if (!disableSwap) {
       /*
        * TRICK: here we count the size of vswp file into the system disk size, as the
        * vswp file will be put together with system disk.
        */
-      Integer memCapa = nodeGroup.getMemCapacityMB();
-      memCapa = (memCapa == null) ? 0 : memCapa;
-      systemDisk.setSize(systemDisk.getSize() + (memCapa + 1023) / 1024);
+         Integer memCapa = nodeGroup.getMemCapacityMB();
+         memCapa = (memCapa == null) ? 0 : memCapa;
+         systemDisk.setSize(systemDisk.getSize() + (memCapa + 1023) / 1024);
+      }
 
       systemDisk.setDiskType(DiskType.SYSTEM_DISK);
       systemDisk.setSeparable(false);

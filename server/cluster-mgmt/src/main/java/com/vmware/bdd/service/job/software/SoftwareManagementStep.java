@@ -20,8 +20,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.bdd.apitypes.NodeStatus;
+import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
+import com.vmware.bdd.utils.JobUtils;
 import org.apache.log4j.Logger;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +45,7 @@ import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.job.TrackableTasklet;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.SyncHostsUtils;
 
@@ -137,6 +142,12 @@ public class SoftwareManagementStep extends TrackableTasklet {
                      clusterName);
          Set<String> hostnames = new HashSet<String>();
          for (NodeEntity node : nodes) {
+            //for software operation, we can only handle VMs who are already VM_READY
+            //Add this filter to tolerate some vm failures in cluster start
+            boolean force = JobUtils.getJobParameterForceClusterOperation(chunkContext);
+            if (force && ManagementOperation.START.equals(managementOperation) && !node.getStatus().equals(NodeStatus.VM_READY)) {
+               continue;
+            }
             hostnames.add(node.getHostName());
          }
          ClusterCreate clusterSpec = clusterManager.getClusterSpec(clusterName);
@@ -212,7 +223,6 @@ public class SoftwareManagementStep extends TrackableTasklet {
       ISoftwareManagementTask task;
       SoftwareManager softwareMgr =
             softwareMgrs.getSoftwareManagerByClusterName(clusterName);
-
       ClusterBlueprint clusterBlueprint =
             getFromJobExecutionContext(chunkContext,
                   JobConstants.CLUSTER_BLUEPRINT_JOB_PARAM,

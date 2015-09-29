@@ -841,7 +841,7 @@ public class TestClusteringJobs extends
    @Transactional(propagation = Propagation.NEVER)
    public void testStartCluster() throws Exception {
       long jobExecutionId =
-            clusterMgr.startCluster(TEST_STATIC_IP_CLUSTER_NAME);
+            clusterMgr.startCluster(TEST_STATIC_IP_CLUSTER_NAME, false);
 
       ClusterRead cluster =
             clusterMgr.getClusterByName(TEST_STATIC_IP_CLUSTER_NAME, false);
@@ -857,7 +857,7 @@ public class TestClusteringJobs extends
    @Transactional(propagation = Propagation.NEVER)
    public void testDupStartCluster() throws Exception {
       try {
-         clusterMgr.startCluster(TEST_STATIC_IP_CLUSTER_NAME);
+         clusterMgr.startCluster(TEST_STATIC_IP_CLUSTER_NAME, false);
          Assert.assertTrue(false, "Cluster start should throw exception.");
       } catch (Exception e) {
          e.printStackTrace();

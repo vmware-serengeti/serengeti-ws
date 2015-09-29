@@ -715,7 +715,7 @@ public class ClusterManager {
       }
    }
 
-   public Long startCluster(String clusterName) throws Exception {
+   public Long startCluster(String clusterName, boolean force) throws Exception {
       logger.info("ClusterManager, starting cluster " + clusterName);
 
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
@@ -746,6 +746,7 @@ public class ClusterManager {
       Map<String, JobParameter> param = new TreeMap<String, JobParameter>();
       param.put(JobConstants.CLUSTER_NAME_JOB_PARAM, new JobParameter(
             clusterName));
+      param.put(JobConstants.FORCE_CLUSTER_OPERATION_JOB_PARAM, new JobParameter(String.valueOf(force)));
       param.put(JobConstants.TIMESTAMP_JOB_PARAM, new JobParameter(new Date()));
       param.put(JobConstants.CLUSTER_SUCCESS_STATUS_JOB_PARAM,
             new JobParameter(ClusterStatus.RUNNING.name()));
@@ -1224,7 +1225,8 @@ public class ClusterManager {
          List<String> roles = nodeGroup.getRoleNameList();
 
          // TODO: more fine control on node roles
-         if (softMgr.hasMgmtRole(roles)) {
+         // Allow disk fix except ironfan
+         if (Constants.IRONFAN.equals(softMgr.getType()) && softMgr.hasMgmtRole(roles)) {
             logger.info("node group " + nodeGroup.getName()
                   + " contains management roles, pass it");
             continue;
@@ -1292,12 +1294,10 @@ public class ClusterManager {
    public Map<String, String> getRackTopology(String clusterName, String topology) {
      ClusterRead cluster = clusterEntityMgr.toClusterRead(clusterName);
       Set<String> hosts = new HashSet<String>();
-      Set<String> racks = new HashSet<String>();
       List<NodeRead> nodes = new ArrayList<NodeRead>();
       for (NodeGroupRead nodeGroup : cluster.getNodeGroups()) {
          for (NodeRead node : nodeGroup.getInstances()) {
             hosts.add(node.getHostName());
-            racks.add(node.getRack());
             nodes.add(node);
          }
       }

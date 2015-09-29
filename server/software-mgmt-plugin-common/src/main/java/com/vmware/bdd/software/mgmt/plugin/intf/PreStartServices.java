@@ -23,5 +23,8 @@ import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginExc
  */
 public interface PreStartServices {
 
-   void preStartServices(String clusterName, int maxWaitingSeconds) throws SoftwareManagementPluginException;
+   void preStartServices(String clusterName, boolean forceStart) throws SoftwareManagementPluginException;
+
+   void preStartServices(String clusterName) throws SoftwareManagementPluginException;
+
 }

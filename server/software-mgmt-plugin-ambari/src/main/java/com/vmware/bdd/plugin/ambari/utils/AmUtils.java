@@ -20,10 +20,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import com.vmware.aurora.util.StringUtil;
 import com.vmware.bdd.plugin.ambari.api.model.ApiHostsRequest;
 import com.vmware.bdd.plugin.ambari.api.model.ApiHostsRequestInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiHostComponents;
+import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
+import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 
 public class AmUtils {
 
@@ -87,5 +90,22 @@ public class AmUtils {
       requestInfo.setContext("Installing components");
       requestInfo.setQueryString("HostRoles/state=INIT");
       return hostsRequest;
+   }
+
+   public static boolean isAmbariServerBelow_2_0_0(String ambariServerVersion) {
+      //When server version is invalid, using the 1.x.x api as default
+      if (ambariServerVersion == null || ambariServerVersion.split("\\.").length != 3) {
+         return true;
+      }
+      return Integer.parseInt(ambariServerVersion.split("\\.")[0]) < 2;
+   }
+
+   public static boolean containsRole(ClusterBlueprint blueprint, String role) {
+      for (NodeGroupInfo info : blueprint.getNodeGroups()) {
+         if (info.getRoles().contains(role)) {
+            return true;
+         }
+      }
+      return false;
    }
 }

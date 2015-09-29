@@ -26,15 +26,15 @@ import org.apache.log4j.Logger;
 import com.google.gson.Gson;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiComponentInfo;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiComponentDependency;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiComponentDependencyInfo;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiConfiguration;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiConfigurationInfo;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponent;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceList;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ComponentCategory;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ComponentName;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiComponentDependency;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiComponentDependencyInfo;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiConfiguration;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiConfigurationInfo;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackComponent;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackService;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackServiceList;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ComponentCategory;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ComponentName;
 import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
@@ -325,6 +325,7 @@ public class AmClusterValidator {
       }
    }
 
+   @SuppressWarnings("unchecked")
    private void validateConfigs(Map<String, Object> config,
          List<String> unRecogConfigTypes, List<String> unRecogConfigKeys,
          String stackVendor, String stackVersion) {
@@ -343,20 +344,36 @@ public class AmClusterValidator {
                   apiConfiguration.getApiConfigurationInfo();
             String configType = apiConfigurationInfo.getType();
             String propertyName = apiConfigurationInfo.getPropertyName();
-            List<String> propertyNames = new ArrayList<String>();
-            if (supportedConfigs.isEmpty()) {
-               propertyNames.add(propertyName);
+            List<String> propertyNames;
+
+            if (supportedConfigs.containsKey(configType)) {
+               propertyNames = (List<String>) supportedConfigs.get(configType);
             } else {
-               if (supportedConfigs.containsKey(configType)) {
-                  propertyNames =
-                        (List<String>) supportedConfigs.get(configType);
-                  propertyNames.add(propertyName);
-               } else {
-                  propertyNames.add(propertyName);
-               }
+               propertyNames = new ArrayList<String>();
             }
+            propertyNames.add(propertyName);
             supportedConfigs.put(configType, propertyNames);
          }
+      }
+      // FIXME
+      List<String> propertyNamesOfCoreSite = (List<String>) supportedConfigs.get("core-site.xml");
+      if (propertyNamesOfCoreSite != null) {
+         propertyNamesOfCoreSite.add("topology.script.file.name");
+         propertyNamesOfCoreSite.add("net.topology.script.file.name");
+         
+         // Configurations of HVE topology
+         propertyNamesOfCoreSite.add("net.topology.nodegroup.aware");
+         propertyNamesOfCoreSite.add("net.topology.impl");
+
+         supportedConfigs.put("core-site.xml", propertyNamesOfCoreSite);
+      }
+
+      // Configurations of HVE topology
+      List<String> propertyNamesOfHdfsSite = (List<String>) supportedConfigs.get("hdfs-site.xml");
+      if (propertyNamesOfHdfsSite != null) {
+         propertyNamesOfHdfsSite.add("dfs.block.replicator.classname");
+
+         supportedConfigs.put("hdfs-site.xml", propertyNamesOfHdfsSite);
       }
 
       Map<String, Object> notAvailableConfig = new HashMap<String, Object>();

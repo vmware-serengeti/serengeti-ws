@@ -469,7 +469,6 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
             + " does not exist. Update node status to NOT_EXIST.");
       node.setStatus(NodeStatus.NOT_EXIST);
       node.resetNicsInfo();
-      node.setHostName(null);
       node.setMoId(null);
       if (node.getAction() != null
             && !(node.getAction().equals(Constants.NODE_ACTION_CLONING_VM))
@@ -586,8 +585,13 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
 
       blueprint.setName(clusterEntity.getName());
       blueprint.setInstanceNum(clusterEntity.getRealInstanceNum(true));
-      // TODO: topology
+
+      // set rack topology
+      blueprint.setTopologyPolicy(clusterEntity.getTopologyPolicy());
+
+      // set cluster software configuration
       if (clusterEntity.getHadoopConfig() != null) {
+         @SuppressWarnings("unchecked")
          Map<String, Object> clusterConfigs =
                gson.fromJson(clusterEntity.getHadoopConfig(), Map.class);
          blueprint.setConfiguration(clusterConfigs);

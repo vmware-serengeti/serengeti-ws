@@ -249,6 +249,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
                for (String role : AvailableServiceRoleContainer.allRoles(parcelVersion.getMajorVersion())) {
                   roles.add(role);
                }
+               stack.setHveSupported(true);
                stack.setRoles(roles);
                hadoopStacks.add(stack);
             }
@@ -282,6 +283,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
       CmClusterDef clusterDef = null;
       try {
          clusterDef = new CmClusterDef(blueprint);
+         ReflectionUtils.getPreStartServicesHook().preStartServices(blueprint.getName());
+
          validateBlueprint(blueprint);
          provisionCluster(clusterDef, null, reportQueue);
          provisionParcels(clusterDef, null, reportQueue);
@@ -323,6 +326,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       CmClusterDef clusterDef = null;
       try {
          clusterDef = new CmClusterDef(blueprint);
+         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName());
          syncHostsId(clusterDef);
          configureServices(clusterDef, reportQueue, false);
          success = true;
@@ -352,6 +356,8 @@ public class ClouderaManagerImpl implements SoftwareManager {
       CmClusterDef clusterDef = null;
       try {
          clusterDef = new CmClusterDef(blueprint);
+         ReflectionUtils.getPreStartServicesHook().preStartServices(blueprint.getName());
+
          provisionCluster(clusterDef, addedNodeNames, reportQueue, true);
          provisionParcels(clusterDef, addedNodeNames, reportQueue);
          Map<String, List<ApiRole>> roles = configureNodeServices(
@@ -916,8 +922,12 @@ public class ClouderaManagerImpl implements SoftwareManager {
       }
    }
 
-   @Override
    public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reportQueue) throws SoftwareManagementPluginException {
+      return startCluster(clusterBlueprint, reportQueue, false);
+   }
+
+   @Override
+   public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reportQueue, boolean forceStart) throws SoftwareManagementPluginException {
       assert(clusterBlueprint != null && clusterBlueprint.getName() != null && !clusterBlueprint.getName().isEmpty());
       String clusterName = clusterBlueprint.getName();
       CmClusterDef clusterDef = null;
@@ -933,7 +943,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
             succeed = true;
             return true;
          }
-         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName(), 120);
+         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName());
          executeAndReport("Starting Services",
                            apiResourceRootV6.getClustersResource().startCommand(clusterName),
                            ProgressSplit.START_SERVICES.getProgress(),
@@ -1775,7 +1785,7 @@ public class ClouderaManagerImpl implements SoftwareManager {
       boolean executed = true;
       int endProgress = ProgressSplit.START_SERVICES.getProgress();
       try {
-         ReflectionUtils.getPreStartServicesHook().preStartServices(cluster.getName(), 120);
+         ReflectionUtils.getPreStartServicesHook().preStartServices(cluster.getName());
          if (!cluster.isEmpty()) {
             if (!isConfigured(cluster)) {
                configureServices(cluster, reportQueue, true);

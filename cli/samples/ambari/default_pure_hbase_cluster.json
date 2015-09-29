@@ -29,9 +29,6 @@
       },
       "haFlag":"on",
       "configuration": {
-        "global": {
-          // service level configurations
-        },
         "hdfs-site": {
           // service level configurations
         }
@@ -51,9 +48,6 @@
       },
       "haFlag":"off",
       "configuration": {
-        "global": {
-          // service level configurations
-        },
         "hdfs-site": {
           // service level configurations
         }
@@ -76,9 +70,6 @@
     }
   ],
   "configuration": {
-    "global": {
-      // service level configurations
-    },
     "core-site": {
       // service level configurations
     },

@@ -79,4 +79,16 @@ public class SoftwareManagementException extends BddException {
       return new SoftwareManagementException(null, "FAILED_TO_FORMAT_DISK",
             vmName, errorMsg);
    }
+
+   public static SoftwareManagementException GET_FQDN_REGISTER_STATUS_ERROR(String vmName) {
+      return new SoftwareManagementException(null, "GET_FQDN_REGISTER_STATUS_ERROR", vmName);
+   }
+
+   public static SoftwareManagementException FAILED_TO_REGISTER_FQDN(String vmName, String errorMsg) {
+      return new SoftwareManagementException(null, "FAILED_TO_REGISTER_FQDN", vmName, errorMsg);
+   }
+
+   public static SoftwareManagementException FAILED_TO_GET_FQDN(String vmName) {
+      return new SoftwareManagementException(null, "FAILED_TO_GET_FQDN", vmName);
+   }
 }

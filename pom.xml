@@ -601,7 +601,7 @@
                -->
                <execution>
                   <id>analyze-compile</id>
-                  <phase>compile</phase>
+                  <phase>install</phase>
                   <goals>
                      <goal>check</goal>
                   </goals>

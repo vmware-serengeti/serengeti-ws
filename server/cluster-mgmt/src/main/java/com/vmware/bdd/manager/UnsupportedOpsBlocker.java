@@ -65,7 +65,8 @@ public class UnsupportedOpsBlocker {
          throw BddException.APP_MGR_TYPE_IS_BLANK(appMgrEntity.getName());
       }
 
-      blockUnsupportedOpsByAppMgr(ops, appMgrEntity.getType());
+      // Remove constraint for cluster fix if using third party app manager
+      //blockUnsupportedOpsByAppMgr(ops, appMgrEntity.getType());
    }
 
    public void blockUnsupportedOpsByAppMgr(String ops, String appMgr) {

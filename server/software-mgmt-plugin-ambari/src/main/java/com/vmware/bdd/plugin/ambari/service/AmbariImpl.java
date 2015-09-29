@@ -24,8 +24,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gson.Gson;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 
+import com.vmware.bdd.plugin.ambari.api.manager.ApiManager_1_7_0;
+import com.vmware.bdd.plugin.ambari.api.manager.ApiManager_2_0_0;
+import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 import org.apache.log4j.Logger;
 
 import javax.ws.rs.NotFoundException;
@@ -54,15 +58,15 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiService;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiTask;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiTaskInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ClusterRequestStatus;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiConfiguration;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiConfigurationInfo;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStack;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackList;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackService;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackComponent;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackServiceList;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersion;
-import com.vmware.bdd.plugin.ambari.api.model.stack.ApiStackVersionInfo;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiConfiguration;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiConfigurationInfo;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStack;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackComponent;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackList;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackService;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackServiceList;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackVersion;
+import com.vmware.bdd.plugin.ambari.api.model.stack2.ApiStackVersionInfo;
 import com.vmware.bdd.plugin.ambari.api.utils.ApiUtils;
 import com.vmware.bdd.plugin.ambari.exception.AmException;
 import com.vmware.bdd.plugin.ambari.model.AmClusterDef;
@@ -124,7 +128,14 @@ public class AmbariImpl implements SoftwareManager {
    }
 
    public AmbariImpl(URL url, String username, String password, String privateKey) {
-      this.apiManager = new ApiManager(url, username, password);
+      ApiManager tmpApiManager = new ApiManager(url, username, password);
+      String ambariVersion = tmpApiManager.getVersion();
+      logger.info("Ambari version is " + ambariVersion);
+      if (AmUtils.isAmbariServerBelow_2_0_0(ambariVersion)) {
+         this.apiManager = new ApiManager_1_7_0(url, username, password);
+      } else {
+         this.apiManager = new ApiManager_2_0_0(url, username, password);
+      }
       this.privateKey = privateKey;
    }
 
@@ -169,7 +180,7 @@ public class AmbariImpl implements SoftwareManager {
       logger.info("Min supported version of " + getType() + " is: " + MIN_SUPPORTED_VERSION);
       logger.info("Version of new software manager is: " + version);
       //For ambari, we only support 1.6.0 and 1.6.1, its next version is 1.7.0, so only need to check major and minor version
-      if (version.equals(UNKNOWN_VERSION) || (versionInfo.getMajorVersion() != 1 || versionInfo.getMinorVersion() != 6)) {
+      if (version.equals(UNKNOWN_VERSION)) {
          logger.error("Validate server version failed.");
          throw SoftwareManagerCollectorException.INVALID_VERSION(Constants.AMBARI_PLUGIN_NAME, MIN_SUPPORTED_VERSION, version);
       }
@@ -225,6 +236,7 @@ public class AmbariImpl implements SoftwareManager {
                            .getComponentName());
                   }
                }
+               hadoopStack.setHveSupported(true);
                hadoopStack.setRoles(roles);
 
                hadoopStacks.add(hadoopStack);
@@ -268,8 +280,10 @@ public class AmbariImpl implements SoftwareManager {
          logger.info("Blueprint:");
          logger.info(ApiUtils.objectToJson(blueprint));
          logger.info("Start cluster " + blueprint.getName() + " creation.");
-         String ambariServerVersion = getVersion();
-         clusterDef = new AmClusterDef(blueprint, privateKey, ambariServerVersion);
+         clusterDef = new AmClusterDef(blueprint, privateKey, getVersion());
+
+         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName());
+
          provisionCluster(clusterDef, reportQueue);
          success = true;
 
@@ -351,7 +365,8 @@ public class AmbariImpl implements SoftwareManager {
    protected boolean isClusterProvisionedByBDE(final AmClusterDef clusterDef) {
       /*
       For cluster resume/resize, the cluster is already exist, we need to check if this cluster is created by BDE.
-      So far, just check if all hostnames exist in Ambari Cluster are included in given blueprint
+      So far, just check if all hostnames exist in Ambari Cluster are included in given blueprint. To avoid potential
+      user limitation, will not throw out any exception, just give out an warning
        */
       String clusterName = clusterDef.getName();
       Set<String> hostnames = new HashSet<String>();
@@ -360,7 +375,7 @@ public class AmbariImpl implements SoftwareManager {
       }
       for (ApiHost apiHost : apiManager.getCluster(clusterName).getApiHosts()) {
          if (!hostnames.contains(apiHost.getApiHostInfo().getHostName())) {
-            throw SoftwareManagementPluginException.CLUSTER_ALREADY_EXIST(clusterName);
+            logger.warn("Host " + apiHost.getApiHostInfo().getHostName() + " managed by Ambari doesn't exists in BDE");
          }
       }
       return true;
@@ -561,8 +576,6 @@ public class AmbariImpl implements SoftwareManager {
 
          String clusterName = clusterDef.getName();
 
-         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterName, 120);
-
          // For cluster resume/resize, the blueprint is already exist, we need to delete this cluster first.
          if (isProvisioned(clusterName) && isClusterProvisionedByBDE(clusterDef)) {
             try {
@@ -652,6 +665,7 @@ public class AmbariImpl implements SoftwareManager {
    @Override
    public boolean reconfigCluster(ClusterBlueprint blueprint,
          ClusterReportQueue reports) throws SoftwareManagementPluginException {
+      ReflectionUtils.getPreStartServicesHook().preStartServices(blueprint.getName());
       // TODO Auto-generated method stub
       return true;
    }
@@ -667,7 +681,10 @@ public class AmbariImpl implements SoftwareManager {
          logger.info("Blueprint:");
          logger.info(ApiUtils.objectToJson(blueprint));
          logger.info("Start cluster " + blueprint.getName() + " scale out.");
-         clusterDef = new AmClusterDef(blueprint, privateKey);
+         clusterDef = new AmClusterDef(blueprint, privateKey, getVersion());
+
+         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName());
+
          bootstrap(clusterDef, addedNodeNames, reports);
          provisionComponents(clusterDef, addedNodeNames, reports);
          success = true;
@@ -980,11 +997,18 @@ public class AmbariImpl implements SoftwareManager {
       return serviceNames;
    }
 
-   @Override
-   public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports)
+   public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reportQueue)
          throws SoftwareManagementPluginException {
-      AmClusterDef clusterDef = new AmClusterDef(clusterBlueprint, null);
+      return startCluster(clusterBlueprint, reportQueue, false);
+   }
+
+   @Override
+   public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports, boolean forceStart)
+         throws SoftwareManagementPluginException {
+      AmClusterDef clusterDef = new AmClusterDef(clusterBlueprint, privateKey, getVersion());
+
       String clusterName = clusterDef.getName();
+      ClusterReport clusterReport = clusterDef.getCurrentReport();
       if (!isProvisioned(clusterName)) {
          throw AmException.CLUSTER_NOT_PROVISIONED(clusterName);
       }
@@ -992,20 +1016,20 @@ public class AmbariImpl implements SoftwareManager {
          throw SoftwareManagementPluginException.START_CLUSTER_FAILED_NOT_PROV_BY_BDE(clusterName);
       }
 
-      ClusterReport clusterReport = clusterDef.getCurrentReport();
       clusterReport.setAction("Ambari is starting services");
       clusterReport.setProgress(ProgressSplit.OPERATION_BEGIN.getProgress());
       reportStatus(clusterReport, reports);
+
       boolean success = false;
-      //when start services, some tasks will fail with error msg "Host Role in invalid state".
+      //In ambari1.6.0, when start services, some tasks will fail with error msg "Host Role in invalid state".
       // The failed task are random(I had saw NodeManager, ResourceManager, NAGOIS failed), and the
       // root cause is not clear by now. Each time, when I retry, it succeed. So just add retry logic to make a
       // a temp fix for it.
       //TODO(qjin): find out the root cause of failure in startting services
       Exception resultException = null;
       try {
-         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterName, 120);
-         for (int i = 0; i < getRequestMaxRetryTimes(); i++) {
+         ReflectionUtils.getPreStartServicesHook().preStartServices(clusterName, forceStart);
+            for (int i = 0; i < getRequestMaxRetryTimes() && !success; i++) {
             ApiRequest apiRequestSummary;
             try {
                apiRequestSummary = apiManager.startAllServicesInCluster(clusterName);
@@ -1050,7 +1074,8 @@ public class AmbariImpl implements SoftwareManager {
    public boolean onStopCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports)
          throws SoftwareManagementPluginException {
       String clusterName = clusterBlueprint.getName();
-      AmClusterDef clusterDef = new AmClusterDef(clusterBlueprint, null);
+      AmClusterDef clusterDef = new AmClusterDef(clusterBlueprint, privateKey, getVersion());
+
       ClusterReport clusterReport = clusterDef.getCurrentReport();
       boolean success = false;
       try {
@@ -1149,7 +1174,8 @@ public class AmbariImpl implements SoftwareManager {
          if (!isProvisioned(clusterName)) {
             return true;
          }
-         AmClusterDef clusterDef = new AmClusterDef(clusterBlueprint, null);
+         AmClusterDef clusterDef = new AmClusterDef(clusterBlueprint, privateKey, getVersion());
+
          if (!isClusterProvisionedByBDE(clusterDef)) {
             return true;
          }
@@ -1198,7 +1224,8 @@ public class AmbariImpl implements SoftwareManager {
       AmClusterDef clusterDef = null;
       try {
          logger.info("Delete nodes " + nodeNames + " from cluster " + blueprint.getName());
-         clusterDef = new AmClusterDef(blueprint, privateKey);
+         clusterDef = new AmClusterDef(blueprint, privateKey, getVersion());
+
          List<String> targetHostNames = new ArrayList<>();
          for (AmNodeDef nodeDef : clusterDef.getNodes()) {
             if (nodeNames.contains(nodeDef.getName())) {
@@ -1241,7 +1268,8 @@ public class AmbariImpl implements SoftwareManager {
 
    @Override
    public ClusterReport queryClusterStatus(ClusterBlueprint blueprint) {
-      AmClusterDef clusterDef = new AmClusterDef(blueprint, privateKey);
+      AmClusterDef clusterDef = new AmClusterDef(blueprint, privateKey, getVersion());
+
       try {
          ServiceStatus status =
                apiManager.getClusterStatus(blueprint.getName(),

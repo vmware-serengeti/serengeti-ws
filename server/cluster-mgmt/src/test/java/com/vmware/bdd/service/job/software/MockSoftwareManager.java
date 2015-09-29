@@ -136,7 +136,7 @@ public class MockSoftwareManager implements SoftwareManager {
    }
 
    @Override
-   public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports)
+   public boolean startCluster(ClusterBlueprint clusterBlueprint, ClusterReportQueue reports, boolean forceStart)
          throws SoftwareManagementPluginException {
       // TODO Auto-generated method stub
       return false;

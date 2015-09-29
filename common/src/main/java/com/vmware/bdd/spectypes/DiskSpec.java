@@ -51,6 +51,8 @@ public class DiskSpec implements Comparable<DiskSpec> {
    
    private String vmdkPath;
 
+   private long id;
+
    public DiskSpec() {
       super();
    }
@@ -164,6 +166,14 @@ public class DiskSpec implements Comparable<DiskSpec> {
       return DiskType.SYSTEM_DISK.equals(this.diskType);
    }
 
+   public boolean isDataDisk() {
+      return DiskType.DATA_DISK.equals(this.diskType);
+   }
+
+   public boolean isSwapDisk() {
+      return DiskType.SWAP_DISK.equals(this.diskType);
+   }
+
    public String getExternalAddress() {
       return externalAddress;
    }
@@ -251,5 +261,13 @@ public class DiskSpec implements Comparable<DiskSpec> {
       } else if (!name.equals(other.name))
          return false;
       return true;
+   }
+
+   public long getId() {
+      return id;
+   }
+
+   public void setId(long id1) {
+      id = id1;
    }
 }

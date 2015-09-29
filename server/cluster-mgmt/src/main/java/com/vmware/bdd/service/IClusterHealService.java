@@ -17,6 +17,7 @@ package com.vmware.bdd.service;
 import java.util.List;
 
 import com.vmware.aurora.vc.VcVirtualMachine;
+import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.spectypes.DiskSpec;
 
 /**
@@ -40,6 +41,86 @@ public interface IClusterHealService {
     * @return
     */
    public List<DiskSpec> getBadDisks(String nodeName);
+
+   /**
+    * does this node have bad disks except system disk that locate on unaccessible datastores
+    *
+    * @param nodeName
+    * @return
+    */
+   public boolean hasBadDisksExceptSystem(String nodeName);
+
+   /**
+    * does this node have bad data disks that locate on unaccessible datastores
+    *
+    * @param nodeName
+    * @return
+    */
+   public boolean hasBadDataDisks(String nodeName);
+
+   /**
+    * return bad data disk entities that locate on unaccessible datastores
+    *
+    * @param nodeName
+    * @return
+    */
+   public List<DiskEntity> getBadDataDiskEntities(String nodeName);
+
+   /**
+    * return bad data disks that locate on unaccessible datastores
+    *
+    * @param nodeName
+    * @return
+    */
+   public List<DiskSpec> getBadDataDisks(String nodeName);
+
+   /**
+    * does this node have bad system disks that locate on unaccessible datastores
+    *
+    * @param nodeName
+    * @return
+    */
+   public boolean hasBadSystemDisks(String nodeName);
+
+   /**
+    * return bad system disk entities that locate on unaccessible datastores
+    *
+    * @param nodeName
+    * @return
+    */
+   public List<DiskEntity> getBadSystemDiskEntities(String nodeName);
+
+   /**
+    * return bad system disks that locate on unaccessible datastores
+    *
+    * @param nodeName
+    * @return
+    */
+   public List<DiskSpec> getBadSystemDisks(String nodeName);
+
+   /**
+    * does this node have bad swap disk that locate on unaccessible datastores
+    *
+    * @param nodeName
+    * @return
+    */
+   public boolean hasBadSwapDisks(String nodeName);
+
+   /**
+    * return bad swap disk entity that locate on unaccessible datastores
+    *
+    * @param nodeName
+    * @return
+    */
+   public List<DiskEntity> getBadSwapDiskEntities(String nodeName);
+
+   /**
+    * return bad swap disk that locate on unaccessible datastores
+    *
+    * @param nodeName
+    * @return
+    */
+   public List<DiskSpec> getBadSwapDisks(String nodeName);
 
    /**
     * for the specified bad disks, find their replacements in healthy datastores
@@ -122,6 +203,20 @@ public interface IClusterHealService {
     * @param nodeName
     * @return
     */
-   public VcVirtualMachine checkNodeStatus(String clusterName, String groupName,
+   public VcVirtualMachine getFixingVm(String clusterName, String groupName,
          String nodeName);
+
+
+   /**
+    *
+    * Replace bad Disks except system for VM
+    *
+    * @param clusterSpec
+    * @param groupName
+    * @param node
+    * @param replacementDisks
+    *           disks to be created as their original one is not accessible
+    * @return
+    */
+   public VcVirtualMachine replaceBadDisksExceptSystem(String clusterName, String groupName, String nodeName, List<DiskSpec> replacementDisks);
 }

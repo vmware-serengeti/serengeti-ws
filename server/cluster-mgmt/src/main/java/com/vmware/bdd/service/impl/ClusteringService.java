@@ -1161,7 +1161,7 @@ public class ClusteringService implements IClusteringService {
          GuestMachineIdSpec machineIdSpec =
                new GuestMachineIdSpec(networkAdds,
                      vNode.fetchPortGroupToIpV4Map(),
-                     vNode.getPrimaryMgtPgName());
+                     vNode.getPrimaryMgtPgName(), vNode, networkMgr);
          logger.info("machine id of vm " + vNode.getVmName() + ":\n"
                + machineIdSpec.toString());
          spec.setBootupConfigs(machineIdSpec.toGuestVariable());
@@ -1974,8 +1974,10 @@ public class ClusteringService implements IClusteringService {
       NodeEntity node = this.clusterEntityMgr.findNodeByName(nodeName);
       boolean reserveRawDisks = clusterEntityMgr.findByName(clusterName).getDistroVendor().equalsIgnoreCase(Constants.MAPR_VENDOR);
       // For node scale up/down, the disk info in db is not yet updated when powering on it, need to fetch from VC
+      List<DiskSpec> diskSpecList = VcVmUtil.toDiskSpecList(node.getDisks());
+
       StartVmSP.StartVmPrePowerOn prePowerOn = new StartVmSP.StartVmPrePowerOn(reserveRawDisks,
-            VcVmUtil.getVolumes(node.getMoId(), node.getDisks()));
+            VcVmUtil.getVolumesFromSpecs(node.getMoId(), diskSpecList));
       StartVmPostPowerOn query =
             new StartVmPostPowerOn(node.fetchAllPortGroups(),
                   Constants.VM_POWER_ON_WAITING_SEC, clusterEntityMgr);

@@ -41,6 +41,8 @@ import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.service.IExecutionService;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.spectypes.NicSpec;
+import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.scope.context.ChunkContext;
 
 public class JobUtils {
    private static final Logger logger = Logger.getLogger(JobUtils.class);
@@ -360,4 +362,20 @@ public class JobUtils {
       List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(clusterName);
       return verifyNodesStatus(nodes, NodeStatus.VM_READY, false);
    }
+
+   public static String getJobParameter(ChunkContext context, String parameterKey) {
+      return context.getStepContext().getStepExecution().getJobParameters().getString(parameterKey);
+   }
+
+   public static boolean getJobParameterForceClusterOperation(ChunkContext chunkContext) {
+      String forceStartString = JobUtils.getJobParameter(chunkContext, JobConstants.FORCE_CLUSTER_OPERATION_JOB_PARAM);
+      return CommonUtil.getBooleanFromString(forceStartString, false);
+   }
+
+   public static void forceClusterOperationRecordError(boolean force, Logger logger) {
+      if(force) {
+         logger.warn(Constants.FORCE_CLUSTER_OPERATION_IGNORE_EXCEPTION);
+      }
+   }
+
 }

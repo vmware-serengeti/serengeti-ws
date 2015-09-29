@@ -19,7 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import com.vmware.bdd.software.mgmt.exception.SoftwareManagementException;
+import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.intf.PreStartServices;
+import com.vmware.bdd.utils.JobUtils;
+
 import org.apache.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -29,10 +33,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vmware.aurora.composition.concurrent.ExecutionResult;
 import com.vmware.aurora.composition.concurrent.Priority;
 import com.vmware.aurora.composition.concurrent.Scheduler;
+import com.vmware.aurora.vc.VcCache;
+import com.vmware.aurora.vc.VcVirtualMachine;
+import com.vmware.aurora.vc.vcservice.VcContext;
+import com.vmware.aurora.vc.vcservice.VcSession;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.BddException;
@@ -40,6 +49,7 @@ import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.sp.NoProgressUpdateCallback;
 import com.vmware.bdd.software.mgmt.plugin.aop.PreConfiguration;
 import com.vmware.bdd.software.mgmt.plugin.exception.InfrastructureException;
+import com.vmware.bdd.utils.VcVmUtil;
 
 @Aspect
 public class DefaultPreStartServicesAdvice implements PreStartServices {
@@ -61,18 +71,13 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
       Method method = signature.getMethod();
       PreConfiguration beforeConfig = AnnotationUtils.findAnnotation(method, PreConfiguration.class);
       String nameParam = beforeConfig.clusterNameParam();
-      String waitingTimeParam = beforeConfig.maxWaitingTimeParam();
 
       String[] paramNames = signature.getParameterNames();
       Object[] args = pjp.getArgs();
       String clusterName = null;
-      int maxWaitingSeconds = 120;
       for (int i = 0; i < paramNames.length; i++) {
          if (paramNames[i].equals(nameParam)) {
             clusterName = (String)args[i];
-         }
-         if (paramNames[i].equals(waitingTimeParam)) {
-            maxWaitingSeconds = (Integer)args[i];
          }
       }
       if (clusterName == null) {
@@ -83,12 +88,17 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
       if (cluster == null) {
          throw BddException.NOT_FOUND("Cluster", clusterName);
       }
-      preStartServices(clusterName, maxWaitingSeconds);
+      preStartServices(clusterName);
       return pjp.proceed();
    }
 
    @Override
-   public void preStartServices(String clusterName, int maxWaitingSeconds) throws InfrastructureException {
+   public void preStartServices(String clusterName) throws SoftwareManagementPluginException {
+      preStartServices(clusterName, false);
+   }
+
+   @Override
+   public void preStartServices(String clusterName, boolean forceStart) throws SoftwareManagementPluginException {
       logger.info("Pre configuration for cluster " + clusterName);
       synchronized(this) {
          if (clusterEntityMgr == null) {
@@ -96,23 +106,30 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
             clusterEntityMgr = (IClusterEntityManager) context.getBean("clusterEntityManager");
          }
       }
+
+      waitVmBootup(clusterName, forceStart);
+
+      updateNodes(clusterName, forceStart);
+   }
+
+   private void waitVmBootup(String clusterName, boolean forceStart) {
       List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(clusterName);
       Callable<Void>[] callables = new Callable[nodes.size()];
       int i = 0;
       for (NodeEntity node : nodes) {
          WaitVMStatusTask task =
-               new WaitVMStatusTask(node.getMoId(), maxWaitingSeconds);
+               new WaitVMStatusTask(node.getMoId());
          callables[i] = task;
          i++;
       }
       try {
          NoProgressUpdateCallback callback = new NoProgressUpdateCallback();
          ExecutionResult[] result =
-            Scheduler.executeStoredProcedures(Priority.INTERACTIVE, callables,
-                  callback);
-         if (result == null) {
-            logger.error("No disk format waiting task is executed.");
-            throw BddException.INTERNAL(null, "No disk format waiting task is executed.");
+               Scheduler.executeStoredProcedures(Priority.INTERACTIVE, callables,
+                     callback);
+         if (result.length == 0) {
+            logger.error("Waiting for nodes bootup task is not executed.");
+            throw BddException.INTERNAL(null, "Waiting for nodes bootup task is not executed.");
          }
          List<String> errorMsgList = new ArrayList<String>();
          for (i = 0; i < callables.length; i++) {
@@ -121,11 +138,54 @@ public class DefaultPreStartServicesAdvice implements PreStartServices {
             }
          }
          if (!errorMsgList.isEmpty()) {
-            throw InfrastructureException.FORMAT_DISK_FAIL(clusterName, errorMsgList);
+            logger.error(errorMsgList);
+            JobUtils.forceClusterOperationRecordError(forceStart, logger);
+            if (!forceStart) {
+               throw InfrastructureException.WAIT_VM_STATUS_FAIL(clusterName, errorMsgList);
+            }
          }
       }  catch (InterruptedException e) {
-         logger.error("error in waiting disk format", e);
-         throw BddException.INTERNAL(e, e.getMessage());
+         String errorMessage = "error when waiting for nodes bootup";
+         logger.error(errorMessage, e);
+         JobUtils.forceClusterOperationRecordError(forceStart, logger);
+         if (!forceStart) {
+            throw BddException.INTERNAL(e, e.getMessage());
+         }
       }
+   }
+
+   @Transactional
+   private Void updateNodes(final String clusterName, final boolean forceStart) {
+
+      return VcContext.inVcSessionDo(new VcSession<Void>() {
+         @Override
+         protected Void body() throws Exception {
+
+            List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(clusterName);
+            for (NodeEntity node : nodes) {
+               if (node.getMoId() == null || node.getMoId().isEmpty()) {
+                  continue;
+               }
+               node = clusterEntityMgr.getNodeWithNicsByMobId(node.getMoId());
+               VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getMoId());
+               String hostname = VcVmUtil.getMgtHostName(vm, node.getPrimaryMgtIpV4());
+               if (hostname == null || hostname.isEmpty()) {
+                  logger.error("Failed to get FQDN from vm " + vm.getName());
+                  JobUtils.forceClusterOperationRecordError(forceStart, logger);
+                  if (!forceStart) {
+                     throw SoftwareManagementException.FAILED_TO_GET_FQDN(vm.getName());
+                  }
+               }
+               if (!hostname.equals(node.getGuestHostName())) {
+                  node.setGuestHostName(hostname);
+                  clusterEntityMgr.update(node);
+                  logger.info("Update management NIC FQDN of node " + node.getVmName() + " to " + node.getGuestHostName());
+               }
+            }
+
+            return null;
+         }
+      });
+
    }
 }

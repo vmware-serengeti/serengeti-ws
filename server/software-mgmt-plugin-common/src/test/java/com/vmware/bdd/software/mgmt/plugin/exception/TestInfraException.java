@@ -39,7 +39,7 @@ public class TestInfraException {
    @Test
    public void testLoadMsg() {
       ArrayList<InfrastructureException> exs = new ArrayList<InfrastructureException>();
-      exs.add(InfrastructureException.FORMAT_DISK_FAIL("cluster", failedMsgList));
+      exs.add(InfrastructureException.WAIT_VM_STATUS_FAIL("cluster", failedMsgList));
 
       for(InfrastructureException ex : exs) {
          assertException(ex);

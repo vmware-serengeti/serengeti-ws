@@ -14,17 +14,12 @@
  ***************************************************************************/
 package com.vmware.bdd.utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 import com.google.gson.Gson;
 import com.vmware.bdd.apitypes.StorageRead;
+
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.composition.DiskSchema;
@@ -52,6 +47,8 @@ import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeStatus;
 import com.vmware.bdd.apitypes.Priority;
+import com.vmware.bdd.apitypes.VcVmNetworkInfo;
+import com.vmware.bdd.apitypes.VcVmNicInfo;
 import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NicEntity;
 import com.vmware.bdd.entity.NodeEntity;
@@ -497,6 +494,9 @@ public class VcVmUtil {
 
    public static boolean isDatastoreAccessible(String dsMobId) {
       final VcDatastore ds = VcCache.getIgnoreMissing(dsMobId);
+      if (ds == null) {
+         return false;
+      }
       try {
          VcContext.inVcSessionDo(new VcSession<Void>() {
             @Override
@@ -683,6 +683,8 @@ public class VcVmUtil {
       schema.resourceSchema = resourceSchema;
 
       // prepare disk schema
+      VcVmUtil.sortDiskOrder(diskSet);
+
       DiskSchema diskSchema = new DiskSchema();
       ArrayList<Disk> disks = new ArrayList<Disk>(diskSet.size());
       for (DiskSpec disk : diskSet) {
@@ -749,9 +751,31 @@ public class VcVmUtil {
       return (new Gson()).toJson(volumes);
    }
 
-   public static String getVolumes(String moid, Set<DiskEntity> diskEntities) {
+   public static List<DiskSpec> toDiskSpecList(Collection<DiskEntity> diskEntityCollection) {
+      ArrayList<DiskSpec> diskSpecArrayList = new ArrayList<>();
+
+      for(DiskEntity entity : diskEntityCollection) {
+         diskSpecArrayList.add(entity.toDiskSpec());
+      }
+
+      return diskSpecArrayList;
+   }
+
+   public static void sortDiskOrder(List<DiskSpec> diskSpecs) {
+      //ensure the order by entity Id
+      Collections.sort(diskSpecs, new Comparator<DiskSpec>() {
+         @Override
+         public int compare(DiskSpec o1, DiskSpec o2) {
+            return Long.compare(o1.getId(), o2.getId());
+         }
+      });
+   }
+
+   public static String getVolumesFromSpecs(String moid, List<DiskSpec> diskEntities) {
+      VcVmUtil.sortDiskOrder(diskEntities);
+
       final List<String> volumes = new ArrayList<String>();
-      for (DiskEntity diskEntity : diskEntities) {
+      for (DiskSpec diskEntity : diskEntities) {
          if (StorageRead.DiskType.DATA_DISK.getType().equals(diskEntity.getDiskType())
                || StorageRead.DiskType.SWAP_DISK.getType().equals(diskEntity.getDiskType()))
             volumes.add(diskEntity.getDiskType() + ":" + VcVmUtil.fetchDiskUUID(moid, diskEntity.getExternalAddress()));
@@ -1042,4 +1066,38 @@ public class VcVmUtil {
          }
       });
    }
+
+   public static String getHostNameFromIpV4(VcVirtualMachine vcVm, String ipV4) {
+
+      VcVmNetworkInfo vcVmNetworkInfo = null;
+
+      if (vcVm == null) {
+         return null;
+      }
+
+      String guestNetworkInfo = vcVm.getGuestVariables().get("guestinfo.network_info");
+      if (guestNetworkInfo != null && !guestNetworkInfo.isEmpty()) {
+         Gson gson = new Gson();
+         vcVmNetworkInfo = gson.fromJson(guestNetworkInfo, VcVmNetworkInfo.class);
+      }
+
+      if (vcVmNetworkInfo == null || ipV4 == null || Constants.NULL_IPV4_ADDRESS.equals(ipV4)) {
+         return null;
+      }
+
+      String hostName = null;
+      for (VcVmNicInfo vcVmNicInfo : vcVmNetworkInfo.getNics()) {
+         if (ipV4.equals(vcVmNicInfo.getIpAddress())) {
+            hostName = vcVmNicInfo.getFqdn();
+            break;
+         }
+      }
+
+      return hostName;
+   }
+
+   public static String getMgtHostName(VcVirtualMachine vcVm, String primaryMgtIpV4) {
+      return getHostNameFromIpV4(vcVm, primaryMgtIpV4);
+   }
+
 }
