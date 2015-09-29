@@ -526,8 +526,8 @@ public class ApiManager implements IApiManager {
 
    @Override
    public ApiBootstrap createBootstrap(ApiBootstrap bootstrap) throws AmbariApiException {
-      logger.info("ApiBootstrap:");
-      logger.info(ApiUtils.objectToJson(bootstrap));
+      logger.info("Bootstrap hosts:");
+      logger.info(ApiUtils.objectToJson(bootstrap.getHosts()));
       Response response = null;
       try {
          response = apiResourceRootV1.getBootstrapResource().createBootstrap(
