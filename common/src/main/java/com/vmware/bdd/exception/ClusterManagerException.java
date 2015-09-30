@@ -134,4 +134,12 @@ public class ClusterManagerException extends BddException {
         return new ClusterManagerException(null, "ADD_NODE_GROUP_FAILED", clusterName);
     }
 
+    public static ClusterManagerException NO_NODE_GROUP_DEFINDED_IN_SPECFILE(String clusterName) {
+        return new ClusterManagerException(null, "NO_NODE_GROUP_DEFINDED_IN_SPECFILE", clusterName);
+    }
+
+    public static ClusterManagerException CLUSTER_STATUS_NOT_READY_FOR_EXPAND(String clusterName) {
+        return new ClusterManagerException(null, "CLUSTER_STATUS_NOT_READY_FOR_EXPAND", clusterName);
+    }
+
 }

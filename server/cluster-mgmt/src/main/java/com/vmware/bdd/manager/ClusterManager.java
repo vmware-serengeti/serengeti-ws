@@ -1762,65 +1762,81 @@ public class ClusterManager {
             break;
       }
 
-      clusterSpec.setNodeGroups(nodeGroupsAdd);
 
-      for (NodeGroupCreate ng : nodeGroupsAdd) {
-         BaseNode node = new BaseNode();
-         if ( 0 == ng.getInstanceNum()) {
-            throw ClusterManagerException.NODE_GROUP_CANNOT_BE_ZERO(ng.getName());
-         }
-         node.setCluster(clusterSpec);
-         node.setTargetVcCluster(clusterSpec.getVcClusters().get(0).getName());
-         node.setNodeGroup(ng);
-         node.setTargetRp(rpNames);
-         vNodes.add(node);
+      if (!ClusterStatus.RUNNING.equals(clusterEntity.getStatus()) && !ClusterStatus.PROVISION_ERROR.equals(clusterEntity.getStatus())) {
+         readyExpand = false;
+         logger.error("Cluster status should not be " + clusterEntity.getStatus() +
+                 " for cluster, status should be RUNNING or PROVISION_ERROR when expand");
+         throw ClusterManagerException.CLUSTER_STATUS_NOT_READY_FOR_EXPAND(clusterName);
       }
 
-      for (NodeGroupCreate ng : nodeGroupsAdd) {
-         NodeGroupEntity group =
-                 clusterEntityMgr.findByName(clusterName, ng.getName());
+      if (null == nodeGroupsAdd && !ClusterStatus.PROVISION_ERROR.equals(clusterEntity.getStatus())) {
+         readyExpand = false;
+         logger.error("Node group should be defined in spec file, when expand "
+                 + clusterName);
+         throw ClusterManagerException.NO_NODE_GROUP_DEFINDED_IN_SPECFILE(clusterName);
+      }
 
-         if (group == null) {
-            NodeGroupEntity addNodeGroupEntity = new NodeGroupEntity();
-            addNodeGroupEntity.setName(ng.getName());
-            addNodeGroupEntity.setRoles((new Gson()).toJson(ng.getRoles()));
-            addNodeGroupEntity.setNodeType(ng.getInstanceType());
-            addNodeGroupEntity.setDefineInstanceNum(ng.getInstanceNum());
-            addNodeGroupEntity.setCpuNum(ng.getCpuNum());
-            addNodeGroupEntity.setMemorySize(ng.getMemCapacityMB());
-            addNodeGroupEntity.setHaFlag(ng.getHaFlag());
-            if (null != ng.getStorage()) {
-               if (ng.getStorage().getType().equals(Datastore.DatastoreType.SHARED.toString())) {
-                  addNodeGroupEntity.setStorageType(Datastore.DatastoreType.SHARED);
-               } else if (ng.getStorage().getType().equals(Datastore.DatastoreType.LOCAL.toString())) {
-                  addNodeGroupEntity.setStorageType(Datastore.DatastoreType.LOCAL);
-               }
-               addNodeGroupEntity.setStorageSize(ng.getStorage().getSizeGB());
-               addNodeGroupEntity.setVcDatastoreNameList(ng.getStorage().getDsNames());
-               addNodeGroupEntity.setDdDatastoreNameList(ng.getStorage().getDsNames4Data());
-               addNodeGroupEntity.setSdDatastoreNameList(ng.getStorage().getDsNames4System());
+      if (null != nodeGroupsAdd) {
+         clusterSpec.setNodeGroups(nodeGroupsAdd);
+
+         for (NodeGroupCreate ng : nodeGroupsAdd) {
+            BaseNode node = new BaseNode();
+            if ( 0 == ng.getInstanceNum()) {
+               throw ClusterManagerException.NODE_GROUP_CANNOT_BE_ZERO(ng.getName());
             }
-            addNodeGroupEntity.setGroupRacks(ng.getReferredGroup());
-            addNodeGroupEntity.setHadoopConfig((new Gson()).toJson(ng
-                    .getConfiguration()));
-            addNodeGroupEntity.setCluster(clusterEntity);
-            addNodeGroupEntity.setVmFolderPath(clusterEntity);
+            node.setCluster(clusterSpec);
+            node.setTargetVcCluster(clusterSpec.getVcClusters().get(0).getName());
+            node.setNodeGroup(ng);
+            node.setTargetRp(rpNames);
+            vNodes.add(node);
+         }
 
-            ng.setVmFolderPath(clusterEntity.getRootFolder() + "/" + ng.getName());
-            clusterEntityMgr.insert(addNodeGroupEntity);
+         for (NodeGroupCreate ng : nodeGroupsAdd) {
+            NodeGroupEntity group =
+                    clusterEntityMgr.findByName(clusterName, ng.getName());
 
-            readyExpand = true;
+            if (group == null) {
+               NodeGroupEntity addNodeGroupEntity = new NodeGroupEntity();
+               addNodeGroupEntity.setName(ng.getName());
+               addNodeGroupEntity.setRoles((new Gson()).toJson(ng.getRoles()));
+               addNodeGroupEntity.setNodeType(ng.getInstanceType());
+               addNodeGroupEntity.setDefineInstanceNum(ng.getInstanceNum());
+               addNodeGroupEntity.setCpuNum(ng.getCpuNum());
+               addNodeGroupEntity.setMemorySize(ng.getMemCapacityMB());
+               addNodeGroupEntity.setHaFlag(ng.getHaFlag());
+               if (null != ng.getStorage()) {
+                  if (ng.getStorage().getType().equals(Datastore.DatastoreType.SHARED.toString())) {
+                     addNodeGroupEntity.setStorageType(Datastore.DatastoreType.SHARED);
+                  } else if (ng.getStorage().getType().equals(Datastore.DatastoreType.LOCAL.toString())) {
+                     addNodeGroupEntity.setStorageType(Datastore.DatastoreType.LOCAL);
+                  }
+                  addNodeGroupEntity.setStorageSize(ng.getStorage().getSizeGB());
+                  addNodeGroupEntity.setVcDatastoreNameList(ng.getStorage().getDsNames());
+                  addNodeGroupEntity.setDdDatastoreNameList(ng.getStorage().getDsNames4Data());
+                  addNodeGroupEntity.setSdDatastoreNameList(ng.getStorage().getDsNames4System());
+               }
+               addNodeGroupEntity.setGroupRacks(ng.getReferredGroup());
+               addNodeGroupEntity.setHadoopConfig((new Gson()).toJson(ng
+                       .getConfiguration()));
+               addNodeGroupEntity.setCluster(clusterEntity);
+               addNodeGroupEntity.setVmFolderPath(clusterEntity);
 
-         } else if (group != null && !ClusterStatus.PROVISION_ERROR.equals(clusterEntity.getStatus())){
-            readyExpand = false;
-            logger.error("Node group" + ng.getName() + " of cluster "
-                    + clusterName + " has existed, failed to insert node group");
-            throw ClusterManagerException.NODE_GROUP_HAS_EXISTED(clusterName, ng.getName());
-         } else if (group != null && ClusterStatus.PROVISION_ERROR.equals(clusterEntity.getStatus())) {
-            readyExpand = true;
+               ng.setVmFolderPath(clusterEntity.getRootFolder() + "/" + ng.getName());
+               clusterEntityMgr.insert(addNodeGroupEntity);
+
+               readyExpand = true;
+
+            } else if (group != null && !ClusterStatus.PROVISION_ERROR.equals(clusterEntity.getStatus())){
+               readyExpand = false;
+               logger.error("Node group" + ng.getName() + " of cluster "
+                       + clusterName + " has existed, failed to insert node group");
+               throw ClusterManagerException.NODE_GROUP_HAS_EXISTED(clusterName, ng.getName());
+            } else if (group != null && ClusterStatus.PROVISION_ERROR.equals(clusterEntity.getStatus())) {
+               readyExpand = true;
+            }
          }
       }
-
 
       if(readyExpand) {
          clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.EXPANDING);

@@ -591,7 +591,7 @@ public class RestResource {
     */
    @RequestMapping(value = "/cluster/{clusterName}/nodegroups", method = RequestMethod.POST, consumes = "application/json")
    @ResponseStatus(HttpStatus.ACCEPTED)
-   public void addCluster(@RequestBody NodeGroupAdd nodeGroupAddSpec,
+   public void expandCluster(@RequestBody NodeGroupAdd nodeGroupAddSpec,
                           @PathVariable("clusterName") String clusterName,
                              HttpServletRequest request, HttpServletResponse response)
            throws Exception {

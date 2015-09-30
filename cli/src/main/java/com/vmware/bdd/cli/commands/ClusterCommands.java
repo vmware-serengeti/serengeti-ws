@@ -1884,7 +1884,7 @@ public class ClusterCommands implements CommandMarker {
    @CliCommand(value = "cluster expand", help = "Expand element for existed cluster")
    public void expandCluster(
         @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String name,
-        @CliOption(key = { "specFile" }, mandatory = false, help = "The spec file name path") final String specFilePath
+        @CliOption(key = { "specFile" }, mandatory = true, help = "The spec file name path") final String specFilePath
     ) {
       try {
           if (specFilePath == null) {
