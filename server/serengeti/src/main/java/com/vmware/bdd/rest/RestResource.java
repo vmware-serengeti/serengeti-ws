@@ -606,7 +606,7 @@ public class RestResource {
       if (!CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
       }
-      logger.info("call rest for add node groups into a cluster");
+      logger.info("call rest for expand node groups into a cluster");
       Long taskId =
               clusterMgr.expandCluster(clusterName, nodeGroupsAdd);
       redirectRequest(taskId, request, response);

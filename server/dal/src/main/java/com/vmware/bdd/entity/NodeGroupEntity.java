@@ -90,6 +90,13 @@ public class NodeGroupEntity extends EntityBase {
    @Column(name = "is_share_datastore")
    private Boolean shareDatastore = true;
 
+   /*
+    * check whether the node group is under provisioning, if the value is false or null,
+    * node group can't do any operation about expand
+    */
+   @Column(name = "is_provisioning")
+   private Boolean isProvisioning;
+
    @ManyToOne
    @JoinColumn(name = "cluster_id")
    private ClusterEntity cluster;
@@ -540,5 +547,13 @@ public class NodeGroupEntity extends EntityBase {
 
    public void setShareDatastore(Boolean shareDatastore) {
       this.shareDatastore = shareDatastore;
+   }
+
+   public Boolean getIsProvisioning() {
+      return isProvisioning;
+   }
+
+   public void setIsProvisioning(Boolean isProvisioning) {
+      this.isProvisioning = isProvisioning;
    }
 }

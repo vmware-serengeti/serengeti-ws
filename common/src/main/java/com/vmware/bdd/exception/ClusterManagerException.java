@@ -122,8 +122,8 @@ public class ClusterManagerException extends BddException {
       return new ClusterManagerException(null, "NO_NEED_TO_RESIZE", clusterName, nodeGroupName, instanceNum);
    }
 
-   public static ClusterManagerException NODE_GROUP_HAS_EXISTED(String clusterName, String nodeGroupName) {
-      return new ClusterManagerException(null, "NODE_GROUP_HAS_EXISTED", nodeGroupName, clusterName);
+   public static ClusterManagerException NODE_GROUP_ALREADY_EXISTED(String clusterName, String nodeGroupName) {
+      return new ClusterManagerException(null, "NODE_GROUP_ALREADY_EXISTED", nodeGroupName, clusterName);
    }
 
     public static ClusterManagerException NODE_GROUP_CANNOT_BE_ZERO(String nodeGroupName) {

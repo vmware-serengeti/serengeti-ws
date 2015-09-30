@@ -133,6 +133,7 @@ create table node_group (
    storage_size           integer,
    disk_number            integer,
    is_share_datastore     boolean,
+   is_provisioning        boolean,
    vc_datastore_names     text,
    sd_datastore_names     text,
    dd_datastore_names     text,

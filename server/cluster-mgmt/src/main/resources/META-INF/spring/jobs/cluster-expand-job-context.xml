@@ -64,6 +64,9 @@
 		<beans:property name="managementOperation" value="EXPAND" />
 		<beans:property name="phase" value="post-software-provision" />
 	</beans:bean>
+	<beans:bean name="setNodeGroupStatusWhenExpandTasklet"
+				class="com.vmware.bdd.service.job.setNodeGroupStatusAfterExpandStep">
+	</beans:bean>
 
 	<job id="expandClusterJob" job-repository="jobRepository">
 		<step id="expandRemoveBadNodeStep" next="updateExpandClusterDataStep1">
@@ -169,8 +172,15 @@
 			</listeners>
 		</step>
 
-		<step id="postSoftwareProvisionWhenExpandStep">
+		<step id="postSoftwareProvisionWhenExpandStep" next="setNodeGroupStatusAfterExpandStep">
 			<tasklet ref="postSoftwareProvisionWhenExpandTasklet" />
+			<listeners>
+				<listener ref="stepListener" />
+			</listeners>
+		</step>
+
+		<step id="setNodeGroupStatusAfterExpandStep">
+			<tasklet ref="setNodeGroupStatusWhenExpandTasklet" />
 			<listeners>
 				<listener ref="stepListener" />
 			</listeners>
