@@ -42,7 +42,10 @@ public class CliProperties {
    private static final int KEY_STORE_PASSWORD_LENGTH = 8;
    private static final String SUPPORTED_PROTOCOLS = "supported_protocols";
    private static final String SUPPORTED_CIPHERSUITES = "supported_ciphersuites";
+   private static final String SUPPORTED_CIPHERSUITES_GROUP = "supported_ciphersuites_group";
    private static final String HOSTNAME_VERIFIER = "hostname_verifier";
+   public static final String STRONG_ENCRYPTION = "STRONG_ENCRYPTION";
+   public static final String DEFAULT_ENCRYPTION = "DEFAULT_ENCRYPTION";
 
    PropertiesConfiguration properties = new PropertiesConfiguration();
 
@@ -84,7 +87,26 @@ public class CliProperties {
 
    public String[] getSupportedCipherSuites() {
       String[] values = properties.getStringArray(SUPPORTED_CIPHERSUITES);
-      return ArrayUtils.isEmpty(values) ? PspConfiguration.WEAK_CIPHER_SUITES : values;
+      return ArrayUtils.isEmpty(values) ? getSupportedCipherSuitesByGroup() : values;
+   }
+
+   public String[] getSupportedCipherSuitesByGroup() {
+      String groupName =  properties.getString(SUPPORTED_CIPHERSUITES_GROUP);
+
+      if (StringUtils.isBlank(groupName)) {
+         LOGGER.warn(String.format("cipher suite group not set, take default one: %1s", DEFAULT_ENCRYPTION));
+         groupName = DEFAULT_ENCRYPTION;
+      }
+      switch (groupName) {
+         case STRONG_ENCRYPTION:
+            return PspConfiguration.CIPHER_SUITES;
+         case DEFAULT_ENCRYPTION:
+            return PspConfiguration.WEAK_CIPHER_SUITES;
+         default: {
+            LOGGER.warn(String.format("cipher suite group can only be: %1s or %2s, but meet %3s.", STRONG_ENCRYPTION, DEFAULT_ENCRYPTION, groupName));
+            return PspConfiguration.WEAK_CIPHER_SUITES;
+         }
+      }
    }
 
    public String getHostnameVerifier() {

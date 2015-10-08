@@ -32,6 +32,9 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -41,7 +44,8 @@ import sun.net.httpserver.HttpServerImpl;
  * Login Client Test
  * Created by Xiaoliangl on 8/26/14.
  */
-public class LoginClientImplTest {
+@ContextConfiguration(locations = {"classpath:META-INF/spring/spring-shell-plugin.xml"})
+public class LoginClientImplTest extends AbstractTestNGSpringContextTests {
 
    private final static Object[][] DATA = new Object[][]{
          {"root", "vmware", 200, "B6926322AF4D8A8B9CEF3906D5735D41"},
@@ -52,6 +56,8 @@ public class LoginClientImplTest {
 
    };
 
+   @Autowired
+   private LoginClient loginClient;
 
    @DataProvider(name = "loginClientImplTest.Default")
    public Object[][] getTestData() {
@@ -67,7 +73,6 @@ public class LoginClientImplTest {
       testTemplate.start();
 
       try {
-         LoginClientImpl loginClient = new LoginClientImpl();
          LoginResponse loginResponse = loginClient.login("http://127.0.0.1:4587/serengeti/j_spring_security_check", userName, passWord);
 
          Assert.assertEquals(loginResponse.getResponseCode(), responseCode);

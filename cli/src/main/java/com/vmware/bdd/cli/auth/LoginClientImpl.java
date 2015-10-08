@@ -34,7 +34,7 @@ import java.util.Arrays;
  * Http Login Client
  */
 @Component
-public class LoginClientImpl {
+public class LoginClientImpl implements LoginClient {
    private final static Logger LOGGER = Logger.getLogger(LoginClientImpl.class);
    protected static final String SET_COOKIE_HEADER = "Set-Cookie";
 
@@ -64,36 +64,36 @@ public class LoginClientImpl {
             Charset.forName("UTF-8"));
       loginPost.setEntity(requestEntity);
 
-      HttpResponse response = null;
+      HttpResponse response;
 
-      try{
+      try {
          response = client1.execute(loginPost);
+
+         LOGGER.debug("resp code is: " + response.getStatusLine());
+         int responseCode = response.getStatusLine().getStatusCode();
+
+         LoginResponse loginResponse;
+         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            //normal response
+            String cookieValue = null;
+            Header[] setCookieHeaders = response.getHeaders(SET_COOKIE_HEADER);
+
+            if (ArrayUtils.isNotEmpty(setCookieHeaders)) {
+               cookieValue = setCookieHeaders[0].getValue();
+
+               if (StringUtils.isNotBlank(cookieValue) && cookieValue.contains(";")) {
+                  cookieValue = cookieValue.split(";")[0];
+               }
+            }
+
+            loginResponse = new LoginResponse(responseCode, cookieValue);
+         } else {
+            loginResponse = new LoginResponse(responseCode, null);
+         }
+
+         return loginResponse;
       } finally {
          loginPost.releaseConnection();
       }
-
-      LOGGER.debug("resp code is: " + response.getStatusLine());
-      int responseCode = response.getStatusLine().getStatusCode();
-
-      LoginResponse loginResponse;
-      if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-         //normal response
-         String cookieValue = null;
-         Header[] setCookieHeaders = response.getHeaders(SET_COOKIE_HEADER);
-
-         if(ArrayUtils.isNotEmpty(setCookieHeaders)) {
-            cookieValue = setCookieHeaders[0].getValue();
-
-            if (StringUtils.isNotBlank(cookieValue) && cookieValue.contains(";")) {
-               cookieValue = cookieValue.split(";")[0];
-            }
-         }
-
-         loginResponse = new LoginResponse(responseCode, cookieValue);
-      } else {
-         loginResponse = new LoginResponse(responseCode, null);
-      }
-
-      return loginResponse;
    }
 }

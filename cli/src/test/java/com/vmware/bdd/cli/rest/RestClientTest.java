@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.vmware.bdd.cli.auth.LoginClient;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +68,7 @@ public class RestClientTest extends AbstractTestNGSpringContextTests {
    private RestClient restClient;
 
    @Autowired
-   private LoginClientImpl loginClient;
+   private LoginClient loginClient;
 
 
    @Test(dataProvider = "RestClientTest.LoginDP")

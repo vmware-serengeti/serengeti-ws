@@ -18,7 +18,7 @@ import com.vmware.bdd.apitypes.Connect;
 import com.vmware.bdd.apitypes.TaskRead;
 import com.vmware.bdd.apitypes.TaskRead.Status;
 import com.vmware.bdd.apitypes.TaskRead.Type;
-import com.vmware.bdd.cli.auth.LoginClientImpl;
+import com.vmware.bdd.cli.auth.LoginClient;
 import com.vmware.bdd.cli.auth.LoginResponse;
 import com.vmware.bdd.cli.commands.CommandsUtils;
 import com.vmware.bdd.cli.commands.Constants;
@@ -54,7 +54,7 @@ public class RestClient {
    private RestTemplate client;
 
    @Autowired
-   private LoginClientImpl loginClient;
+   private LoginClient loginClient;
 
    private RestClient() {
    }

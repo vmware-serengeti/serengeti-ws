@@ -13,9 +13,8 @@
         </property>
     </bean>
 
-
    <bean id="loginClient" class="org.mockito.Mockito" factory-method="mock">
-      <constructor-arg value="com.vmware.bdd.cli.auth.LoginClientImpl" />
+      <constructor-arg value="com.vmware.bdd.cli.auth.LoginClient" />
    </bean>
 
    <context:component-scan base-package="com.vmware.bdd.cli.rest"/>

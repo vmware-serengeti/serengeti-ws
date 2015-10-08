@@ -22,25 +22,42 @@ public class PspConfiguration {
     * Application defined cipher suites and protocols
     */
    public final static String[] CIPHER_SUITES = {
-         "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA",
-         "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
-         "TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA",
+         "TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384",
+         "TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384",
+         "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
+         "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384",
+         "TLS_RSA_WITH_AES_256_CBC_SHA256",
+
          "TLS_ECDH_RSA_WITH_AES_256_CBC_SHA",
-         "TLS_DHE_RSA_WITH_AES_256_CBC_SHA",
-         "TLS_DHE_DSS_WITH_AES_256_CBC_SHA",
+         "TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA",
+         "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+         "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA",
          "TLS_RSA_WITH_AES_256_CBC_SHA",
-         "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
-         "TLS_RSA_WITH_AES_128_CBC_SHA",
-         "TLS_DHE_DSS_WITH_AES_128_CBC_SHA",
-         "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
-         "TLS_DHE_DSS_WITH_AES_128_CBC_SHA"};
+
+         "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256",
+         "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256",
+         "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
+         "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+         "TLS_RSA_WITH_AES_128_CBC_SHA256",
+
+         "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA",
+         "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA",
+         "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+         "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
+         "TLS_RSA_WITH_AES_128_CBC_SHA"};
 
    public final static String[] WEAK_CIPHER_SUITES = {
-         "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
-         "TLS_RSA_WITH_AES_128_CBC_SHA",
-         "TLS_DHE_DSS_WITH_AES_128_CBC_SHA",
-         "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
-         "TLS_DHE_DSS_WITH_AES_128_CBC_SHA"};
+         "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256",
+         "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256",
+         "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
+         "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+         "TLS_RSA_WITH_AES_128_CBC_SHA256",
+
+         "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA",
+         "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA",
+         "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+         "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
+         "TLS_RSA_WITH_AES_128_CBC_SHA"};
 
    public final static String[] SSL_PROTOCOLS = {"TLSv1.1", "TLSv1.2" };
 
@@ -53,7 +70,7 @@ public class PspConfiguration {
        * Add your custom configuration here. Alternatively, you could add it
        * outside too, but adding it here makes it cleaner.
        */
-      this.setSupportedCipherSuites(CIPHER_SUITES);
+      this.setSupportedCipherSuites(WEAK_CIPHER_SUITES);
       this.setSupportedProtocols(SSL_PROTOCOLS);
       this.setSSLContextAlgorithm("TLS");
    }

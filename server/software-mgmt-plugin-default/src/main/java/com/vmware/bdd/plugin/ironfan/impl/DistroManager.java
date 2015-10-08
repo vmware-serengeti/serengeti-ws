@@ -29,11 +29,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.vmware.bdd.security.tls.PspConfiguration;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -51,6 +53,10 @@ import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 class RolePackageMapping {
    private List<String> roles;
@@ -244,14 +250,27 @@ public class DistroManager {
       BufferedReader in = null;
       DefaultHttpClient httpclient = new DefaultHttpClient();
       try {
-         TrustStrategy trustStrategy = new TrustStrategy() {
-            @Override
-            public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-               return true;
-            }
-         };
+         SSLContext sslContext = SSLContexts.custom().useTLS().build();
 
-         SSLSocketFactory socketFactory = new SSLSocketFactory(trustStrategy,
+         sslContext.init(null, new TrustManager[]{new X509TrustManager() {
+            @Override
+            public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+               return;
+            }
+
+            @Override
+            public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+               return;
+            }
+
+            @Override
+            public X509Certificate[] getAcceptedIssuers() {
+               return new X509Certificate[0];
+            }
+         }}, null);
+
+         SSLSocketFactory socketFactory = new SSLSocketFactory(sslContext,
+               PspConfiguration.SSL_PROTOCOLS, PspConfiguration.WEAK_CIPHER_SUITES,
                SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 
          Scheme sch = new Scheme("https", 443, socketFactory);
@@ -264,6 +283,7 @@ public class DistroManager {
 
          logger.info("executing request: " + httpget.getRequestLine());
          HttpResponse response = httpclient.execute(httpget);
+
          if (!manifestFile.exists()) {
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_MODIFIED) {
                return null;
