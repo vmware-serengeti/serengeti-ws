@@ -24,6 +24,7 @@ import com.vmware.bdd.service.job.software.external.ExternalProgressMonitor;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReportQueue;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,7 @@ import com.vmware.aurora.composition.concurrent.Scheduler;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.utils.Version;
 import com.vmware.bdd.service.IClusterUpgradeService;
 import com.vmware.bdd.service.job.StatusUpdater;
 import com.vmware.bdd.service.sp.NoProgressUpdateCallback;
@@ -45,6 +47,9 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
          .getLogger(ClusterUpgradeService.class);
 
    private String serverVersion;
+
+   private String clusterVersion;
+
    @Autowired
    private IClusterEntityManager clusterEntityMgr;
    @Autowired
@@ -59,6 +64,9 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
       logger.info("Upgrading cluster " + clusterName + ".");
 
       this.serverVersion = clusterEntityMgr.getServerVersion();
+
+      this.clusterVersion = clusterEntityMgr.getClusterVersion(clusterName);
+
       List<NodeEntity> nodes = getNodes(clusterName);
 
       // do upgrade
@@ -83,9 +91,9 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
          NoProgressUpdateCallback callback = new NoProgressUpdateCallback();
          ExecutionResult[] result =
                Scheduler
-                     .executeStoredProcedures(
-                           com.vmware.aurora.composition.concurrent.Priority.BACKGROUND,
-                           storeNodeProceduresArray, callback);
+               .executeStoredProcedures(
+                     com.vmware.aurora.composition.concurrent.Priority.BACKGROUND,
+                     storeNodeProceduresArray, callback);
 
          if (result == null || result.length == 0) {
             logger.error("No node is upgraded.");
@@ -131,7 +139,7 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
    }
 
    private void postUpgradeNode(String clusterName) {
-      if (serverVersion.equalsIgnoreCase(Constants.BDE_SERVER_VERSION_2_2)) {
+      if (isClusterVersionBelow_2_2_0()) {
          /*
           * When upgrading BDE cluster nodes from 2.1.0 to 2.2.0, the mount point dirs change from /mnt/scsi-xxx-xxx to /mnt/dataX,
           * Then need to reconfigure the cluster to restart the services on the nodes.
@@ -145,7 +153,7 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
    }
 
    private void preUpgradeNode(String clusterName) {
-      if (serverVersion.equalsIgnoreCase(Constants.BDE_SERVER_VERSION_2_2)) {
+      if (isClusterVersionBelow_2_2_0()) {
          SoftwareManager softwareManager = softwareManagerCollector.getSoftwareManagerByClusterName(clusterName);
          ClusterBlueprint blueprint = clusterEntityMgr.toClusterBluePrint(clusterName);
          if (needToRestartCluster(softwareManager, blueprint)) {
@@ -208,5 +216,9 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
       } else {
          return true;
       }
+   }
+
+   private boolean isClusterVersionBelow_2_2_0() {
+      return Version.compare(clusterVersion, "2.2.0") < 0;
    }
 }

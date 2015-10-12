@@ -16,8 +16,8 @@ package com.vmware.bdd.manager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-
 import com.vmware.bdd.apitypes.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
@@ -53,6 +53,7 @@ import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 import com.vmware.bdd.software.mgmt.thrift.ServerData;
 import com.vmware.bdd.usermgmt.UserMgmtConstants;
 import com.vmware.bdd.utils.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
@@ -1029,6 +1030,12 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
    @Override
    public void update(Observable o, Object arg) {
       // TODO
+   }
+
+   @Override
+   public String getClusterVersion(String clusterName) {
+      ClusterEntity clusterEntity = clusterDao.findByName(clusterName);
+      return clusterEntity.getVersion();
    }
 
 }

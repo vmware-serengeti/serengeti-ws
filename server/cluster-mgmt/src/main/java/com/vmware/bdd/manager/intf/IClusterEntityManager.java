@@ -92,7 +92,7 @@ public interface IClusterEntityManager {
 
    public void setClusterStatus(String clusterName, ClusterReport report);
 
-//   public void syncUp(String clusterName, boolean updateClusterStatus);
+   //   public void syncUp(String clusterName, boolean updateClusterStatus);
 
    public void removeVmReference(String vmId);
 
@@ -151,4 +151,6 @@ public interface IClusterEntityManager {
    public Map<String, String> findUserMgmtCfg(String clusterName);
 
    NodeRead refreshNodeStatus(String vmName, boolean inSession);
+
+   public String getClusterVersion(String clusterName);
 }
