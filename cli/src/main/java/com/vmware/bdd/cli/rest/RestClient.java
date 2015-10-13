@@ -302,8 +302,7 @@ public class RestClient {
                throw new CliRestException(taskRead.getFailNodes().get(0).getErrorMessage());
             }
 
-            if ((prettyOutput != null && prettyOutput.length > 0 && (taskRead.getType() == Type.VHM ? prettyOutput[0]
-                  .isRefresh(true) : prettyOutput[0].isRefresh(false)))
+            if ((prettyOutput != null && prettyOutput.length > 0 && prettyOutput[0].isRefresh(true))
                   || oldTaskStatus != taskStatus
                   || oldProgress != progress) {
                //clear screen and show progress every few seconds 
