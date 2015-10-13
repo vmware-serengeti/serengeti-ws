@@ -24,6 +24,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -35,6 +37,15 @@ import com.vmware.bdd.apitypes.ResourcePoolRead;
  * Work as a message queue
  * 
  */
+
+@NamedQueries({
+   @NamedQuery(
+      name = "rp.findUsedRpsByNodeGroup",
+      query = "select distinct rp from VcResourcePoolEntity rp"
+            + " where rp.id in (select node.vcRp.id from NodeEntity node where node.nodeGroup.id=:nodeGroupId)"
+   )
+})
+
 @Entity
 @SequenceGenerator(name = "IdSequence", sequenceName = "vc_resource_pool_seq", allocationSize = 1)
 @Table(name = "vc_resource_pool")

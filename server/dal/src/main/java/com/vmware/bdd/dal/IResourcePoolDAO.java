@@ -39,4 +39,6 @@ public interface IResourcePoolDAO extends IBaseDAO<VcResourcePoolEntity> {
 
    void addResourcePoolEntity(final String rpName, final String vcClusterName,
          final String vcResourcePool);
+
+   List<VcResourcePoolEntity> findUsedRpsByNodeGroup(Long nodeGroupId);
 }

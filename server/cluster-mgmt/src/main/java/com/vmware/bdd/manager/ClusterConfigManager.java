@@ -313,8 +313,7 @@ public class ClusterConfigManager {
          }
          //Set HBASE_REGISIONSERVER_OPTS for ironfan hbase_regionserer whose latencySensitivity is set to HIGH
          if(!CommonUtil.isBlank(cluster.getAppManager()) && Constants.IRONFAN.equals(cluster.getAppManager()))
-            for(int i=0; i<clusterEntity.getNodeGroups().size(); i++){
-               NodeGroupEntity group = clusterEntity.getNodeGroups().get(i);
+            for(NodeGroupEntity group : clusterEntity.getNodeGroups()){
                String groupRoles = group.getRoles();
                if((group.getLatencySensitivity() == LatencyPriority.HIGH)
                      && ((groupRoles.contains(HadoopRole.HBASE_REGIONSERVER_ROLE.toString())))){
@@ -501,7 +500,7 @@ public class ClusterConfigManager {
       return netNamesInfo;
    }
 
-   private void validateMemorySize(List<NodeGroupEntity> nodeGroups,
+   private void validateMemorySize(Set<NodeGroupEntity> nodeGroups,
          List<String> failedMsgList) {
       boolean validated = true;
       StringBuilder invalidNodeGroupNames = new StringBuilder();
@@ -648,10 +647,10 @@ public class ClusterConfigManager {
       return valid;
    }
 
-   private List<NodeGroupEntity> convertNodeGroupsToEntities(Gson gson,
+   private Set<NodeGroupEntity> convertNodeGroupsToEntities(Gson gson,
          ClusterEntity clusterEntity, String distro, NodeGroupCreate[] groups,
          boolean validateWhiteList) {
-      List<NodeGroupEntity> nodeGroups = new LinkedList<NodeGroupEntity>();
+      Set<NodeGroupEntity> nodeGroups = new HashSet<NodeGroupEntity>();
       for (NodeGroupCreate group : groups) {
          NodeGroupEntity groupEntity =
                convertGroup(gson, clusterEntity, group, distro,
@@ -904,7 +903,7 @@ public class ClusterConfigManager {
 
       // TODO need more role checks
 
-      List<NodeGroupEntity> nodeGroupEntities = clusterEntity.getNodeGroups();
+      Set<NodeGroupEntity> nodeGroupEntities = clusterEntity.getNodeGroups();
       long instanceNum = 0;
 
       for (NodeGroupEntity ngEntity : nodeGroupEntities) {
@@ -1271,7 +1270,7 @@ public class ClusterConfigManager {
    private void updateNodegroupAppConfig(ClusterCreate clusterCreate,
          ClusterEntity cluster, boolean validateWhiteList) {
       Gson gson = new Gson();
-      List<NodeGroupEntity> groupEntities = cluster.getNodeGroups();
+      Set<NodeGroupEntity> groupEntities = cluster.getNodeGroups();
       Map<String, NodeGroupEntity> groupMap =
             new HashMap<String, NodeGroupEntity>();
       for (NodeGroupEntity entity : groupEntities) {

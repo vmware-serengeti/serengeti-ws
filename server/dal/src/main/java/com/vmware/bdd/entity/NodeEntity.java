@@ -44,6 +44,14 @@ import com.vmware.bdd.utils.Constants;
  * Hadoop Node Entity class: describes hadoop node info
  * 
  */
+
+@NamedNativeQueries({
+   @NamedNativeQuery(
+      name = "node.countByNodeGroup",
+      query = "select count(n.id) from node as n where n.node_group_id=:nodeGroupId"
+   )
+})
+
 @Entity
 @SequenceGenerator(name = "IdSequence", sequenceName = "node_seq", allocationSize = 1)
 @Table(name = "node")
@@ -103,13 +111,13 @@ public class NodeEntity extends EntityBase {
 
    @OneToMany(mappedBy = "nodeEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
    @OrderBy("id")
-   private List<DiskEntity> disks;
+   private Set<DiskEntity> disks;
 
    @OneToMany(mappedBy = "nodeEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
    private Set<NicEntity> nics;
 
    public NodeEntity() {
-      this.disks = new ArrayList<>();
+      this.disks = new HashSet<DiskEntity>();
       this.nics = new HashSet<NicEntity>();
    }
 
@@ -120,7 +128,7 @@ public class NodeEntity extends EntityBase {
       this.rack = rack;
       this.hostName = hostName;
       this.status = status;
-      this.disks = new ArrayList<>();
+      this.disks = new HashSet<DiskEntity>();
       this.nics = new HashSet<NicEntity>();
    }
 
@@ -146,10 +154,14 @@ public class NodeEntity extends EntityBase {
 
    public List<String> getVolumns() {
       List<String> volumns = new ArrayList<String>();
+      if(disks == null || disks.size() < 1) {
+         return volumns;
+      }
+      List<DiskEntity> sortedDisks = new ArrayList<>();
+      sortedDisks.addAll(disks);
+      sortDiskOrder(sortedDisks);
 
-      sortDiskOrder(disks);
-
-      for (DiskEntity disk : disks) {
+      for (DiskEntity disk : sortedDisks) {
          if (DiskType.DATA_DISK.getType().equals(disk.getDiskType())
                || DiskType.SWAP_DISK.getType().equals(disk.getDiskType()))
             volumns.add(disk.getDiskType() + ":" + disk.getHardwareUUID());
@@ -158,12 +170,14 @@ public class NodeEntity extends EntityBase {
    }
 
    public List<String> getDataVolumnsMountPoint() {
-      sortDiskOrder(disks);
+      List<DiskEntity> sortedDisks = new ArrayList<>();
+      sortedDisks.addAll(disks);
+      sortDiskOrder(sortedDisks);
 
       //Todo(qjin): need to check
       List<String> mountPoints = new ArrayList<String>();
       int i = 0;
-      for (DiskEntity disk : disks) {
+      for (DiskEntity disk : sortedDisks) {
          if (DiskType.DATA_DISK.getType().equals(disk.getDiskType())) {
             //Todo(qjin): when will the uuid be null?
             if (disk.getHardwareUUID() == null) {
@@ -366,11 +380,11 @@ public class NodeEntity extends EntityBase {
       return new ArrayList<String>(datastores);
    }
 
-   public List<DiskEntity> getDisks() {
+   public Set<DiskEntity> getDisks() {
       return disks;
    }
 
-   public void setDisks(List<DiskEntity> disks) {
+   public void setDisks(Set<DiskEntity> disks) {
       this.disks = disks;
    }
 
@@ -395,7 +409,7 @@ public class NodeEntity extends EntityBase {
 
       if (newNode.getDisks() != null && !newNode.getDisks().isEmpty()) {
          if (this.disks == null)
-            this.disks = new ArrayList<>(newNode.disks.size());
+            this.disks = new HashSet<>(newNode.disks.size());
 
          for (DiskEntity disk : newNode.getDisks()) {
             DiskEntity clone = disk.copy(disk);

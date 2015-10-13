@@ -31,7 +31,13 @@ import com.vmware.bdd.entity.NodeEntity;
  */
 public interface IClusterDAO extends IBaseDAO<ClusterEntity> {
 
+   List<String> findAllClusterNames();
+
    ClusterEntity findByName(String name);
+
+   ClusterEntity findWithNodeGroups(String clusterName);
+
+   ClusterEntity findWithNodes(String clusterName, boolean includeVolumes);
 
    List<String> findClustersByUsedResourcePool(String rpName);
 

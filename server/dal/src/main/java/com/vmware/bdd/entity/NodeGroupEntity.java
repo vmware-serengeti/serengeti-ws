@@ -103,7 +103,7 @@ public class NodeGroupEntity extends EntityBase {
 
    @OneToMany(mappedBy = "nodeGroup", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
    @OrderBy("id")
-   private List<NodeEntity> nodes;
+   private Set<NodeEntity> nodes;
 
    /*
     * cluster definition field. VCResourcePool inside this array may not be used
@@ -261,11 +261,11 @@ public class NodeGroupEntity extends EntityBase {
       this.storageSize = storageSize;
    }
 
-   public List<NodeEntity> getNodes() {
+   public Set<NodeEntity> getNodes() {
       return nodes;
    }
 
-   public void setNodes(List<NodeEntity> nodes) {
+   public void setNodes(Set<NodeEntity> nodes) {
       this.nodes = nodes;
    }
 

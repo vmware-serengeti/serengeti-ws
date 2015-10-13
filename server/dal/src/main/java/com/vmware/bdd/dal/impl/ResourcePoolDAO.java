@@ -28,7 +28,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vmware.bdd.dal.IResourcePoolDAO;
-import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.exception.BddException;
 
@@ -115,4 +114,15 @@ public class ResourcePoolDAO extends BaseDAO<VcResourcePoolEntity> implements
       logger.info("add resource pool " + rpName);
    }
 
+   @Override
+   @SuppressWarnings("unchecked")
+   public List<VcResourcePoolEntity> findUsedRpsByNodeGroup(Long nodeGroupId) {
+      logger.debug("findUsedRpsByNodeGroup using named query, nodeGroupId:" + nodeGroupId);
+      List<VcResourcePoolEntity> rps = (List<VcResourcePoolEntity>)this.sessionFactory.getCurrentSession()
+            .getNamedQuery("rp.findUsedRpsByNodeGroup")
+            .setLong("nodeGroupId", nodeGroupId.longValue())
+            .list();
+      logger.debug("findUsedRpsByNodeGroup, rps size:" + rps.size());
+      return rps;
+   }
 }

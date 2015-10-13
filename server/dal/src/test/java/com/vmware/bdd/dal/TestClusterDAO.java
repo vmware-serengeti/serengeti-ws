@@ -76,7 +76,7 @@ public class TestClusterDAO extends AbstractTransactionalTestNGSpringContextTest
       cluster.setTopologyPolicy(TopologyType.NONE);
       cluster.setStatus(ClusterStatus.PROVISIONING);
 
-      List<NodeGroupEntity> nodeGroups = new LinkedList<NodeGroupEntity>();
+      Set<NodeGroupEntity> nodeGroups = new HashSet<NodeGroupEntity>();
       NodeGroupEntity hdfsGroup = new NodeGroupEntity(HDFS_GROUP);
 
       hdfsGroup.setCluster(cluster);
@@ -87,7 +87,7 @@ public class TestClusterDAO extends AbstractTransactionalTestNGSpringContextTest
       hdfsGroup.setDefineInstanceNum(2);
       hdfsGroup.setHaFlag("on");
 
-      List<NodeEntity> hdfsNodes = new LinkedList<NodeEntity>();
+      Set<NodeEntity> hdfsNodes = new HashSet<NodeEntity>();
       NodeEntity hdfsNode1 = new NodeEntity();
       NodeEntity hdfsNode2 = new NodeEntity();
       hdfsNode1.setVmName("hdfsNode1");
@@ -121,7 +121,7 @@ public class TestClusterDAO extends AbstractTransactionalTestNGSpringContextTest
       computeGroup.setDefineInstanceNum(1);
       computeGroup.setHaFlag("on");
 
-      List<NodeEntity> computeNodes = new LinkedList<NodeEntity>();
+      Set<NodeEntity> computeNodes = new HashSet<NodeEntity>();
       NodeEntity computeNode1 = new NodeEntity();
       computeNode1.setVmName("computeNode1");
       computeNodes.add(computeNode1);

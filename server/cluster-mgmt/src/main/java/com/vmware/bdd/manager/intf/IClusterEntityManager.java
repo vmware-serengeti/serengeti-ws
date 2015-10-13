@@ -25,6 +25,7 @@ import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
+import com.vmware.bdd.manager.SoftwareManagerCollector;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.software.mgmt.plugin.monitor.ClusterReport;
@@ -38,6 +39,10 @@ public interface IClusterEntityManager {
    public NodeEntity findNodeById(Long id);
 
    public ClusterEntity findByName(String clusterName);
+
+   public ClusterRead findClusterWithNodeGroups(String clusterName);
+
+   public ClusterRead findClusterWithNodes(String clusterName, boolean includeVolumns);
 
    public NodeGroupEntity findByName(String clusterName, String groupName);
 
@@ -53,6 +58,8 @@ public interface IClusterEntityManager {
    public List<String> findByAppManager(String appManagerName);
 
    public List<ClusterEntity> findAllClusters();
+
+   public List<String> findAllClusterNames();
 
    public List<NodeGroupEntity> findAllGroups(String clusterName);
 
@@ -150,7 +157,9 @@ public interface IClusterEntityManager {
 
    public Map<String, String> findUserMgmtCfg(String clusterName);
 
-   NodeRead refreshNodeStatus(String vmName, boolean inSession);
+   public NodeRead refreshNodeStatus(String vmName, boolean inSession);
 
    public String getClusterVersion(String clusterName);
+
+   public SoftwareManagerCollector getSoftwareManagerCollector();
 }

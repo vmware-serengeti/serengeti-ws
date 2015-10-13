@@ -60,7 +60,7 @@ public class JobUtils {
       for (NodeGroupCreate group : cluster.getNodeGroups()) {
          NodeGroupEntity groupEntity =
                entityMgr.findByName(clusterEntity, group.getName());
-         List<NodeEntity> nodeEntities = groupEntity.getNodes();
+         Set<NodeEntity> nodeEntities = groupEntity.getNodes();
          List<NodeEntity> listEntities = new ArrayList<NodeEntity>();
          listEntities.addAll(nodeEntities);
          existingNodes
@@ -191,7 +191,7 @@ public class JobUtils {
       for (NodeGroupCreate group : cluster.getNodeGroups()) {
          NodeGroupEntity groupEntity =
                entityMgr.findByName(clusterEntity, group.getName());
-         List<NodeEntity> nodeEntities = groupEntity.getNodes();
+         Set<NodeEntity> nodeEntities = groupEntity.getNodes();
          if (nodeEntities == null) {
             continue;
          }

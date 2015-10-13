@@ -48,11 +48,41 @@ import com.vmware.bdd.utils.CommonUtil;
 @Repository
 @Transactional(readOnly = true)
 public class ClusterDAO extends BaseDAO<ClusterEntity> implements IClusterDAO {
-   private final static Logger LOGGER = Logger.getLogger(ClusterDAO.class);
+   private final static Logger logger = Logger.getLogger(ClusterDAO.class);
 
    @Override
    public ClusterEntity findByName(String name) {
       return findUniqueByCriteria(Restrictions.eq("name", name).ignoreCase());
+   }
+
+   @Override
+   @SuppressWarnings("unchecked")
+   public List<String> findAllClusterNames() {
+      logger.debug("findAllClusterNames");
+
+      List<String> clusterNames =
+            this.sessionFactory.getCurrentSession().createQuery(
+                  "select distinct c.name from ClusterEntity c").list();
+
+      return clusterNames;
+   }
+
+   @Override
+   public ClusterEntity findWithNodeGroups(String clusterName) {
+      logger.debug("findWithNodeGroups using named query:"+clusterName);
+      return (ClusterEntity)this.sessionFactory.getCurrentSession()
+            .getNamedQuery("cluster.findClusterWithNgs")
+            .setString("clusterName", clusterName)
+            .uniqueResult();
+   }
+
+   @Override
+   public ClusterEntity findWithNodes(String clusterName, boolean includeVolumes) {
+      logger.debug("findWithNodes using named query:"+clusterName);
+      return (ClusterEntity)this.sessionFactory.getCurrentSession()
+            .getNamedQuery(includeVolumes ? "cluster.findClusterWithVolumes" : "cluster.findClusterWithNodes")
+            .setString("clusterName", clusterName)
+            .uniqueResult();
    }
 
    @Override

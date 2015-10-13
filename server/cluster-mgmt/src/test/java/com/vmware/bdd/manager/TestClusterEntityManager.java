@@ -77,7 +77,7 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
       cluster.setAutomationEnable(false);
       cluster.setAppManager(Constants.IRONFAN);
 
-      List<NodeGroupEntity> nodeGroups = new LinkedList<NodeGroupEntity>();
+      Set<NodeGroupEntity> nodeGroups = new HashSet<NodeGroupEntity>();
       NodeGroupEntity hdfsGroup = new NodeGroupEntity(HDFS_GROUP);
 
       // add hdfs node group
@@ -94,7 +94,7 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
       hdfsGroup.setRoles((new Gson()).toJson(roleStr));
 
       // add a hdfs node
-      List<NodeEntity> nodes = new LinkedList<NodeEntity>();
+      Set<NodeEntity> nodes = new HashSet<NodeEntity>();
       NodeEntity node0 = new NodeEntity();
       node0.setVmName(HDFS_NODE_0);
       node0.setNodeGroup(hdfsGroup);
@@ -135,7 +135,7 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
       associations.add(association);
 
       computeGroup.setGroupAssociations(associations);
-      computeGroup.setNodes(new LinkedList<NodeEntity>());
+      computeGroup.setNodes(new HashSet<NodeEntity>());
 
       nodeGroups.add(computeGroup);
 

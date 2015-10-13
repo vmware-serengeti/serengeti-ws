@@ -221,7 +221,7 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
                   vNode.getGroupName());
       AuAssert.check(nodeGroupEntity != null);
       if (nodeGroupEntity.getNodes() == null) {
-         nodeGroupEntity.setNodes(new LinkedList<NodeEntity>());
+         nodeGroupEntity.setNodes(new HashSet<NodeEntity>());
       }
 
       boolean insert = false;
@@ -283,7 +283,7 @@ public class ClusterUpdateDataStep extends TrackableTasklet {
          nodeEntity.setMemorySize((long) vNode.getMem());
 
          // set disk entities, include system/swap/data disk
-         List<DiskEntity> diskEntities = nodeEntity.getDisks();
+         Set<DiskEntity> diskEntities = nodeEntity.getDisks();
 
          // system disk
          DiskEntity systemDisk = nodeEntity.findSystemDisk();

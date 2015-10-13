@@ -247,7 +247,7 @@ public class ClusterManager {
             clusterConfigMgr.getClusterConfig(clusterName, needAllocIp);
       Map<String, String> cloudProvider = resMgr.getCloudProviderAttributes();
 
-      ClusterRead read = clusterEntityMgr.toClusterRead(clusterName, true);
+      ClusterRead read = clusterEntityMgr.findClusterWithNodes(clusterName, true);
 
       Map<String, Object> attrs = new HashMap<String, Object>();
 
@@ -360,7 +360,8 @@ public class ClusterManager {
          refreshClusterStatus(clusterName);
       }
       logger.debug("refreshClusterStatus time: " + (new java.util.Date().getTime()-startTime.getTime()));
-      return clusterEntityMgr.toClusterRead(clusterName, realTime);
+      return realTime ? clusterEntityMgr.findClusterWithNodes(clusterName, false)
+            : clusterEntityMgr.findClusterWithNodeGroups(clusterName);
    }
 
    public ClusterCreate getClusterSpec(String clusterName) {
@@ -408,10 +409,10 @@ public class ClusterManager {
       java.util.Date startTime = new java.util.Date();
 
       List<ClusterRead> clusters = new ArrayList<ClusterRead>();
-      List<ClusterEntity> clusterEntities = clusterEntityMgr.findAllClusters();
+      List<String> clusterNames = clusterEntityMgr.findAllClusterNames();
       logger.debug("findAllClusters time:" +(new java.util.Date().getTime()-startTime.getTime()));
-      for (ClusterEntity entity : clusterEntities) {
-         clusters.add(getClusterByName(entity.getName(), realTime));
+      for (String clusterName : clusterNames) {
+         clusters.add(getClusterByName(clusterName, realTime));
       }
       logger.debug("getClusters total time:" +(new java.util.Date().getTime()-startTime.getTime()));
       return clusters;
@@ -1618,7 +1619,7 @@ public class ClusterManager {
    }
 
    public Map<String, String> getRackTopology(String clusterName, String topology) {
-     ClusterRead cluster = clusterEntityMgr.toClusterRead(clusterName, true);
+      ClusterRead cluster = clusterEntityMgr.findClusterWithNodes(clusterName, false);
       Set<String> hosts = new HashSet<String>();
       List<NodeRead> nodes = new ArrayList<NodeRead>();
       for (NodeGroupRead nodeGroup : cluster.getNodeGroups()) {

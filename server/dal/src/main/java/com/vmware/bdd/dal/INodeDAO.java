@@ -37,4 +37,6 @@ public interface INodeDAO extends IBaseDAO<NodeEntity> {
    List<NodeEntity> findByHostName(String hostName);
 
    void updateAction(String moId, String action);
+
+   int getCountByNodeGroup(Long nodeGroupId);
 }

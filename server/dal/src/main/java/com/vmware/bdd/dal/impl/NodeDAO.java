@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,7 @@ import com.vmware.bdd.utils.AuAssert;
 @Repository
 @Transactional(readOnly = true)
 public class NodeDAO extends BaseDAO<NodeEntity> implements INodeDAO {
+   private final static Logger logger = Logger.getLogger(NodeDAO.class);
 
    @Override
    public List<NodeEntity> findByNodeGroups(Collection<NodeGroupEntity> groups) {
@@ -75,5 +77,15 @@ public class NodeDAO extends BaseDAO<NodeEntity> implements INodeDAO {
       NodeEntity node = findByMobId(moId);
       AuAssert.check(node != null);
       node.setAction(action);
+   }
+
+   @Override
+   public int getCountByNodeGroup(Long nodeGroupId) {
+      logger.debug("getCountByNodeGroup using named query, nodeGroupId:" + nodeGroupId);
+      Number count = (Number)this.sessionFactory.getCurrentSession()
+            .getNamedQuery("node.countByNodeGroup")
+            .setLong("nodeGroupId", nodeGroupId.longValue())
+            .uniqueResult();
+      return count.intValue();
    }
 }

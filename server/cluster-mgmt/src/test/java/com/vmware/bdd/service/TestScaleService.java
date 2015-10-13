@@ -15,7 +15,9 @@
 package com.vmware.bdd.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import mockit.Mock;
 import mockit.MockClass;
@@ -136,7 +138,7 @@ public class TestScaleService {
       scaleService = new ScaleService();
 
       // mock getDisks
-      List<DiskEntity> disks = new ArrayList<>();
+      Set<DiskEntity> disks = new HashSet<>();
       DiskEntity swapDisk =  new DiskEntity(SWAP_DISK_NAME);
       swapDisk.setVmdkPath(DS1_NAME + "/" + NODE_NAME + "/" + SWAP_DISK_NAME);
       swapDisk.setDatastoreName(DS1_NAME);

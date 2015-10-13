@@ -30,6 +30,8 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -38,8 +40,6 @@ import org.apache.log4j.Logger;
 import org.hibernate.annotations.Type;
 
 import com.google.gson.Gson;
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.apitypes.ClusterNetConfigInfo;
@@ -48,6 +48,30 @@ import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.security.EncryptionGuard;
 import com.vmware.bdd.utils.ConfigInfo;
+
+@NamedQueries({
+   @NamedQuery(
+      name = "cluster.findClusterWithNgs",
+      query = "from ClusterEntity c left join fetch c.nodeGroups ng where c.name=:clusterName"
+   ),
+   @NamedQuery(
+      name = "cluster.findClusterWithNodes",
+      query = "from ClusterEntity c"
+            + " left join fetch c.nodeGroups ng"
+            + " left join fetch ng.nodes n"
+            + " left join fetch ng.groupAssociations ga"
+            + " where c.name=:clusterName"
+   ),
+   @NamedQuery(
+      name = "cluster.findClusterWithVolumes",
+      query = "from ClusterEntity c"
+            + " left join fetch c.nodeGroups ng"
+            + " left join fetch ng.nodes n"
+            + " left join fetch ng.groupAssociations ga"
+            + " left join fetch n.disks d"
+            + " where c.name=:clusterName"
+   )
+})
 
 /**
  * Cluster Entity
@@ -85,7 +109,7 @@ public class ClusterEntity extends EntityBase {
    private boolean startAfterDeploy;
 
    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-   private List<NodeGroupEntity> nodeGroups;
+   private Set<NodeGroupEntity> nodeGroups;
 
    @Column(name = "password")
    private String password;
@@ -239,11 +263,11 @@ public class ClusterEntity extends EntityBase {
       this.startAfterDeploy = startAfterDeploy;
    }
 
-   public List<NodeGroupEntity> getNodeGroups() {
+   public Set<NodeGroupEntity> getNodeGroups() {
       return nodeGroups;
    }
 
-   public void setNodeGroups(List<NodeGroupEntity> nodeGroups) {
+   public void setNodeGroups(Set<NodeGroupEntity> nodeGroups) {
       this.nodeGroups = nodeGroups;
    }
 

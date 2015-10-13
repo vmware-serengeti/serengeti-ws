@@ -31,6 +31,7 @@ import com.vmware.bdd.dal.INetworkDAO;
 import com.vmware.bdd.dal.INodeDAO;
 import com.vmware.bdd.dal.INodeGroupDAO;
 import com.vmware.bdd.dal.INodeTemplateDAO;
+import com.vmware.bdd.dal.IResourcePoolDAO;
 import com.vmware.bdd.dal.IServerInfoDAO;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.DiskEntity;
@@ -78,6 +79,8 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
    private INodeTemplateDAO nodeTemplateDAO;
 
    private INetworkDAO networkDAO;
+
+   private IResourcePoolDAO rpDao;
 
    private IServerInfoDAO serverInfoDao;
    private SoftwareManagerCollector softwareManagerCollector;
@@ -129,9 +132,19 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
    }
 
    @Autowired
+   public void setRpDao(IResourcePoolDAO rpDao) {
+      this.rpDao = rpDao;
+   }
+
+   @Autowired
    public void setSoftwareManagerCollector(
          SoftwareManagerCollector softwareManagerCollector) {
       this.softwareManagerCollector = softwareManagerCollector;
+   }
+
+   @Override
+   public SoftwareManagerCollector getSoftwareManagerCollector() {
+      return this.softwareManagerCollector;
    }
 
    @Override
@@ -152,6 +165,99 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
    @Override
    public ClusterEntity findByName(String clusterName) {
       return clusterDao.findByName(clusterName);
+   }
+
+   @Override
+   public ClusterRead findClusterWithNodeGroups(String clusterName) {
+      ClusterEntity cluster = clusterDao.findWithNodeGroups(clusterName);
+      ClusterRead clusterRead = RestObjectManager.clusterEntityToRead(cluster);
+
+      SoftwareManager softMgr = null;
+      try {
+         softMgr = softwareManagerCollector.getSoftwareManager(cluster.getAppManager());
+      } catch (Exception e) {
+         logger.error("Failed to get softwareManger.");
+         // do not throw exception for exporting cluster info
+      }
+      int clusterInstanceNum = 0;
+      List<NodeGroupRead> ngReads = new ArrayList<>();
+      for(NodeGroupEntity ng: cluster.getNodeGroups()) {
+         NodeGroupRead ngRead = RestObjectManager.nodeGroupEntityToRead(ng);
+         int instanceNum = this.nodeDao.getCountByNodeGroup(ng.getId());
+         ngRead.setInstanceNum(instanceNum);
+         clusterInstanceNum += instanceNum;
+         ngRead.setComputeOnly(false);
+         try {
+            ngRead.setComputeOnly(softMgr.isComputeOnlyRoles(ngRead.getRoles()));
+         } catch (Exception e) {
+         }
+         ngReads.add(ngRead);
+      }
+      clusterRead.setNodeGroups(ngReads);
+      clusterRead.setInstanceNum(clusterInstanceNum);
+      clusterRead.setTemplateName(this.nodeTemplateDAO.findByMoid(cluster.getTemplateId()).getName());
+
+      return clusterRead;
+   }
+
+   @Override
+   public ClusterRead findClusterWithNodes(String clusterName, boolean includeVolumes) {
+      ClusterEntity cluster = clusterDao.findWithNodes(clusterName, includeVolumes);
+      ClusterRead clusterRead = RestObjectManager.clusterEntityToRead(cluster);
+
+      SoftwareManager softMgr = null;
+      try {
+         softMgr = softwareManagerCollector.getSoftwareManager(cluster.getAppManager());
+      } catch (Exception e) {
+         logger.error("Failed to get softwareManger.");
+         // do not throw exception for exporting cluster info
+      }
+
+      int clusterInstanceNum = 0;
+      List<NodeGroupRead> ngReads = new ArrayList<>();
+      List<VcResourcePoolEntity> rps = new ArrayList<>();
+
+      for(NodeGroupEntity ng: cluster.getNodeGroups()) {
+         NodeGroupRead ngRead = RestObjectManager.nodeGroupEntityToRead(ng);
+
+         List<NodeRead> nodeReads = new ArrayList<>();
+         for(NodeEntity node: ng.getNodes()) {
+            nodeReads.add(RestObjectManager.nodeEntityToRead(node, includeVolumes));
+         }
+         ngRead.setInstances(nodeReads);
+         int instanceNum = this.nodeDao.getCountByNodeGroup(ng.getId());
+         ngRead.setInstanceNum(instanceNum);
+         clusterInstanceNum += instanceNum;
+         try {
+            ngRead.setComputeOnly(softMgr.isComputeOnlyRoles(ngRead.getRoles()));
+         } catch (Exception e) {
+         }
+         ngReads.add(ngRead);
+
+         List<VcResourcePoolEntity> rpsNg = this.rpDao.findUsedRpsByNodeGroup(ng.getId());
+         if(rpsNg != null && !rpsNg.isEmpty()) {
+            rps.addAll(rpsNg);
+         }
+         logger.debug("findClusterWithNodes rps size:" + rps.size());
+      }
+      clusterRead.setNodeGroups(ngReads);
+      clusterRead.setInstanceNum(clusterInstanceNum);
+      clusterRead.setTemplateName(this.nodeTemplateDAO.findByMoid(cluster.getTemplateId()).getName());
+
+      List<ResourcePoolRead> rpReads = new ArrayList<ResourcePoolRead>();
+      Set<Long> processedRpIds = new HashSet<>();
+      for (VcResourcePoolEntity rp : rps) {
+         if(!processedRpIds.contains(rp.getId())) {
+            ResourcePoolRead rpRead = RestObjectManager.vcResourcePoolEntityToRead(rp);
+            rpRead.setNodes(null);
+            rpReads.add(rpRead);
+            processedRpIds.add(rp.getId());
+         }
+      }
+      logger.debug("findClusterWithNodes rpReads size:" + rpReads.size());
+      clusterRead.setResourcePools(rpReads);
+
+      return clusterRead;
    }
 
    public Map<String, Map<String, String>> findInfraConfig(String clusterName) {
@@ -216,6 +322,11 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
    @Override
    public List<ClusterEntity> findAllClusters() {
       return clusterDao.findAll();
+   }
+
+   @Override
+   public List<String> findAllClusterNames() {
+      return clusterDao.findAllClusterNames();
    }
 
    @Override
@@ -749,11 +860,13 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       return toNodeGroupInfo(group);
    }
 
+   @Deprecated
    @Override
    public ClusterRead toClusterRead(String clusterName, boolean withNodesList) {
       return toClusterRead(clusterName, withNodesList, false);
    }
 
+   @Deprecated
    @Override
    @SuppressWarnings("rawtypes")
    public ClusterRead toClusterRead(String clusterName, boolean withNodesList,
