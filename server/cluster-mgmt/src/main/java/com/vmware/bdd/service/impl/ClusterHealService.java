@@ -24,6 +24,7 @@ import java.util.concurrent.Callable;
 
 import com.google.gson.internal.Pair;
 
+import com.vmware.aurora.global.Configuration;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -673,7 +674,8 @@ public class ClusterHealService implements IClusterHealService {
       NodeEntity nodeEntity = clusterEntityMgr.findNodeByName(nodeName);
       StartVmPostPowerOn query =
             new StartVmPostPowerOn(nodeEntity.fetchAllPortGroups(),
-                  Constants.VM_POWER_ON_WAITING_SEC, clusterEntityMgr);
+                  Configuration.getInt(Constants.VM_POWER_ON_WAITING_SEC_KEY, Constants.VM_POWER_ON_WAITING_SEC),
+                  clusterEntityMgr);
 
       VcVirtualMachine vcVm = ClusterUtil.getVcVm(clusterEntityMgr, nodeEntity);
 

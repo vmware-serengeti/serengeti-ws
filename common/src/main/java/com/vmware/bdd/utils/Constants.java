@@ -272,4 +272,6 @@ public class Constants {
    public static final String SKIP_REFRESH_VC = "skip.refresh.vc.resource";
 
    public static final String PARAMS_NETWORK_DDNS_TYPE = "DYNAMIC";
+   public static final String VM_POWER_ON_WAITING_SEC_KEY = "vm.poweron.waiting.seconds";
+   public static final String DELETE_POWEROFF_NOIP_VM = "cluster.operation.deletePowerOffNoIpVm";
 }

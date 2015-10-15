@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.exception.BddException;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -149,12 +150,9 @@ public class ResizeClusterRemoveBadNodeStep extends TrackableTasklet {
                   continue;
                }
                VcVirtualMachine vm = VcCache.getIgnoreMissing(node.getVmMobId());
-               Set<String> ips = VcVmUtil.getAllIpAddresses(vm, node.getNics().keySet(), false);
-               if (vm == null
-                     || (!vm.isPoweredOn())
-                     || ips.contains(Constants.NULL_IPV4_ADDRESS)) {
+
+               if(!JobUtils.checkVcVmReachable(node, vm)) {
                   deletedNodes.add(node);
-                  continue;
                }
             }
          }

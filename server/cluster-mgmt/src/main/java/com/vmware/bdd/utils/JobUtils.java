@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.aurora.global.Configuration;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 
@@ -130,7 +131,6 @@ public class JobUtils {
     * VM method.
     *
     * @param existingNodes
-    * @param deletedNodes
     * @param occupiedIpSets
     */
    public static void removeNonExistNodes(List<BaseNode> existingNodes,
@@ -175,6 +175,36 @@ public class JobUtils {
       }
    }
 
+   public static boolean checkVcVmReachable(BaseNode node, VcVirtualMachine vm) {
+      boolean deleteBadVm = Configuration.getBoolean(Constants.DELETE_POWEROFF_NOIP_VM, true);
+      logger.info("the delete poweroff and no IP VMs flag is: " + deleteBadVm);
+      if (vm == null) {
+         logger.warn("Node " + node.getVmName() + " will be deleted because cannot find VM.");
+         return false;
+      } else {
+         if (!vm.isPoweredOn()) {
+            if(deleteBadVm) {
+               logger.warn("Node " + node.getVmName() + " will be deleted because it's not powered on.");
+            } else {
+               logger.warn("Node " + node.getVmName() + " is not power-on, but will not be deleted.");
+            }
+            return !deleteBadVm;
+         } else if(!VcVmUtil.checkIpAddresses(vm)){
+            List<String> ips = VcVmUtil.getAllIpAddresses(vm);
+            logger.warn("ip addresses for node " + node.getVmName() + ": " + (ips == null ? "None" : ips.toString()));
+            if(deleteBadVm) {
+               logger.warn("Node " + node.getVmName() + " will be deleted because no valid ip address.");
+            } else {
+               logger.warn("Node " + node.getVmName() + " has no ip address, but will not be deleted.");
+            }
+            return !deleteBadVm;
+         } else {
+            logger.info("node is reachable: " + node.getVmName());
+            return true;
+         }
+      }
+   }
+
    /**
     * separate vc unreachable node from existing node list. if the node is
     * powered off, or powered on but ip address is not accessible, remove the
@@ -202,8 +232,7 @@ public class JobUtils {
                logger.warn("Cannot find VM in VcCache for node "
                      + node.getVmName() + " whose mobid is "
                      + node.getVmMobId() + ".");
-               vm =
-                     ClusterUtil.findAndUpdateNodeVmByName(entityMgr,
+               vm = ClusterUtil.findAndUpdateNodeVmByName(entityMgr,
                            nodeEntity);
                if (vm == null) {
                   logger.warn("Cannot find VM by VM path " + node.getVmName()
@@ -212,24 +241,12 @@ public class JobUtils {
                   node.setVmMobId(vm.getId());
                }
             }
-            if (vm == null || (!vm.isPoweredOn())
-                  || !VcVmUtil.checkIpAddresses(vm)) {
-               if (vm == null) {
-                  logger.warn("Node " + node.getVmName()
-                        + " will be deleted because cannot find VM.");
-               } else if (!vm.isPoweredOn()) {
-                  logger.warn("Node " + node.getVmName()
-                        + " will be deleted because it's not powered on.");
-               } else {
-                  logger.warn("Node " + node.getVmName()
-                        + " will be deleted because no valid ip address.");
-                  List<String> ips = VcVmUtil.getAllIpAddresses(vm);
-                  logger.warn("ip addresses for node " + node.getVmName()
-                              + ": " + (ips == null ? "None" : ips.toString()));
-               }
+
+            if(!checkVcVmReachable(node, vm)) {
                deletedNodes.add(node);
                continue;
             }
+
             String haFlag = node.getNodeGroup().getHaFlag();
             if (haFlag != null
                   && Constants.HA_FLAG_FT.equals(haFlag.toLowerCase())) {

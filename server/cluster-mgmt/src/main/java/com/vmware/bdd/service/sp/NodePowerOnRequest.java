@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.aurora.global.Configuration;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -83,7 +84,7 @@ public class NodePowerOnRequest extends SimpleRequest {
       boolean needBootstrap = nodeEntity.needUpgrade(serverVersion);
       StartVmPostPowerOn query =
             new StartVmPostPowerOn(nodeEntity.fetchAllPortGroups(),
-                  Constants.VM_POWER_ON_WAITING_SEC, clusterEntityMgr);
+                  Configuration.getInt(Constants.VM_POWER_ON_WAITING_SEC_KEY, Constants.VM_POWER_ON_WAITING_SEC), clusterEntityMgr);
       query.setVmId(vmId);
       try {
          query.call();

@@ -1205,7 +1205,7 @@ public class ClusteringService implements IClusteringService {
          // timeout is 10 mintues
          StartVmPostPowerOn query =
                new StartVmPostPowerOn(vNode.getNics().keySet(),
-                     Constants.VM_POWER_ON_WAITING_SEC);
+                     Configuration.getInt(Constants.VM_POWER_ON_WAITING_SEC_KEY, Constants.VM_POWER_ON_WAITING_SEC));
          spec.setPostPowerOn(query);
          spec.setPrePowerOn(getPrePowerOnFunc(vNode, reserveRawDisks));
          spec.setCloneType(VcVmCloneType.FULL);
@@ -1557,7 +1557,7 @@ public class ClusteringService implements IClusteringService {
                (new Gson()).toJson(node.getVolumns()));
          StartVmPostPowerOn query =
                new StartVmPostPowerOn(node.fetchAllPortGroups(),
-                     Constants.VM_POWER_ON_WAITING_SEC, clusterEntityMgr);
+                     Configuration.getInt(Constants.VM_POWER_ON_WAITING_SEC_KEY, Constants.VM_POWER_ON_WAITING_SEC), clusterEntityMgr);
          VcHost host = null;
          if (node.getHostName() != null) {
             host = VcResourceUtils.findHost(node.getHostName());
@@ -1738,6 +1738,8 @@ public class ClusteringService implements IClusteringService {
       if (badNodes == null) {
          badNodes = new ArrayList<BaseNode>();
       }
+
+      logger.info("violate placement policy nodes: " + badNodes);
       // append node in wrong status
       for (BaseNode node : deletedNodes) {
          if (node.getVmMobId() != null) {
@@ -2072,7 +2074,7 @@ public class ClusteringService implements IClusteringService {
             VcVmUtil.getVolumesFromSpecs(node.getMoId(), diskSpecList));
       StartVmPostPowerOn query =
             new StartVmPostPowerOn(node.fetchAllPortGroups(),
-                  Constants.VM_POWER_ON_WAITING_SEC, clusterEntityMgr);
+                  Configuration.getInt(Constants.VM_POWER_ON_WAITING_SEC_KEY, Constants.VM_POWER_ON_WAITING_SEC), clusterEntityMgr);
 
       VcHost host = null;
       if (node.getHostName() != null) {
