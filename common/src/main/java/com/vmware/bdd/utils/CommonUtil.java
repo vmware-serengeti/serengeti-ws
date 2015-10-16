@@ -57,10 +57,14 @@ public class CommonUtil {
    * Set file permission to 600
    */
    public static void setOwnerOnlyReadWrite(String filename) throws IOException {
-      Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
-      perms.add(PosixFilePermission.OWNER_READ);
-      perms.add(PosixFilePermission.OWNER_WRITE);
-      Files.setPosixFilePermissions(Paths.get(filename), perms);
+      try {
+         Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+         perms.add(PosixFilePermission.OWNER_READ);
+         perms.add(PosixFilePermission.OWNER_WRITE);
+         Files.setPosixFilePermissions(Paths.get(filename), perms);
+      }catch (UnsupportedOperationException uoe) {
+         logger.error("we are probably on windows! failed to set PosixFilePermission to: " + filename, uoe);
+      }
    }
 
    public static String getConfDir() {
