@@ -18,6 +18,9 @@ import java.util.ArrayList;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.stream.StreamSource;
 
 import org.apache.log4j.Logger;
 import org.springframework.security.core.GrantedAuthority;
@@ -43,9 +46,11 @@ public class UserService implements UserDetailsService {
       try {
          jaxbContext = JAXBContext.newInstance(Users.class);
          Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-         Users users =
-               (Users) jaxbUnmarshaller.unmarshal(FileUtils.getConfigurationFile(
-                     UserService.UsersFile, "Users"));
+         XMLInputFactory xif = XMLInputFactory.newFactory();
+         xif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+         XMLStreamReader xsr = xif.createXMLStreamReader(new StreamSource(
+               FileUtils.getConfigurationFile(UserService.UsersFile, "Users")));
+         Users users = (Users) jaxbUnmarshaller.unmarshal(xsr);
          User userDTO = null;
          if (users != null) {
             for (User user : users.getUsers()) {
