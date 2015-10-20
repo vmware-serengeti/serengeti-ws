@@ -181,7 +181,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
       int clusterInstanceNum = 0;
       List<NodeGroupRead> ngReads = new ArrayList<>();
-      for(NodeGroupEntity ng: cluster.getNodeGroups()) {
+      for(NodeGroupEntity ng: cluster.getNodeGroupsSortedById()) {
          NodeGroupRead ngRead = RestObjectManager.nodeGroupEntityToRead(ng);
          int instanceNum = this.nodeDao.getCountByNodeGroup(ng.getId());
          ngRead.setInstanceNum(instanceNum);
@@ -217,7 +217,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       List<NodeGroupRead> ngReads = new ArrayList<>();
       List<VcResourcePoolEntity> rps = new ArrayList<>();
 
-      for(NodeGroupEntity ng: cluster.getNodeGroups()) {
+      for(NodeGroupEntity ng: cluster.getNodeGroupsSortedById()) {
          NodeGroupRead ngRead = RestObjectManager.nodeGroupEntityToRead(ng);
 
          List<NodeRead> nodeReads = new ArrayList<>();

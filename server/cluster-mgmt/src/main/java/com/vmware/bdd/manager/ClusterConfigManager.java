@@ -650,7 +650,7 @@ public class ClusterConfigManager {
    private Set<NodeGroupEntity> convertNodeGroupsToEntities(Gson gson,
          ClusterEntity clusterEntity, String distro, NodeGroupCreate[] groups,
          boolean validateWhiteList) {
-      Set<NodeGroupEntity> nodeGroups = new HashSet<NodeGroupEntity>();
+      Set<NodeGroupEntity> nodeGroups = new LinkedHashSet<NodeGroupEntity>();
       for (NodeGroupCreate group : groups) {
          NodeGroupEntity groupEntity =
                convertGroup(gson, clusterEntity, group, distro,

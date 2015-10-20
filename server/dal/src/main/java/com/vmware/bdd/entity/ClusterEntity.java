@@ -17,6 +17,8 @@ package com.vmware.bdd.entity;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -269,6 +271,17 @@ public class ClusterEntity extends EntityBase {
 
    public void setNodeGroups(Set<NodeGroupEntity> nodeGroups) {
       this.nodeGroups = nodeGroups;
+   }
+
+   public List<NodeGroupEntity> getNodeGroupsSortedById() {
+      List<NodeGroupEntity> sortedNg = new ArrayList<>(getNodeGroups());
+      Collections.sort(sortedNg, new Comparator<NodeGroupEntity> () {
+         @Override
+         public int compare(NodeGroupEntity ng1, NodeGroupEntity ng2) {
+            return (int)(ng1.getId() - ng2.getId());
+         }
+      });
+      return sortedNg;
    }
 
    public String getVcRpNames() {
