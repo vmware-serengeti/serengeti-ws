@@ -38,9 +38,11 @@ import com.vmware.bdd.entity.DiskEntity;
 import com.vmware.bdd.entity.NicEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.entity.NodeGroupEntity;
+import com.vmware.bdd.entity.NodeTemplateEntity;
 import com.vmware.bdd.entity.ServerInfoEntity;
 import com.vmware.bdd.entity.VcResourcePoolEntity;
 import com.vmware.bdd.exception.BddException;
+import com.vmware.bdd.manager.i18n.Messages;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
@@ -195,7 +197,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
       clusterRead.setNodeGroups(ngReads);
       clusterRead.setInstanceNum(clusterInstanceNum);
-      clusterRead.setTemplateName(this.nodeTemplateDAO.findByMoid(cluster.getTemplateId()).getName());
+      setNodeTemplateName(clusterRead, cluster.getTemplateId());
 
       return clusterRead;
    }
@@ -242,7 +244,7 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       }
       clusterRead.setNodeGroups(ngReads);
       clusterRead.setInstanceNum(clusterInstanceNum);
-      clusterRead.setTemplateName(this.nodeTemplateDAO.findByMoid(cluster.getTemplateId()).getName());
+      setNodeTemplateName(clusterRead, cluster.getTemplateId());
 
       List<ResourcePoolRead> rpReads = new ArrayList<ResourcePoolRead>();
       Set<Long> processedRpIds = new HashSet<>();
@@ -258,6 +260,18 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
       clusterRead.setResourcePools(rpReads);
 
       return clusterRead;
+   }
+
+   //Set node template name for ClusterRead object
+   private void setNodeTemplateName(ClusterRead clusterRead, String templateId) {
+      NodeTemplateEntity template = this.nodeTemplateDAO.findByMoid(templateId);
+      if(template != null) {
+         clusterRead.setTemplateName(template.getName());
+      } else {
+         logger.warn("NodeTemplateEntity not found: " + templateId);
+         String notFound = Messages.getString("CLUSTER_MANAGER.NODE_TEMPLATE_NOT_FOUND");
+         clusterRead.setTemplateName(notFound);
+      }
    }
 
    public Map<String, Map<String, String>> findInfraConfig(String clusterName) {
