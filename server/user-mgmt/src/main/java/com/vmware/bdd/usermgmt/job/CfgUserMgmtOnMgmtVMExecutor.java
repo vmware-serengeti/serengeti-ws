@@ -100,7 +100,9 @@ public class CfgUserMgmtOnMgmtVMExecutor {
             .addArgument("chef-client")
             .addArgument("-z")
             .addArgument("-j")
-            .addArgument("\"" + specFilePath + "\"");
+            .addArgument("\"" + specFilePath + "\"")
+            .addArgument("-c")
+            .addArgument("/opt/serengeti/.chef/knife.rb");
 
       execCommand(cmdLine);
    }
