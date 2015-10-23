@@ -662,7 +662,7 @@ public class ClusterConfigManager {
       return nodeGroups;
    }
 
-   private NodeGroupEntity convertGroup(Gson gson, ClusterEntity clusterEntity,
+   public NodeGroupEntity convertGroup(Gson gson, ClusterEntity clusterEntity,
          NodeGroupCreate group, String distro, boolean validateWhiteList) {
       NodeGroupEntity groupEntity = new NodeGroupEntity();
       if (group.getRoles() == null || group.getRoles().isEmpty()) {

@@ -1792,34 +1792,9 @@ public class ClusterManager {
             NodeGroupEntity group =
                     clusterEntityMgr.findByName(clusterName, ng.getName());
             if (group == null) {
-               NodeGroupEntity addNodeGroupEntity = new NodeGroupEntity();
-               addNodeGroupEntity.setName(ng.getName());
-               addNodeGroupEntity.setRoles((new Gson()).toJson(ng.getRoles()));
-               addNodeGroupEntity.setNodeType(ng.getInstanceType());
-               addNodeGroupEntity.setDefineInstanceNum(ng.getInstanceNum());
-               addNodeGroupEntity.setCpuNum(ng.getCpuNum());
-               addNodeGroupEntity.setMemorySize(ng.getMemCapacityMB());
-               addNodeGroupEntity.setHaFlag(ng.getHaFlag());
-               if (null != ng.getStorage()) {
-                  if (ng.getStorage().getType().equals(Datastore.DatastoreType.SHARED.toString())) {
-                     addNodeGroupEntity.setStorageType(Datastore.DatastoreType.SHARED);
-                  } else if (ng.getStorage().getType().equals(Datastore.DatastoreType.LOCAL.toString())) {
-                     addNodeGroupEntity.setStorageType(Datastore.DatastoreType.LOCAL);
-                  }
-                  addNodeGroupEntity.setStorageSize(ng.getStorage().getSizeGB());
-                  addNodeGroupEntity.setVcDatastoreNameList(ng.getStorage().getDsNames());
-                  addNodeGroupEntity.setDdDatastoreNameList(ng.getStorage().getDsNames4Data());
-                  addNodeGroupEntity.setSdDatastoreNameList(ng.getStorage().getDsNames4System());
-               }
-               addNodeGroupEntity.setGroupRacks(ng.getReferredGroup());
-               addNodeGroupEntity.setHadoopConfig((new Gson()).toJson(ng
-                       .getConfiguration()));
-               addNodeGroupEntity.setCluster(clusterEntity);
-               addNodeGroupEntity.setVmFolderPath(clusterEntity);
+               NodeGroupEntity addNodeGroupEntity = clusterConfigMgr.convertGroup(new Gson(), clusterEntity, ng, null, true);
                addNodeGroupEntity.setIsProvisioning(true);
-               ng.setVmFolderPath(clusterEntity.getRootFolder() + "/" + ng.getName());
                clusterEntityMgr.insert(addNodeGroupEntity);
-
                readyExpand = true;
             } else if (group.getIsProvisioning() == Boolean.TRUE) {
                readyExpand = true;
