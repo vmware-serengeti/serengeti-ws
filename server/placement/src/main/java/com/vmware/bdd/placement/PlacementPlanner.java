@@ -87,6 +87,7 @@ public class PlacementPlanner implements IPlacementPlanner {
 
    Map<String, String> hostToRackMap;
 
+   @Override
    public void init(ClusterCreate cluster, BaseNode template,
          List<BaseNode> existedNodes, Map<String, String> hostToRackMap) {
       this.cluster = cluster;
@@ -765,7 +766,8 @@ public class PlacementPlanner implements IPlacementPlanner {
             if (DiskType.DATA_DISK == disk.getDiskType()) {
                if (disk.isSeparable()) {
                   String storageType = node.getNodeGroup().getStorage().getType();
-                  int disksNum = node.getNodeGroup().getStorage().getDiskNum();
+                  Integer num = node.getNodeGroup().getStorage().getDiskNum();
+                  int disksNum = num != null ? num : 0;
                   logger.info(String.format("%1$s disks number per node for node %2$s is %3$d", storageType, node.getVmName(), disksNum));
                   if (disksNum > 0) {
                      int subdiskSize = disk.getSize() / disksNum;
@@ -857,6 +859,7 @@ public class PlacementPlanner implements IPlacementPlanner {
 
       Collections.sort(sortedList,
             new Comparator<Map.Entry<String, Integer>>() {
+               @Override
                public int compare(Map.Entry<String, Integer> e1,
                      Map.Entry<String, Integer> e2) {
                   return e1.getValue().compareTo(e2.getValue());

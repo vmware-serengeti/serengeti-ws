@@ -429,7 +429,7 @@ public class TestClouderaManagerImpl {
          mockedProvider.onStopCluster(blueprint, reportQueue);
       } catch (SoftwareManagementPluginException e) {
          exceptionExist = true;
-         Assert.assertEquals(e.getMessage(), "An exception happens when App_Manager (ClouderaManager) tries to stop the cluster: cluster01.");
+         Assert.assertEquals(e.getMessage(), "An exception happens when Application Manager (ClouderaManager) tries to stop the cluster: cluster01.");
       }
       Assert.assertTrue(exceptionExist);
       Mockito.when(apiRootResource.getRootV6()).thenReturn(rootResourceV6);
@@ -490,7 +490,7 @@ public class TestClouderaManagerImpl {
          mockedProvider.startCluster(blueprint, reportQueue);
       } catch (SoftwareManagementPluginException e) {
          exceptionExist = true;
-         Assert.assertEquals(e.getMessage(), "App_Manager (ClouderaManager) fails to start the cluster: cluster01.");
+         Assert.assertEquals(e.getMessage(), "Application Manager (ClouderaManager) fails to start the cluster: cluster01.");
       }
       Assert.assertTrue(exceptionExist);
       Mockito.when(apiRootResource.getRootV6()).thenReturn(rootResourceV6);

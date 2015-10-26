@@ -134,7 +134,7 @@ public class VcVmUtil {
          throw BddException.wrapIfNeeded(e, e.getLocalizedMessage());
       }
    }
-   
+
    /**
     * Returns all ip addresses
     */
@@ -178,7 +178,7 @@ public class VcVmUtil {
          throw BddException.wrapIfNeeded(e, e.getLocalizedMessage());
       }
    }
-   
+
    public static Set<String> getAllIpAddresses(final VcVirtualMachine vcVm,
          final Set<String> portGroups, boolean inSession) {
       Set<String> allIpAddresses = new HashSet<String>();
@@ -627,6 +627,7 @@ public class VcVmUtil {
             return null;
          }
 
+         @Override
          protected boolean isTaskSession() {
             return true;
          }
@@ -734,9 +735,10 @@ public class VcVmUtil {
                   .getMemCapacityMB();
       resourceSchema.priority =
             com.vmware.aurora.interfaces.model.IDatabaseConfig.Priority.Normal;
+      LatencyPriority latencyPriority = groupSpec.getLatencySensitivity();
       resourceSchema.latencySensitivity =
-            (CommonUtil.isBlank(groupSpec.getLatencySensitivity().name()) ?
-                  LatencyPriority.NORMAL : groupSpec.getLatencySensitivity());
+            (latencyPriority == null || CommonUtil.isBlank(latencyPriority.name()) ?
+                  LatencyPriority.NORMAL : latencyPriority);
       schema.resourceSchema = resourceSchema;
 
       // prepare disk schema
@@ -925,6 +927,7 @@ public class VcVmUtil {
                return null;
             }
 
+            @Override
             protected boolean isTaskSession() {
                return true;
             }
@@ -949,6 +952,7 @@ public class VcVmUtil {
                return null;
             }
 
+            @Override
             protected boolean isTaskSession() {
                return true;
             }
@@ -972,6 +976,7 @@ public class VcVmUtil {
                return null;
             }
 
+            @Override
             protected boolean isTaskSession() {
                return true;
             }
@@ -1014,6 +1019,7 @@ public class VcVmUtil {
             return false;
          }
 
+         @Override
          protected boolean isTaskSession() {
             return true;
          }
@@ -1073,6 +1079,7 @@ public class VcVmUtil {
             return false;
          }
 
+         @Override
          protected boolean isTaskSession() {
             return true;
          }

@@ -47,7 +47,7 @@ public class TestRestLogInterceptor {
             } else {
                 assertEquals(file.getAbsolutePath(), "/opt/serengeti/logs/serengeti.audit");
             }
-            assertTrue(content.contains("Fail") && content.contains("localhost"));
+            assertTrue(content.contains("localhost, GET /api/hello, 200"));
             assertTrue(append);
         }
     }
@@ -59,7 +59,10 @@ public class TestRestLogInterceptor {
         when(request.getHeader("X-FORWARDED-FOR")).thenReturn(null);
         when(request.getRemoteAddr()).thenReturn("");
         when(request.getRemoteHost()).thenReturn("localhost");
+        when(request.getRequestURI()).thenReturn("/api/hello");
+        when(request.getMethod()).thenReturn("GET");
         response = mock(HttpServletResponse.class);
+        when(response.getStatus()).thenReturn(200);
         handler = mock(Object.class);
         ex = mock(Exception.class);
     }

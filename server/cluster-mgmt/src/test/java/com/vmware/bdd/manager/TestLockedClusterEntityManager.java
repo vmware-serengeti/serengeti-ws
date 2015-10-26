@@ -14,6 +14,8 @@
  ***************************************************************************/
 package com.vmware.bdd.manager;
 
+import mockit.Mockit;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -32,6 +34,7 @@ import com.vmware.bdd.service.sp.MockClusterEntityManager;
 public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextTests {
 
    private MockClusterEntityManager mockedMgr;
+
    private static class LockTestThread extends Thread {
       private ILockedClusterEntityManager clusterEntityMgr;
 
@@ -39,6 +42,7 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
          this.clusterEntityMgr = clusterEntityMgr;
       }
 
+      @Override
       public void run() {
          clusterEntityMgr.syncUp(LOCKED_CLUSTER_NAME, false);
       }
@@ -56,6 +60,7 @@ public class TestLockedClusterEntityManager extends AbstractTestNGSpringContextT
       mockedMgr = new MockClusterEntityManager();
       competitiveLockedMgr.setClusterEntityMgr(mockedMgr);
       exclusiveLockedMgr.setClusterEntityMgr(mockedMgr);
+      Mockit.setUpMock(MockClusterEntityManager.class);
    }
 
    @AfterClass

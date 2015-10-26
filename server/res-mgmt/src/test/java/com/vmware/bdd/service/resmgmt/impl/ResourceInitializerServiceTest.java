@@ -22,11 +22,14 @@ import java.util.Map;
 import com.vmware.bdd.apitypes.NetworkDnsType;
 import mockit.Mock;
 import mockit.MockUp;
+import mockit.Mockit;
 import mockit.Tested;
 
 import org.apache.log4j.Logger;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
@@ -42,6 +45,7 @@ import com.vmware.bdd.service.resmgmt.IDatastoreService;
 import com.vmware.bdd.service.resmgmt.INetworkService;
 import com.vmware.bdd.service.resmgmt.IResourceInitializerService;
 import com.vmware.bdd.service.resmgmt.IResourcePoolService;
+import com.vmware.bdd.service.utils.MockResourceService;
 
 /**
  * @author Jarred Li
@@ -67,6 +71,15 @@ public class ResourceInitializerServiceTest extends BaseResourceTest{
       service = new ResourceInitializerService();
    }
 
+   @AfterMethod(groups = { "res-mgmt" })
+   public void tearDownMockup() {
+      Mockit.tearDownMocks();
+   }
+
+   @BeforeMethod(groups = { "res-mgmt" })
+   public void setMockup() {
+      Mockit.setUpMock(MockResourceService.class);
+   }
 
    @Test(groups = { "res-mgmt"})
    public void isResoruceInitialized() {
@@ -210,8 +223,7 @@ public class ResourceInitializerServiceTest extends BaseResourceTest{
       networkSvc = new MockUp<INetworkService>() {
          @Mock
          NetworkEntity addDhcpNetwork(final String name,
-               final String portGroup, NetworkDnsType dnsType,
-               final boolean isGenerateHostname) {
+               final String portGroup, NetworkDnsType dnsType) {
             Assert.assertEquals(dnsType, NetworkDnsType.NORMAL);
             Assert.assertEquals(name, "defaultNetwork");
             Assert.assertEquals(portGroup, "serengetiNet");

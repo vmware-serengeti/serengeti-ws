@@ -17,6 +17,7 @@ package com.vmware.bdd.plugin.ambari.service.am;
 import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
 import com.vmware.bdd.plugin.ambari.api.exception.AmbariApiException;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
+import com.vmware.bdd.plugin.ambari.api.manager.ApiManager_1_7_0;
 import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiCluster;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiClusterList;
@@ -27,6 +28,8 @@ import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiTask;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiTaskInfo;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiRequest;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.request.ApiGetRequestInfo;
+import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
+import com.vmware.bdd.software.mgmt.plugin.monitor.ServiceStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,36 +37,26 @@ import java.util.List;
 /**
  * Created by qjin on 8/27/14.
  */
-public class FakeApiManager extends ApiManager {
+public class FakeApiManager extends ApiManager_1_7_0 {
 
    public FakeApiManager(AmbariManagerClientbuilder clientbuilder) {
       super(clientbuilder);
    }
 
-   @Override
-   public ApiRequest startAllServicesInCluster(String clusterName) throws AmbariApiException {
-      return null;
-   }
+//   @Override
+//   public ApiRequest startAllServicesInCluster(String clusterName) throws AmbariApiException {
+//      return null;
+//   }
+//
+//   @Override
+//   public ApiRequest stopAllServicesInCluster(String clusterName) throws AmbariApiException {
+//      return null;
+//   }
 
-   @Override
-   public ApiRequest stopAllServicesInCluster(String clusterName) throws AmbariApiException {
-      return null;
-   }
-
-   @Override
-   public ApiClusterList getClusterList() {
-      return new ApiClusterList();
-   }
-
-   @Override
-   public ApiCluster getCluster(String clusterName) {
-      return null;
-   }
-
-   @Override
-   public boolean deleteService(String clusterName, String serviceName) {
-      return true;
-   }
+//   @Override
+//   public ApiClusterList getClusterList() {
+//      return new ApiClusterList();
+//   }
 
    @Override
    public List<String> getClusterServicesNames(String clusterName) throws AmbariApiException {

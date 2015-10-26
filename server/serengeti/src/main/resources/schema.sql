@@ -139,6 +139,7 @@ create table node_group (
    dd_datastore_names     text,
    vc_rp_names            text,
    group_racks            text,
+   vm_folder_path         text,
    configuration          text,
    instance_per_host      integer,
    cluster_id             bigint,

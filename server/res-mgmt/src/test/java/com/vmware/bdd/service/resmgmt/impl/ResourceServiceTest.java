@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import com.vmware.bdd.service.utils.MockResourceService;
 import com.vmware.bdd.service.utils.MockVcContext;
 import com.vmware.bdd.service.utils.MockVcInventory;
 import mockit.*;
@@ -48,7 +49,7 @@ import com.vmware.bdd.exception.VcProviderException;
  * @version 0.8
  *
  */
-
+/*
 public class ResourceServiceTest extends BaseResourceTest {
 
    private static final Logger logger = Logger
@@ -69,6 +70,7 @@ public class ResourceServiceTest extends BaseResourceTest {
    @BeforeClass
    public void init() {
       resSvc = new ResourceService();
+      //Mockit.setUpMock(MockResourceService.class);
       Mockit.setUpMock(MockVcContext.class);
       Mockit.setUpMock(MockVcInventory.class);
    }
@@ -318,3 +320,4 @@ public class ResourceServiceTest extends BaseResourceTest {
    }
 
 }
+*/

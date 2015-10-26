@@ -255,9 +255,9 @@ public class ClusterManager {
          SoftwareManager softwareManager = clusterConfigMgr.getSoftwareManager(clusterConfig.getAppManager());
          IronfanStack stack = (IronfanStack)filterDistroFromAppManager(softwareManager, clusterConfig.getDistro());
          CommonClusterExpandPolicy.expandDistro(clusterConfig, stack);
-         
+
          attrs.put("cloud_provider", cloudProvider);
-         attrs.put("cluster_definition", clusterConfig);         
+         attrs.put("cluster_definition", clusterConfig);
       }
 
       if (read != null) {
@@ -462,20 +462,16 @@ public class ClusterManager {
       }
       logger.info("start to create a cluster: " + name);
 
-      List<String> dsNames = getUsedDS(clusterSpec.getDsNames());
+      List<String> dsNames = getDsNamesToBeUsed(clusterSpec.getDsNames());
       if (dsNames.isEmpty()) {
          throw ClusterConfigException.NO_DATASTORE_ADDED();
       }
-      List<VcCluster> vcClusters = getUsedVcClusters(clusterSpec.getRpNames());
+      List<VcCluster> vcClusters = getVcClustersToBeUsed(clusterSpec.getRpNames());
       if (vcClusters == null || vcClusters.isEmpty()) {
          throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
       }
 
-      if(logger.isDebugEnabled()) {
-         logger.debug("skipRefreshVc: " + newParams.getBoolean(Constants.SKIP_REFRESH_VC));
-      }
-
-      if(BooleanUtils.toBoolean(newParams.getBoolean(Constants.SKIP_REFRESH_VC))) {
+      if(newParams.getBoolean(Constants.SKIP_REFRESH_VC, false)) {
          logger.info("skip refresh vc resources.");
       } else {
          VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
@@ -619,7 +615,10 @@ public class ClusterManager {
       }
    }
 
-   private List<String> getUsedDS(List<String> specifiedDsNames) {
+   /**
+    * Get the dsNames to be used by the cluster
+    */
+   private List<String> getDsNamesToBeUsed(List<String> specifiedDsNames) {
       if (specifiedDsNames == null || specifiedDsNames.isEmpty()) {
          specifiedDsNames = new ArrayList<String>();
          specifiedDsNames.addAll(clusterConfigMgr.getDatastoreMgr()
@@ -638,7 +637,10 @@ public class ClusterManager {
       return rpNames;
    }
 
-   private List<VcCluster> getUsedVcClusters(List<String> rpNames) {
+   /**
+    * Get the vCenter clusters to be used by the cluster
+    */
+   private List<VcCluster> getVcClustersToBeUsed(List<String> rpNames) {
       List<VcCluster> clusters = null;
       if (rpNames == null || rpNames.isEmpty()) {
          clusters = clusterConfigMgr.getRpMgr().getAllVcResourcePool();
@@ -757,20 +759,16 @@ public class ClusterManager {
          }
       }
 
-      List<String> dsNames = getUsedDS(cluster.getVcDatastoreNameList());
+      List<String> dsNames = getDsNamesToBeUsed(cluster.getVcDatastoreNameList());
       if (dsNames.isEmpty()) {
-         throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
-      }
-      List<VcCluster> vcClusters = getUsedVcClusters(cluster.getVcRpNameList());
-      if (vcClusters.isEmpty()) {
          throw ClusterConfigException.NO_DATASTORE_ADDED();
       }
-
-      if(logger.isDebugEnabled()) {
-         logger.debug("skipRefreshVc: " + newParams.getBoolean(Constants.SKIP_REFRESH_VC));
+      List<VcCluster> vcClusters = getVcClustersToBeUsed(cluster.getVcRpNameList());
+      if (vcClusters.isEmpty()) {
+         throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
       }
 
-      if(BooleanUtils.toBoolean(newParams.getBoolean(Constants.SKIP_REFRESH_VC))) {
+      if(newParams.getBoolean(Constants.SKIP_REFRESH_VC, false)) {
          logger.info("skip refresh vc resources.");
       } else {
          VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
@@ -1004,21 +1002,17 @@ public class ClusterManager {
 
       ValidationUtils.validateVersion(clusterEntityMgr, clusterName);
 
-      List<String> dsNames = getUsedDS(cluster.getVcDatastoreNameList());
+      List<String> dsNames = getDsNamesToBeUsed(cluster.getVcDatastoreNameList());
       if (dsNames.isEmpty()) {
          throw ClusterConfigException.NO_DATASTORE_ADDED();
       }
 
-      List<VcCluster> vcClusters = getUsedVcClusters(cluster.getVcRpNameList());
+      List<VcCluster> vcClusters = getVcClustersToBeUsed(cluster.getVcRpNameList());
       if (vcClusters.isEmpty()) {
          throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
       }
 
-      if(logger.isDebugEnabled()) {
-         logger.debug("skipRefreshVc: " + newParams.getBoolean(Constants.SKIP_REFRESH_VC));
-      }
-
-      if(BooleanUtils.toBoolean(newParams.getBoolean(Constants.SKIP_REFRESH_VC))) {
+      if(newParams.getBoolean(Constants.SKIP_REFRESH_VC, false)) {
          logger.info("skip refresh vc resources.");
       } else {
          VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
@@ -1694,6 +1688,7 @@ public class ClusterManager {
 
          // scan the files under the serengeti yum repo directory
          File[] rpmList = yumRepoPath.listFiles(new FileFilter() {
+            @Override
             public boolean accept(File f) {
                String fname = f.getName();
                int idx = fname.indexOf("-");
@@ -1840,11 +1835,11 @@ public class ClusterManager {
                     "To update a cluster, its status must be PROVISION_ERROR");
          }
       }
-      List<String> dsNames = getUsedDS(cluster.getVcDatastoreNameList());
+      List<String> dsNames = getDsNamesToBeUsed(cluster.getVcDatastoreNameList());
       if (dsNames.isEmpty()) {
          throw ClusterConfigException.NO_DATASTORE_ADDED();
       }
-      List<VcCluster> vcClusters = getUsedVcClusters(cluster.getVcRpNameList());
+      List<VcCluster> vcClusters = getVcClustersToBeUsed(cluster.getVcRpNameList());
       if (vcClusters.isEmpty()) {
          throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
       }

@@ -15,6 +15,7 @@
 package com.vmware.bdd.plugin.ambari.api.manager;
 
 import com.google.gson.Gson;
+import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
 import com.vmware.bdd.plugin.ambari.api.exception.AmbariApiException;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiAlert;
 import com.vmware.bdd.plugin.ambari.api.model.cluster.ApiServiceAlert;
@@ -41,6 +42,10 @@ public class ApiManager_1_7_0 extends ApiManager {
 
    public ApiManager_1_7_0(URL baseUrl, String user, String password) {
       super(baseUrl, user, password);
+   }
+
+   public ApiManager_1_7_0(AmbariManagerClientbuilder clientbuilder) {
+      super(clientbuilder);
    }
 
    @Override

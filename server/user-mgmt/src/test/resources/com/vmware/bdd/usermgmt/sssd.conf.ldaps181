@@ -31,7 +31,7 @@ ldap_group_object_class = Group
 ldap_user_search_base = cn=Users,dc=bde,dc=vmware,dc=com
 ldap_group_search_base = cn=Builtin,dc=bde,dc=vmware,dc=com
 
-ldap_uri = ldap://10.112.113.181
+ldap_uri = ldap://10.112.113.182
 ldap_default_bind_dn = xiaoliangl@bde.vmware.com
 ldap_default_authtok = VMware123
 

@@ -184,8 +184,6 @@ public class DistroManager {
    private static String distroRootUrl = "http://localhost/distros/";
    private static String distrosManifestUrl;
    private static final Logger logger = Logger.getLogger(DistroManager.class);
-   private static String eTag = null;
-   private static long lastModified = 0L;
 
    static {
       distroRootUrl = Configuration.getString("serengeti.distro_root", distroRootUrl);
@@ -196,6 +194,8 @@ public class DistroManager {
       NONE, TARBALL, REPO, BOTH
    }
 
+   private String eTag = null;
+   private long lastModified = 0L;
    private Map<String, Distro> distros = null;
 
    public DistroManager() {
@@ -206,7 +206,7 @@ public class DistroManager {
       }
    }
 
-/*   
+/*
    public List<DistroRead> getPluginSupportDistro(String appManager) {
       SoftwareManager softwareManager =
             softwareManagerCollector.getSoftwareManager(appManager);
@@ -241,7 +241,7 @@ public class DistroManager {
          // No need to reload the file if it's not modified.
          if (lastModified != manifestFile.lastModified()) {
             lastModified = manifestFile.lastModified();
-            logger.debug("last modified date of manifest file changed. Reloading manifest.");
+            logger.info("last modified date of manifest file changed. Reloading manifest.");
          } else {
             return null;
          }
@@ -275,7 +275,6 @@ public class DistroManager {
 
          Scheme sch = new Scheme("https", 443, socketFactory);
          httpclient.getConnectionManager().getSchemeRegistry().register(sch);
-
          HttpGet httpget = new HttpGet(new URI(distrosManifestUrl));
          if (eTag != null) {
             httpget.addHeader("If-None-Match", eTag);

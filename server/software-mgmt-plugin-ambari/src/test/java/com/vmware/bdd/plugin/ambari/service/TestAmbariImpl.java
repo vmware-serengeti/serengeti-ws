@@ -186,7 +186,7 @@ public class TestAmbariImpl {
          ambari.onStopCluster(blueprint, reportQueue);
       } catch (SoftwareManagementPluginException e) {
          Assert.assertNotNull(e.getCause());
-         String expectedErrMsg = "App_Manager (" + Constants.AMBARI_PLUGIN_NAME + ") fails to stop the cluster " +
+         String expectedErrMsg = "Application Manager (" + Constants.AMBARI_PLUGIN_NAME + ") fails to stop the cluster " +
                blueprint.getName() + ": Cannot stop a cluster that is not provisioned by Big Data Extension.";
          Assert.assertEquals(e.getCause().getMessage(), expectedErrMsg);
       }

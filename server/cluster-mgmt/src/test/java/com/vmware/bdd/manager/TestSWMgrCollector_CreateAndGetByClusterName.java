@@ -73,7 +73,7 @@ public class TestSWMgrCollector_CreateAndGetByClusterName extends TestSWMgrColle
    }
 
    @Test(expectedExceptions = BddException.class,
-         expectedExceptionsMessageRegExp = "Internal error: Failed to write AppManager to META-DB.")
+         expectedExceptionsMessageRegExp = "Internal server error: Failed to write AppManager to META-DB.")
    public void testCreateAppManager_FailedWriteMetaDB() {
       Mockito.doThrow(new RuntimeException()).when(appManagerService).addAppManager(appManagerAddFoo);
 

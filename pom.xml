@@ -660,6 +660,9 @@
                      <excludes>
                         <exclude>**/TestClusteringJobs.java</exclude>
                         <exclude>**/SoftwareManagementClientTest.java</exclude>
+												<exclude>**/TestAm*.java</exclude>
+												<exclude>**/TestLockedClusterEntityManager.java</exclude>
+												<exclude>**/TestUserMgmtServerController*.java</exclude>
                      </excludes>
                   </configuration>
                </plugin>

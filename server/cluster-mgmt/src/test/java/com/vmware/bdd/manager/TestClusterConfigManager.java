@@ -106,6 +106,8 @@ public class TestClusterConfigManager {
    public void setMockup() {
       Mockit.setUpMock(MockResourceManager.class);
       Mockit.setUpMock(MockVcVmUtil.class);
+      Mockit.setUpMock(MockVcResourceUtils.class);
+      Mockit.setUpMock(MockNodeTemplateService.class);
    }
 
    @AfterClass(groups = { "TestClusterConfigManager" })
@@ -1125,7 +1127,7 @@ public class TestClusterConfigManager {
       System.out.println(manifest);
       Assert.assertTrue(
             manifest
-                  .indexOf("{\"name\":\"my-cluster5\",\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\",\"hadoop_resourcemanager\",\"hadoop_datanode\",\"hadoop_nodemanager\"],\"instance_num\":1,\"storage\":{\"type\":\"local\",\"shares\":\"NORMAL\",\"sizeGB\":50,\"diskNum\":2,\"shareDatastore\":false},\"cpu\":3,\"memory\":15000,\"swap_ratio\":1.0,\"ha\":\"off\"") == 0,
+                  .indexOf("\"groups\":[{\"name\":\"main_group\",\"roles\":[\"hadoop_namenode\",\"hadoop_resourcemanager\",\"hadoop_datanode\",\"hadoop_nodemanager\"],\"instance_num\":1,\"storage\":{\"type\":\"local\",\"shares\":\"NORMAL\",\"sizeGB\":50,\"diskNum\":2,\"shareDatastore\":false},\"cpu\":3,\"memory\":15000") >= 0,
             "manifest is inconsistent");
    }
 

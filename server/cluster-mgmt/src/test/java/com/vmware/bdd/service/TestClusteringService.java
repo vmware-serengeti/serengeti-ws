@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import mockit.Mock;
+import mockit.MockClass;
 import mockit.Mockit;
 
 import org.apache.log4j.Logger;
@@ -80,6 +82,7 @@ public class TestClusteringService {
       Mockit.setUpMock(MockVcResourceUtils.class);
       Mockit.setUpMock(MockVcVmUtil.class);
       Mockit.setUpMock(MockVcCache.class);
+      Mockit.setUpMock(MockClusteringService.class);
    }
 
    @BeforeClass(groups = { "TestClusteringService" })
@@ -90,14 +93,9 @@ public class TestClusteringService {
       // mock a VcVm
       VcVirtualMachine vm = Mockito.mock(VcVirtualMachine.class);
       Mockito.when(vm.getName()).thenReturn("template-vm");
-      Mockito.when(vm.getDatacenter()).thenReturn(
-            Mockito.mock(VcDatacenter.class));
+      Mockito.when(vm.getDatacenter()).thenReturn(Mockito.mock(VcDatacenter.class));
 
-      // set vcVm field
-      Field field = service.getClass().getDeclaredField("templateVm");
-      field.setAccessible(true);
-      field.set(service, vm);
-
+      Field field;
       field = service.getClass().getDeclaredField("cloneConcurrency");
       field.setAccessible(true);
       field.set(service, 2);

@@ -62,6 +62,7 @@ import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.service.MockTmScheduler;
 import com.vmware.bdd.service.MockTmScheduler.VmOperation;
 import com.vmware.bdd.service.MockVcCache;
+import com.vmware.bdd.service.sp.MockClusterEntityManager;
 
 @ContextConfiguration(locations = { "classpath:/spring/*-context.xml"})
 public class TestClusterManager extends AbstractTestNGSpringContextTests {
@@ -86,6 +87,7 @@ public class TestClusterManager extends AbstractTestNGSpringContextTests {
       Mockit.setUpMock(MockValidationUtils.class);
       Mockit.setUpMock(MockTmScheduler.class);
       Mockit.setUpMock(MockVcCache.class);
+      Mockit.setUpMock(MockClusterEntityManager.class);
       MockVcCache.setGetFlag(true);
    }
 
@@ -245,7 +247,7 @@ public class TestClusterManager extends AbstractTestNGSpringContextTests {
       IClusterEntityManager iclusterEntityManager =
             new MockUp<IClusterEntityManager>() {
                @Mock
-               public ClusterRead toClusterRead(String name) {
+               public ClusterRead findClusterWithNodes(String clusterName, boolean includeVolumns) {
                   ClusterRead cluster = new ClusterRead();
                   cluster.setTopologyPolicy(TopologyType.NONE);
                   List<NodeGroupRead> nodeGroups =
@@ -253,6 +255,7 @@ public class TestClusterManager extends AbstractTestNGSpringContextTests {
                   NodeGroupRead nodeGroup = new NodeGroupRead();
                   List<NodeRead> nodes = new ArrayList<NodeRead>();
                   NodeRead node = new NodeRead();
+                  node.setMoId("vm-01");
                   node.setRack("rack1");
                   node.setHostName("host1.com");
                   Map<NetTrafficType, List<IpConfigInfo>> ipConfigs =

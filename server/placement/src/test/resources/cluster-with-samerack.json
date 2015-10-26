@@ -79,7 +79,6 @@
       ]
      }
   ],
-  "templateId": "vm-10786",
   "networkings": [
   {
     "portGroup": "wdc-vhadp-pub2",

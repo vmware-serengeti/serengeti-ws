@@ -250,14 +250,10 @@ public class TestClusterEntityManager extends AbstractTestNGSpringContextTests {
       report.getNodeReports().put(HDFS_NODE_1, node);
 
       boolean result = clusterEntityMgr.handleOperationStatus(CLUSTER_NAME, report, false);
-      Assert.assertFalse(result, 
+      Assert.assertFalse(result,
             "cluster " + CLUSTER_NAME + " operation should not be finished");
       List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(CLUSTER_NAME);
-      Assert.assertTrue("Installing node agent...".equals(nodes.get(0).getAction()),
-            "node 1 action should be " + "Installing node agent..." 
-            + ", but got " + nodes.get(0).getAction());
-      Assert.assertTrue("Installing agent...".equals(nodes.get(1).getAction()),
-            "node 1 action should be " + "Installing agent..." 
-            + ", but got " + nodes.get(1).getAction());
+      Assert.assertEquals(nodes.get(0).getAction(), "Installing agent...");
+      Assert.assertEquals(nodes.get(0).getAction(), "Installing agent...");
    }
 }

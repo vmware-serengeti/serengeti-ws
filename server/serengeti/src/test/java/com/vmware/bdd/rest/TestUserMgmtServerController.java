@@ -50,7 +50,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 /**
  * Created By xiaoliangl on 11/27/14.
  */
-@ContextConfiguration(locations = {"classpath:mocks.xml", "classpath:test-usermgmtserver-controller.xml"})
+@ContextConfiguration(locations = { "classpath:mocks.xml", "classpath:test-usermgmtserver-controller.xml",
+      "classpath:datasource-context.xml", "classpath:tx-context.xml" })
 @WebAppConfiguration
 @ActiveProfiles("webapp")
 public class TestUserMgmtServerController extends AbstractTestNGSpringContextTests {

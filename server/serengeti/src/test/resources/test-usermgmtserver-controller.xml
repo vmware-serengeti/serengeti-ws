@@ -7,9 +7,10 @@
         http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context
-        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/context/spring-context-3.1.xsd
         http://www.springframework.org/schema/mvc
         http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
    <bean name="userMgmtServerService" class="org.mockito.Mockito" factory-method="mock">
       <constructor-arg value="com.vmware.bdd.usermgmt.UserMgmtServerService"/>
    </bean>
@@ -22,4 +23,6 @@
       <context:exclude-filter type="regex" expression="com\.vmware\.bdd\.rest\.RestResource" />
       <context:exclude-filter type="regex" expression="com\.vmware\.bdd\.rest\.MgmtVMConfigController" />
    </context:component-scan>
+
+   <context:component-scan base-package="com.vmware.bdd" />
 </beans>

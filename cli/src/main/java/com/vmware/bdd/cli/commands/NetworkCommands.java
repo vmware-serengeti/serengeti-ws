@@ -104,7 +104,6 @@ public class NetworkCommands implements CommandMarker {
 
       NetworkType operType = null;
 
-       CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_NETWORK, NetworkDnsType.DYNAMIC.toString());
       if (!CommandsUtils.isBlank(ip) && dhcp) {
          CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
                Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
