@@ -463,6 +463,22 @@ public class Configuration {
    }
 
    /**
+    * Get all of values in a property as a String[] type.
+    *
+    * @param key
+    *           The key of property.
+    * @param defautValue
+    *           The default value.
+    * @return The property value.
+    */
+   public static String[] getStringArray(String key, String[] defautValue) {
+      String[] values = config.getStringArray(key);
+      if(values != null && values.length == 4)
+         return values;
+      return defautValue;
+   }
+
+   /**
     * Get all of values in a property as a string type.
     * 
     * @param key

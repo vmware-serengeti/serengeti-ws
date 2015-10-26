@@ -274,4 +274,6 @@ public class Constants {
    public static final String PARAMS_NETWORK_DDNS_TYPE = "DYNAMIC";
    public static final String VM_POWER_ON_WAITING_SEC_KEY = "vm.poweron.waiting.seconds";
    public static final String DELETE_POWEROFF_NOIP_VM = "cluster.operation.deletePowerOffNoIpVm";
+   //add by Chaolong
+   public static final String VCINVENTORYREFRESH_THREADPOOL_CONFIG = "vcinventoryrefresh.threadpool.config";
 }
