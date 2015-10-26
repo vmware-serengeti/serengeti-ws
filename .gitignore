@@ -14,3 +14,4 @@ cli/cli.properties
 lib/vlsi/*.jar
 **.pmd
 **.checkstyle
+.reviewboardrc

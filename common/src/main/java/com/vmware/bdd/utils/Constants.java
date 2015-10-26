@@ -248,4 +248,6 @@ public class Constants {
    public static final String SERENGETI_YUM_EXTRA_PACKAGES = "mailx,wsdl4j";
    public static final String SERENGETI_YUM_EXTRA_PACKAGES_CONFIG = "serengeti.yum.extra.pakcages.config";
 
+   //add by Chaolong
+   public static final String VCINVENTORYREFRESH_THREADPOOL_CONFIG = "vcinventoryrefresh.threadpool.config";
 }

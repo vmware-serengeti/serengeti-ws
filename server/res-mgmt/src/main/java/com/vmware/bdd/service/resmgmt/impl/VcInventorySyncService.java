@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.service.resmgmt.impl;
 
+import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.util.AuAssert;
 import com.vmware.aurora.vc.VcDatacenter;
 import com.vmware.aurora.vc.VcInventory;
@@ -23,18 +24,17 @@ import com.vmware.bdd.service.resmgmt.VC_RESOURCE_TYPE;
 import com.vmware.bdd.service.resmgmt.sync.AbstractSyncVcResSP;
 import com.vmware.bdd.service.resmgmt.sync.SyncVcResourceSp;
 import com.vmware.bdd.service.resmgmt.sync.filter.VcResourceFilters;
+import com.vmware.bdd.utils.Constants;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
-
+import com.vmware.aurora.global.ThreadPoolConfig;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -44,7 +44,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class VcInventorySyncService implements IVcInventorySyncService {
    private static final Logger LOGGER = Logger.getLogger(VcInventorySyncService.class);
 
-   private ExecutorService es = Executors.newFixedThreadPool(10);
+//   private ExecutorService es = Executors.newFixedThreadPool(10);//mark
+
+   private String[] defaultValue = {"10","100","100","VcInventorySync-"};
+
+   private ThreadPoolTaskExecutor es = null;
 
    private AtomicBoolean inProgress = new AtomicBoolean(false);
 
@@ -54,6 +58,17 @@ public class VcInventorySyncService implements IVcInventorySyncService {
 
    public void setCounters(VcInventorySyncCounters counters) {
       this.counters = counters;
+   }
+
+   public VcInventorySyncService() {
+      ThreadPoolConfig config = new ThreadPoolConfig(Configuration.getStringArray(Constants.VCINVENTORYREFRESH_THREADPOOL_CONFIG, defaultValue));
+      LOGGER.debug(config.toString());
+      es = new ThreadPoolTaskExecutor();
+      es.setCorePoolSize(config.getCorePoolSize());
+      es.setMaxPoolSize(config.getMaxPoolSize());
+      es.setQueueCapacity(config.getWorkQueue());
+      es.setThreadNamePrefix(config.getNamePrefix());
+      es.initialize();
    }
 
    /**
@@ -182,7 +197,7 @@ public class VcInventorySyncService implements IVcInventorySyncService {
       }
    }
 
-   private List<Future<List<AbstractSyncVcResSP>>> submit(ExecutorService es, List<AbstractSyncVcResSP> syncSps) {
+   private List<Future<List<AbstractSyncVcResSP>>> submit(ThreadPoolTaskExecutor es, List<AbstractSyncVcResSP> syncSps) {
 
       if (CollectionUtils.isNotEmpty(syncSps)) {
          List<Future<List<AbstractSyncVcResSP>>> newRefreshTaskList = new ArrayList();
@@ -196,7 +211,7 @@ public class VcInventorySyncService implements IVcInventorySyncService {
       }
    }
 
-   private void work(ExecutorService es, List<AbstractSyncVcResSP> syncSps) throws ExecutionException, InterruptedException {
+   private void work(ThreadPoolTaskExecutor es, List<AbstractSyncVcResSP> syncSps) throws ExecutionException, InterruptedException {
       List<Future<List<AbstractSyncVcResSP>>> resultList = submit(es, syncSps);
 
       while (resultList.size() > 0) {
