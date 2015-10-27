@@ -36,20 +36,10 @@ import javax.net.ssl.TrustManager;
  * enabled.
  */
 public class TlsTcpClient {
-   private boolean pspCompliant = false;
-
    private SimpleServerTrustManager trustManager;
 
    public TrustManager getTrustManager() {
       return trustManager;
-   }
-
-   public boolean isPspCompliant() {
-      return pspCompliant;
-   }
-
-   public void setPspCompliant(boolean pspCompliant) {
-      this.pspCompliant = pspCompliant;
    }
 
    public void setTrustManager(SimpleServerTrustManager trustManager) {
@@ -62,7 +52,7 @@ public class TlsTcpClient {
     * @param port
     */
    public void checkCertificateFirstly(String host, int port, final boolean forceTrustCert) {
-      PspConfiguration config = new PspConfiguration();
+      TlsClientConfiguration config = new TlsClientConfiguration();
       SSLSocket secureSocket = null;
       SSLSocketFactory socketFactory = null;
 
@@ -85,7 +75,7 @@ public class TlsTcpClient {
          /**
           * Instantiate a context that implements the family of TLS protocols
           */
-         SSLContext customSSLContext = SSLContext.getInstance(config.getSSLContextAlgorithm());
+         SSLContext customSSLContext = SSLContext.getInstance("TLS");
          /**
           * Initialize SSL context. Default instances of KeyManager and
           * SecureRandom are used.
@@ -109,16 +99,14 @@ public class TlsTcpClient {
 
          InetSocketAddress address = new InetSocketAddress(host, port);
 
-         if(isPspCompliant()) {
             /**
              * Build connection configuration and pass to socket
              */
-            SSLParameters params = new SSLParameters();
-            params.setCipherSuites(config.getSupportedCipherSuites());
-            params.setProtocols(config.getSupportedProtocols());
+         SSLParameters params = new SSLParameters();
+         params.setCipherSuites(config.getCipherSuites());
+         params.setProtocols(config.getSslProtocols());
 //          params.setEndpointIdentificationAlgorithm(config.getEndpointIdentificationAlgorithm());
-            secureSocket.setSSLParameters(params);
-         }
+         secureSocket.setSSLParameters(params);
 
          /**
           * Set socket options

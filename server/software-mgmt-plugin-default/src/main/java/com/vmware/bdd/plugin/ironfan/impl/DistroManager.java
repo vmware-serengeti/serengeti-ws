@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.vmware.bdd.security.tls.PspConfiguration;
+import com.vmware.bdd.security.tls.TlsClientConfiguration;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -37,7 +37,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
@@ -269,8 +268,9 @@ public class DistroManager {
             }
          }}, null);
 
+         TlsClientConfiguration tlsConfiguration = new TlsClientConfiguration();
          SSLSocketFactory socketFactory = new SSLSocketFactory(sslContext,
-               PspConfiguration.SSL_PROTOCOLS, PspConfiguration.WEAK_CIPHER_SUITES,
+               tlsConfiguration.getSslProtocols(), tlsConfiguration.getCipherSuites(),
                SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 
          Scheme sch = new Scheme("https", 443, socketFactory);

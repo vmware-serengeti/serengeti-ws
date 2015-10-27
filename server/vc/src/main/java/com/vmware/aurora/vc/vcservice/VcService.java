@@ -39,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManager;
 
+import com.vmware.bdd.security.tls.TlsClientConfiguration;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
@@ -517,6 +518,9 @@ public class VcService {
       httpConfig.getKeyStoreConfig().setKeyAlias(CmsKeyStore.VC_EXT_KEY);
       httpConfig.getKeyStoreConfig().setKeyPassword(CmsKeyStore.getVCExtPassword());
       httpConfig.setThumbprintVerifier(getThumbprintVerifier());
+
+      TlsClientConfiguration tlsClientConfiguration = new TlsClientConfiguration();
+      httpConfig.setEnabledProtocols(tlsClientConfiguration.getSslProtocols());
       HttpClientConfiguration clientConfig = HttpClientConfiguration.Factory.newInstance();
       clientConfig.setHttpConfiguration(httpConfig);
       Client client = Client.Factory.createClient(sdkUri, version, clientConfig);

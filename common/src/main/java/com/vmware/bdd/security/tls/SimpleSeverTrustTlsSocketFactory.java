@@ -198,13 +198,13 @@ public class SimpleSeverTrustTlsSocketFactory extends SSLSocketFactory {
          throw new TlsInitException("SSLContext_INIT_ERR", e);
       }
 
+      TlsClientConfiguration tlsClientConfiguration = new TlsClientConfiguration();
       /**
        * Build connection configuration and pass to socket
        */
       SSLParameters params = new SSLParameters();
-      //@TODO handle secure configuration
-//      params.setCipherSuites(config.getSupportedCipherSuites());
-//      params.setProtocols(config.getSupportedProtocols());
+      params.setCipherSuites(tlsClientConfiguration.getCipherSuites());
+      params.setProtocols(tlsClientConfiguration.getSslProtocols());
 //      params.setEndpointIdentificationAlgorithm(
 //            config.getEndpointIdentificationAlgorithm());
       /**
