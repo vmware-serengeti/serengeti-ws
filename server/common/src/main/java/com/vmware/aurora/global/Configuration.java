@@ -30,6 +30,7 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.ConfigurationUtils;
 import org.apache.commons.configuration.ConversionException;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 
 import com.vmware.aurora.exception.AuroraException;
@@ -467,13 +468,42 @@ public class Configuration {
     *
     * @param key
     *           The key of property.
+    * @return The property value.
+    */
+   public static String[] getStringArray(String key){
+      return config.getStringArray(key);
+   }
+
+   /**
+    * Get all of values in a property as a String[] type.
+    *
+    * @param key
+    *           The key of property.
     * @param defautValue
     *           The default value.
     * @return The property value.
     */
    public static String[] getStringArray(String key, String[] defautValue) {
-      String[] values = config.getStringArray(key);
-      if(values != null && values.length == 4)
+      String[] values = getStringArray(key);
+      if(!ArrayUtils.isEmpty(values))
+         return values;
+      return defautValue;
+   }
+
+   /**
+    * Get all of values in a property as a String[] type
+    * and judge the legality of ThreadPoolConfig.
+    * four default parameters here
+    *
+    *  @param key
+    *           The key of property.
+    * @param defautValue
+    *           The default value.
+    * @return The property value.
+    */
+   public static String[] getThreadConfig(String key, String[] defautValue){
+      String[] values = getStringArray(key, defautValue);
+      if(values.length == 3)
          return values;
       return defautValue;
    }

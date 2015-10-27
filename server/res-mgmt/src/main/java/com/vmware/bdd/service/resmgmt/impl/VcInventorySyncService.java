@@ -46,7 +46,9 @@ public class VcInventorySyncService implements IVcInventorySyncService {
 
 //   private ExecutorService es = Executors.newFixedThreadPool(10);//mark
 
-   private static final String[] defaultValue = {"10","50","1000","VcInventorySync-"};
+   private static final String[] DEFAULT_VALUE = {"10","50","1000"};
+
+   private static final String NAME_PREFIX = "VcInventorySync-";
 
    private ThreadPoolTaskExecutor es = null;
 
@@ -61,13 +63,13 @@ public class VcInventorySyncService implements IVcInventorySyncService {
    }
 
    public VcInventorySyncService() {
-      ThreadPoolConfig config = new ThreadPoolConfig(Configuration.getStringArray(Constants.VCINVENTORYREFRESH_THREADPOOL_CONFIG, defaultValue));
+      ThreadPoolConfig config = new ThreadPoolConfig(Configuration.getThreadConfig(Constants.VCINVENTORYREFRESH_THREADPOOL_CONFIG, DEFAULT_VALUE));
       LOGGER.debug(config.toString());
       es = new ThreadPoolTaskExecutor();
       es.setCorePoolSize(config.getCorePoolSize());
       es.setMaxPoolSize(config.getMaxPoolSize());
       es.setQueueCapacity(config.getWorkQueue());
-      es.setThreadNamePrefix(config.getNamePrefix());
+      es.setThreadNamePrefix(NAME_PREFIX);
       es.initialize();
    }
 

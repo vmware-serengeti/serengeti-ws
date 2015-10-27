@@ -13,13 +13,11 @@ public class ThreadPoolConfig {
 	private int corePoolSize;
 	private int maxPoolSize;
 	private int workQueue;
-	private String namePrefix;
 
 	public ThreadPoolConfig(String[] config) {
 		corePoolSize = Integer.parseInt(config[0]);
 		maxPoolSize = Integer.parseInt(config[1]);
 		workQueue = Integer.parseInt(config[2]);
-		namePrefix = config[3];
 	}
 
 	public int getCorePoolSize() {
@@ -34,12 +32,8 @@ public class ThreadPoolConfig {
 		return workQueue;
 	}
 
-	public String getNamePrefix() {
-		return namePrefix;
-	}
-
 	public String toString() {
-		ToStringBuilder ts = new ToStringBuilder(this).append("corePoolSize",getCorePoolSize()).append("maxPoolSize", getMaxPoolSize()).append("workQueue",getWorkQueue()).append("namePrefix",getNamePrefix());
+		ToStringBuilder ts = new ToStringBuilder(this).append("corePoolSize",getCorePoolSize()).append("maxPoolSize", getMaxPoolSize()).append("workQueue",getWorkQueue());
 		return ts.toString();
 	}
 }
