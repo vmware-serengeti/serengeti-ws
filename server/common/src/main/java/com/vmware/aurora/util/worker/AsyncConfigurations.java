@@ -75,7 +75,8 @@ public class AsyncConfigurations {
    public ScheduledExecutorService vcCacheScheduler() {
       ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat(VC_CACHE_SCHEDULER + "-%d").build();
 
-//      return Executors.newScheduledThreadPool(2, threadFactory);
-      return Executors.newScheduledThreadPool(com.vmware.aurora.global.Configuration.getInt(Constants.VCCACHE_SCHEDULER_CONFIG), threadFactory);
+      int poolSize = com.vmware.aurora.global.Configuration.getInt(Constants.VCCACHE_SCHEDULER_CONFIG, 2);
+      LOGGER.debug("poolsize is: "+ poolSize);
+      return Executors.newScheduledThreadPool(poolSize, threadFactory);
    }
 }
