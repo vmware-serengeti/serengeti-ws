@@ -266,6 +266,7 @@ abstract class VcObjectImpl implements VcObject {
 
    @Override
    public void update() throws Exception {
+      logger.info("update " + this);
       updateInternal(EnumSet.of(UpdateType.CONFIG));
       /* If this VC object in VcCache is not the same as this one,
        * also update the cached one.
