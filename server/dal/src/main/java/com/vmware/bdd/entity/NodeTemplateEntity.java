@@ -15,14 +15,13 @@
 
 package com.vmware.bdd.entity;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-
-import com.ibm.icu.text.SimpleDateFormat;
 
 @Entity
 @SequenceGenerator(name = "IdSequence", sequenceName = "node_template_seq", allocationSize = 1)

@@ -66,11 +66,8 @@ public class CmsKeyStore {
          cmsKeyStorePath = Configuration.getString(CMS_KEYSTORE, "/opt/aurora/cms/cms.key");
          logger.info("cmsKeyStorePath ========"+cmsKeyStorePath);
          keyStorePswd = Configuration.getString(CMS_KEYSTORE_PSWD);
-         logger.info("keyStorePswd ========"+keyStorePswd);
          cmsKeyPswd = Configuration.getString(CMS_KEYSTORE_PSWD);
-         logger.info("cmsKeyPswd ========"+cmsKeyPswd);
          vcExtPswd = Configuration.getString(CMS_KEYSTORE_PSWD);
-         logger.info("vcExtPswd ========"+vcExtPswd);
          cmsKeyAlias = Configuration.getString(CMS_KEYSTORE_ALIAS);
          logger.info("cmsKeyAlias ========"+cmsKeyAlias);
          keyStore = loadKeyStore();

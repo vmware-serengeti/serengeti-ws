@@ -75,7 +75,7 @@ public class Constants {
    public static final String CONNECT_FAILURE = "Cannot connect to the host";
    public static final String CONNECT_FAILURE_NO_SESSION_ID = "Cannot connect to the host: No session id returned.";
    public static final String UNSUPPORTED_HTTP_RESPONSE_CODE = "Unsupported HTTP Response Code: %1s";
-   public static final String DISCONNECT_FAILURE = "Diconnect failed";
+   public static final String DISCONNECT_FAILURE = "Disconnect failed";
    public static final String NEED_CONNECTION = "no connection to serengeti server. You should connect it first.";
 
    public static final int SEPERATOR_LEN = 76;

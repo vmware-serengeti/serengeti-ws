@@ -41,7 +41,7 @@ import java.util.Set;
 
 /**
  * RestClient provides common rest apis required by resource operations.
- * 
+ *
  */
 @Component
 public class RestClient {
@@ -61,7 +61,7 @@ public class RestClient {
 
    /**
     * connect to a Serengeti server
-    * 
+    *
     * @param host
     *           host url with optional port
     * @param username
@@ -188,7 +188,6 @@ public class RestClient {
          Class<T> respEntityType) {
       HttpHeaders headers = buildHeaders();
       HttpEntity<String> entity = new HttpEntity<String>(headers);
-
       return client.exchange(uri, HttpMethod.GET, entity, respEntityType);
    }
 
@@ -213,7 +212,7 @@ public class RestClient {
 
    /**
     * Create an object through rest apis
-    * 
+    *
     * @param entity
     *           the creation content
     * @param path
@@ -305,7 +304,7 @@ public class RestClient {
             if ((prettyOutput != null && prettyOutput.length > 0 && prettyOutput[0].isRefresh(true))
                   || oldTaskStatus != taskStatus
                   || oldProgress != progress) {
-               //clear screen and show progress every few seconds 
+               //clear screen and show progress every few seconds
                clearScreen();
                //output completed task summary first in the case there are several related tasks
                if (prettyOutput != null && prettyOutput.length > 0
@@ -377,7 +376,7 @@ public class RestClient {
 
    /**
     * Generic method to get an object by id
-    * 
+    *
     * @param id
     * @param entityType
     *           the object type
@@ -447,7 +446,7 @@ public class RestClient {
 
    /**
     * Method to get by path
-    * 
+    *
     * @param entityType
     * @param path
     * @param verb
@@ -483,7 +482,7 @@ public class RestClient {
 
    /**
     * Generic method to get all objects of a type
-    * 
+    *
     * @param entityType
     *           object type
     * @param path
@@ -516,7 +515,7 @@ public class RestClient {
 
    /**
     * Delete an object by id
-    * 
+    *
     * @param id
     * @param path
     *           the rest url
@@ -573,7 +572,7 @@ public class RestClient {
 
    /**
     * process requests with query parameters
-    * 
+    *
     * @param id
     * @param path
     *           the rest url
@@ -635,7 +634,7 @@ public class RestClient {
 
    /**
     * Update an object
-    * 
+    *
     * @param entity
     *           the updated content
     * @param path

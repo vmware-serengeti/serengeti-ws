@@ -8,16 +8,26 @@
 		http://www.springframework.org/schema/beans
 		http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 
-	<http entry-point-ref="restAuthenticationEntryPoint" auto-config="true">
+	<http entry-point-ref="restAuthenticationEntryPoint" auto-config="true"
+		use-expressions="false" disable-url-rewriting="false">
 		<intercept-url pattern="/**" access="IS_AUTHENTICATED_FULLY" />
 		<form-login authentication-failure-handler-ref="noRedirectFailureHandler"
-			authentication-success-handler-ref="noRedirectSuccessHandler" />
-		<logout invalidate-session="true" />
+			authentication-success-handler-ref="noRedirectSuccessHandler"
+			username-parameter="j_username" password-parameter="j_password"
+			login-processing-url="/j_spring_security_check" />
+		<logout invalidate-session="true" logout-url="/j_spring_security_logout" />
+		<!-- CSRF is enabled by default in Spring Security 4. Disable it for now. -->
+		<csrf disabled="true" />
 	</http>
 
 	<beans:bean id="noRedirectSuccessHandler" class="com.vmware.bdd.rest.NoRedirectSuccessHandler" />
 	<beans:bean id="noRedirectFailureHandler" class="com.vmware.bdd.rest.NoRedirectFailureHandler" />
 	<beans:bean id="restAuthenticationEntryPoint" class="com.vmware.bdd.rest.RestAuthenticationEntryPoint" />
+
+	<beans:bean id="authenticationManager"
+		class="org.springframework.security.authentication.ProviderManager">
+		<beans:constructor-arg ref="userAuthenticationProvider" />
+	</beans:bean>
 
 	<authentication-manager alias="authenticationManager">
 		<authentication-provider ref="userAuthenticationProvider" />
