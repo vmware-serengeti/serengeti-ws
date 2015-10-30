@@ -276,4 +276,5 @@ public class Constants {
    public static final String DELETE_POWEROFF_NOIP_VM = "cluster.operation.deletePowerOffNoIpVm";
    //add by Chaolong
    public static final String VCINVENTORYREFRESH_THREADPOOL_CONFIG = "vcinventoryrefresh.threadpool.config";
+   public static final java.lang.String CLUSTER_SYNC_MAX_WAIT_SEC = "bde_cluster.sync.waiting.seconds";
 }

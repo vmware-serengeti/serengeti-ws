@@ -14,6 +14,7 @@
  ***************************************************************************/
 package com.vmware.bdd.service.impl;
 
+import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.aop.annotation.ClusterEntityConcurrentWriteLock;
 import com.vmware.bdd.aop.annotation.RetryTransaction;
 import com.vmware.bdd.apitypes.ClusterStatus;
@@ -23,6 +24,8 @@ import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.NodeEntity;
 import com.vmware.bdd.manager.concurrent.AsyncExecutors;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
+import com.vmware.bdd.utils.Constants;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -43,6 +46,9 @@ import java.util.concurrent.Future;
 public class ClusterSyncService {
    private static final Logger logger = Logger.getLogger(ClusterSyncService.class);
 
+   private final long MAX_WAIT = Configuration.getLong(Constants.CLUSTER_SYNC_MAX_WAIT_SEC, 5*60*1000);
+   private final long TIME_SLICE = 100l;
+
    @Autowired
    private IClusterEntityManager clusterEntityMgr;
 
@@ -57,13 +63,15 @@ public class ClusterSyncService {
       List<NodeEntity> nodes = clusterEntityMgr.findAllNodes(clusterName);
 
       boolean allNodesDown = true;
+
       List<Future<NodeRead>> refreshedNodeList = new ArrayList<>();
       for (NodeEntity node : nodes) {
          refreshedNodeList.add(nodeSyncService.asyncRefreshNodeStatus(node.getVmName()));
       }
 
       //wait all node refresh is done
-      while (refreshedNodeList.size() > 0) {
+      long elapsed = 0l;
+      while (CollectionUtils.isNotEmpty(refreshedNodeList)) {
          for (Iterator<Future<NodeRead>> futureItr = refreshedNodeList.iterator(); futureItr.hasNext(); ) {
             Future<NodeRead> refreshedNodeFuture = futureItr.next();
             if(refreshedNodeFuture.isDone()) {
@@ -87,10 +95,25 @@ public class ClusterSyncService {
          }
 
          try {
-            Thread.sleep(50);
+            Thread.sleep(TIME_SLICE);
+            elapsed += TIME_SLICE;
+
+            if(elapsed >= MAX_WAIT) {
+               break;
+            }
          } catch (InterruptedException e) {
             //nothing to do
          }
+
+         if(logger.isDebugEnabled()) {
+            logger.debug("sync cluster: " + clusterName);
+         }
+      }
+
+      if(CollectionUtils.isNotEmpty(refreshedNodeList)) {
+         logger.warn("failed to sync all nodes status in given time interval: " + clusterName);
+      } else {
+         logger.info(String.format("sync all node status of cluster: %1s in %2s milliseconds", clusterName, elapsed));
       }
 
       if (updateClusterStatus && allNodesDown) {

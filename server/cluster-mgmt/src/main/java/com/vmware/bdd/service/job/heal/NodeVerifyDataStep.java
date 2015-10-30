@@ -14,22 +14,19 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job.heal;
 
+import com.vmware.bdd.service.IClusterHealService;
+import com.vmware.bdd.service.job.JobConstants;
+import com.vmware.bdd.service.job.JobExecutionStatusHolder;
+import com.vmware.bdd.service.job.TrackableTasklet;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.vmware.bdd.exception.ClusterHealServiceException;
-import com.vmware.bdd.service.IClusterHealService;
-import com.vmware.bdd.service.job.ClusterUpdateDataStep;
-import com.vmware.bdd.service.job.JobConstants;
-import com.vmware.bdd.service.job.JobExecutionStatusHolder;
-import com.vmware.bdd.service.job.TrackableTasklet;
-
 public class NodeVerifyDataStep extends TrackableTasklet {
 
    private static final Logger logger = Logger
-         .getLogger(ClusterUpdateDataStep.class);
+         .getLogger(NodeVerifyDataStep.class);
 
    @Autowired
    private IClusterHealService healService;

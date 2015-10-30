@@ -42,7 +42,7 @@ import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
 @Component
 public class ExclusiveWriteLockedClusterEntityManager implements
       IExclusiveLockedClusterEntityManager {
-   private static final Logger logger = Logger.getLogger(ConcurrentWriteLockedClusterEntityManager.class);
+   private static final Logger logger = Logger.getLogger(ExclusiveWriteLockedClusterEntityManager.class);
 
    private IClusterEntityManager clusterEntityMgr;
 
@@ -68,6 +68,7 @@ public class ExclusiveWriteLockedClusterEntityManager implements
    @Override
    @ClusterEntityExclusiveWriteLock
    public void syncUp(String clusterName, boolean updateClusterStatus) {
+      logger.info("syncup cluster: " + clusterName);
       clusterSyncService.syncUp(clusterName, updateClusterStatus);
    }
 
@@ -75,6 +76,7 @@ public class ExclusiveWriteLockedClusterEntityManager implements
    @ClusterEntityExclusiveWriteLock
    @Async(AsyncExecutors.CLUSTER_SYNC_EXEC)
    public void asyncSyncUp(String clusterName, boolean updateClusterStatus) {
+      logger.info("async syncup cluster: " + clusterName);
       clusterSyncService.syncUp(clusterName, updateClusterStatus);
    }
 

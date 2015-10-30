@@ -685,6 +685,7 @@ public class VcVmUtil {
       VcResourcePoolEntity rpEntity = node.getVcRp();
       String vcRPName = "";
 
+      VcResourcePool rp = null;
       try {
          VcCluster cluster =
                VcResourceUtils.findVcCluster(rpEntity.getVcCluster());
@@ -700,14 +701,9 @@ public class VcVmUtil {
                   rpEntity.getVcResourcePool() + "/" + clusterRpName + "/"
                         + groupName;
          }
-         VcResourcePool rp =
+         rp =
                VcResourceUtils.findRPInVCCluster(rpEntity.getVcCluster(),
                      vcRPName);
-         if (rp == null) {
-            throw ClusteringServiceException.TARGET_VC_RP_NOT_FOUND(
-                  rpEntity.getVcCluster(), vcRPName);
-         }
-         return rp;
       } catch (Exception e) {
          logger.error("Failed to get VC resource pool " + vcRPName
                + " in vc cluster " + rpEntity.getVcCluster(), e);
@@ -715,6 +711,12 @@ public class VcVmUtil {
          throw ClusteringServiceException.TARGET_VC_RP_NOT_FOUND(
                rpEntity.getVcCluster(), vcRPName);
       }
+
+      if (rp == null) {
+         throw ClusteringServiceException.TARGET_VC_RP_NOT_FOUND(
+               rpEntity.getVcCluster(), vcRPName);
+      }
+      return rp;
    }
 
    public static VmSchema getVmSchema(ClusterCreate spec, String nodeGroup,

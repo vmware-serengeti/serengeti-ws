@@ -14,28 +14,26 @@
  ***************************************************************************/
 package com.vmware.bdd.service.job.heal;
 
-import java.util.List;
-
+import com.vmware.aurora.vc.VcVirtualMachine;
+import com.vmware.bdd.exception.ClusterHealServiceException;
+import com.vmware.bdd.service.IClusterHealService;
+import com.vmware.bdd.service.job.JobConstants;
+import com.vmware.bdd.service.job.JobExecutionStatusHolder;
+import com.vmware.bdd.service.job.TrackableTasklet;
+import com.vmware.bdd.spectypes.DiskSpec;
+import com.vmware.bdd.utils.AuAssert;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.vmware.aurora.vc.VcVirtualMachine;
-import com.vmware.bdd.exception.ClusterHealServiceException;
-import com.vmware.bdd.service.IClusterHealService;
-import com.vmware.bdd.service.job.ClusterUpdateDataStep;
-import com.vmware.bdd.service.job.JobConstants;
-import com.vmware.bdd.service.job.JobExecutionStatusHolder;
-import com.vmware.bdd.service.job.TrackableTasklet;
-import com.vmware.bdd.spectypes.DiskSpec;
-import com.vmware.bdd.utils.AuAssert;
+import java.util.List;
 
 public class NodeRecoverDiskFailureStep extends TrackableTasklet {
 
    private static final Logger logger = Logger
-         .getLogger(ClusterUpdateDataStep.class);
+         .getLogger(NodeRecoverDiskFailureStep.class);
 
    @Autowired
    private IClusterHealService healService;

@@ -15,6 +15,7 @@
 package com.vmware.bdd.utils;
 
 import com.vmware.bdd.apitypes.NodeStatus;
+import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.exception.TaskException;
 import com.vmware.bdd.service.job.JobConstants;
 import com.vmware.bdd.service.job.TrackableTasklet;
@@ -60,8 +61,18 @@ public class ClusterUtil {
       String[] strs = vmName.split("-");
       String clusterName = strs[0];
       String groupName = strs[1];
-      final VcResourcePool vcResPool = VcVmUtil.getTargetRp(clusterName, groupName, node);
 
+      VcResourcePool vcResourcePool = null;
+      try {
+         vcResourcePool = VcVmUtil.getTargetRp(clusterName, groupName, node);
+      } catch (ClusteringServiceException rpNotFound) {
+         logger.error("rp not found for group " + groupName);
+
+         //in case the resource pool is not found. return null.
+         return null;
+      }
+
+      final VcResourcePool vcResPool = vcResourcePool;
       // 2. get the vm by vm name from the target resource pool
       // when we get here, it means some vms under the resource pool might have
       // changed after the last VcCache refresh, so we should update it first to get
