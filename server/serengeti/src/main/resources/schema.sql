@@ -74,7 +74,7 @@ create sequence appmanager_seq;
 create table appmanager (
    id              bigint        not null unique DEFAULT nextval('appmanager_seq'::regclass),
    name            varchar(255)  not null unique,
-   description     varchar(255),
+   description     varchar(1000),
    type            varchar(255)  not null,
    url             varchar(255)  not null,
    username        varchar(255)  not null,
