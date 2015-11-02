@@ -264,11 +264,14 @@ public class ClusterEntityManager implements IClusterEntityManager, Observer {
 
    //Set node template name for ClusterRead object
    private void setNodeTemplateName(ClusterRead clusterRead, String templateId) {
-      NodeTemplateEntity template = this.nodeTemplateDAO.findByMoid(templateId);
+      NodeTemplateEntity template = null;
+      if(templateId != null) {
+         template = this.nodeTemplateDAO.findByMoid(templateId);
+      }
       if(template != null) {
          clusterRead.setTemplateName(template.getName());
       } else {
-         logger.warn("NodeTemplateEntity not found: " + templateId);
+         logger.warn("NodeTemplateEntity not found, templateId=[" + templateId + "]");
          String notFound = Messages.getString("CLUSTER_MANAGER.NODE_TEMPLATE_NOT_FOUND");
          clusterRead.setTemplateName(notFound);
       }
