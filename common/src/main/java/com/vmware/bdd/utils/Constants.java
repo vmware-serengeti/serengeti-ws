@@ -277,4 +277,5 @@ public class Constants {
    //add by Chaolong
    public static final String VCINVENTORYREFRESH_THREADPOOL_CONFIG = "vcinventoryrefresh.threadpool.config";
    public static final java.lang.String CLUSTER_SYNC_MAX_WAIT_SEC = "bde_cluster.sync.waiting.seconds";
+   public static final java.lang.String CONNECT_TO_ANOTHER_VC = "bde.connected_to_another_vc";
 }

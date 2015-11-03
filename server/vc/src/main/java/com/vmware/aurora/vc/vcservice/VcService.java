@@ -40,6 +40,7 @@ import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManager;
 
 import com.vmware.bdd.security.tls.TlsClientConfiguration;
+import com.vmware.bdd.utils.Constants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
@@ -123,6 +124,12 @@ public class VcService {
       return new ThumbprintVerifier() {
          @Override
          public Result verify(String thumbprint) {
+            //tempo solution, when connect to another VC, disable certificate verification.
+            if(Configuration.getBoolean(Constants.CONNECT_TO_ANOTHER_VC, false)) {
+               logger.info("the BDE server is configured to connect to another vCenter, whose certificate will not be verified.");
+               return Result.MATCH;
+            }
+
             if (thumbprint.equalsIgnoreCase(vcThumbprint)) {
                return Result.MATCH;
             } else {
@@ -584,11 +591,17 @@ public class VcService {
          setService(new ServiceContents(++curGenCount), VcConnectionStatusChangeEvent.VC_SESSION_CREATED);
          /* Context callback to communicate session reset. */
          VcContext.serviceReset(this);
-         /*
-          * Now that we have a valid VMOMI connection, set properties for our extension
-          */
-         if (vcExtensionRegistered && justRegistered) {
-            configureExtensionVService();
+
+         //tempo solution, when connect to another VC, disable certificate verification.
+         if(Configuration.getBoolean(Constants.CONNECT_TO_ANOTHER_VC, false)) {
+            logger.info("the BDE server is configured to connect to another vCenter, so not configure Extension Service.");
+         } else {
+            /*
+             * Now that we have a valid VMOMI connection, set properties for our extension
+             */
+            if (vcExtensionRegistered && justRegistered) {
+               configureExtensionVService();
+            }
          }
       } catch (Exception ex) {
          if (service != null) {

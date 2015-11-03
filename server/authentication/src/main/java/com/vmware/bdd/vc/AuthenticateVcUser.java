@@ -19,6 +19,9 @@ import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLException;
 
+import com.vmware.aurora.global.Configuration;
+import com.vmware.bdd.security.tls.TlsClientConfiguration;
+import com.vmware.bdd.utils.Constants;
 import com.vmware.vim.binding.vim.ServiceInstance;
 import com.vmware.vim.binding.vim.ServiceInstanceContent;
 import com.vmware.vim.binding.vim.SessionManager;
@@ -30,8 +33,10 @@ import com.vmware.vim.vmomi.client.http.HttpConfiguration;
 import com.vmware.vim.vmomi.client.http.ThumbprintVerifier;
 import com.vmware.vim.vmomi.client.http.impl.HttpConfigurationImpl;
 import com.vmware.vim.vmomi.core.types.VmodlContext;
+import org.apache.log4j.Logger;
 
 public class AuthenticateVcUser {
+   private final static Logger LOGGER = Logger.getLogger(AuthenticateVcUser.class);
    private static final Class<?> version = version8.class;
    private String vcThumbprint;
    private String serviceUrl;
@@ -58,6 +63,13 @@ public class AuthenticateVcUser {
       return new ThumbprintVerifier() {
          @Override
          public Result verify(String thumbprint) {
+            //tempo solution, when connect to another VC, disable certificate verification.
+            if(Configuration.getBoolean(Constants.CONNECT_TO_ANOTHER_VC, false)) {
+               LOGGER.info("the BDE server is configured to connect to another vCenter, whose certificate will not be verified.");
+               return Result.MATCH;
+            }
+
+            //default and good behavior.
             if (vcThumbprint == null
                   || vcThumbprint.equalsIgnoreCase(thumbprint)) {
                return Result.MATCH;
@@ -83,6 +95,9 @@ public class AuthenticateVcUser {
          httpConfig.setThumbprintVerifier(getThumbprintVerifier());
          HttpClientConfiguration clientConfig =
                HttpClientConfiguration.Factory.newInstance();
+         //set customized SSL protocols
+         TlsClientConfiguration tlsClientConfiguration = new TlsClientConfiguration();
+         httpConfig.setEnabledProtocols(tlsClientConfiguration.getSslProtocols());
          clientConfig.setHttpConfiguration(httpConfig);
          vmomiClient = Client.Factory.createClient(uri, version, clientConfig);
 
