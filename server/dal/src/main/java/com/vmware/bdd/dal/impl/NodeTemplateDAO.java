@@ -33,12 +33,12 @@ public class NodeTemplateDAO extends BaseDAO<NodeTemplateEntity> implements INod
 
    @Override
    public NodeTemplateEntity findByMoid(String vmMoid) {
-      return findUniqueByCriteria(Restrictions.eq("moid", vmMoid).ignoreCase());
+      return findUniqueByCriteria(Restrictions.eq("moid", vmMoid));
    }
 
    @Override
    public List<NodeTemplateEntity> findByName(String name) {
-      return this.findByCriteria(Restrictions.eq("name", name).ignoreCase());
+      return this.findByCriteria(Restrictions.eq("name", name));
    }
 
    @Override
