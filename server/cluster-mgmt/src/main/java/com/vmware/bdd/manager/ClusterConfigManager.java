@@ -15,17 +15,21 @@
 package com.vmware.bdd.manager;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import com.vmware.aurora.util.HbaseRegionServerOptsUtil;
-import com.vmware.bdd.spectypes.HadoopRole;
-import com.vmware.bdd.utils.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -36,16 +40,30 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.vmware.aurora.global.Configuration;
+import com.vmware.aurora.util.HbaseRegionServerOptsUtil;
 import com.vmware.aurora.vc.DiskSpec.AllocationType;
-import com.vmware.aurora.vc.VcVirtualMachine;
-import com.vmware.bdd.apitypes.*;
+import com.vmware.bdd.apitypes.ClusterCreate;
+import com.vmware.bdd.apitypes.ClusterNetConfigInfo;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
+import com.vmware.bdd.apitypes.DiskSplitPolicy;
+import com.vmware.bdd.apitypes.IpBlock;
+import com.vmware.bdd.apitypes.IpConfigInfo;
+import com.vmware.bdd.apitypes.LatencyPriority;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
+import com.vmware.bdd.apitypes.NetworkAdd;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
+import com.vmware.bdd.apitypes.NodeRead;
+import com.vmware.bdd.apitypes.PlacementPolicy;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupAssociation;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks.GroupRacksType;
+import com.vmware.bdd.apitypes.RackInfo;
+import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.apitypes.StorageRead.DiskScsiControllerType;
+import com.vmware.bdd.apitypes.TopologyType;
 import com.vmware.bdd.entity.ClusterEntity;
 import com.vmware.bdd.entity.IpBlockEntity;
 import com.vmware.bdd.entity.NetworkEntity;
@@ -67,7 +85,12 @@ import com.vmware.bdd.software.mgmt.plugin.model.ClusterBlueprint;
 import com.vmware.bdd.software.mgmt.plugin.model.HadoopStack;
 import com.vmware.bdd.software.mgmt.plugin.model.NodeGroupInfo;
 import com.vmware.bdd.specpolicy.CommonClusterExpandPolicy;
+import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.VcCluster;
+import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.InfrastructureConfigUtils;
+import com.vmware.bdd.utils.VcVmUtil;
 
 public class ClusterConfigManager {
    private static final long serialVersionUID = 1L;
@@ -89,10 +112,10 @@ public class ClusterConfigManager {
    private static final String NO_PROXY = "serengeti.no_proxy";
    private static final String ELASTIC_RUNTIME_AUTOMATION_ENABLE =
          "elastic_runtime.automation.enable";
-   private String httpProxy = Configuration
+   private final String httpProxy = Configuration
          .getString(HTTP_PROXY.toString(), "");
-   private String noProxy = Configuration.getStrings(NO_PROXY.toString(), "");
-   private boolean automationEnable = Configuration.getBoolean(
+   private final String noProxy = Configuration.getStrings(NO_PROXY.toString(), "");
+   private final boolean automationEnable = Configuration.getBoolean(
          ELASTIC_RUNTIME_AUTOMATION_ENABLE, false);
 
    public IDatastoreService getDatastoreMgr() {
@@ -448,11 +471,11 @@ public class ClusterConfigManager {
       applyInfraChanges(cluster, blueprint);
    }
 
-   private Map<NetTrafficType, List<ClusterNetConfigInfo>> validateAndConvertNetNamesToNetConfigs(
+   private LinkedHashMap<NetTrafficType, List<ClusterNetConfigInfo>> validateAndConvertNetNamesToNetConfigs(
          Map<NetTrafficType, List<String>> netNamesInfo, boolean isMaprDistro) {
-      Map<NetTrafficType, List<ClusterNetConfigInfo>> netConfigs =
-            new HashMap<NetTrafficType, List<ClusterNetConfigInfo>>();
-      Map<String, Set<String>> port2names = new HashMap<String, Set<String>>();
+      LinkedHashMap<NetTrafficType, List<ClusterNetConfigInfo>> netConfigs =
+            new LinkedHashMap<NetTrafficType, List<ClusterNetConfigInfo>>();
+      LinkedHashMap<String, Set<String>> port2names = new LinkedHashMap<String, Set<String>>();
 
       for (NetTrafficType type : netNamesInfo.keySet()) {
          netConfigs.put(type, new ArrayList<ClusterNetConfigInfo>());
@@ -1043,7 +1066,7 @@ public class ClusterConfigManager {
          PlacementPolicy policies = new PlacementPolicy();
          policies.setInstancePerHost(instancePerHost);
          if (ngRacks != null) {
-            policies.setGroupRacks((GroupRacks) new Gson().fromJson(ngRacks,
+            policies.setGroupRacks(new Gson().fromJson(ngRacks,
                   GroupRacks.class));
          }
          if (associonEntities != null) {
@@ -1301,7 +1324,7 @@ public class ClusterConfigManager {
 
    /**
     * validate if rack topology of all hosts is uploaded
-    * 
+    *
     * @param hosts
     * @param topology
     */
@@ -1326,7 +1349,7 @@ public class ClusterConfigManager {
 
    /**
     * build rack topology of the nodes according to the topology
-    * 
+    *
     * @param nodes
     * @param topology
     * @return

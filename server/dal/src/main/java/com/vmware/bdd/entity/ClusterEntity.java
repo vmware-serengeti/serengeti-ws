@@ -19,8 +19,8 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -43,8 +43,8 @@ import org.hibernate.annotations.Type;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.apitypes.ClusterNetConfigInfo;
+import com.vmware.bdd.apitypes.ClusterStatus;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.Priority;
 import com.vmware.bdd.apitypes.TopologyType;
@@ -331,7 +331,7 @@ public class ClusterEntity extends EntityBase {
    @SuppressWarnings("unchecked")
    public Map<NetTrafficType, List<ClusterNetConfigInfo>> getNetworkConfigInfo() {
       return (new Gson()).fromJson(networkConfig,
-            new TypeToken<HashMap<NetTrafficType, List<ClusterNetConfigInfo>>>() {}.getType());
+            new TypeToken<LinkedHashMap<NetTrafficType, List<ClusterNetConfigInfo>>>() {}.getType());
    }
 
    public void setNetworkConfig(String networkConfig) {

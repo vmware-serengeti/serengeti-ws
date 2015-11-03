@@ -25,30 +25,29 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.vmware.bdd.apitypes.*;
-import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import jline.console.ConsoleReader;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 import org.springframework.stereotype.Component;
+
 import com.vmware.bdd.apitypes.AppManagerRead;
 import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.ClusterRead;
 import com.vmware.bdd.apitypes.ClusterType;
 import com.vmware.bdd.apitypes.DistroRead;
 import com.vmware.bdd.apitypes.ElasticityRequestBody;
-import com.vmware.bdd.apitypes.FixDiskRequestBody;
 import com.vmware.bdd.apitypes.ElasticityRequestBody.ElasticityMode;
+import com.vmware.bdd.apitypes.FixDiskRequestBody;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.NetworkRead;
+import com.vmware.bdd.apitypes.NodeGroupAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeGroupRead;
 import com.vmware.bdd.apitypes.NodeRead;
@@ -353,8 +352,8 @@ public class ClusterCommands implements CommandMarker {
          return;
       }
 
-      Map<NetTrafficType, List<String>> networkConfig =
-            new HashMap<NetTrafficType, List<String>>();
+      LinkedHashMap<NetTrafficType, List<String>> networkConfig =
+            new LinkedHashMap<NetTrafficType, List<String>>();
       if (networkName == null) {
          if (allNetworkNames.size() == 1) {
             networkConfig.put(NetTrafficType.MGT_NETWORK,
