@@ -514,7 +514,7 @@ public class VcService {
       HttpConfigurationImpl httpConfig = new HttpConfigurationImpl();
       httpConfig.setTimeoutMs(SESSION_TIME_OUT);
       httpConfig.setKeyStore(CmsKeyStore.getKeyStore());
-      httpConfig.setDefaultProxy(vcHost, 80, "http");
+      httpConfig.setDefaultProxy(vcHost, Configuration.getInt("vim.login.port", 80), Configuration.getString("vim.login.protocol", "http"));
       httpConfig.getKeyStoreConfig().setKeyAlias(CmsKeyStore.VC_EXT_KEY);
       httpConfig.getKeyStoreConfig().setKeyPassword(CmsKeyStore.getVCExtPassword());
       httpConfig.setThumbprintVerifier(getThumbprintVerifier());
