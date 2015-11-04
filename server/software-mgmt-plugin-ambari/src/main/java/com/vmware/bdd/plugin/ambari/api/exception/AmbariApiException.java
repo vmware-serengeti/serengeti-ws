@@ -92,4 +92,8 @@ public class AmbariApiException extends RuntimeException {
          }
       }
    }
+
+   public static AmbariApiException CONNOT_FIND_REQUEST(Long requestId) {
+      return new AmbariApiException("AMBARI_API.AMBARI_SERVER_ERROR", null, "can not find the request " + requestId);
+   }
 }

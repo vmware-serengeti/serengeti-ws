@@ -14,8 +14,6 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.service;
 
-import javax.ws.rs.NotFoundException;
-
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,19 +26,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.vmware.bdd.apitypes.LatencyPriority;
-import com.vmware.bdd.exception.SoftwareManagerCollectorException;
-import com.vmware.bdd.plugin.ambari.api.manager.ApiManager_1_7_0;
-import com.vmware.bdd.plugin.ambari.api.manager.ApiManager_2_0_0;
-import com.vmware.bdd.plugin.ambari.utils.AmUtils;
-import com.vmware.aurora.util.HbaseRegionServerOptsUtil;
-import com.vmware.bdd.software.mgmt.plugin.intf.AbstractSoftwareManager;
+import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 
+import com.vmware.aurora.util.HbaseRegionServerOptsUtil;
+import com.vmware.bdd.apitypes.LatencyPriority;
+import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.plugin.ambari.api.AmbariManagerClientbuilder;
 import com.vmware.bdd.plugin.ambari.api.manager.ApiManager;
+import com.vmware.bdd.plugin.ambari.api.manager.ApiManager_1_7_0;
+import com.vmware.bdd.plugin.ambari.api.manager.ApiManager_2_0_0;
 import com.vmware.bdd.plugin.ambari.api.model.ApiPersist;
 import com.vmware.bdd.plugin.ambari.api.model.blueprint.ApiBlueprint;
 import com.vmware.bdd.plugin.ambari.api.model.bootstrap.ApiBootstrap;
@@ -85,6 +82,7 @@ import com.vmware.bdd.plugin.ambari.poller.ClusterOperationPoller;
 import com.vmware.bdd.plugin.ambari.poller.ExternalNodesRegisterPoller;
 import com.vmware.bdd.plugin.ambari.poller.HostBootstrapPoller;
 import com.vmware.bdd.plugin.ambari.spectypes.HadoopRole;
+import com.vmware.bdd.plugin.ambari.utils.AmUtils;
 import com.vmware.bdd.plugin.ambari.utils.Constants;
 import com.vmware.bdd.software.mgmt.plugin.exception.SoftwareManagementPluginException;
 import com.vmware.bdd.software.mgmt.plugin.exception.ValidationException;
@@ -109,7 +107,7 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
    public static final String MIN_SUPPORTED_VERSION = "1.6.0";
    private static final String UNKNOWN_VERSION = "UNKNOWN";
 
-   private String privateKey;
+   private final String privateKey;
 
    private ApiManager apiManager;
 
@@ -298,7 +296,6 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
 
          String ambariServerVersion = getVersion();
          clusterDef = new AmClusterDef(blueprint, privateKey, ambariServerVersion);
-         logger.info("Cluster def after modification: " + ApiUtils.objectToJson(clusterDef));
 
          ReflectionUtils.getPreStartServicesHook().preStartServices(clusterDef.getName());
 
@@ -744,7 +741,7 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
       }
       if (confHbaseEnv.get("hbase_regionserver_heapsize") == null) {
          long hbaseHeapsizeMhz = HbaseRegionServerOptsUtil.getHeapSizeMhz(
-               (long) group.getMemorySize(), group.getRoles().size());
+               group.getMemorySize(), group.getRoles().size());
          confHbaseEnv.put("hbase_regionserver_heapsize",
                String.valueOf(hbaseHeapsizeMhz) + "m");
       }
@@ -805,6 +802,7 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
       return unsupportedRoles;
    }
 
+   @Override
    public void validateRolesForShrink(NodeGroupInfo groupInfo)
          throws SoftwareManagementPluginException {
       ValidateRolesUtil.validateRolesForShrink(AmUtils.getConfDir(), groupInfo);
@@ -1192,7 +1190,7 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
    private boolean startAllComponents(AmClusterDef clusterDef,
          Map<String, ApiComponentInfo> componentToInfo,
          ApiHostComponentsRequest apiHostComponentsRequest, List<String> targetHostNames,
-         ClusterReportQueue reports) 
+         ClusterReportQueue reports)
                throws Exception {
       List<String> componentNames = new ArrayList<>();
       for (ApiHostComponent hostComponent : apiHostComponentsRequest.getHostComponents()) {
@@ -1999,7 +1997,7 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
    }
 
    @Override
-   public void restartClusterRequiredServices(ClusterBlueprint blueprint, ClusterReportQueue reports) throws Exception { 
+   public void restartClusterRequiredServices(ClusterBlueprint blueprint, ClusterReportQueue reports) throws Exception {
       String ambariServerVersion = getVersion();
       AmClusterDef clusterDef = new AmClusterDef(blueprint, privateKey, ambariServerVersion);
       restartRequiredServices(clusterDef, reports);
