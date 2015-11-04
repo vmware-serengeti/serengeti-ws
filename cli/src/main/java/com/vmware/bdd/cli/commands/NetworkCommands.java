@@ -110,7 +110,7 @@ public class NetworkCommands implements CommandMarker {
                Constants.PARAMS_EXCLUSION_PAIR_NETWORK_ADD_IP_DHCP
                + Constants.PARAMS_EXCLUSION);
          return;
-      } else if(!CommandsUtils.isBlank(ip) && NetworkDnsType.DYNAMIC.toString().equals(dnsType)) {
+      } else if(!CommandsUtils.isBlank(ip) && NetworkDnsType.DYNAMIC.toString().equals(dnsType.toUpperCase())) {
           CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
                   Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
                   Constants.PARAMS_EXCLUSION_PAIR_NETWORK_ADD_STATIC_DDNS
@@ -196,12 +196,12 @@ public class NetworkCommands implements CommandMarker {
    public void modifyNetwork(
          @CliOption(key = { "name" }, mandatory = true, help = "The network name") final String name,
          @CliOption(key = { "addIP" }, mandatory = false, help = "The ip information") final String ip,
-         @CliOption(key = { "dnsType" }, mandatory = false, specifiedDefaultValue = "NORMAL", help = "The type of DNS server: NORMAL, DYNAMIC or OTHERS") final String dnsType) {
+         @CliOption(key = { "dnsType" }, mandatory = false, specifiedDefaultValue = "NORMAL", unspecifiedDefaultValue = "NORMAL", help = "The type of DNS server: NORMAL, DYNAMIC or OTHERS") final String dnsType) {
 
       NetworkAdd networkAdd = new NetworkAdd();
       networkAdd.setName(name);
       try {
-         if (!CommandsUtils.isBlank(ip) && dnsType.equals(NetworkDnsType.DYNAMIC.toString())) {
+         if (!CommandsUtils.isBlank(ip) && dnsType.toUpperCase().equals(NetworkDnsType.DYNAMIC.toString())) {
              CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_NETWORK,
                      Constants.OUTPUT_OP_ADD, Constants.OUTPUT_OP_RESULT_FAIL,
                      Constants.PARAMS_EXCLUSION_PAIR_NETWORK_ADD_STATIC_DDNS

@@ -65,7 +65,7 @@ public final class HbaseRegionServerOptsUtil {
       logger.info("in getHeapSizeMhz");
       long osMemMhz = 1024;
       long hbaseHeapMhz = nodeMemMhz - 1024*(groupRoleNums - 1) - osMemMhz;
-      hbaseHeapMhz = (hbaseHeapMhz > 1024) ? hbaseHeapMhz : 1024;;
+      hbaseHeapMhz = (hbaseHeapMhz > 1024) ? hbaseHeapMhz : 1024;
       logger.info("in getHeapSizeMhz"+hbaseHeapMhz);
       return  hbaseHeapMhz;
    }
