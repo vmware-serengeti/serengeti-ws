@@ -22,8 +22,11 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import com.vmware.bdd.upgrade.PostUpgradeHandler;
 import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
+
 import org.apache.log4j.Logger;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -70,6 +73,16 @@ public class ResourceInitializer implements ServletContextListener {
             resInitializerSvc.updateOrInsertServerInfo();
          }
          logger.info("ResourceInitializer completed");
+
+         // do some post upgrade work for the first time start after upgrade
+         if ( ConfigInfo.isJustUpgraded() ) {
+            logger.info("handle post upgrade for the first time start after upgrade");
+            PostUpgradeHandler postUpgradeHandler = wac.getBean("postUpgradeHandler", PostUpgradeHandler.class);
+            postUpgradeHandler.handlePostUpgrade();
+            // set the just_upgrade tag to be false
+            ConfigInfo.setJustUpgraded(false);
+            ConfigInfo.save();
+         }
       } catch (Throwable t) {
          logger.error("Resource initialization failed.", t);
       }
