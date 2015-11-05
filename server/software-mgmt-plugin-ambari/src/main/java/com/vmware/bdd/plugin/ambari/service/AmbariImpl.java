@@ -1876,7 +1876,11 @@ public class AmbariImpl extends AbstractSoftwareManager implements SoftwareManag
                clusterDef.getCurrentReport().getNodeReports();
          for (AmNodeDef node : clusterDef.getNodes()) {
             String fqdn = node.getFqdn();
-            nodeReports.get(node.getName()).setStatus(hostStates.get(fqdn));
+            NodeReport nodeReport = nodeReports.get(node.getName());
+            // The nodeReport will null if the node is a external namenode(Compute only cluster).
+            if (nodeReport != null) {
+               nodeReport.setStatus(hostStates.get(fqdn));
+            }
          }
       } catch (NotFoundException e) {
          logger.info("Cluster " + blueprint.getName() + " does not exist in server.");
