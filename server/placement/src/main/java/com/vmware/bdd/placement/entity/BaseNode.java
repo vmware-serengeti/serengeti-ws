@@ -21,6 +21,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
+import com.vmware.aurora.composition.CreateVmSP;
 import com.vmware.aurora.composition.DiskSchema;
 import com.vmware.aurora.composition.DiskSchema.Disk;
 import com.vmware.aurora.composition.VmSchema;
@@ -32,6 +35,7 @@ import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.NetworkAdd;
 import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.NodeStatus;
+import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 import com.vmware.bdd.apitypes.StorageRead.DiskScsiControllerType;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractHost;
@@ -39,12 +43,14 @@ import com.vmware.bdd.placement.util.PlacementUtil;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.spectypes.NicSpec;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.vm.device.VirtualDiskOption.DiskMode;
 
 public class BaseNode {
 
+   private static final Logger logger = Logger.getLogger(BaseNode.class);
    private String vmName;
 
    private NodeGroupCreate nodeGroup;
@@ -465,8 +471,11 @@ public class BaseNode {
       ArrayList<Disk> tmDisks = new ArrayList<Disk>();
 
       // transform DiskSpec to TM.VmSchema.DiskSchema
-      int lsiScsiIndex = 1;
+      int lsiScsiIndex = 0;
       int paraVirtualScsiIndex = 0;
+      StorageRead.DiskScsiControllerType sysSwapCtrlType =
+            CommonUtil.getSystemAndSwapControllerType();
+
       for (DiskSpec disk : this.disks) {
          if (disk.isSystemDisk()) {
             /*
@@ -480,22 +489,25 @@ public class BaseNode {
             tmDisk.initialSizeMB = disk.getSize() * 1024;
             tmDisk.datastore = disk.getTargetDs();
             tmDisk.mode = DiskMode.independent_persistent;
-            if (DiskScsiControllerType.LSI_CONTROLLER.equals(disk
-                  .getController())) {
-               if (lsiScsiIndex == PlacementUtil.CONTROLLER_RESERVED_CHANNEL) {
-                  // controller reserved channel, *:7, cannot be used by custom disk
-                  lsiScsiIndex++;
-               }
-               tmDisk.externalAddress =
-                     PlacementUtil.LSI_CONTROLLER_EXTERNAL_ADDRESS_PREFIX
-                           + lsiScsiIndex;
-               lsiScsiIndex++;
+            if ( disk.isSwapDisk() ) {
+               tmDisk.externalAddress = PlacementUtil.getSwapAddress(sysSwapCtrlType);
             } else {
-               tmDisk.externalAddress =
-                     PlacementUtil.getParaVirtualAddress(paraVirtualScsiIndex);
-               paraVirtualScsiIndex =
-                     PlacementUtil
-                           .getNextValidParaVirtualScsiIndex(paraVirtualScsiIndex);
+               if (DiskScsiControllerType.LSI_CONTROLLER.equals(disk
+                     .getController())) {
+                  if (lsiScsiIndex == PlacementUtil.CONTROLLER_RESERVED_CHANNEL) {
+                     // controller reserved channel, *:7, cannot be used by custom disk
+                     lsiScsiIndex++;
+                  }
+                  tmDisk.externalAddress =
+                       PlacementUtil.LSI_CONTROLLER_EXTERNAL_ADDRESS_PREFIX + lsiScsiIndex;
+                  lsiScsiIndex++;
+               } else {
+                  tmDisk.externalAddress =
+                        PlacementUtil.getParaVirtualAddress(paraVirtualScsiIndex);
+                  paraVirtualScsiIndex =
+                        PlacementUtil
+                              .getNextValidParaVirtualScsiIndex(paraVirtualScsiIndex);
+               }
             }
             tmDisk.allocationType = AllocationType.valueOf(disk.getAllocType());
             tmDisk.type = disk.getDiskType().getType();

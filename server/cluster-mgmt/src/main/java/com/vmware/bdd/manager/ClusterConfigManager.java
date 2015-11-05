@@ -1205,14 +1205,20 @@ public class ClusterConfigManager {
          }
          return;
       }
-      if (storageType != DatastoreType.LOCAL) {
-         // if storage type is specified, set controller type based on storage type
-         storage.setControllerType(DiskScsiControllerType.LSI_CONTROLLER);
+
+      DiskScsiControllerType systemSwapDiskControllerType = CommonUtil.getSystemAndSwapControllerType();
+      DiskScsiControllerType dataDiskControllerType = CommonUtil.getDataDiskControllerType();
+      if ( systemSwapDiskControllerType == DiskScsiControllerType.PARA_VIRTUAL_CONTROLLER
+            && dataDiskControllerType == DiskScsiControllerType.LSI_CONTROLLER ) {
+         logger.warn("The data disk controller type cannot be set to LSI_CONTROLLER when "
+               + "the system and swap disk controller type is PARA_VIRTUAL_CONTROLLER."
+               + "The PARA_VIRTUAL_CONTROLLER will be used for data disk.");
+         dataDiskControllerType = DiskScsiControllerType.PARA_VIRTUAL_CONTROLLER;
+      }
+      storage.setControllerType(dataDiskControllerType);
+      storage.setAllocType(AllocationType.THICK.name());
+      if ( storageType == DatastoreType.SHARED ) {
          storage.setAllocType(AllocationType.THIN.name());
-      } else {
-         storage
-               .setControllerType(DiskScsiControllerType.PARA_VIRTUAL_CONTROLLER);
-         storage.setAllocType(AllocationType.THICK.name());
       }
    }
 

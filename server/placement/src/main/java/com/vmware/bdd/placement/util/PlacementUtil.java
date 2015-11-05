@@ -17,9 +17,9 @@ package com.vmware.bdd.placement.util;
 
 import java.util.ArrayList;
 
+import com.vmware.bdd.apitypes.StorageRead;
 import com.vmware.bdd.placement.entity.BaseNode;
 import com.vmware.bdd.placement.entity.VirtualNode;
-import com.vmware.bdd.utils.CommonUtil;
 
 public class PlacementUtil {
    public static final String LOCAL_DATASTORE_TYPE = "LOCAL";
@@ -33,7 +33,13 @@ public class PlacementUtil {
    public static final String DATA_DISK_2 = "DATA2.vmdk";
 
    public static final String LSI_CONTROLLER_EXTERNAL_ADDRESS_PREFIX =
-         "VirtualLsiLogicController:0:";
+      "VirtualLsiLogicController:1:";
+
+   public static final String LSI_CONTROLLER_EXTERNAL_ADDRESS_SWAP =
+         "VirtualLsiLogicController:0:1";
+   public static final String PARA_VIRTUAL_CONTROLLER_EXTERNAL_ADDRESS_SWAP =
+         "ParaVirtualSCSIController:0:1";
+
    public static final int CONTROLLER_RESERVED_CHANNEL = 7;
    public static final String[] PARA_VIRTUAL_SCSI_EXTERNAL_ADDRESS_PREFIXES = {
       "ParaVirtualSCSIController:1:",
@@ -84,5 +90,13 @@ public class PlacementUtil {
       int diskIndex = paraVirtualScsiIndex /
          PARA_VIRTUAL_SCSI_EXTERNAL_ADDRESS_PREFIXES.length;
       return PARA_VIRTUAL_SCSI_EXTERNAL_ADDRESS_PREFIXES[arrayIndex] + diskIndex;
+   }
+
+   public static String getSwapAddress(StorageRead.DiskScsiControllerType sysSwapCtrlType) {
+      if ( sysSwapCtrlType ==
+              StorageRead.DiskScsiControllerType.PARA_VIRTUAL_CONTROLLER ) {
+         return PARA_VIRTUAL_CONTROLLER_EXTERNAL_ADDRESS_SWAP;
+      }
+      return LSI_CONTROLLER_EXTERNAL_ADDRESS_SWAP;
    }
 }

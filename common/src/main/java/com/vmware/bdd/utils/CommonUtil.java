@@ -702,4 +702,19 @@ public class CommonUtil {
       }
    }
 
+   public static StorageRead.DiskScsiControllerType getDataDiskControllerType() {
+      String controllerType;
+      try {
+         controllerType = Configuration.getString(Constants.DATA_DISK_CONTROLLER_TYPE);
+      } catch (NoSuchElementException e) {
+         controllerType = null;
+      }
+      if (controllerType == null || controllerType.equalsIgnoreCase(StorageRead.DiskScsiControllerType.PARA_VIRTUAL_CONTROLLER.getDisplayName())) {
+         return StorageRead.DiskScsiControllerType.PARA_VIRTUAL_CONTROLLER;
+      } else if (controllerType.equalsIgnoreCase(StorageRead.DiskScsiControllerType.LSI_CONTROLLER.getDisplayName())) {
+         return StorageRead.DiskScsiControllerType.LSI_CONTROLLER;
+      } else {
+         throw BddException.INVALID_PARAMETER(Constants.DATA_DISK_CONTROLLER_TYPE, controllerType);
+      }
+   }
 }

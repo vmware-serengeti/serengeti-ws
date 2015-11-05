@@ -266,6 +266,7 @@ public class Constants {
    public static final String SUDO_COMMAND = "serengeti.sudo.command";
    public static final String DEFAULT_SUDO_COMMAND = "sudo";
    public static final String SYSTEM_AND_SWAP_DISK_CONTROLLER_TYPE = "storage.system_swap.disk.controller.type";
+   public static final String DATA_DISK_CONTROLLER_TYPE = "storage.data.disk.controller.type";
    public static final String FORCE_CLUSTER_OPERATION_JOB_PARAM = "force.cluster.operation";
 
    public static final String VC_INVENTORY_SYNC_INTERVAL_IN_SECOND = "vc.inventory.sync.intervalSecond";
