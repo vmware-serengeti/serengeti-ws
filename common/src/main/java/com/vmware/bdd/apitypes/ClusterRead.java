@@ -400,24 +400,6 @@ public class ClusterRead implements Comparable<ClusterRead> {
     * rest api since start/stop vms will take some time to complete.
     */
    public boolean needAsyncUpdateParam(ElasticityRequestBody requestBody) {
-      Boolean enableAuto = requestBody.getEnableAuto();
-      if (enableAuto != null && !enableAuto && targetNumNotEmpty(requestBody)) { //set manual and targetNum != null
-         return true;
-      } else if (enableAuto == null) { //not set auto
-         Boolean existingElasticityMode = this.getAutomationEnable();
-         if (existingElasticityMode != null && !existingElasticityMode
-               && requestBody.getActiveComputeNodeNum() != null) { // existing is Manual and targetNum != null
-            return true;
-         }
-      }
-      return false;
-   }
-
-   private boolean targetNumNotEmpty(ElasticityRequestBody requestBody) {
-      if (requestBody.getActiveComputeNodeNum() != null
-            || this.getVhmTargetNum() != null) {
-         return true;
-      }
       return false;
    }
 

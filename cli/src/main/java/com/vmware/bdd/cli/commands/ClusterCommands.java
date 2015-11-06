@@ -984,10 +984,6 @@ public class ClusterCommands implements CommandMarker {
    @CliCommand(value = "cluster setParam", help = "set cluster parameters")
    public void setParam(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
-         @CliOption(key = { "elasticityMode" }, mandatory = false, help = "The elasticity mode: AUTO, MANUAL") final String elasticityMode,
-         @CliOption(key = { "minComputeNodeNum" }, mandatory = false, help = "The minimum number of compute nodes staying powered on (valid in auto elasticity mode)") final Integer minComputeNodeNum,
-         @CliOption(key = { "maxComputeNodeNum" }, mandatory = false, help = "The maximum number of compute nodes staying powered on (valid in auto elasticity mode)") final Integer maxComputeNodeNum,
-         @CliOption(key = { "targetComputeNodeNum" }, mandatory = false, help = "The number of instances powered on (valid in manual elasticity mode)") final Integer targetComputeNodeNum,
          @CliOption(key = { "ioShares" }, mandatory = false, help = "The relative disk I/O priorities: HIGH, NORNAL, LOW") final String ioShares) {
       try {
          //validate if the cluster exists
@@ -999,48 +995,10 @@ public class ClusterCommands implements CommandMarker {
             return;
          }
 
-         //validate the node group type for elasticity params
-         if (elasticityMode != null || minComputeNodeNum != null
-               || maxComputeNodeNum != null || targetComputeNodeNum != null) {
-            if (!cluster.validateSetManualElasticity()) {
-               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                       Constants.OUTPUT_OP_SET_PARAM, Constants.OUTPUT_OP_RESULT_FAIL,
-                       Constants.PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP);
-               return;
-            }
-         } else if (ioShares == null) {
+         if (ioShares == null) {
             // in this case, no parameter is specified excpet "cluster name", return directly
             System.out
                   .println("There is nothing to adjust, please specify more parameters.");
-            return;
-         }
-
-         ElasticityMode mode = null;
-         //validate the input of elasticityMode
-         if (elasticityMode != null) {
-            try {
-               mode = ElasticityMode.valueOf(elasticityMode.toUpperCase());
-            } catch (IllegalArgumentException e) {
-               CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                       Constants.OUTPUT_OP_SET_PARAM, Constants.OUTPUT_OP_RESULT_FAIL,
-                       Constants.INVALID_VALUE + " elasticityMode = " + elasticityMode);
-               return;
-            }
-         }
-         Boolean enableAuto = null;
-         if (mode != null) {
-            enableAuto = (mode == ElasticityMode.AUTO) ? true : false;
-         }
-
-         //validate the input parameters
-         try {
-            if (!cluster.validateSetParamParameters(targetComputeNodeNum,
-                  minComputeNodeNum, maxComputeNodeNum)) {
-               return;
-            }
-         } catch (Exception e) {
-            CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                    Constants.OUTPUT_OP_SET_PARAM, Constants.OUTPUT_OP_RESULT_FAIL, e.getMessage());
             return;
          }
 
@@ -1058,39 +1016,11 @@ public class ClusterCommands implements CommandMarker {
          }
 
          ElasticityRequestBody requestBody = new ElasticityRequestBody();
-         requestBody.setEnableAuto(enableAuto);
-         //print warning for ignored parameters under different mode
-         if (mode != null) {
-            if (mode == ElasticityMode.AUTO) {
-               requestBody.setMinComputeNodeNum(minComputeNodeNum);
-               requestBody.setMaxComputeNodeNum(maxComputeNodeNum);
-            } else {
-               requestBody.setActiveComputeNodeNum(targetComputeNodeNum);
-            }
-         } else {
-            requestBody.setMinComputeNodeNum(minComputeNodeNum);
-            requestBody.setMaxComputeNodeNum(maxComputeNodeNum);
-            requestBody.setActiveComputeNodeNum(targetComputeNodeNum);
-         }
          requestBody.setIoPriority(ioPriority);
 
          restClient.setParam(cluster, requestBody);
          CommandsUtils.printCmdSuccess(Constants.OUTPUT_OBJECT_CLUSTER,
                  Constants.OUTPUT_OP_RESULT_ADJUST);
-         //print warning for ignored parameters under different mode
-         if (mode != null) {
-            if (mode == ElasticityMode.AUTO) {
-               if (targetComputeNodeNum != null) {
-                  System.out
-                        .println("\'targetComputeNodeNum\' ignored. Parameter is not applicable to AUTO elasticity mode.");
-               }
-            } else {
-               if (minComputeNodeNum != null || maxComputeNodeNum != null) {
-                  System.out
-                        .println("\'minComputeNodeNum\' and \'maxComputeNodeNum\' ignored. Parameters are not applicable to MANUAL elasticity mode.");
-               }
-            }
-         }
       } catch (CliRestException e) {
          if (e.getMessage() != null) {
             CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
@@ -1102,12 +1032,7 @@ public class ClusterCommands implements CommandMarker {
    @CliCommand(value = "cluster resetParam", help = "reset cluster parameters")
    public void resetParam(
          @CliOption(key = { "name" }, mandatory = true, help = "The cluster name") final String clusterName,
-         @CliOption(key = { "all" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "reset all parameters") final boolean all,
-         @CliOption(key = { "elasticityMode" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "reset elasticity mode to MANUAL") final boolean elasticityMode,
-         @CliOption(key = { "minComputeNodeNum" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "reset minComputeNodeNum to -1") final boolean minComputeNodeNum,
-         @CliOption(key = { "maxComputeNodeNum" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "reset maxComputeNodeNum to -1") final boolean maxComputeNodeNum,
-         @CliOption(key = { "targetComputeNodeNum" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "reset targetComputeNodeNum to -1(activate all compute nodes)") final boolean targetComputeNodeNum,
-         @CliOption(key = { "ioShares" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "reset disk I/O priorities to LOW") final boolean ioShares) {
+         @CliOption(key = { "ioShares" }, mandatory = true, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "reset disk I/O priorities to LOW") final boolean ioShares) {
       try {
          //validate if the cluster exists
          ClusterRead cluster = restClient.get(clusterName, false);
@@ -1117,37 +1042,10 @@ public class ClusterCommands implements CommandMarker {
                     "cluster " + clusterName + " does not exist.");
             return;
          }
-         /* TODO emma: remove validation from client as client does not have knowledge about if it's compute only node group
-                  //validate the node group type
-                  if ((elasticityMode || minComputeNodeNum || maxComputeNodeNum || targetComputeNodeNum)
-                        && !cluster.validateSetManualElasticity()) {
-                     CommandsUtils.printCmdFailure(Constants.OUTPUT_OBJECT_CLUSTER,
-                           clusterName, Constants.OUTPUT_OP_RESET_PARAM,
-                           Constants.OUTPUT_OP_RESULT_FAIL,
-                           Constants.PARAM_SHOULD_HAVE_COMPUTE_ONLY_GROUP);
-                     return;
-                  }*/
 
-         // reset Auto Elasticity parameters. The default values are:
-         // elasticityMode: manual
-         // targetComputeNodes: -1
-         // minComputeNodes: -1
-         // maxComputeNodes: -1
          // ioShares: normal
          ElasticityRequestBody requestBody = new ElasticityRequestBody();
-         if (elasticityMode || all) {
-            requestBody.setEnableAuto(false);
-         }
-         if (minComputeNodeNum || all) {
-            requestBody.setMinComputeNodeNum(-1);
-         }
-         if (maxComputeNodeNum || all) {
-            requestBody.setMaxComputeNodeNum(-1);
-         }
-         if (targetComputeNodeNum || all) {
-            requestBody.setActiveComputeNodeNum(-1);
-         }
-         if (ioShares || all) {
+         if (ioShares) {
             requestBody.setIoPriority(Priority.NORMAL);
          }
          restClient.setParam(cluster, requestBody);
@@ -1372,21 +1270,7 @@ public class ClusterCommands implements CommandMarker {
          userMgmtCfg = infraCfg.get(UserMgmtConstants.LDAP_USER_MANAGEMENT);
       }
 
-
       TopologyType topology = cluster.getTopologyPolicy();
-      String autoElasticityStatus;
-      String minComputeNodeNum = cluster.retrieveVhmMinNum();
-      String maxComputeNodeNum = cluster.retrieveVhmMaxNum();
-      if (cluster.getAutomationEnable() == null) {
-         autoElasticityStatus = "N/A";
-         minComputeNodeNum = "N/A";
-         maxComputeNodeNum = "N/A";
-      } else if (cluster.getAutomationEnable()) {
-         autoElasticityStatus = "Enable";
-      } else {
-         autoElasticityStatus = "Disable";
-      }
-
       printSeperator();
 
       // list cluster level params
@@ -1404,9 +1288,6 @@ public class ClusterCommands implements CommandMarker {
       if (topology != null && topology != TopologyType.NONE) {
          clusterParams.put("TOPOLOGY", topology.toString());
       }
-      clusterParams.put("AUTO ELASTIC", autoElasticityStatus);
-      clusterParams.put("MIN COMPUTE NODES NUM", minComputeNodeNum);
-      clusterParams.put("MAX COMPUTE NODES NUM", maxComputeNodeNum);
       clusterParams.put("IO SHARES", cluster.getIoShares() == null ? ""
             : cluster.getIoShares().toString());
       clusterParams.put("STATUS", cluster.getStatus() == null ? "" : cluster

@@ -446,11 +446,7 @@ public class RestResource {
       }
 
       Long taskId =
-            clusterMgr.asyncSetParam(clusterName,
-                    requestBody.getActiveComputeNodeNum(),
-                    requestBody.getMinComputeNodeNum(),
-                    requestBody.getMaxComputeNodeNum(),
-                    requestBody.getEnableAuto(), requestBody.getIoPriority());
+            clusterMgr.asyncSetParam(clusterName, null, null, null, null, requestBody.getIoPriority());
       redirectRequest(taskId, request, response);
    }
 
@@ -467,34 +463,12 @@ public class RestResource {
          HttpServletResponse response) throws Exception {
       verifyInitialized();
       validateInput(clusterName, requestBody);
-      clusterMgr.syncSetParam(clusterName,
-              requestBody.getActiveComputeNodeNum(),
-              requestBody.getMinComputeNodeNum(),
-              requestBody.getMaxComputeNodeNum(),
-              requestBody.getEnableAuto(),
-              requestBody.getIoPriority());
+      clusterMgr.syncSetParam(clusterName, null, null, null, null, requestBody.getIoPriority());
    }
 
    private void validateInput(String clusterName, ElasticityRequestBody requestBody) {
       if (CommonUtil.isBlank(clusterName) || !CommonUtil.validateClusterName(clusterName)) {
          throw BddException.INVALID_PARAMETER("cluster name", clusterName);
-      }
-
-      Integer minComputeNodeNum = requestBody.getMinComputeNodeNum();
-      if (minComputeNodeNum != null && minComputeNodeNum < -1) {
-         throw BddException.INVALID_PARAMETER("min compute node num", minComputeNodeNum.toString());
-      }
-
-      Integer maxComputeNodeNum = requestBody.getMaxComputeNodeNum();
-      if (maxComputeNodeNum != null && maxComputeNodeNum < -1) {
-         throw BddException.INVALID_PARAMETER("max compute node num", maxComputeNodeNum.toString());
-      }
-
-      Integer activeComputeNodeNum = requestBody.getActiveComputeNodeNum();
-      // The active compute node number must be a positive number or -1.
-      if (activeComputeNodeNum != null && activeComputeNodeNum < -1) {
-         logger.error("Invalid instance number: " + activeComputeNodeNum + " !");
-         throw BddException.INVALID_PARAMETER("instance number", activeComputeNodeNum.toString());
       }
    }
 

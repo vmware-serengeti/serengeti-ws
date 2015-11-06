@@ -18,38 +18,10 @@ package com.vmware.bdd.apitypes;
  * This class is a DTO of the cluster set/resetParam command.
  */
 public class ElasticityRequestBody {
-   private Integer minComputeNodeNum; // min compute nodes that stay powered on
-   private Integer maxComputeNodeNum; // max compute nodes that stay powered on
-   private Integer activeComputeNodeNum;
-   private Boolean enableAuto;
    private Priority ioPriority;
 
    public static enum ElasticityMode {
       AUTO, MANUAL
-   }
-
-   public Integer getMinComputeNodeNum() {
-      return minComputeNodeNum;
-   }
-
-   public void setMinComputeNodeNum(Integer minComputeNodeNum) {
-      this.minComputeNodeNum = minComputeNodeNum;
-   }
-
-   public Integer getMaxComputeNodeNum() {
-      return maxComputeNodeNum;
-   }
-
-   public void setMaxComputeNodeNum(Integer maxComputeNodeNum) {
-      this.maxComputeNodeNum = maxComputeNodeNum;
-   }
-
-   public Integer getActiveComputeNodeNum() {
-      return activeComputeNodeNum;
-   }
-
-   public void setActiveComputeNodeNum(Integer activeComputeNodeNum) {
-      this.activeComputeNodeNum = activeComputeNodeNum;
    }
 
    public Priority getIoPriority() {
@@ -58,13 +30,5 @@ public class ElasticityRequestBody {
 
    public void setIoPriority(Priority ioPriority) {
       this.ioPriority = ioPriority;
-   }
-
-   public Boolean getEnableAuto() {
-      return enableAuto;
-   }
-
-   public void setEnableAuto(Boolean enableAuto) {
-      this.enableAuto = enableAuto;
    }
 }
