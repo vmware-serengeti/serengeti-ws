@@ -275,8 +275,16 @@ public class Constants {
    public static final String PARAMS_NETWORK_DDNS_TYPE = "DYNAMIC";
    public static final String VM_POWER_ON_WAITING_SEC_KEY = "vm.poweron.waiting.seconds";
    public static final String DELETE_POWEROFF_NOIP_VM = "cluster.operation.deletePowerOffNoIpVm";
-   //add by Chaolong
+
    public static final String VCINVENTORYREFRESH_THREADPOOL_CONFIG = "vcinventoryrefresh.threadpool.config";
    public static final java.lang.String CLUSTER_SYNC_MAX_WAIT_SEC = "bde_cluster.sync.waiting.seconds";
    public static final java.lang.String CONNECT_TO_ANOTHER_VC = "bde.connected_to_another_vc";
+
+   /**
+    * The maximum number of data disks attached to a VM.
+    * SCSI 0:0 and SCSI 0:1 are used for System Disk and Swap Disk.
+    * SCSI 1:0 ~ SCSI 1:15, SCSI 2:0 ~ SCSI 2:15, SCSI 3:0 ~ SCSI 3:15 (excluding SCSI x:7)
+    * can be used for data disks. SCSI x:7 is reserved for the virtual SCSI adapter.
+    */
+   public static final int MAX_DISKS_NUMBER = 45;
 }

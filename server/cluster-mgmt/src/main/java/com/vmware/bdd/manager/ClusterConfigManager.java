@@ -88,6 +88,7 @@ import com.vmware.bdd.specpolicy.CommonClusterExpandPolicy;
 import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.bdd.utils.InfrastructureConfigUtils;
 import com.vmware.bdd.utils.VcVmUtil;
@@ -1461,11 +1462,20 @@ public class ClusterConfigManager {
       if (storageType == null) {
          storageType = DatastoreType.LOCAL.name();
       }
-      if (diskNumber != null) {
-         return diskNumber;
-      } else {
-         return Configuration.getInt(String.format("storage.%1$s.disk_number_per_node", storageType.toLowerCase()), 0);
+      if (diskNumber == null) {
+         diskNumber = Configuration.getInt(String.format("storage.%1$s.disk_number_per_node", storageType.toLowerCase()), 0);
       }
+
+      int maxDiskNum = ConfigInfo.getMaxDiskNumPerNode();
+      logger.debug("maxDiskNum is " + maxDiskNum);
+      if (diskNumber < 0) {
+         diskNumber = 0;
+      } else if (diskNumber > maxDiskNum) {
+         throw ClusterConfigException.DISK_NUM_EXCEED_LIMIT(group.getName(), diskNumber, maxDiskNum);
+      }
+
+
+      return diskNumber;
    }
 
    /*

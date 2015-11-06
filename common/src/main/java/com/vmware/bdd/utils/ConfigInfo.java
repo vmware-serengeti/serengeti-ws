@@ -139,4 +139,12 @@ public class ConfigInfo {
          return serengetiUUID;
       }
    }
+
+   public static int getMaxDiskNumPerNode() {
+      int num = Configuration.getInt("storage.disk_number_per_node.max", Constants.MAX_DISKS_NUMBER);
+      if (num <= 0) {
+         num = Constants.MAX_DISKS_NUMBER;
+      }
+      return num;
+   }
 }

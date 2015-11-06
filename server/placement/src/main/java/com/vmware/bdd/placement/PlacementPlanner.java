@@ -30,6 +30,7 @@ import com.google.gson.Gson;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.*;
 import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.ConfigInfo;
 import com.vmware.bdd.utils.Constants;
 import org.apache.log4j.Logger;
 
@@ -556,7 +557,12 @@ public class PlacementPlanner implements IPlacementPlanner {
          List<AbstractDatastore> originDatastores) {
       int minDiskSize = getMininumDiskSize();
       int maxNumDatastores = (separable.getSize() + minDiskSize - 1) / minDiskSize;
-      Collections.sort(originDatastores);
+      // recalculate minDiskSize based on the configured MaxDiskNumPerNode
+      maxNumDatastores = Math.min(maxNumDatastores, ConfigInfo.getMaxDiskNumPerNode());
+      minDiskSize = Math.max(minDiskSize, separable.getSize() / maxNumDatastores);
+      logger.debug("maxNumDatastores: " + maxNumDatastores + " minDiskSize: " + minDiskSize);
+
+      Collections.sort(originDatastores); // sorted by free space on the datastore from small to big
       List<AbstractDatastore> datastores = new ArrayList<AbstractDatastore>();
       int numDatastores = 0;
       for (AbstractDatastore datastore : originDatastores) {
@@ -567,7 +573,14 @@ public class PlacementPlanner implements IPlacementPlanner {
       }
 
       int length = datastores.size() + 1;
+      // free space of each datastore
       int[] free = new int[length];
+      // if use the total free space of a datastore as the expected size of the
+      // disks to be placed on all datastores,
+      // partSum[i] is the total size fo all disks. The disk placed on the
+      // datastore with smaller free space is smaller than the expected size.
+      // This means use all the free space of smaller datastores and use part of
+      // the free space of bigger datastores.
       int[] partSum = new int[length];
 
       int iter = 0;
@@ -645,6 +658,7 @@ public class PlacementPlanner implements IPlacementPlanner {
       int i = 0;
       int index = 0;
       int remain = separable.getSize();
+      int maxDiskNum = ConfigInfo.getMaxDiskNumPerNode();
       List<DiskSpec> disks = new ArrayList<DiskSpec>();
 
       for (; i < datastores.size(); i++) {
@@ -668,8 +682,14 @@ public class PlacementPlanner implements IPlacementPlanner {
          disks.add(subDisk);
          ds.allocate(size);
          index++;
-         if (remain == 0)
+         if (remain == 0) {
             break;
+         }
+         if (index == maxDiskNum) {
+            logger.error("Aggregate Spliter: all the " + maxDiskNum
+                  + " SCSI controllers are used, but still can not place disk " + separable.toString());
+            return null;
+         }
       }
       // not enough space to place this disk
       if (i >= datastores.size()) {

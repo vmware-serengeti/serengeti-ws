@@ -153,11 +153,13 @@ public class ClusterConfigException extends BddException {
       return new ClusterConfigException(null, "INSTANCE_SIZE_NOT_SET", group);
    }
    public static ClusterConfigException INVALID_LOCAL_REPO_URL(List<String> errors) {
-	  return new ClusterConfigException(null, "INVALID_LOCAL_REPO_URL", errors);
+      return new ClusterConfigException(null, "INVALID_LOCAL_REPO_URL", errors);
    }
-
    public static ClusterConfigException INVALID_INFRA_CONFIG(Throwable ex) {
       return new ClusterConfigException(ex, "INVALID_INFRA_CONFIG");
    }
-   
+   public static ClusterConfigException DISK_NUM_EXCEED_LIMIT(String nodeGroupName, int num, int limit) {
+      return new ClusterConfigException(null, "DISK_NUM_EXCEED_LIMIT", num, nodeGroupName, limit);
+   }
+
 }
