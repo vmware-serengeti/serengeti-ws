@@ -15,15 +15,18 @@
 package com.vmware.bdd.apitypes;
 
 
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
 import com.vmware.bdd.exception.ClusterConfigException;
-
-import com.vmware.bdd.utils.*;
-
-import java.io.Serializable;
-import java.util.*;
+import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.Constants;
 
 
 /**
@@ -236,7 +239,7 @@ public class NodeGroupAdd implements Serializable {
       boolean validated = true;
       StringBuilder invalidNodeGroupNames = new StringBuilder();
       for (NodeGroupCreate nodeGroup : nodeGroups) {
-         if (nodeGroup.getSwapRatio() <= 0) {
+         if (nodeGroup.getSwapRatio() < 0) {
             validated = false;
             invalidNodeGroupNames.append(nodeGroup.getName()).append(",");
          }
@@ -247,7 +250,7 @@ public class NodeGroupAdd implements Serializable {
                  invalidNodeGroupNames.length());
          failedMsgList
                  .add(errorMsgBuff
-                         .append("The 'swapRatio' must be greater than 0 in group ")
+                         .append("The 'swapRatio' must be greater than or equal to 0 in group ")
                          .append(invalidNodeGroupNames.toString()).append(".")
                          .toString());
       }

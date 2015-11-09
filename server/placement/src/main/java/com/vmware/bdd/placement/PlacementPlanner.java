@@ -26,24 +26,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gson.Gson;
-import com.vmware.aurora.global.Configuration;
-import com.vmware.bdd.apitypes.*;
-import com.vmware.bdd.utils.CommonUtil;
-import com.vmware.bdd.utils.ConfigInfo;
-import com.vmware.bdd.utils.Constants;
 import org.apache.log4j.Logger;
 
+import com.google.gson.Gson;
 import com.google.gson.internal.Pair;
 import com.vmware.aurora.composition.NetworkSchema;
 import com.vmware.aurora.composition.NetworkSchema.Network;
 import com.vmware.aurora.composition.ResourceSchema;
+import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.interfaces.model.IDatabaseConfig.Priority;
 import com.vmware.aurora.vc.DiskSpec.AllocationType;
+import com.vmware.bdd.apitypes.ClusterCreate;
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
+import com.vmware.bdd.apitypes.DiskSplitPolicy;
+import com.vmware.bdd.apitypes.LatencyPriority;
+import com.vmware.bdd.apitypes.NetworkAdd;
+import com.vmware.bdd.apitypes.NodeGroupCreate;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks;
 import com.vmware.bdd.apitypes.PlacementPolicy.GroupRacks.GroupRacksType;
-import com.vmware.bdd.apitypes.StorageRead.DiskScsiControllerType;
 import com.vmware.bdd.apitypes.StorageRead.DiskType;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractCluster;
 import com.vmware.bdd.placement.entity.AbstractDatacenter.AbstractDatastore;
@@ -57,6 +57,9 @@ import com.vmware.bdd.placement.util.PlacementUtil;
 import com.vmware.bdd.spectypes.DiskSpec;
 import com.vmware.bdd.spectypes.VcCluster;
 import com.vmware.bdd.utils.AuAssert;
+import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.ConfigInfo;
+import com.vmware.bdd.utils.Constants;
 
 public class PlacementPlanner implements IPlacementPlanner {
    static final Logger logger = Logger.getLogger(PlacementPlanner.class);
@@ -209,14 +212,16 @@ public class PlacementPlanner implements IPlacementPlanner {
          // THICK as by default
          diskAllocType = AllocationType.THICK;
       }
-      // swap disk
-      int swapDisk =
-            (((int) Math.ceil(nodeGroup.getMemCapacityMB()
-                  * nodeGroup.getSwapRatio()) + 1023) / 1024);
-      disks.add(new DiskSpec(DiskType.SWAP_DISK.getDiskName(), swapDisk, node
-            .getVmName(), false, DiskType.SWAP_DISK,
-            CommonUtil.getSystemAndSwapControllerType(), null, diskAllocType
-                  .toString(), null, null, null));
+      // swap disk. There is no swap disk if the value of swapRatio is 0
+      if (nodeGroup.getSwapRatio() > 0) {
+         int swapDisk =
+               (((int) Math.ceil(nodeGroup.getMemCapacityMB()
+                     * nodeGroup.getSwapRatio()) + 1023) / 1024);
+         disks.add(new DiskSpec(DiskType.SWAP_DISK.getDiskName(), swapDisk, node
+               .getVmName(), false, DiskType.SWAP_DISK,
+               CommonUtil.getSystemAndSwapControllerType(), null, diskAllocType
+               .toString(), null, null, null));
+      }
 
       // data disks
       if (!DatastoreType.TEMPFS.name().equalsIgnoreCase(

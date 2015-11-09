@@ -1045,7 +1045,7 @@ public class ClusterConfigManager {
       }
 
       Float swapRatio = ngEntity.getSwapRatio();
-      if (swapRatio != null && swapRatio > 0) {
+      if (swapRatio != null && swapRatio >= 0) {
          group.setSwapRatio(swapRatio);
       }
 

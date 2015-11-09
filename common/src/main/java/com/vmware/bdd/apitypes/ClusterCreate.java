@@ -540,7 +540,7 @@ public class ClusterCreate implements Serializable {
       boolean validated = true;
       StringBuilder invalidNodeGroupNames = new StringBuilder();
       for (NodeGroupCreate nodeGroup : nodeGroups) {
-         if (nodeGroup.getSwapRatio() <= 0) {
+         if (nodeGroup.getSwapRatio() < 0) {
             validated = false;
             invalidNodeGroupNames.append(nodeGroup.getName()).append(",");
          }
@@ -551,7 +551,7 @@ public class ClusterCreate implements Serializable {
                invalidNodeGroupNames.length());
          failedMsgList
                .add(errorMsgBuff
-                     .append("The 'swapRatio' must be greater than 0 in group ")
+                     .append("The 'swapRatio' must be greater than or equal to 0 in group ")
                      .append(invalidNodeGroupNames.toString()).append(".")
                      .toString());
       }
