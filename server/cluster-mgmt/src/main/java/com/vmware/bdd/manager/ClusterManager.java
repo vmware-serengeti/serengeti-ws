@@ -1804,7 +1804,7 @@ public class ClusterManager {
       if(readyExpand) {
          clusterEntityMgr.updateClusterStatus(clusterName, ClusterStatus.EXPANDING);
          if (clusteringService.addNodeGroups(clusterSpec, nodeGroupsAdd, vNodes)) {
-            taskId = clusterExpandExecute(clusterName, nodeGroupsAdd);
+            taskId = clusterExpandExecute(clusterName, nodeGroupsAdd, clusterSpec);
          } else {
             logger.error("Cluster "
                     + clusterName + " failed to add node groups.");
@@ -1817,7 +1817,7 @@ public class ClusterManager {
       return taskId;
    }
 
-   public Long clusterExpandExecute(String clusterName, NodeGroupCreate[] nodeGroupsAdd) throws Exception {
+   public Long clusterExpandExecute(String clusterName, NodeGroupCreate[] nodeGroupsAdd, ClusterCreate clusterSpec) throws Exception {
 
       ClusterEntity cluster = clusterEntityMgr.findByName(clusterName);
       StringBuffer nodeGroupNameList = new StringBuffer();
@@ -1843,7 +1843,9 @@ public class ClusterManager {
          throw ClusterConfigException.NO_RESOURCE_POOL_ADDED();
       }
 
-      this.resMgr.refreshVcResources();
+      VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
+              getRpNames(clusterSpec.getRpNames()), clusterSpec.getNetworkNames());
+      syncService.refreshInventory(filters);
 
       // validate accessibility
       validateDatastore(dsNames, vcClusters);
