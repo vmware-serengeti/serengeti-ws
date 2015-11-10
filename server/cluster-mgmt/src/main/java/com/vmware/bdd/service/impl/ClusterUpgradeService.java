@@ -139,14 +139,25 @@ public class ClusterUpgradeService implements IClusterUpgradeService {
    }
 
    private void postUpgradeNode(String clusterName) {
+      SoftwareManager softwareManager = softwareManagerCollector.getSoftwareManagerByClusterName(clusterName);
+      ClusterBlueprint blueprint = clusterEntityMgr.toClusterBluePrint(clusterName);
+
       if (isClusterVersionBelow_2_2_0()) {
          /*
           * When upgrading BDE cluster nodes from 2.1.0 to 2.2.0, the mount point dirs change from /mnt/scsi-xxx-xxx to /mnt/dataX,
           * Then need to reconfigure the cluster to restart the services on the nodes.
           */
-         SoftwareManager softwareManager = softwareManagerCollector.getSoftwareManagerByClusterName(clusterName);
-         ClusterBlueprint blueprint = clusterEntityMgr.toClusterBluePrint(clusterName);
          if (needToRestartCluster(softwareManager, blueprint)) {
+            this.softwareManagementService.configCluster(clusterName);
+         }
+      } else {
+         /*
+          * When upgrading BDE cluster nodes from 2.2.0 to 2.3.0 (or 2.3.0 to 2.4.0 etc.),
+          * the client.rb on each nodes point to the old BDE Server.
+          * So need to reconfigure cluster to regenerate client.rb and related certificates.
+          */
+         if (Constants.IRONFAN.equalsIgnoreCase(softwareManager.getType())) {
+            logger.info("reconfiguring cluster " + clusterName + " during post upgrade.");
             this.softwareManagementService.configCluster(clusterName);
          }
       }
