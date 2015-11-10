@@ -21,15 +21,7 @@ import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import com.vmware.aurora.vc.VcResourcePool;
@@ -358,7 +350,7 @@ public class ClusterManager {
             // for not running cluster, we don't sync up status from chef
          refreshClusterStatus(clusterName);
       }
-      logger.debug("refreshClusterStatus time: " + (new java.util.Date().getTime()-startTime.getTime()));
+      logger.debug("refreshClusterStatus time: " + (new java.util.Date().getTime() - startTime.getTime()));
       return realTime ? clusterEntityMgr.findClusterWithNodes(clusterName, false)
             : clusterEntityMgr.findClusterWithNodeGroups(clusterName);
    }
@@ -617,13 +609,14 @@ public class ClusterManager {
    /**
     * Get the dsNames to be used by the cluster
     */
-   private List<String> getDsNamesToBeUsed(List<String> specifiedDsNames) {
+   private List<String> getDsNamesToBeUsed(final List<String> specifiedDsNames) {
       if (specifiedDsNames == null || specifiedDsNames.isEmpty()) {
-         specifiedDsNames = new ArrayList<String>();
-         specifiedDsNames.addAll(clusterConfigMgr.getDatastoreMgr()
-                 .getAllDatastoreNames());
+         List<String> allDsNames = new ArrayList<>();
+         allDsNames.addAll(clusterConfigMgr.getDatastoreMgr().getAllDatastoreNames());
+         return allDsNames;
+      } else {
+         return validateGivenDS(specifiedDsNames);
       }
-      return specifiedDsNames;
    }
 
    private List<String> getRpNames(List<String> rpNames) {
