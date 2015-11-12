@@ -19,6 +19,7 @@ import com.vmware.aurora.global.Configuration;
 public class ConfigInfo {
    private static final String SERENGETI_INITIALIZE_UUID = "serengeti.initialize.uuid";
    private static final String SERENGETI_JUST_UPGRADED = "serengeti.just_upgraded";
+   private static final String SERENGETI_JUST_RESTORED = "serengeti.just_restored";
 
    private static final String SERENGETI_UUID_KEY = "serengeti.uuid";
 
@@ -39,6 +40,7 @@ public class ConfigInfo {
    private static boolean initUUID;
    private static boolean deployAsVApp;
    private static boolean justUpgraded;
+   private static boolean justRestored;
 
    static {
       mqEnabled = Configuration.getBoolean("task.enable_mq", mqEnabled);
@@ -55,6 +57,7 @@ public class ConfigInfo {
       initUUID = Configuration.getBoolean(SERENGETI_INITIALIZE_UUID, true);
       deployAsVApp = Configuration.getBoolean("deploy_as_vapp");
       justUpgraded = Configuration.getBoolean(SERENGETI_JUST_UPGRADED, false);
+      justRestored = Configuration.getBoolean(SERENGETI_JUST_RESTORED, false);
    }
 
    public static boolean isDebugEnabled() {
@@ -126,6 +129,15 @@ public class ConfigInfo {
    public static void setJustUpgraded(boolean justUpgraded) {
       ConfigInfo.justUpgraded = justUpgraded;
       Configuration.setBoolean(SERENGETI_JUST_UPGRADED, justUpgraded);
+   }
+
+   public static boolean isJustRestored() {
+      return justRestored;
+   }
+
+   public static void setJustRestored(boolean justRestored) {
+      ConfigInfo.justRestored = justRestored;
+      Configuration.setBoolean(SERENGETI_JUST_RESTORED, justRestored);
    }
 
    public static void save() {

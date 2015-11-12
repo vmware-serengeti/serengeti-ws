@@ -18,6 +18,7 @@ package com.vmware.bdd.service.resmgmt.impl;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -35,6 +36,7 @@ import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.service.resmgmt.INodeTemplateService;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.ConfigInfo;
 
 @Component
 public class NodeTemplateService implements INodeTemplateService {
@@ -46,6 +48,16 @@ public class NodeTemplateService implements INodeTemplateService {
 
    @Autowired
    private INodeTemplateDAO nodeTemplateDAO;
+
+   private HashMap<String, String> templateMoidMap = new HashMap<String, String>();
+
+   public HashMap<String, String> getTemplateMoidMap() {
+      return templateMoidMap;
+   }
+
+   public void setTemplateMoidMap(HashMap<String, String> templateMoidMap) {
+      this.templateMoidMap = templateMoidMap;
+   }
 
    @Override
    public VcVirtualMachine getNodeTemplateVMByName(String templateName) {
@@ -136,9 +148,11 @@ public class NodeTemplateService implements INodeTemplateService {
       logger.info("Refreshing node templates from vCenter");
       List<VcVirtualMachine> vms = VcResourceUtils.findAllNodeTemplates();
       HashSet<String> moids = new HashSet<String>();
+      HashMap<String, String> nameToMoid = new HashMap<String, String>();
       for (VcVirtualMachine vm : vms) {
          String moid = vm.getId();
          moids.add(moid);
+         nameToMoid.put(vm.getName(), moid);
          long timestamp = System.currentTimeMillis();
          NodeTemplateEntity entity = nodeTemplateDAO.findByMoid(moid);
          if (entity == null) {
@@ -153,6 +167,18 @@ public class NodeTemplateService implements INodeTemplateService {
       // remove the non-exists templates from DB
       for (NodeTemplateEntity entity : nodeTemplateDAO.findAll()) {
          if (!moids.contains(entity.getMoid())) {
+            if ( ConfigInfo.isJustRestored() ) {
+               // for restore and upgrade, we need to get the mapping between
+               // old moid to new moid for all the node templates
+               logger.info("The Serengeti Server was just restored, so create the "
+                     + "moid mapping between old and new templates, then update the "
+                     + "template id in cluster table.");
+               String oldMoid = entity.getMoid();
+               String newMoid = nameToMoid.get(entity.getName());
+               if ( null != newMoid ) {
+                  templateMoidMap.put(oldMoid, newMoid);
+               }
+            }
             nodeTemplateDAO.delete(entity);
          }
       }

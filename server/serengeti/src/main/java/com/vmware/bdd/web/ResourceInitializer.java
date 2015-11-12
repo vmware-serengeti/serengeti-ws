@@ -22,11 +22,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import com.vmware.bdd.upgrade.PostUpgradeHandler;
-import com.vmware.bdd.utils.CommonUtil;
-import com.vmware.bdd.utils.ConfigInfo;
-import com.vmware.bdd.utils.Constants;
-
 import org.apache.log4j.Logger;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -34,9 +29,14 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import com.vmware.aurora.global.Configuration;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.bdd.plugin.NgcBDERegistrar;
+import com.vmware.bdd.restore.PostRestoreHandler;
 import com.vmware.bdd.service.IClusteringService;
 import com.vmware.bdd.service.collection.ICollectionInitializerService;
 import com.vmware.bdd.service.resmgmt.IResourceInitializerService;
+import com.vmware.bdd.upgrade.PostUpgradeHandler;
+import com.vmware.bdd.utils.CommonUtil;
+import com.vmware.bdd.utils.ConfigInfo;
+import com.vmware.bdd.utils.Constants;
 
 /**
  * @author Jarred Li
@@ -73,6 +73,19 @@ public class ResourceInitializer implements ServletContextListener {
             resInitializerSvc.updateOrInsertServerInfo();
          }
          logger.info("ResourceInitializer completed");
+
+         // do some post restore work for the first time start after restore
+         if ( ConfigInfo.isJustRestored() ) {
+            logger.info("handle post restore for user management");
+            PostUpgradeHandler postUpgradeHandler = wac.getBean("postUpgradeHandler", PostUpgradeHandler.class);
+            postUpgradeHandler.handlePostUpgradeForUsrMgmt();
+            logger.info("handle post restore for other functions");
+            PostRestoreHandler postRestoreHandler = wac.getBean("postRestoreHandler", PostRestoreHandler.class);
+            postRestoreHandler.handlePostRestore();
+            // set the just_restore tag to be false
+            ConfigInfo.setJustRestored(false);
+            ConfigInfo.save();
+         }
 
          // do some post upgrade work for the first time start after upgrade
          if ( ConfigInfo.isJustUpgraded() ) {

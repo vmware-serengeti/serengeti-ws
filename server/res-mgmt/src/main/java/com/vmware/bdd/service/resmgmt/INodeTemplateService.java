@@ -15,6 +15,7 @@
 
 package com.vmware.bdd.service.resmgmt;
 
+import java.util.HashMap;
 import java.util.List;
 
 import com.vmware.aurora.vc.VcVirtualMachine;
@@ -30,5 +31,6 @@ public interface INodeTemplateService {
    public VcVirtualMachine getNodeTemplateVMByName(String templateName);
    public String getNodeTemplateNameByMoid(String moid);
    public String getNodeTemplateIdByName(String templateName);
+   public HashMap<String, String> getTemplateMoidMap();
 
 }

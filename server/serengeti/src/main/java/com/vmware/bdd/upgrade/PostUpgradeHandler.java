@@ -39,6 +39,11 @@ public class PostUpgradeHandler {
 
    public void handlePostUpgrade() {
       logger.info("start to process the post upgrade");
+      handlePostUpgradeForUsrMgmt();
+   }
+
+   public void handlePostUpgradeForUsrMgmt() {
+      logger.info("start to process the post upgrade for user management");
       Map<String, String> mvcMap = mgmtVmCfgService.get();
       if ( mvcMap != null ) {
          String mgmtMode = mvcMap.get(UserMgmtConstants.VMCONFIG_MGMTVM_CUM_MODE);

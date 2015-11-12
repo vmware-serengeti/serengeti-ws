@@ -9,4 +9,5 @@
         http://www.springframework.org/schema/context/spring-context.xsd">
 
 	<bean id="postUpgradeHandler" class="com.vmware.bdd.upgrade.PostUpgradeHandler" />
+	<bean id="postRestoreHandler" class="com.vmware.bdd.restore.PostRestoreHandler" />
 </beans>
