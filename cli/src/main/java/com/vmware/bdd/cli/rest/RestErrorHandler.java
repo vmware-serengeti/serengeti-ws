@@ -80,24 +80,28 @@ public class RestErrorHandler implements ResponseErrorHandler {
          throw new CliRestException(errorMessage.getMessage());
       } else {
          HttpStatus statusCode = response.getStatusCode();
-         String errorMsg = "";
-         if (statusCode == HttpStatus.UNAUTHORIZED) {
-            errorMsg = Constants.CONNECT_SESSION_TIME_OUT;
-         } else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR) {
-            errorMsg =
-                  "vCenter Server connect command failed: "
-                        + getVCConnectErrorMsg(body);
-         } else if (statusCode == HttpStatus.METHOD_NOT_ALLOWED) {
-            errorMsg = body;
-            if (errorMsg.isEmpty()) {
-               errorMsg = statusCode.getReasonPhrase();
-            }
-         } else {
+         handleHttpErrCode(statusCode, body);
+      }
+   }
+
+   public static void handleHttpErrCode(HttpStatus statusCode, String responseContent) {
+      String errorMsg = "";
+      if (statusCode == HttpStatus.UNAUTHORIZED) {
+         errorMsg = Constants.CONNECT_SESSION_TIME_OUT;
+      } else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR) {
+         errorMsg =
+               "vCenter Server connect command failed: "
+                     + getVCConnectErrorMsg(responseContent);
+      } else if (statusCode == HttpStatus.METHOD_NOT_ALLOWED) {
+         errorMsg = responseContent;
+         if (errorMsg.isEmpty()) {
             errorMsg = statusCode.getReasonPhrase();
          }
-
-         throw new CliRestException(statusCode, errorMsg);
+      } else {
+         errorMsg = statusCode.getReasonPhrase();
       }
+
+      throw new CliRestException(statusCode, errorMsg);
    }
 
    private String getResponseContent(InputStream is) {
@@ -145,7 +149,7 @@ public class RestErrorHandler implements ResponseErrorHandler {
       return buffer.toString();
    }
 
-   private String getVCConnectErrorMsg(String content) {
+   private static String getVCConnectErrorMsg(String content) {
       return findErrorMsg(content, "(Connection(.)*</h1>)+");
    }
 

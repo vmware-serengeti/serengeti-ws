@@ -91,10 +91,8 @@ public class AppManagerRestClient {
                 Constants.REST_PATH_APPMANAGER + "/" + appMgrName + "/"
                         + Constants.REST_PATH_DISTRO + "/" + distroName + "/"
                         + Constants.REST_PATH_CONFIGURATIONS;
-        final HttpMethod httpverb = HttpMethod.GET;
 
-        return restClient.getAllObjects(String.class, path, httpverb,
-                false);
+        return restClient.getContentAsString(Constants.HTTPS_CONNECTION_API + path);
     }
 
     public DistroRead getDefaultDistro(String name) {

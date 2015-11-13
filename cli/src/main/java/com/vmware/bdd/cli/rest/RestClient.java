@@ -25,13 +25,25 @@ import com.vmware.bdd.cli.commands.Constants;
 import com.vmware.bdd.cli.commands.CookieCache;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.utils.CommonUtil;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.*;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.log4j.Logger;
 import org.fusesource.jansi.AnsiConsole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +68,41 @@ public class RestClient {
    @Autowired
    private LoginClient loginClient;
 
+   @Autowired
+   private HttpClient httpClient;
+
    private RestClient() {
+   }
+
+   public String getContentAsString(String path) {
+      String uri = hostUri + path;
+      logger.debug("getContentAsString @ " + uri);
+
+      HttpGet getRequest = new HttpGet(uri);
+
+      String cookieInfo = readCookieInfo();
+      getRequest.setHeader("Cookie", cookieInfo == null ? "" : cookieInfo);
+
+      try {
+         HttpResponse response = httpClient.execute(getRequest);
+
+         int responseCode = response.getStatusLine().getStatusCode();
+
+         InputStream contentStream = response.getEntity().getContent();
+         String contentAsString = IOUtils.toString(contentStream, "UTF-8");
+
+         logger.debug("content as string: " + contentAsString);
+         if(responseCode != org.apache.http.HttpStatus.SC_OK) {
+            HttpStatus status = HttpStatus.valueOf(responseCode);
+            RestErrorHandler.handleHttpErrCode(status, contentAsString);
+         }
+
+         return contentAsString;
+      } catch (IOException e) {
+         throw new CliRestException("HTTP Response Error: " + e.getMessage());
+      } finally {
+         getRequest.releaseConnection();
+      }
    }
 
    /**
@@ -136,7 +182,8 @@ public class RestClient {
    public void disconnect() {
       try {
          checkConnection();
-         logout(Constants.REST_PATH_LOGOUT, String.class);
+
+         getContentAsString(Constants.REST_PATH_LOGOUT);
       } catch (CliRestException cliRestException) {
          if (cliRestException.getStatus() == HttpStatus.UNAUTHORIZED) {
             writeCookieInfo("");
@@ -175,13 +222,6 @@ public class RestClient {
          targetUri += Constants.QUERY_DETAIL;
       }
       return restGetByUri(targetUri, respEntityType);
-   }
-
-   private <T> ResponseEntity<T> logout(final String path,
-         final Class<T> respEntityType) {
-      StringBuilder uriBuff = new StringBuilder();
-      uriBuff.append(hostUri).append(path);
-      return restGetByUri(uriBuff.toString(), respEntityType);
    }
 
    private <T> ResponseEntity<T> restGetByUri(String uri,
