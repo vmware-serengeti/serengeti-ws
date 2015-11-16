@@ -69,6 +69,7 @@ import com.cloudera.api.v6.ServicesResourceV6;
 import com.cloudera.api.v7.RootResourceV7;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.GsonBuilder;
+import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.exception.SoftwareManagerCollectorException;
 import com.vmware.bdd.plugin.clouderamgr.exception.ClouderaManagerException;
 import com.vmware.bdd.plugin.clouderamgr.exception.CommandExecFailException;
@@ -508,7 +509,10 @@ public class ClouderaManagerImpl extends AbstractSoftwareManager implements Soft
                roleNames.add(apiRole.getName());
             }
             roleNameList.setRoleNames(roleNames);
-            retry(5, new Retriable() {
+            // Just workaround to wait for the parcel installation to complete because the parcel would spend several minutes.
+            // Retry to do this step after sleep a minute(default value), also it can be configured on serengeti property file.
+            int sleepTime = Configuration.getInt("serengeti.clouderamgr.resize.sleep.time", 60);
+            retry(10, sleepTime, new Retriable() {
                @Override
                public void doWork() throws Exception {
                   executeAndReport("Deploying client config", addedNodeNames,
@@ -2282,9 +2286,14 @@ public class ClouderaManagerImpl extends AbstractSoftwareManager implements Soft
    }
 
    private void retry(int retryTimes, Retriable operate) throws Exception {
+      retry(retryTimes, 3, operate);
+   }
+
+   private void retry(int retryTimes, int sleepTime, Retriable operate) throws Exception {
       int i = 0;
       while (true) {
          i += 1;
+         Thread.sleep(sleepTime*1000);
          try {
             operate.doWork();
             return;
