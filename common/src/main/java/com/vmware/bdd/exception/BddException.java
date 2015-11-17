@@ -262,4 +262,7 @@ public class BddException extends RuntimeException {
       return new BddException(null, "CLUSTER", "RECOVER_FAILED", vmNames);
    }
 
+   public static BddException INTERNAL_SERVER_ERROR() {
+      return INTERNAL(null, "UNKNOWN.");
+   }
 }

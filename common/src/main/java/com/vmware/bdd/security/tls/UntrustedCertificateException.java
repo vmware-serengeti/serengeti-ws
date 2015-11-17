@@ -25,11 +25,8 @@ public class UntrustedCertificateException extends BddException{
    private CertificateInfo certInfo;
 
    public UntrustedCertificateException(CertificateInfo certInfo1) {
-      super(null, "BDD.SECURITY", "TLS_CERT_UNTRUSTED");
+      super(null, "TLS", "SERVER_CERT_UNTRUSTED");
       certInfo = certInfo1;
-   }
-
-   public UntrustedCertificateException() {
    }
 
    public CertificateInfo getCertInfo() {

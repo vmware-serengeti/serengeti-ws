@@ -23,7 +23,7 @@ public class TlsConnectionException extends BddException{
    private boolean connectionFail = false;
 
    public TlsConnectionException(Throwable throwable, String error, boolean connectFail) {
-      super(throwable, "BDD.SECURITY", "TLS_CONNECTION_ERR", error);
+      super(throwable, "TLS", "CONNECTION_ERR", error);
 
       connectionFail = connectFail;
    }
