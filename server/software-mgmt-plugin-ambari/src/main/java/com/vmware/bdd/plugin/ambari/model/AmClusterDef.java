@@ -117,7 +117,8 @@ public class AmClusterDef implements Serializable {
             AmNodeDef nodeDef = new AmNodeDef();
             nodeDef.setName(node.getName());
             nodeDef.setIp(node.getMgtIpAddress());
-            nodeDef.setFqdn(node.getHostname());
+            // Set the FQDN of management network to Ambari NodeDef to avoid the FQND of the node is localhost(Root cause is that the hostname of guest info will delay if the network is not good.).
+            nodeDef.setFqdn(node.getMgtFqdn());
             nodeDef.setRackInfo(node.getRack());
             nodeDef.setConfigurations(AmUtils.toAmConfigurations(group
                   .getConfiguration()));
@@ -371,7 +372,7 @@ public class AmClusterDef implements Serializable {
 
       return needBootstrapHostCount;
    }
-      
+
    public String getAmbariServerVersion() {
       return ambariServerVersion;
    }
@@ -547,7 +548,7 @@ public class AmClusterDef implements Serializable {
       for (NodeGroupInfo group : blueprint.getNodeGroups()) {
          if (group.getRoles().contains(role)) {
             for (NodeInfo node : group.getNodes()) {
-               fqdns.add(node.getHostname());
+               fqdns.add(node.getMgtFqdn());
             }
          }
       }

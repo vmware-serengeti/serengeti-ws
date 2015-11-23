@@ -18,6 +18,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.google.gson.annotations.Expose;
 import com.vmware.bdd.apitypes.IpConfigInfo;
 import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
@@ -30,6 +32,7 @@ import com.vmware.bdd.apitypes.NetConfigInfo.NetTrafficType;
 public class NodeInfo implements Serializable {
 
    private static final long serialVersionUID = -6527422807735089543L;
+   private static final Logger logger = Logger.getLogger(NodeInfo.class);
 
    @Expose
    private String name;
@@ -63,7 +66,13 @@ public class NodeInfo implements Serializable {
    }
 
    public String getHostname() {
-      return hostname;
+      if (hostname == null || hostname.isEmpty()
+            || "localhost".equalsIgnoreCase(hostname)
+            || "localhost.localdomain".equalsIgnoreCase(hostname)) {
+         return getMgtFqdn();
+      } else {
+         return hostname;
+      }
    }
 
    public void setHostname(String hostname) {
@@ -82,6 +91,16 @@ public class NodeInfo implements Serializable {
       try {
          return ipConfigs.get(NetTrafficType.MGT_NETWORK).get(0).getIpAddress();
       } catch (Exception e) {
+         logger.warn("Failed to get IP address of management network for node " + name + ": " + e.getMessage());
+         return null;
+      }
+   }
+
+   public String getMgtFqdn() {
+      try {
+         return ipConfigs.get(NetTrafficType.MGT_NETWORK).get(0).getFqdn();
+      } catch (Exception e) {
+         logger.warn("Failed to get the FQDN of management network for node " + name + ": " + e.getMessage());
          return null;
       }
    }
