@@ -204,9 +204,9 @@
 =======================================================================
 
 
-Serengeti 2.2.0:
+Serengeti 2.3.0:
 
-Serengeti 2.2.0: includes a number of subcomponents with
+Serengeti 2.3.0: includes a number of subcomponents with
 separate copyright notices and license terms.  The product that 
 includes this file does not necessarily use all the open source 
 subcomponents referred to below. Your use of the source
@@ -335,4 +335,4 @@ Source Files is valid for three years from the date you acquired this
 Software product. Alternatively, the Source Files may accompany the
 VMware product.
 
-[SERENGETIENT220NV052215]
+[SERENGETIENT230GASS112315]
