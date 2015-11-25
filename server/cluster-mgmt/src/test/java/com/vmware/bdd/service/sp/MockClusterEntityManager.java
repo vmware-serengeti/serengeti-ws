@@ -14,9 +14,6 @@
  ***************************************************************************/
 package com.vmware.bdd.service.sp;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import mockit.Mock;
 import mockit.MockClass;
 
@@ -28,16 +25,6 @@ import com.vmware.bdd.manager.ClusterEntityManager;
 @MockClass(realClass = ClusterEntityManager.class)
 public class MockClusterEntityManager extends
       ClusterEntityManager {
-   private boolean started;
-
-   public synchronized boolean isStarted() {
-      return started;
-   }
-
-   public synchronized void setStarted(boolean started) {
-      this.started = started;
-   }
-
    @Override
    @Mock
    public NodeEntity getNodeByMobId(String vmId) {
@@ -62,32 +49,8 @@ public class MockClusterEntityManager extends
          String nodeAction, boolean inSession) {
    }
 
-   /*
-   @Override
-   public void syncUp(String clusterName, boolean updateClusterStatus) {
-      try {
-         started = true;
-         Thread.sleep(200);
-         System.out.println("Sleep 200ms.");
-      } catch (Exception e) {
-         e.printStackTrace();
-      }
-   }*/
-
    @Override
    @Mock
    public void removeVmReference(String vmId) {
    }
-/*
-   @Override
-   @Mock
-   public List<NodeEntity> findAllNodes(String clusterName) {
-      return new ArrayList<NodeEntity>();
-   }
-
-   @Override
-   public List<NodeEntity> findAllNodes(String clusterName, String groupName) {
-      return new ArrayList<NodeEntity>();
-   }
-   */
 }
