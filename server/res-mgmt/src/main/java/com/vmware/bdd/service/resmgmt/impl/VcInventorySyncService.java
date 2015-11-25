@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by xiaoliangl on 7/22/15.
@@ -85,40 +86,22 @@ public class VcInventorySyncService implements IVcInventorySyncService {
     * @param vcResourceFilters
     * refresh the vc inventory, some resource will be filtered from refreshing.
     */
-   public void refreshInventory(VcResourceFilters vcResourceFilters) throws InterruptedException {
-      if (inProgress.get()) {
-         if(LOGGER.isInfoEnabled()) {
-            LOGGER.info("a inventory refresh is already in progress. wait for its finishing.");
-         }
-         waitForCompletion();
-         if(LOGGER.isInfoEnabled()) {
-            LOGGER.info("wait for refreshing is done.");
-         }
-      } else {
-         if (inProgress.compareAndSet(false, true)) {
-            if(LOGGER.isInfoEnabled()) {
-               LOGGER.info("start a inventory refresh.");
-            }
-            counters.setRefreshInProgress(true);
-            counters.increaseInvRefresh();
-            try {
-               List<VcDatacenter> dcList = VcInventory.getDatacenters();
-               refresh(dcList, vcResourceFilters);
-            } finally {
-               counters.setRefreshInProgress(false);
-               inProgress.set(false);
-               if(LOGGER.isInfoEnabled()) {
-                  LOGGER.info("the inventory refresh is done.");
-               }
-            }
-         } else {
-            if(LOGGER.isInfoEnabled()) {
-               LOGGER.info("another thread has initiated a inventory refresh.  wait it finishing.");
-            }
-            waitForCompletion();
-            if(LOGGER.isInfoEnabled()) {
-               LOGGER.info("wait for refreshing is done.");
-            }
+   public synchronized void refreshInventory(VcResourceFilters vcResourceFilters) throws InterruptedException {
+      inProgress.set(true);
+
+      if (LOGGER.isInfoEnabled()) {
+         LOGGER.info("start a inventory refresh.");
+      }
+      counters.setRefreshInProgress(true);
+      counters.increaseInvRefresh();
+      try {
+         List<VcDatacenter> dcList = VcInventory.getDatacenters();
+         refresh(dcList, vcResourceFilters);
+      } finally {
+         counters.setRefreshInProgress(false);
+         inProgress.set(false);
+         if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("the inventory refresh is done.");
          }
       }
    }

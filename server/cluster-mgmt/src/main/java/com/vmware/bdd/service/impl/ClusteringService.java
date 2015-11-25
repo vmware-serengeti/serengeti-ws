@@ -31,7 +31,14 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.vmware.aurora.vc.VcCluster;
 import com.vmware.bdd.apitypes.*;
+import com.vmware.bdd.exception.ClusterConfigException;
+import com.vmware.bdd.manager.*;
+import com.vmware.bdd.service.resmgmt.IVcInventorySyncService;
+import com.vmware.bdd.service.resmgmt.sync.filter.VcResourceFilters;
+import com.vmware.bdd.spectypes.*;
+import com.vmware.bdd.spectypes.DiskSpec;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,10 +78,6 @@ import com.vmware.bdd.entity.resmgmt.ResourceReservation;
 import com.vmware.bdd.exception.BddException;
 import com.vmware.bdd.exception.ClusteringServiceException;
 import com.vmware.bdd.exception.VcProviderException;
-import com.vmware.bdd.manager.ClusterConfigManager;
-import com.vmware.bdd.manager.ClusterManager;
-import com.vmware.bdd.manager.ElasticityScheduleManager;
-import com.vmware.bdd.manager.SoftwareManagerCollector;
 import com.vmware.bdd.manager.intf.IClusterEntityManager;
 import com.vmware.bdd.manager.intf.IConcurrentLockedClusterEntityManager;
 import com.vmware.bdd.placement.Container;
@@ -97,8 +100,6 @@ import com.vmware.bdd.service.sp.*;
 import com.vmware.bdd.service.utils.VcResourceUtils;
 import com.vmware.bdd.software.mgmt.plugin.intf.SoftwareManager;
 import com.vmware.bdd.specpolicy.GuestMachineIdSpec;
-import com.vmware.bdd.spectypes.DiskSpec;
-import com.vmware.bdd.spectypes.HadoopRole;
 import com.vmware.bdd.utils.AuAssert;
 import com.vmware.bdd.utils.ClusterUtil;
 import com.vmware.bdd.utils.CommonUtil;
@@ -159,6 +160,15 @@ public class ClusteringService implements IClusteringService {
 
    @Autowired
    private CmsWorker cmsWorker;
+
+   @Autowired
+   private IVcInventorySyncService syncService;
+
+   @Autowired
+   private VcResourceManager vcResourceManager;
+
+   @Autowired
+   private VcResourceFilterBuilder vcResourceFilterBuilder;
 
    @Autowired
    public void setClusterManager(ClusterManager clusterManager) {
@@ -1394,6 +1404,26 @@ public class ClusteringService implements IClusteringService {
    @Override
    public List<BaseNode> getPlacementPlan(ClusterCreate clusterSpec,
          List<BaseNode> existedNodes) {
+
+      try {
+         Thread.sleep(Configuration.getInt("vcrefresh.delay.forResume", 10) * 1000);
+      } catch (InterruptedException e1) {
+         logger.error("vcrefresh.delay.forResume interrupted.", e1);
+      }
+
+      List<String> dsNames = vcResourceManager.getDsNamesToBeUsed(clusterSpec.getDsNames());
+      if (dsNames.isEmpty()) {
+         throw ClusterConfigException.NO_DATASTORE_ADDED();
+      }
+
+      VcResourceFilters filters = vcResourceFilterBuilder.build(dsNames,
+            vcResourceManager.getRpNames(clusterSpec.getRpNames()), clusterSpec.getNetworkNames());
+
+      try {
+         syncService.refreshInventory(filters);
+      } catch (InterruptedException e) {
+         logger.error("failed to refresh vc inventory.", e);
+      }
 
       logger.info("Begin to calculate provision plan.");
 
