@@ -46,8 +46,8 @@ public class AmClusterValidator {
 
    private static final Logger logger = Logger
          .getLogger(AmClusterValidator.class);
-   private List<String> warningMsgList;
-   private List<String> errorMsgList;
+   private final List<String> warningMsgList;
+   private final List<String> errorMsgList;
    private ApiManager apiManager;
 
    public ApiManager getApiManager() {
@@ -241,14 +241,13 @@ public class AmClusterValidator {
          ComponentCategory targetComponentCategory =
                ComponentCategory.valueOf(apiTargetComponentInfo
                      .getComponentCategory());
-         ComponentName componentName =
-               ComponentName.valueOf(apiTargetComponentInfo.getComponentName());
+         String componentName = apiTargetComponentInfo.getComponentName();
          if (isNamenodeHa(allRoles, unRecogRoles)) {
-            if (componentName.isSecondaryNamenode()) {
+            if (ComponentName.isSecondaryNamenode(componentName)) {
                continue;
             }
          } else {
-            if (componentName.isJournalnode() || componentName.isZkfc()) {
+            if (ComponentName.isJournalnode(componentName) || ComponentName.isZkfc(componentName)) {
                continue;
             }
          }
@@ -288,8 +287,7 @@ public class AmClusterValidator {
          if (unRecogRoles != null && unRecogRoles.contains(role)) {
             continue;
          }
-         ComponentName componentName = ComponentName.valueOf(role);
-         if (componentName.isNamenode()) {
+         if (ComponentName.isNamenode(role)) {
             nameNodesCount++;
          }
       }
@@ -360,7 +358,7 @@ public class AmClusterValidator {
       if (propertyNamesOfCoreSite != null) {
          propertyNamesOfCoreSite.add("topology.script.file.name");
          propertyNamesOfCoreSite.add("net.topology.script.file.name");
-         
+
          // Configurations of HVE topology
          propertyNamesOfCoreSite.add("net.topology.nodegroup.aware");
          propertyNamesOfCoreSite.add("net.topology.impl");
