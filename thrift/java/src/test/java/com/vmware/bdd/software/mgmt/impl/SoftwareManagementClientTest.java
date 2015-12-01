@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2012-2013 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2012-2015 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,32 +14,52 @@
  ***************************************************************************/
 package com.vmware.bdd.software.mgmt.impl;
 
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
-import org.testng.Assert;
+import org.apache.thrift.TException;
+import org.apache.thrift.server.TServer;
+import org.apache.thrift.server.TSimpleServer;
+import org.apache.thrift.server.TServer.Args;
+import org.apache.thrift.transport.TServerSocket;
+import org.apache.thrift.transport.TServerTransport;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.software.mgmt.thrift.ClusterAction;
 import com.vmware.bdd.software.mgmt.thrift.ClusterData;
 import com.vmware.bdd.software.mgmt.thrift.ClusterOperation;
 import com.vmware.bdd.software.mgmt.thrift.GroupData;
 import com.vmware.bdd.software.mgmt.thrift.OperationStatusWithDetail;
-import com.vmware.bdd.software.mgmt.thrift.ServerData;
+import com.vmware.bdd.software.mgmt.thrift.SoftwareManagement;
+import com.vmware.bdd.software.mgmt.thrift.SoftwareManagement.Iface;
+import com.vmware.bdd.software.mgmt.thrift.SoftwareManagement.Processor;
 
 
 public class SoftwareManagementClientTest {
 
    private static final String clusterName = "cc2";
-   private static final String configFileName =
-         "/opt/serengeti/logs/task/3/1/cc2.json";
+   private static final String configFileName = "/opt/serengeti/logs/task/3/1/cc2.json";
 
    private SoftwareManagementClient client;
+   private TServer server;
+   private SoftwareManagement.Iface handler;
 
    @BeforeClass(groups = { "software-management" })
-   public void init() {
+   public void init() throws TException {
+      handler = mock(SoftwareManagement.Iface.class);
+      Processor<Iface> processor = new SoftwareManagement.Processor<>(handler);
+      TServerTransport serverTransport = new TServerSocket(Configuration.getInt("management.thrift.port"));
+      server = new TSimpleServer(new Args(serverTransport).processor(processor));
+      new Thread() {
+         public void run() {
+            server.serve();
+         }
+      }.start();
       client = new SoftwareManagementClient();
       client.init();
    }
@@ -47,6 +67,7 @@ public class SoftwareManagementClientTest {
    @AfterClass(groups = { "software-management" })
    public void close() {
       client.close();
+      server.stop();
    }
 
    @Test(groups = { "software-management" })
@@ -55,7 +76,12 @@ public class SoftwareManagementClientTest {
       clusterOperation.setAction(ClusterAction.CREATE);
       clusterOperation.setTargetName(clusterName);
       clusterOperation.setSpecFileName(configFileName);
-      client.runClusterOperation(clusterOperation);
+      try {
+         when(handler.runClusterOperation(clusterOperation)).thenReturn(0);
+      } catch (TException e) {
+         fail("Exception when calling runClusterOperation", e);
+      }
+      assertEquals(client.runClusterOperation(clusterOperation), 0);
    }
 
    @Test(groups = { "software-management" })
@@ -64,7 +90,12 @@ public class SoftwareManagementClientTest {
       clusterOperation.setAction(ClusterAction.QUERY);
       clusterOperation.setTargetName(clusterName);
       clusterOperation.setSpecFileName(configFileName);
-      client.runClusterOperation(clusterOperation);
+      try {
+         when(handler.runClusterOperation(clusterOperation)).thenReturn(0);
+      } catch (TException e) {
+         fail("Exception when calling runClusterOperation", e);
+      }
+      assertEquals(client.runClusterOperation(clusterOperation), 0);
    }
 
    @Test(groups = { "software-management" })
@@ -73,7 +104,12 @@ public class SoftwareManagementClientTest {
       clusterOperation.setAction(ClusterAction.UPDATE);
       clusterOperation.setTargetName(clusterName);
       clusterOperation.setSpecFileName(configFileName);
-      client.runClusterOperation(clusterOperation);
+      try {
+         when(handler.runClusterOperation(clusterOperation)).thenReturn(0);
+      } catch (TException e) {
+         fail("Exception when calling runClusterOperation", e);
+      }
+      assertEquals(client.runClusterOperation(clusterOperation), 0);
    }
 
    @Test(groups = { "software-management" })
@@ -82,7 +118,12 @@ public class SoftwareManagementClientTest {
       clusterOperation.setAction(ClusterAction.START);
       clusterOperation.setTargetName(clusterName);
       clusterOperation.setSpecFileName(configFileName);
-      client.runClusterOperation(clusterOperation);
+      try {
+         when(handler.runClusterOperation(clusterOperation)).thenReturn(0);
+      } catch (TException e) {
+         fail("Exception when calling runClusterOperation", e);
+      }
+      assertEquals(client.runClusterOperation(clusterOperation), 0);
    }
 
    @Test(groups = { "software-management" })
@@ -91,7 +132,12 @@ public class SoftwareManagementClientTest {
       clusterOperation.setAction(ClusterAction.STOP);
       clusterOperation.setTargetName(clusterName);
       clusterOperation.setSpecFileName(configFileName);
-      client.runClusterOperation(clusterOperation);
+      try {
+         when(handler.runClusterOperation(clusterOperation)).thenReturn(0);
+      } catch (TException e) {
+         fail("Exception when calling runClusterOperation", e);
+      }
+      assertEquals(client.runClusterOperation(clusterOperation), 0);
    }
 
    @Test(groups = { "software-management" })
@@ -100,7 +146,12 @@ public class SoftwareManagementClientTest {
       clusterOperation.setAction(ClusterAction.DESTROY);
       clusterOperation.setTargetName(clusterName);
       clusterOperation.setSpecFileName(configFileName);
-      client.runClusterOperation(clusterOperation);
+      try {
+         when(handler.runClusterOperation(clusterOperation)).thenReturn(0);
+      } catch (TException e) {
+         fail("Exception when calling runClusterOperation", e);
+      }
+      assertEquals(client.runClusterOperation(clusterOperation), 0);
    }
 
    @Test(groups = { "software-management" })
@@ -109,28 +160,41 @@ public class SoftwareManagementClientTest {
       clusterOperation.setAction(ClusterAction.CONFIGURE);
       clusterOperation.setTargetName(clusterName);
       clusterOperation.setSpecFileName(configFileName);
-      client.runClusterOperation(clusterOperation);
+      try {
+         when(handler.runClusterOperation(clusterOperation)).thenReturn(0);
+      } catch (TException e) {
+         fail("Exception when calling runClusterOperation", e);
+      }
+      assertEquals(client.runClusterOperation(clusterOperation), 0);
    }
 
    @Test(groups = { "software-management" })
    public void getOperationStatusWithDetail() {
-      OperationStatusWithDetail status =
-            client.getOperationStatusWithDetail(clusterName);
-      Assert.assertNotNull(status);
-      ClusterData clusterData = status.getClusterData();
-      String clusterName = clusterData.getClusterName();
-      System.out.println("clusterName : " + clusterName);
-      Map<String, GroupData> groups = clusterData.getGroups();
-      for (String groupName : groups.keySet()) {
-         System.out.println("group name key: " + groupName);
-         GroupData groupData = groups.get(groupName);
-         System.out.println("group data name: " + groupData.getGroupName());
-         List<ServerData> servers = groupData.getInstances();
-         for (ServerData serverData : servers) {
-            System.out.println("server data - name:" + serverData.getName()
-                  + ", status: " + serverData.getStatus() + ", action: "
-                  + serverData.getStatus());
-         }
+      ClusterData serverClusterData = new ClusterData();
+      serverClusterData.setClusterName(clusterName);
+      Map<String, GroupData> serverGroups = new HashMap<String, GroupData>();
+      GroupData serverGroup1 = new GroupData();
+      serverGroup1.setGroupName("group1");
+      serverGroups.put("group1", serverGroup1);
+      serverClusterData.setGroups(serverGroups);
+      OperationStatusWithDetail serverStatus = new OperationStatusWithDetail();
+      serverStatus.setClusterData(serverClusterData);
+      try {
+         when(handler.getOperationStatusWithDetail(clusterName)).thenReturn(serverStatus);
+      } catch (TException e) {
+         fail("Exception when calling getOperationStatusWithDetail", e);
+      }
+      OperationStatusWithDetail status = client.getOperationStatusWithDetail(clusterName);
+      assertNotNull(status);
+      ClusterData clientClusterData = status.getClusterData();
+      assertEquals(serverClusterData.getClusterName(), clientClusterData.getClusterName());
+      Map<String, GroupData> clientGroups = clientClusterData.getGroups();
+      assertNotNull(clientGroups);
+      assertEquals(serverGroups.size(), clientGroups.size());
+      for (String groupName : clientGroups.keySet()) {
+         GroupData clientGroupData = clientGroups.get(groupName);
+         GroupData serverGroupData = serverGroups.get(groupName);
+         assertEquals(serverGroupData.getGroupName(), clientGroupData.getGroupName());
       }
    }
 
