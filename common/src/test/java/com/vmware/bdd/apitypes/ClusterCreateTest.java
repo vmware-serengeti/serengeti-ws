@@ -24,7 +24,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.vmware.bdd.apitypes.Datastore.DatastoreType;
@@ -257,7 +256,7 @@ public class ClusterCreateTest {
       NodeGroupCreate master = new NodeGroupCreate();
       master.setName("master");
       master.setMemCapacityMB(7501);
-      master.setSwapRatio(0F);
+      master.setSwapRatio(-0.5F);
       master.setInstanceNum(1);
       master.setRoles(Arrays.asList("hadoop_namenode",
             "hadoop_resourcemanager"));
@@ -279,8 +278,8 @@ public class ClusterCreateTest {
       cluster.setNodeGroups(new NodeGroupCreate[] { master, worker, client });
       cluster.validateClusterCreate(failedMsgList, warningMsgList);
       assertEquals(1, failedMsgList.size());
-      assertEquals("The 'swapRatio' must be greater than 0 in group master.",
-            failedMsgList.get(0));
+      assertEquals("The 'swapRatio' must be greater than or equal to 0 in group master.",
+           failedMsgList.get(0));
       assertEquals(1, warningMsgList.size());
       assertEquals(
             "Warning: The size of the virtual machine memory must be evenly divisible by 4. For group master, 7500 replaces 7501 for the memCapacityMB value.",

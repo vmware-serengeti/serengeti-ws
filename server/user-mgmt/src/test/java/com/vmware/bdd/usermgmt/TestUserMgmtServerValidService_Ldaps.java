@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -33,11 +35,16 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.apitypes.UserMgmtServer;
 import com.vmware.bdd.exception.ValidationException;
+import com.vmware.bdd.security.tls.PspConfiguration;
 import com.vmware.bdd.security.tls.UntrustedCertificateException;
 import com.vmware.bdd.usermgmt.mocks.LdapsTrustStoreConfigMock;
 import com.vmware.bdd.validation.ValidationError;
+
+import mockit.Mock;
+import mockit.MockUp;
 
 /**
  * Created By xiaoliangl on 12/1/14.
@@ -50,6 +57,22 @@ public class TestUserMgmtServerValidService_Ldaps extends AbstractTestNGSpringCo
    @BeforeClass
    public void setup() throws IOException {
       TestSssdConfigurationGenerator.setupSssdTemplates();
+      new MockUp<Configuration>() {
+         @Mock
+         private PropertiesConfiguration init() {
+            return null;
+         }
+         @Mock
+         public String[] getStringArray(String key, String[] defautValue) {
+            if(key.equals("serengeti.tlsclient.protocols")) {
+               return new String[] {"TLSv1", "TLSv1.1", "TLSv1.2" };
+            } else if(key.equals("serengeti.tlsclient.ciphersuites")) {
+               return PspConfiguration.WEAK_CIPHER_SUITES;
+            } else {
+               throw new IllegalArgumentException(key);
+            }
+         }
+      };
    }
 
    @AfterClass

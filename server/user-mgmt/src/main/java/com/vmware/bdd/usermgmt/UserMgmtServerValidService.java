@@ -246,7 +246,7 @@ public class UserMgmtServerValidService {
 //            } else {
 
             String groupCn = getCnFromGroupDn(groupDn);
-            if (groupCn == null | groupCn.trim().length() == 0) {
+            if (groupCn == null || groupCn.trim().length() == 0) {
                validationErrors.addError("AdminGroup", new ValidationError("ADMIN_GROUP.FORMAT_ERR", "CN attribute missing."));
             } else {
                answer = ctx.search(
