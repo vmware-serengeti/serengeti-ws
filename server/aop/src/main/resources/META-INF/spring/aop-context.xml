@@ -1,45 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:aop="http://www.springframework.org/schema/aop"
-	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
-		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="retryTransaction" class="com.vmware.bdd.aop.tx.RetryTransactionAdvice"></bean>
-	<bean id="loggingAspectBean" class="com.vmware.bdd.aop.logging.ExceptionHandlerAspect"></bean>
-	<bean id="readLock" class="com.vmware.bdd.aop.lock.ClusterEntityConcurentWriteLockAdvice"></bean>
-	<bean id="writeLock" class="com.vmware.bdd.aop.lock.ClusterEntityExclusiveWriteLockAdvice"></bean>
-
-    <aop:config>
-		<aop:pointcut id="rertryTransactionOperation"
-			expression="execution(* com.vmware.bdd.service..*.*(..)) and @annotation(com.vmware.bdd.aop.annotation.RetryTransaction)" />
-		<aop:aspect id="retryAspect" ref="retryTransaction">
-			<aop:around method="retry" pointcut-ref="rertryTransactionOperation" />
-		</aop:aspect>
-	</aop:config>
+    <bean id="retryTransaction" class="com.vmware.bdd.aop.tx.RetryTransactionAdvice"></bean>
+    <bean id="loggingAspectBean" class="com.vmware.bdd.aop.logging.ExceptionHandlerAspect"></bean>
+    <bean id="readLock" class="com.vmware.bdd.aop.lock.ClusterEntityConcurentWriteLockAdvice"></bean>
+    <bean id="writeLock" class="com.vmware.bdd.aop.lock.ClusterEntityExclusiveWriteLockAdvice"></bean>
 
     <aop:config>
-		<aop:pointcut id="logExceptionPointcut"
-            expression="execution(* com.vmware.bdd.service..*.*(..)) and not @annotation(com.vmware.bdd.aop.annotation.DisableExceptionLogging)" />
-		<aop:aspect id="log" ref="loggingAspectBean">
-			<aop:after-throwing method="logException" throwing="t" pointcut-ref="logExceptionPointcut"/>
-		</aop:aspect>
-	</aop:config>
-	<aop:config>
-		<aop:pointcut id="readLockClusterEntityLock"
-			expression="execution(* com.vmware.bdd.manager..*.*(..)) and @annotation(com.vmware.bdd.aop.annotation.ClusterEntityConcurrentWriteLock)" />
-		<aop:aspect id="readLockAspect" ref="readLock">
-			<aop:around method="lock" pointcut-ref="readLockClusterEntityLock" />
-		</aop:aspect>
-	</aop:config>
+        <aop:pointcut id="rertryTransactionOperation"
+                      expression="execution(* com.vmware.bdd.service..*.*(..)) and @annotation(com.vmware.bdd.aop.annotation.RetryTransaction)"/>
+        <aop:aspect id="retryAspect" ref="retryTransaction">
+            <aop:around method="retry" pointcut-ref="rertryTransactionOperation"/>
+        </aop:aspect>
+    </aop:config>
 
-	<aop:config>
-		<aop:pointcut id="writeLockClusterEntityLock"
-			expression="execution(* com.vmware.bdd.manager..*.*(..)) and @annotation(com.vmware.bdd.aop.annotation.ClusterEntityExclusiveWriteLock)" />
-		<aop:aspect id="writeLockAspect" ref="writeLock">
-			<aop:around method="lock" pointcut-ref="writeLockClusterEntityLock" />
-		</aop:aspect>
-	</aop:config>
+    <aop:config>
+        <aop:pointcut id="logExceptionPointcut"
+                      expression="execution(* com.vmware.bdd.service..*.*(..)) and not @annotation(com.vmware.bdd.aop.annotation.DisableExceptionLogging)"/>
+        <aop:aspect id="log" ref="loggingAspectBean">
+            <aop:after-throwing method="logException" throwing="t" pointcut-ref="logExceptionPointcut"/>
+        </aop:aspect>
+    </aop:config>
+    <aop:config>
+        <aop:pointcut id="readLockClusterEntityLock"
+                      expression="execution(* com.vmware.bdd.manager..*.*(..)) and @annotation(com.vmware.bdd.aop.annotation.ClusterEntityConcurrentWriteLock)"/>
+        <aop:aspect id="readLockAspect" ref="readLock">
+            <aop:around method="lock" pointcut-ref="readLockClusterEntityLock"/>
+        </aop:aspect>
+    </aop:config>
 
+    <aop:config>
+        <aop:pointcut id="writeLockClusterEntityLock"
+                      expression="execution(* com.vmware.bdd.manager..*.*(..)) and @annotation(com.vmware.bdd.aop.annotation.ClusterEntityExclusiveWriteLock)"/>
+        <aop:aspect id="writeLockAspect" ref="writeLock">
+            <aop:around method="lock" pointcut-ref="writeLockClusterEntityLock"/>
+        </aop:aspect>
+    </aop:config>
+
+
+    <bean id="unhandledRestExceptionLogging" class="com.vmware.bdd.aop.rest.UnhandledExceptionLoggingAspect"/>
+
+    <aop:config>
+        <aop:aspect id="unhandledExceptionAspect" ref="unhandledRestExceptionLogging" >
+            <aop:after-throwing method="logRestArgsOnUnhandledException"
+                                throwing="e" pointcut="execution(public * com.vmware.bdd.rest.RestResource.*(..)) or execution(public * com.vmware.bdd.rest.MgmtVMConfigController.*(..)) or execution(public * com.vmware.bdd.rest.UserMgmtServerController.*(..))"/>
+        </aop:aspect>
+    </aop:config>
+    <aop:aspectj-autoproxy />
 </beans>
