@@ -14,12 +14,14 @@
  ***************************************************************************/
 package com.vmware.bdd.service.resmgmt.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import com.vmware.bdd.service.utils.MockResourceService;
 import com.vmware.bdd.service.utils.MockVcContext;
 import com.vmware.bdd.service.utils.MockVcInventory;
 import mockit.*;
@@ -29,6 +31,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Lists;
 import com.vmware.aurora.vc.VcDatastore;
 import com.vmware.aurora.vc.VcHost;
 import com.vmware.aurora.vc.VcNetwork;
@@ -49,7 +52,7 @@ import com.vmware.bdd.exception.VcProviderException;
  * @version 0.8
  *
  */
-/*
+
 public class ResourceServiceTest extends BaseResourceTest {
 
    private static final Logger logger = Logger
@@ -81,7 +84,7 @@ public class ResourceServiceTest extends BaseResourceTest {
          vcInitialized = true;
       }
    }
-
+/*
    @Test(groups = { "res-mgmt", "dependsOnVC" })
    public void testGetResourcePoolByName() {
       initVirtualCenter();
@@ -287,12 +290,12 @@ public class ResourceServiceTest extends BaseResourceTest {
       id = resSvc.reserveResoruce(resReservation);
 
    }
-
+*/
    @Test(groups = { "res-mgmt" })
    public void testReserveResourceAndCommitResource() {
       ResourceReservation resReservation = new ResourceReservation();
       resReservation.setClusterName("testCluster");
-      UUID id = resSvc.reserveResoruce(resReservation);
+      UUID id = resSvc.reserveResource(resReservation);
       Assert.assertNotNull(id);
       resSvc.commitReservation(id);
    }
@@ -301,23 +304,99 @@ public class ResourceServiceTest extends BaseResourceTest {
    public void testReserveResourceAndCommitResource2() {
       ResourceReservation resReservation = new ResourceReservation();
       resReservation.setClusterName("testCluster");
-      UUID id = resSvc.reserveResoruce(resReservation);
+      UUID id = resSvc.reserveResource(resReservation);
       Assert.assertNotNull(id);
       resSvc.commitReservation(id);
       resReservation.setClusterName("testCluster2");
-      id = resSvc.reserveResoruce(resReservation);
+      id = resSvc.reserveResource(resReservation);
       Assert.assertNotNull(id);
+      resSvc.commitReservation(id);
    }
-
 
    @Test(groups = { "res-mgmt" })
    public void testReserveResourceAndCancelReservation() {
       ResourceReservation resReservation = new ResourceReservation();
       resReservation.setClusterName("testCluster");
-      UUID id = resSvc.reserveResoruce(resReservation);
+      UUID id = resSvc.reserveResource(resReservation);
       Assert.assertNotNull(id);
       resSvc.cancleReservation(id);
    }
 
+   @Test(groups = { "res-mgmt" })
+   public void testConcurrentReserve() {
+      ExecutorService es = Executors.newFixedThreadPool(20);
+      ReservationTestThread[] threads = new ReservationTestThread[10];
+      for(int i = 0; i< threads.length; i++) {
+         threads[i] = new ReservationTestThread();
+         es.submit(threads[i]);
+      }
+      es.shutdown();
+      try {
+         es.awaitTermination(30, TimeUnit.SECONDS);
+      } catch(InterruptedException e) {
+         e.printStackTrace();
+      }
+   }
+
+   @Test(groups = { "res-mgmt" }, dependsOnMethods = { "testConcurrentReserve" })
+   public void testConcurrentReserveOrder() {
+      final AtomicInteger counter = new AtomicInteger(0);
+      ExecutorService es = Executors.newFixedThreadPool(10,
+            new ThreadFactory() {
+               @Override
+               public Thread newThread(Runnable r) {
+               Thread t = new Thread(r);
+               t.setName("T" + counter.incrementAndGet());
+               return t;
+            }
+      });
+      ReservationTestThread[] threads = new ReservationTestThread[10];
+      for(int i = 0; i< threads.length; i++) {
+         threads[i] = new ReservationTestThread();
+         try {
+            Thread.sleep(50);
+         } catch(Exception e) {
+            e.printStackTrace();
+         }
+         es.submit(threads[i]);
+      }
+      es.shutdown();
+      try {
+         es.awaitTermination(30, TimeUnit.SECONDS);
+      } catch(InterruptedException e) {
+         e.printStackTrace();
+      }
+      for(int i = 1; i < threads.length; i++) {
+         Assert.assertTrue(threads[i-1].reservedTime < threads[i].reservedTime);
+      }
+   }
+
+   class ReservationTestThread extends Thread{
+      public long reservedTime = 0;
+      public long threadStartTime = 0;
+
+      @Override
+      public void run() {
+         String name = Thread.currentThread().getName();
+         ResourceReservation resReservation = new ResourceReservation();
+         resReservation.setClusterName("testCluster");
+         threadStartTime = new java.util.Date().getTime();
+         System.out.println(name + ":  started");
+         UUID id = resSvc.reserveResource(resReservation);
+         reservedTime = new java.util.Date().getTime();
+         System.out.println(name + ":  reserved");
+         try {
+            Thread.sleep(2000);
+         } catch(InterruptedException e) {
+            e.printStackTrace(System.out);
+         }
+         if(new Random().nextBoolean()) {
+            resSvc.commitReservation(id);
+            System.out.println(name + ":  committed");
+         } else {
+            resSvc.cancleReservation(id);
+            System.out.println(name + ":  canceled");
+         }
+      }
+   }
 }
-*/

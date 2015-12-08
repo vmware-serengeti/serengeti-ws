@@ -193,7 +193,7 @@ public interface IResourceService {
     * @return
     * @throws VcProviderException
     */
-   UUID reserveResoruce(ResourceReservation resReservation)
+   UUID reserveResource(ResourceReservation resReservation)
          throws VcProviderException;
 
    /**

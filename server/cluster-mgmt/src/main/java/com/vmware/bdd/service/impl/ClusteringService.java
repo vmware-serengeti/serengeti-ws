@@ -2040,7 +2040,7 @@ public class ClusteringService implements IClusteringService {
    public UUID reserveResource(String clusterName) {
       ResourceReservation reservation = new ResourceReservation();
       reservation.setClusterName(clusterName);
-      return resMgr.reserveResoruce(reservation);
+      return resMgr.reserveResource(reservation);
    }
 
    @Override

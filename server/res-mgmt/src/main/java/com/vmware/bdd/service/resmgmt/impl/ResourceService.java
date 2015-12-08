@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -68,8 +71,10 @@ public class ResourceService implements IResourceService {
    private INetworkDAO networkDao;
 
    private final Map<UUID, ResourceReservation> reservedResource =
-         new HashMap<UUID, ResourceReservation>();
+         new ConcurrentHashMap<UUID, ResourceReservation>();
 
+   // Fair Semaphore ensures the policy of resource reservation is first come, first served. 
+   private Semaphore reservationPermits = new Semaphore(1, true);
 
    /**
     * @return the rpDao
@@ -369,40 +374,26 @@ public class ResourceService implements IResourceService {
       return result;
    }
 
-
    /* (non-Javadoc)
     * @see com.vmware.bdd.service.resmgmt.ResourceManager#reserveResoruce(com.vmware.bdd.bo.ResourceReservation)
     */
    @Override
-   public synchronized UUID reserveResoruce(ResourceReservation resReservation)
+   public UUID reserveResource(ResourceReservation resReservation)
          throws VcProviderException {
       boolean concurrentJobEnabled = Configuration.getBoolean(Constants.SERENGETI_CONCURRENT_JOB_ENABLED, false);
       if(concurrentJobEnabled) {//if concurrent creation switch is on, don't check concurrent creations.
          logger.info("concurrent cluster create is performed.");
          return addReservation(resReservation);
-      } else { // Only a simple creation can be running, others will wait for its finishing.
-         boolean noConcurrentCreation = reservedResource.isEmpty() ;
-
-         long maxWait = Configuration.getLong("serengeti.concurrent.job.maxWaitMins", 120l) * 60;
-         while (!noConcurrentCreation) {
-            if(maxWait <= 0) {
-               logger.warn("Max Concurrent Wait time elapsed, before the current cluster creation is done.");
-               break;
-            }
-
-            int timeSlice = 30;//check per default 30 seconds
-            try {
-               wait(timeSlice * 1000);
-            } catch (InterruptedException e) {
-               BddException.INTERNAL(e, "wait for concurrent cluster creation but be interrupted");
-            } finally {
-               maxWait -= timeSlice;
-            }
-            noConcurrentCreation = reservedResource.isEmpty();
-            logger.info("concurrent reservation state: " + noConcurrentCreation);
+      } else { // Only one creation can be running, others will wait for its finishing.
+         long maxWait = Configuration.getLong("serengeti.concurrent.job.maxWaitMins", 120l);
+         try {
+            reservationPermits.tryAcquire(maxWait, TimeUnit.MINUTES);
+         } catch (InterruptedException e) {
+            BddException.INTERNAL(e, "waiting for concurrent cluster creation but was interrupted");
          }
+         logger.info("reservedResource is empty: " + reservedResource.isEmpty());
 
-         if(!noConcurrentCreation) {
+         if(resourceAlreadyReserved()) {
             ResourceReservation[] reservations = reservedResource.values().toArray(new ResourceReservation[0]);
             String clusterName = reservations[0].getClusterName();
             logger.error("concurrent cluster create is not allowed.");
@@ -413,14 +404,28 @@ public class ResourceService implements IResourceService {
       }
    }
 
+   private boolean resourceAlreadyReserved() {
+      return !reservedResource.isEmpty();
+   }
+
+   private void removeReservation(UUID reservationId) {
+      if(reservedResource.containsKey(reservationId)) {
+         reservedResource.remove(reservationId);
+         if(!Configuration.getBoolean(Constants.SERENGETI_CONCURRENT_JOB_ENABLED, false)) {
+            reservationPermits.release();
+         }
+      } else {
+         BddException.INTERNAL(new Exception(), String.format("%s: reservation ID %s not found", Thread.currentThread().getName(), reservationId));
+      }
+   }
+
    /* (non-Javadoc)
     * @see com.vmware.bdd.service.resmgmt.ResourceManager#cancleReservation(long)
     */
    @Override
-   public synchronized void cancleReservation(UUID reservationId)
+   public void cancleReservation(UUID reservationId)
          throws VcProviderException {
-      reservedResource.remove(reservationId);
-      notifyAll();
+      removeReservation(reservationId);
       logger.info("current VMs Cloning is canceled, remove Reservation.");
    }
 
@@ -428,13 +433,11 @@ public class ResourceService implements IResourceService {
     * @see com.vmware.bdd.service.resmgmt.ResourceManager#commitReservation(long)
     */
    @Override
-   public synchronized void commitReservation(UUID reservationId)
+   public void commitReservation(UUID reservationId)
          throws VcProviderException {
-      reservedResource.remove(reservationId);
-      notifyAll();
+      removeReservation(reservationId);
       logger.info("current VMs Cloning is done, commit Reservation.");
    }
-
 
    /* (non-Javadoc)
     * @see com.vmware.bdd.service.resmgmt.ResourceManager#getHostsByClusterName(java.lang.String)

@@ -60,7 +60,7 @@ public class MockResourceService implements IResourceService {
 
    @Override
    @Mock
-   public synchronized UUID reserveResoruce(ResourceReservation resReservation)
+   public synchronized UUID reserveResource(ResourceReservation resReservation)
    throws VcProviderException {
       if (reserved) {
          throw VcProviderException.CONCURRENT_CLUSTER_CREATING(resReservation.getClusterName());
