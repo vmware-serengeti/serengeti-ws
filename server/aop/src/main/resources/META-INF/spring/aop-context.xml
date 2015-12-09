@@ -40,15 +40,4 @@
             <aop:around method="lock" pointcut-ref="writeLockClusterEntityLock"/>
         </aop:aspect>
     </aop:config>
-
-
-    <bean id="unhandledRestExceptionLogging" class="com.vmware.bdd.aop.rest.UnhandledExceptionLoggingAspect"/>
-
-    <aop:config>
-        <aop:aspect id="unhandledExceptionAspect" ref="unhandledRestExceptionLogging" >
-            <aop:after-throwing method="logRestArgsOnUnhandledException"
-                                throwing="e" pointcut="execution(public * com.vmware.bdd.rest.RestResource.*(..)) or execution(public * com.vmware.bdd.rest.MgmtVMConfigController.*(..)) or execution(public * com.vmware.bdd.rest.UserMgmtServerController.*(..))"/>
-        </aop:aspect>
-    </aop:config>
-    <aop:aspectj-autoproxy />
 </beans>

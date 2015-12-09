@@ -30,4 +30,15 @@
     <mvc:interceptors>
         <bean class="com.vmware.bdd.rest.interceptor.RestLogInterceptor" />
     </mvc:interceptors>
+
+    <!--AOP aspect for dump REST CALLs on unhandled exceptions-->
+    <bean id="unhandledRestExceptionLogging" class="com.vmware.bdd.aop.rest.UnhandledExceptionLoggingAspect"/>
+
+    <aop:config>
+        <aop:aspect id="unhandledExceptionAspect" ref="unhandledRestExceptionLogging" >
+            <aop:after-throwing method="logRestArgsOnUnhandledException"
+                                throwing="e" pointcut="execution(public * com.vmware.bdd.rest.RestResource.*(..)) or execution(public * com.vmware.bdd.rest.MgmtVMConfigController.*(..)) or execution(public * com.vmware.bdd.rest.UserMgmtServerController.*(..))"/>
+        </aop:aspect>
+    </aop:config>
+    <aop:aspectj-autoproxy />
 </beans>
