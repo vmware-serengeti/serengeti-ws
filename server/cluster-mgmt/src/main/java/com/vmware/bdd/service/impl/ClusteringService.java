@@ -1691,8 +1691,7 @@ public class ClusteringService implements IClusteringService {
             logger.info("no VM is available. Return directly.");
             return true;
          }
-         Callable<Void>[] storeProceduresArray =
-               storeProcedures.toArray(new Callable[0]);
+         Callable<Void>[] storeProceduresArray = storeProcedures.toArray(new Callable[0]);
          // execute store procedures to start VMs
          logger.info("ClusteringService, start to stop vms.");
          BaseProgressCallback callback = new BaseProgressCallback(statusUpdator);
@@ -1813,21 +1812,23 @@ public class ClusteringService implements IClusteringService {
    }
 
    @Override
-   public boolean deleteCluster(String name, List<BaseNode> vNodes,
-         StatusUpdater statusUpdator) {
+   public boolean deleteCluster(String name, List<BaseNode> vNodes, StatusUpdater statusUpdator) {
+      if (vNodes == null || vNodes.size() < 1) {
+         logger.error("no node need to be deleted.");
+         return true;
+      }
+      //Find folder firstly, or will fail to find it after deleting VMs.
+      Folder folder = findFolder(vNodes.get(0));
       boolean deleted = syncDeleteVMs(vNodes, statusUpdator, true);
-      if (vNodes.size() > 0) {
-         try {
-            deleteChildRps(name, vNodes);
-         } catch (Exception e) {
-            logger.error("ignore delete resource pool error.", e);
-         }
-
-         try {
-            deleteFolders(vNodes.get(0));
-         } catch (Exception e) {
-            logger.error("ignore delete folder error.", e);
-         }
+      try {
+         deleteChildRps(name, vNodes);
+      } catch (Exception e) {
+         logger.error("ignore delete resource pool error.", e);
+      }
+      try {
+         deleteFolders(folder);
+      } catch (Exception e) {
+         logger.error("ignore delete folder error.", e);
       }
       return deleted;
    }
@@ -1895,19 +1896,13 @@ public class ClusteringService implements IClusteringService {
       }
    }
 
-   /**
-    * this method will delete the cluster root folder, if there is any VM
-    * existed and powered on in the folder, the folder deletion will fail.
-    *
-    * @param node
-    * @throws BddException
-    */
-   private void deleteFolders(BaseNode node) throws BddException {
+   private Folder findFolder(BaseNode node) throws BddException {
       String path = node.getVmFolder();
+      String mobid = node.getVmMobId();
       // path format: <serengeti...>/<cluster name>/<group name>
       String[] folderNames = path.split("/");
       AuAssert.check(folderNames.length == 3);
-      VcDatacenter dc = VcResourceUtils.findVM(node.getVmMobId()).getDatacenter();
+      VcDatacenter dc = VcResourceUtils.findVM(mobid).getDatacenter();
       List<String> deletedFolders = new ArrayList<String>();
       deletedFolders.add(folderNames[0]);
       deletedFolders.add(folderNames[1]);
@@ -1915,15 +1910,26 @@ public class ClusteringService implements IClusteringService {
       try {
          folder = VcResourceUtils.findFolderByNameList(dc, deletedFolders);
       } catch (Exception e) {
-         logger.error("error in deleting folders", e);
+         logger.error("error in finding folders", e);
          throw BddException.INTERNAL(e, e.getMessage());
       }
+      String clusterFolderName = folderNames[0] + "/" + folderNames[1];
+      logger.info("find cluster root folder: " + clusterFolderName + "test: folder.name=" + folder.getName() + " folder.ref=" + folder._getRef().getValue());
+      return folder;
+   }
+   
+   /**
+    * this method will delete the cluster root folder, if there is any VM
+    * existed and powered on in the folder, the folder deletion will fail.
+    *
+    * @param folder
+    * @throws BddException
+    */
+   private void deleteFolders(Folder folder) throws BddException {
       if (folder == null) {
          logger.info("No folder to delete.");
          return;
       }
-      String clusterFolderName = folderNames[0] + "/" + folderNames[1];
-      logger.info("find cluster root folder: " + clusterFolderName);
       List<Folder> folders = new ArrayList<Folder>();
       folders.add(folder);
       DeleteVMFolderSP sp = new DeleteVMFolderSP(folders, true, false);
@@ -1941,9 +1947,9 @@ public class ClusteringService implements IClusteringService {
             return;
          }
          if (result[0].finished && result[0].throwable == null) {
-            logger.info("Cluster folder " + clusterFolderName + " is deleted.");
+            logger.info("Cluster folder " + folder.getName() + " is deleted.");
          } else {
-            logger.info("Failed to delete cluster folder " + clusterFolderName,
+            logger.info("Failed to delete cluster folder " + folder.getName(),
                   result[0].throwable);
          }
       } catch (InterruptedException e) {
