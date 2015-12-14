@@ -91,22 +91,17 @@ import com.vmware.vim.binding.vim.Folder;
       "file:../serengeti/WebContent/WEB-INF/spring/tx-context.xml",
       "file:../serengeti/WebContent/WEB-INF/spring/manager-context.xml",
       "file:src/test/resources/spring/serengeti-jobs-context.xml" })
-public class TestClusteringJobs extends
-      AbstractTransactionalTestNGSpringContextTests {
-   private static final Logger logger = Logger
-         .getLogger(TestClusteringJobs.class);
+public class TestClusteringJobs extends AbstractTransactionalTestNGSpringContextTests {
+   private static final Logger logger = Logger.getLogger(TestClusteringJobs.class);
+
    private static final String TEST_VC_CLUSTER = "test.vc.cluster";
    private static final String TEST_VC_RESOURCEPOOL = "test.vc.resourcepool";
-   private static final String TEST_VC_DATASTORE_SPEC =
-         "test.vc.datastore.spec";
-   private static final String TEST_VC_DATASTORE_TYPE =
-         "test.vc.datastore.type";
-   private static final String TEST_DHCP_VC_PORTGROUP =
-         "test.dhcp.vc.portgroup";
+   private static final String TEST_VC_DATASTORE_SPEC = "test.vc.datastore.spec";
+   private static final String TEST_VC_DATASTORE_TYPE = "test.vc.datastore.type";
+   private static final String TEST_DHCP_VC_PORTGROUP = "test.dhcp.vc.portgroup";
    private static final String TEST_STATIC_END_IP = "test.static.end.ip";
    private static final String TEST_STATIC_START_IP = "test.static.start.ip";
-   private static final String TEST_STATIC_VC_PORTGROUP =
-         "test.static.vc.portgroup";
+   private static final String TEST_STATIC_VC_PORTGROUP = "test.static.vc.portgroup";
    private static final String TEST_STATIC_NETMASK = "test.static.netmask";
    private static final String TEST_STATIC_GATEWAY = "test.static.gateway";
    private static final String TEST_STATIC_DNS2 = "test.static.dns2";
@@ -115,7 +110,7 @@ public class TestClusteringJobs extends
    private static final String TEST_DHCP_NETWORK_NAME = "clusteringJobs-net1";
    private static final String TEST_DATASTORE_NAME = "clusteringJobs-ds1";
    private static final String TEST_RP_NAME = "clusteringJobs-rp1";
-   private static final String TEST_STATIC_IP_CLUSTER_NAME = "testClusterJobs";
+   private static final String TEST_CLUSTER_NAME = "testClusterJobs";
    private static final String TEST_DHCP_CLUSTER_NAME = "testDhcpClusterJobs";
 
    private static String staticDns2;
@@ -130,9 +125,9 @@ public class TestClusteringJobs extends
    private static String datastoreSpec;
    private static String vcRP;
    private static String vcCluster;
+
    @Autowired
    private IServerInfoDAO serverInfoDao;
-
    @Autowired
    private JobManager jobManager;
    @Autowired
@@ -195,8 +190,7 @@ public class TestClusteringJobs extends
    @BeforeClass(groups = { "TestClusteringJobs" })
    public void setup() throws Exception {
       Properties testProperty = new Properties();
-      testProperty.load(new FileInputStream(
-            "src/test/resources/vc-test.properties"));
+      testProperty.load(new FileInputStream("src/test/resources/vc-test.properties"));
       staticDns1 = testProperty.getProperty(TEST_STATIC_DNS1);
       staticDns2 = testProperty.getProperty(TEST_STATIC_DNS2);
       staticGateway = testProperty.getProperty(TEST_STATIC_GATEWAY);
@@ -205,9 +199,7 @@ public class TestClusteringJobs extends
       startIp = testProperty.getProperty(TEST_STATIC_START_IP);
       endIp = testProperty.getProperty(TEST_STATIC_END_IP);
       dhcpPortgroup = testProperty.getProperty(TEST_DHCP_VC_PORTGROUP);
-      datastoreType =
-            DatastoreType.valueOf(testProperty
-                  .getProperty(TEST_VC_DATASTORE_TYPE));
+      datastoreType = DatastoreType.valueOf(testProperty.getProperty(TEST_VC_DATASTORE_TYPE));
       datastoreSpec = testProperty.getProperty(TEST_VC_DATASTORE_SPEC);
       vcRP = testProperty.getProperty(TEST_VC_RESOURCEPOOL);
       vcCluster = testProperty.getProperty(TEST_VC_CLUSTER);
@@ -233,6 +225,7 @@ public class TestClusteringJobs extends
          resPoolSvc.addResourcePool(TEST_RP_NAME, vcCluster, vcRP);
       } catch (Exception e) {
          logger.error("ignore create resource pool exception. ", e);
+         throw e;
       }
       List<String> specs = new ArrayList<String>();
       String[] dsSpecs = datastoreSpec.split(",");
@@ -327,7 +320,7 @@ public class TestClusteringJobs extends
    }
 
    private void removeClusters() {
-      cleanUpUtils.removeCluster(clusterEntityMgr, TEST_STATIC_IP_CLUSTER_NAME);
+      cleanUpUtils.removeCluster(clusterEntityMgr, TEST_CLUSTER_NAME);
       cleanUpUtils.removeCluster(clusterEntityMgr, TEST_DHCP_CLUSTER_NAME);
    }
 
@@ -388,31 +381,29 @@ public class TestClusteringJobs extends
    @Transactional(propagation = Propagation.NEVER)
    public void testCreateCluster() throws Exception {
       ClusterCreate createSpec = new ClusterCreate();
-      createSpec.setName(TEST_STATIC_IP_CLUSTER_NAME);
+      createSpec.setName(TEST_CLUSTER_NAME);
       createSpec.setAppManager("Default");
       createSpec.setType(ClusterType.HDFS_MAPRED);
-      createSpec.setNetworkConfig(createNetConfig(TEST_STATIC_NETWORK_NAME, staticPortgroup));
+      createSpec.setNetworkConfig(createNetConfig(TEST_DHCP_NETWORK_NAME, dhcpPortgroup));
       createSpec.setDistro("bigtop");
       createSpec.setDistroVendor(Constants.DEFAULT_VENDOR);
       long jobExecutionId = clusterMgr.createCluster(createSpec, new BaseConfiguration());
-      ClusterRead cluster =
-            clusterMgr.getClusterByName(TEST_STATIC_IP_CLUSTER_NAME, false);
+      ClusterRead cluster = clusterMgr.getClusterByName(TEST_CLUSTER_NAME, false);
       Assert.assertTrue(
             cluster.getStatus() == ClusterStatus.PROVISIONING,
             "Cluster status should be PROVISIONING, but got "
                   + cluster.getStatus());
       waitTaskFinished(jobExecutionId);
-      cluster = clusterMgr.getClusterByName(TEST_STATIC_IP_CLUSTER_NAME, false);
+      cluster = clusterEntityMgr.findClusterWithNodes(TEST_CLUSTER_NAME, true);
       Assert.assertTrue(
             cluster.getInstanceNum() == 5,
             "Cluster instance number should be 5, but got "
                   + cluster.getInstanceNum());
       Assert.assertTrue(cluster.getStatus() == ClusterStatus.RUNNING,
             "Cluster status should be RUNNING, but got " + cluster.getStatus());
-      checkIpRange(cluster);
-      checkVcFolders(TEST_STATIC_IP_CLUSTER_NAME);
-      checkVcResourePools(cluster, ConfigInfo.getSerengetiUUID() + "-"
-            + TEST_STATIC_IP_CLUSTER_NAME);
+      //checkIpRange(cluster);
+      checkVcFolders(TEST_CLUSTER_NAME);
+      checkVcResourePools(cluster, ConfigInfo.getSerengetiUUID() + "-" + TEST_CLUSTER_NAME);
       checkDiskLayout(cluster);
    }
 
@@ -679,6 +670,29 @@ public class TestClusteringJobs extends
             "Cluster status should be RUNNING, but got " + cluster.getStatus());
    }
 
+   @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testClusterResizeSuccess" })
+   @Transactional(propagation = Propagation.NEVER)
+   public void testDeleteDhcpCluster() throws Exception {
+      long jobExecutionId =
+            clusterMgr.deleteClusterByName(TEST_DHCP_CLUSTER_NAME);
+
+      ClusterRead cluster =
+            clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
+      Assert.assertTrue(cluster.getStatus() == ClusterStatus.DELETING,
+            "Cluster status should be DELETING, but got " + cluster.getStatus());
+      waitTaskFinished(jobExecutionId);
+      try {
+         cluster = clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
+         Assert.assertTrue(false, "Cluster should not be found.");
+      } catch (BddException e) {
+         if (e.getErrorId().equals("NOT_FOUND")) {
+            Assert.assertTrue(true);
+            return;
+         }
+         e.printStackTrace();
+      }
+   }
+
    @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testCreateCluster" })
    public void testDeleteUsedDatastore() {
       try {
@@ -709,10 +723,10 @@ public class TestClusteringJobs extends
    @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testDeleteUsedRP" })
    public void testGetClusterRead() {
       ClusterEntity cluster =
-            clusterEntityMgr.findByName(TEST_STATIC_IP_CLUSTER_NAME);
+            clusterEntityMgr.findByName(TEST_CLUSTER_NAME);
       assertTrue(cluster != null);
       ClusterRead clusterRead =
-            clusterEntityMgr.toClusterRead(TEST_STATIC_IP_CLUSTER_NAME, true);
+            clusterEntityMgr.toClusterRead(TEST_CLUSTER_NAME, true);
       assertTrue("parse ClusterRead object from cluster entity should work.",
             clusterRead != null);
       logger.info((new Gson()).toJson(clusterRead));
@@ -722,7 +736,7 @@ public class TestClusteringJobs extends
    @Transactional
    public void testGetClusterUsedResources() {
       ClusterEntity cluster =
-            clusterEntityMgr.findByName(TEST_STATIC_IP_CLUSTER_NAME);
+            clusterEntityMgr.findByName(TEST_CLUSTER_NAME);
 
       assertTrue(cluster != null);
       assertTrue(
@@ -752,7 +766,7 @@ public class TestClusteringJobs extends
    @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testGetClusterUsedResources" })
    public void testGetGroupFromName() {
       ClusterEntity cluster =
-            clusterEntityMgr.findByName(TEST_STATIC_IP_CLUSTER_NAME);
+            clusterEntityMgr.findByName(TEST_CLUSTER_NAME);
       NodeGroupEntity group = clusterEntityMgr.findByName(cluster, "master");
       assertTrue(group != null);
       logger.info("get group master " + group);
@@ -794,7 +808,7 @@ public class TestClusteringJobs extends
    @Transactional(propagation = Propagation.NEVER)
    public void testDupCreateCluster() throws Exception {
       ClusterCreate createSpec = new ClusterCreate();
-      createSpec.setName(TEST_STATIC_IP_CLUSTER_NAME);
+      createSpec.setName(TEST_CLUSTER_NAME);
       createSpec.setType(ClusterType.HDFS_MAPRED);
       try {
          clusterMgr.createCluster(createSpec, new BaseConfiguration());
@@ -808,14 +822,13 @@ public class TestClusteringJobs extends
    @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testDupCreateCluster" })
    @Transactional(propagation = Propagation.NEVER)
    public void testStopCluster() throws Exception {
-      long jobExecutionId = clusterMgr.stopCluster(TEST_STATIC_IP_CLUSTER_NAME);
+      long jobExecutionId = clusterMgr.stopCluster(TEST_CLUSTER_NAME);
 
-      ClusterRead cluster =
-            clusterMgr.getClusterByName(TEST_STATIC_IP_CLUSTER_NAME, false);
+      ClusterRead cluster = clusterEntityMgr.findClusterWithNodes(TEST_CLUSTER_NAME, false);
       Assert.assertTrue(cluster.getStatus() == ClusterStatus.STOPPING,
             "Cluster status should be STOPPING, but got " + cluster.getStatus());
       waitTaskFinished(jobExecutionId);
-      cluster = clusterMgr.getClusterByName(TEST_STATIC_IP_CLUSTER_NAME, false);
+      cluster = clusterEntityMgr.findClusterWithNodes(TEST_CLUSTER_NAME, false);
       Assert.assertTrue(cluster.getStatus() == ClusterStatus.STOPPED,
             "Cluster status should be STOPPED, but got " + cluster.getStatus());
       NodeRead node = cluster.getNodeGroups().get(0).getInstances().get(0);
@@ -829,14 +842,14 @@ public class TestClusteringJobs extends
    @Transactional(propagation = Propagation.NEVER)
    public void testDupStopCluster() throws Exception {
       try {
-         clusterMgr.stopCluster(TEST_STATIC_IP_CLUSTER_NAME);
+         clusterMgr.stopCluster(TEST_CLUSTER_NAME);
          Assert.assertTrue(false, "Cluster stop should throw exception.");
       } catch (Exception e) {
          e.printStackTrace();
          Assert.assertTrue(true, "got expected exception.");
       }
       ClusterRead cluster =
-            clusterMgr.getClusterByName(TEST_STATIC_IP_CLUSTER_NAME, false);
+            clusterMgr.getClusterByName(TEST_CLUSTER_NAME, false);
       Assert.assertTrue(cluster.getStatus() == ClusterStatus.STOPPED,
             "Cluster status should be STOPPED, but got " + cluster.getStatus());
    }
@@ -845,14 +858,14 @@ public class TestClusteringJobs extends
    @Transactional(propagation = Propagation.NEVER)
    public void testStartCluster() throws Exception {
       long jobExecutionId =
-            clusterMgr.startCluster(TEST_STATIC_IP_CLUSTER_NAME, false);
+            clusterMgr.startCluster(TEST_CLUSTER_NAME, false);
 
       ClusterRead cluster =
-            clusterMgr.getClusterByName(TEST_STATIC_IP_CLUSTER_NAME, false);
+            clusterMgr.getClusterByName(TEST_CLUSTER_NAME, false);
       Assert.assertTrue(cluster.getStatus() == ClusterStatus.STARTING,
             "Cluster status should be STARTING, but got " + cluster.getStatus());
       waitTaskFinished(jobExecutionId);
-      cluster = clusterMgr.getClusterByName(TEST_STATIC_IP_CLUSTER_NAME, false);
+      cluster = clusterMgr.getClusterByName(TEST_CLUSTER_NAME, false);
       Assert.assertTrue(cluster.getStatus() == ClusterStatus.RUNNING,
             "Cluster status should be RUNNING, but got " + cluster.getStatus());
    }
@@ -861,14 +874,14 @@ public class TestClusteringJobs extends
    @Transactional(propagation = Propagation.NEVER)
    public void testDupStartCluster() throws Exception {
       try {
-         clusterMgr.startCluster(TEST_STATIC_IP_CLUSTER_NAME, false);
+         clusterMgr.startCluster(TEST_CLUSTER_NAME, false);
          Assert.assertTrue(false, "Cluster start should throw exception.");
       } catch (Exception e) {
          e.printStackTrace();
          Assert.assertTrue(true, "got expected exception.");
       }
       ClusterRead cluster =
-            clusterMgr.getClusterByName(TEST_STATIC_IP_CLUSTER_NAME, false);
+            clusterMgr.getClusterByName(TEST_CLUSTER_NAME, false);
       Assert.assertTrue(cluster.getStatus() == ClusterStatus.RUNNING,
             "Cluster status should be RUNNING, but got " + cluster.getStatus());
    }
@@ -876,9 +889,9 @@ public class TestClusteringJobs extends
    @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testDupStartCluster" })
    @Transactional(propagation = Propagation.NEVER)
    public void testConfigIOShares() throws Exception {
-      clusterMgr.prioritizeCluster(TEST_STATIC_IP_CLUSTER_NAME, Priority.HIGH);
+      clusterMgr.prioritizeCluster(TEST_CLUSTER_NAME, Priority.HIGH);
       ClusterRead cluster =
-            clusterMgr.getClusterByName(TEST_STATIC_IP_CLUSTER_NAME, false);
+            clusterMgr.getClusterByName(TEST_CLUSTER_NAME, false);
       Assert.assertTrue(cluster.getIoShares().equals(Priority.HIGH),
             "Cluster " + cluster.getName() + " should have HIGH io share level");
    }
@@ -886,17 +899,14 @@ public class TestClusteringJobs extends
    @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testConfigIOShares" })
    @Transactional(propagation = Propagation.NEVER)
    public void testDeleteCluster() throws Exception {
-      long jobExecutionId =
-            clusterMgr.deleteClusterByName(TEST_STATIC_IP_CLUSTER_NAME);
-
-      ClusterRead cluster =
-            clusterMgr.getClusterByName(TEST_STATIC_IP_CLUSTER_NAME, false);
+      long jobExecutionId = clusterMgr.deleteClusterByName(TEST_CLUSTER_NAME);
+      ClusterRead cluster = clusterMgr.getClusterByName(TEST_CLUSTER_NAME, false);
       Assert.assertTrue(cluster.getStatus() == ClusterStatus.DELETING,
             "Cluster status should be DELETING, but got " + cluster.getStatus());
       waitTaskFinished(jobExecutionId);
       try {
          cluster =
-               clusterMgr.getClusterByName(TEST_STATIC_IP_CLUSTER_NAME, false);
+               clusterMgr.getClusterByName(TEST_CLUSTER_NAME, false);
          Assert.assertTrue(false, "Cluster should not be found.");
       } catch (BddException e) {
          if (e.getErrorId().equals("NOT_FOUND")) {
@@ -907,8 +917,8 @@ public class TestClusteringJobs extends
          }
       }
       assertChildRPRemoved(ConfigInfo.getSerengetiUUID() + "-"
-            + TEST_STATIC_IP_CLUSTER_NAME);
-      assertFolderRemoved(TEST_STATIC_IP_CLUSTER_NAME);
+            + TEST_CLUSTER_NAME);
+      assertFolderRemoved(TEST_CLUSTER_NAME);
    }
 
    private void assertChildRPRemoved(String rpName) {
@@ -944,7 +954,7 @@ public class TestClusteringJobs extends
    @Transactional(propagation = Propagation.NEVER)
    public void testDupDeleteCluster() throws Exception {
       try {
-         clusterMgr.deleteClusterByName(TEST_STATIC_IP_CLUSTER_NAME);
+         clusterMgr.deleteClusterByName(TEST_CLUSTER_NAME);
          Assert.assertTrue(false, "Cluster should not be found.");
       } catch (BddException e) {
          if (e.getSection().equals("NOT_FOUND")) {
@@ -955,26 +965,4 @@ public class TestClusteringJobs extends
       }
    }
 
-   @Test(groups = { "TestClusteringJobs" }, dependsOnMethods = { "testClusterResizeSuccess" })
-   @Transactional(propagation = Propagation.NEVER)
-   public void testDeleteDhcpCluster() throws Exception {
-      long jobExecutionId =
-            clusterMgr.deleteClusterByName(TEST_DHCP_CLUSTER_NAME);
-
-      ClusterRead cluster =
-            clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
-      Assert.assertTrue(cluster.getStatus() == ClusterStatus.DELETING,
-            "Cluster status should be DELETING, but got " + cluster.getStatus());
-      waitTaskFinished(jobExecutionId);
-      try {
-         cluster = clusterMgr.getClusterByName(TEST_DHCP_CLUSTER_NAME, false);
-         Assert.assertTrue(false, "Cluster should not be found.");
-      } catch (BddException e) {
-         if (e.getErrorId().equals("NOT_FOUND")) {
-            Assert.assertTrue(true);
-            return;
-         }
-         e.printStackTrace();
-      }
-   }
 }
