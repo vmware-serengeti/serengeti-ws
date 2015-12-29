@@ -39,7 +39,7 @@ import com.vmware.bdd.cli.commands.CookieCache;
  * Test case for RestClient
  * Created By xiaoliangl on 8/27/14.
  */
-@ContextConfiguration(locations = {"classpath:com/vmware/bdd/cli/command/tests/restclient-test-context.xml"})
+@ContextConfiguration(locations = {"classpath:com/vmware/bdd/cli/command/tests/test-context.xml"})
 @DirtiesContext( classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD) // reset spring context after each test method.
 public class RestClientTest extends AbstractTestNGSpringContextTests {
    private static Object[][] DATA = null;

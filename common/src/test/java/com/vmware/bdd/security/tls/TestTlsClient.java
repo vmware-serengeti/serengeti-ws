@@ -105,10 +105,10 @@ public class TestTlsClient {
       } catch (UntrustedCertificateException uce) {
          CertificateInfo certInfo = uce.getCertInfo();
          Assert.assertNotNull(certInfo);
-         Assert.assertEquals(certInfo.getSubjectDn(), "CN=*.eng.vmware.com, OU=IT, O=\"VMware, Inc.\", L=Palo Alto, ST=California, C=US");
-         Assert.assertEquals(certInfo.getIssuerDn(), "CN=DigiCert High Assurance CA-3, OU=www.digicert.com, O=DigiCert Inc, C=US");
-         Assert.assertEquals(certInfo.getSerialNumber(), "0C8FBE4535E383074BE071A8AF58245E");
-         Assert.assertEquals(certInfo.getSha1Fingerprint(), "5E835E96FB3C677927B0D3EBE6E0463B6778770B");
+         Assert.assertEquals(certInfo.getSubjectDn(), "CN=*.eng.vmware.com, O=\"VMware, Inc.\", L=Palo Alto, ST=California, C=US");
+         Assert.assertEquals(certInfo.getIssuerDn(), "CN=DigiCert SHA2 High Assurance Server CA, OU=www.digicert.com, O=DigiCert Inc, C=US");
+         Assert.assertEquals(certInfo.getSerialNumber(), "09881EA1812A7891F0F1227BEB39A6D4");
+         Assert.assertEquals(certInfo.getSha1Fingerprint(), "9005D818D76E908558C29793A0231FDC90A794FC");
          Assert.assertNotNull(certInfo.getNotAfter());
          Assert.assertNotNull(certInfo.getNotBefore());
 
@@ -131,12 +131,6 @@ public class TestTlsClient {
    public void testConnectAgain() throws IOException {
 
       helper.checkCertificateFirstly("wiki.eng.vmware.com", 443, true);
-   }
-
-   @Test
-   public void testConnectAgain1() throws IOException {
-
-      helper.checkCertificateFirstly("pek2-aurora-dev-01-113-dhcp137.eng.vmware.com", 636, true);
    }
 
    @Test(expectedExceptions = {TruststoreException.class})

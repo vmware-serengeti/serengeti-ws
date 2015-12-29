@@ -35,7 +35,7 @@
 
    <repositories>
        <repository>
-           <id>cdh.repo</id>
+           <id>Cloudera</id>
            <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
            <name>Cloudera Repository</name>
        </repository>
