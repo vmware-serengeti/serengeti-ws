@@ -1,5 +1,5 @@
 {
-  "nodeGroups":[
+  "nodeGroups": [
     {
       "name": "master",
       "roles": [
@@ -22,7 +22,7 @@
       ],
       "instanceNum": 3,
       "cpuNum": 1,
-      "memCapacityMB": 3748,	
+      "memCapacityMB": 3748,
       "storage": {
         "type": "LOCAL",
         "sizeGB": 50
@@ -41,7 +41,15 @@
         "type": "LOCAL",
         "sizeGB": 20
       },
-      "haFlag": "off"
+      "haFlag": "off",
+      "placementPolicies": {
+        "groupAssociations": [
+          {
+            "reference": "data",
+            "type": "STRICT"
+          }
+        ]
+      }
     },
     {
       "name": "client",
