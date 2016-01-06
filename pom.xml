@@ -659,7 +659,7 @@
                      <excludedGroups>dependsOnVC</excludedGroups>
                      <excludes>
                         <exclude>**/TestAm*.java</exclude>
-                        <exclude>**/TestLockedClusterEntityManager.java</exclude>
+                        <exclude>**/TestUserMgmtServerValidService_Ldap*.java</exclude>
                         <exclude>**/TestUserMgmtServerController*.java</exclude>
                      </excludes>
                   </configuration>
