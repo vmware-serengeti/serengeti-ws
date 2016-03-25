@@ -275,13 +275,6 @@ public class AppConfigValidationFactory {
             } catch (NumberFormatException e) {
                validateResult.addFailureValue(text);
             }
-         } else if ("poolMaxJobsDefault".equals(element.getTagName())) {
-            String text = ((Text)element.getFirstChild()).getData().trim();
-            try {
-               int val = Integer.parseInt(text);
-            } catch (NumberFormatException e) {
-               validateResult.addFailureValue(text);
-            }
          } else if ("fairSharePreemptionTimeout".equals(element.getTagName())) {
             String text = ((Text)element.getFirstChild()).getData().trim();
             try {
