@@ -14,6 +14,9 @@
  ***************************************************************************/
 package com.vmware.bdd.plugin.ambari.utils;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -23,6 +26,13 @@ public class Version {
    public static int compare(String srcVersion, String destVersion) {
       logger.info("The source version is " + srcVersion);
       logger.info("The destination version is " + destVersion);
+
+      srcVersion = getArtifactVersion(srcVersion);
+      destVersion = getArtifactVersion(destVersion);
+
+      logger.info("The source artifact version is " + srcVersion);
+      logger.info("The destination artifact version is " + destVersion);
+
       DefaultArtifactVersion srcArtifactVersion = new DefaultArtifactVersion(srcVersion);
       DefaultArtifactVersion destArtifactVersion = new DefaultArtifactVersion(destVersion);
 
@@ -53,5 +63,15 @@ public class Version {
          }
       }
       return 0;
+   }
+
+   private static String getArtifactVersion(String srcVersion) {
+      Pattern pattern = Pattern.compile("(\\d+)(.)(\\d+)(.)(\\d+)");
+      Matcher matcher = pattern.matcher(srcVersion);
+      while(matcher.find())
+      {
+         return matcher.group(0);
+      }
+      return srcVersion;
    }
 }

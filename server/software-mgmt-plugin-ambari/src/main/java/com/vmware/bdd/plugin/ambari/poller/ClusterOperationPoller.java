@@ -37,13 +37,13 @@ public class ClusterOperationPoller extends StatusPoller {
    private static final Logger logger = Logger
          .getLogger(ClusterOperationPoller.class);
 
-   private ApiManager apiManager;
-   private List<ApiRequest> apiRequestsSummary;
-   private String clusterName;
-   private ClusterReport currentReport;
-   private ClusterReportQueue reportQueue;
-   private int beginProgress;
-   private int endProgress;
+   private final ApiManager apiManager;
+   private final List<ApiRequest> apiRequestsSummary;
+   private final String clusterName;
+   private final ClusterReport currentReport;
+   private final ClusterReportQueue reportQueue;
+   private final int beginProgress;
+   private final int endProgress;
 
    public ClusterOperationPoller(final ApiManager apiManager,
          final ApiRequest apiRequestSummary, final String clusterName,
@@ -106,6 +106,14 @@ public class ClusterOperationPoller extends StatusPoller {
          }
          currentReport.setNodeReports(nodeReports);
 
+         boolean isCompletedState = clusterRequestStatus.isCompletedState();
+
+         // Fix bug the request_status is COMPLETED when running cluster creation REST API on Ambari server >= 2.2
+         if (apiRequest.getApiRequestInfo().getTaskCount() == 0 && isCompletedState) {
+            isCompleted = false;
+            break;
+         }
+
          int provisionPercent =
                (int) apiRequest.getApiRequestInfo().getProgressPercent();
          if (provisionPercent != 0) {
@@ -114,7 +122,6 @@ public class ClusterOperationPoller extends StatusPoller {
             if (toProgress >= endProgress) {
                toProgress = endProgress;
             }
-            boolean isCompletedState = clusterRequestStatus.isCompletedState();
             if ((toProgress != currentProgress) && (provisionPercent % 10 == 0)
                   || isCompletedState) {
                if (isCompletedState) {
@@ -131,7 +138,7 @@ public class ClusterOperationPoller extends StatusPoller {
          }
 
 
-         if (!clusterRequestStatus.isCompletedState()) {
+         if (!isCompletedState) {
             isCompleted = false;
             break;
          }
