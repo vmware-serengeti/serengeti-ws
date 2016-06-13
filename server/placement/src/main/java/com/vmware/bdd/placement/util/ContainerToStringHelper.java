@@ -33,19 +33,23 @@ public class ContainerToStringHelper {
          sb.append(cluster.getName());
          sb.append('\n');
          int hostIndent = 4;
-         for(AbstractDatacenter.AbstractHost host : cluster.getHosts()) {
-            for(int i = 0; i < hostIndent; i ++) {
-               sb.append('>');
-            }
-            sb.append(host.getName());
-            sb.append('\n');
-            int datastoreIndent = 6;
-            for(AbstractDatacenter.AbstractDatastore datastore : host.getDatastores()) {
-               for(int i = 0; i < datastoreIndent; i ++) {
+         if (cluster.getHosts() != null) {
+            for(AbstractDatacenter.AbstractHost host : cluster.getHosts()) {
+               for(int i = 0; i < hostIndent; i ++) {
                   sb.append('>');
                }
-               sb.append(datastore.getName()).append(':').append(datastore.getFreeSpace()).append("GB");
+               sb.append(host.getName());
                sb.append('\n');
+               int datastoreIndent = 6;
+               if (host.getDatastores() != null) {
+                  for(AbstractDatacenter.AbstractDatastore datastore : host.getDatastores()) {
+                     for(int i = 0; i < datastoreIndent; i ++) {
+                        sb.append('>');
+                     }
+                     sb.append(datastore.getName()).append(':').append(datastore.getFreeSpace()).append("GB");
+                     sb.append('\n');
+                  }
+               }
             }
          }
       }
