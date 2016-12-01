@@ -315,6 +315,8 @@ public class VcService {
          httpConfig = new HttpConfigurationImpl();
          httpConfig.setTimeoutMs(timeoutMillis);
          httpConfig.setThumbprintVerifier(getThumbprintVerifier());
+         TlsClientConfiguration tlsClientConfiguration = new TlsClientConfiguration();
+         httpConfig.setEnabledProtocols(tlsClientConfiguration.getSslProtocols());
 
          if (useExecutor) {
             vmomiClient = Client.Factory.createClient(uri, version, executor, httpConfig);
