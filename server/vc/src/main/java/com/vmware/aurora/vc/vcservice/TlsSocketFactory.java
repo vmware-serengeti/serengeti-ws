@@ -22,6 +22,7 @@ import java.net.UnknownHostException;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
 
 import org.apache.commons.httpclient.ConnectTimeoutException;
@@ -29,6 +30,8 @@ import org.apache.commons.httpclient.HttpClientError;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
 import org.apache.log4j.Logger;
+
+import com.vmware.bdd.security.tls.TlsClientConfiguration;
 
 /**
  * Created By xiaoliangl on 12/16/14.
@@ -43,8 +46,13 @@ public class TlsSocketFactory implements SecureProtocolSocketFactory {
 
    private TrustManager[] trustManagers = null;
 
+   private String[] protocols;
+
    public TlsSocketFactory(TrustManager[] trustManagers1) {
       trustManagers = trustManagers1;
+
+      TlsClientConfiguration tlsClientConfiguration = new TlsClientConfiguration();
+      protocols = tlsClientConfiguration.getSslProtocols();
    }
 
    private SSLContext createEasySSLContext() {
@@ -70,22 +78,26 @@ public class TlsSocketFactory implements SecureProtocolSocketFactory {
 
    @Override
    public Socket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException, UnknownHostException {
-      return getSSLContext().getSocketFactory().createSocket(
+      SSLSocket sslSocket = (SSLSocket) getSSLContext().getSocketFactory().createSocket(
             socket,
             host,
             port,
             autoClose
       );
+      sslSocket.setEnabledProtocols(protocols);
+      return sslSocket;
    }
 
    @Override
    public Socket createSocket(String host, int port, InetAddress localAddress, int localPort) throws IOException, UnknownHostException {
-      return getSSLContext().getSocketFactory().createSocket(
+      SSLSocket sslSocket = (SSLSocket) getSSLContext().getSocketFactory().createSocket(
             host,
             port,
             localAddress,
             localPort
       );
+      sslSocket.setEnabledProtocols(protocols);
+      return sslSocket;
    }
 
    @Override
@@ -95,21 +107,25 @@ public class TlsSocketFactory implements SecureProtocolSocketFactory {
       }
       int timeout = params.getConnectionTimeout();
       SocketFactory socketfactory = getSSLContext().getSocketFactory();
+      SSLSocket sslSocket = null;
       if (timeout == 0) {
-         return socketfactory.createSocket(host, port, localAddress, localPort);
+         sslSocket = (SSLSocket) socketfactory.createSocket(host, port, localAddress, localPort);
       } else {
-         Socket socket = socketfactory.createSocket();
-         socket.bind(new InetSocketAddress(localAddress, localPort));
-         socket.connect(new InetSocketAddress(host, port), timeout);
-         return socket;
+         sslSocket = (SSLSocket) socketfactory.createSocket();
+         sslSocket.bind(new InetSocketAddress(localAddress, localPort));
+         sslSocket.connect(new InetSocketAddress(host, port), timeout);
       }
+      sslSocket.setEnabledProtocols(protocols);
+      return sslSocket;
    }
 
    @Override
    public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
-      return getSSLContext().getSocketFactory().createSocket(
+      SSLSocket sslSocket = (SSLSocket) getSSLContext().getSocketFactory().createSocket(
             host,
             port
       );
+      sslSocket.setEnabledProtocols(protocols);
+      return sslSocket;
    }
 }
