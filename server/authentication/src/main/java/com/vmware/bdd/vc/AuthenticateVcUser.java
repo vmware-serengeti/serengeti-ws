@@ -21,10 +21,12 @@ import javax.net.ssl.SSLException;
 
 import com.vmware.aurora.global.Configuration;
 import com.vmware.bdd.security.tls.TlsClientConfiguration;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
 import com.vmware.vim.binding.vim.ServiceInstance;
 import com.vmware.vim.binding.vim.ServiceInstanceContent;
 import com.vmware.vim.binding.vim.SessionManager;
+import com.vmware.vim.binding.vim.UserSession;
 import com.vmware.vim.binding.vim.version.version8;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 import com.vmware.vim.vmomi.client.Client;
@@ -33,7 +35,9 @@ import com.vmware.vim.vmomi.client.http.HttpConfiguration;
 import com.vmware.vim.vmomi.client.http.ThumbprintVerifier;
 import com.vmware.vim.vmomi.client.http.impl.HttpConfigurationImpl;
 import com.vmware.vim.vmomi.core.types.VmodlContext;
+
 import org.apache.log4j.Logger;
+import org.springframework.security.authentication.BadCredentialsException;
 
 public class AuthenticateVcUser {
    private final static Logger LOGGER = Logger.getLogger(AuthenticateVcUser.class);
@@ -88,6 +92,7 @@ public class AuthenticateVcUser {
 
    public void authenticateUser(String name, String password) throws Exception {
       Client vmomiClient = null;
+      SessionManager sessionManager = null;
       try {
 
          URI uri = new URI(serviceUrl);
@@ -105,15 +110,30 @@ public class AuthenticateVcUser {
          svcRef.setType("ServiceInstance");
          svcRef.setValue("ServiceInstance");
 
+         if (CommonUtil.isBlank(name)) { // VC session token auth
+            // use soap id to impersonate current VC user
+            vmomiClient.getBinding().setSession(vmomiClient.getBinding().createSession(password));
+         }
+
          ServiceInstance instance =
                vmomiClient.createStub(ServiceInstance.class, svcRef);
          ServiceInstanceContent instanceContent = instance.retrieveContent();
-         SessionManager sessionManager =
+         sessionManager =
                vmomiClient.createStub(SessionManager.class,
                      instanceContent.getSessionManager());
 
-         sessionManager.login(name, password, sessionManager.getDefaultLocale());
-         sessionManager.logout();
+         if (!CommonUtil.isBlank(name)) { // username/passowrd auth
+            sessionManager.login(name, password, sessionManager.getDefaultLocale());
+            sessionManager.logout();
+         } else { // VC session token auth
+            UserSession session = sessionManager.getCurrentSession();
+            if (session == null) {
+               throw new BadCredentialsException("invalid vc session.");
+            } else {
+               LOGGER.info(session.getUserName() + " is authenticated");
+            }
+
+          }
       } finally {
          if (vmomiClient != null) {
             vmomiClient.shutdown();
