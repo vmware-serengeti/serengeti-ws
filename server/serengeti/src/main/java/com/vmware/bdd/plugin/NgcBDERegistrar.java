@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (c) 2014-2015 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2014-2017 VMware, Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,9 @@ import com.vmware.aurora.security.JksKeyStoreUtil;
 import com.vmware.aurora.util.AuAssert;
 import com.vmware.aurora.vc.vcservice.VcContext;
 import com.vmware.aurora.vc.vcservice.VcSession;
+import com.vmware.bdd.utils.CommonUtil;
 import com.vmware.bdd.utils.Constants;
+import com.vmware.bdd.utils.ShellCommandExecutor;
 import com.vmware.vim.binding.impl.vim.DescriptionImpl;
 import com.vmware.vim.binding.impl.vim.ExtensionImpl;
 import com.vmware.vim.binding.impl.vim.ExtensionImpl.ClientInfoImpl;
@@ -193,6 +195,10 @@ public class NgcBDERegistrar extends NgcRegistrar {
 
       NgcZipPacker packer = new NgcZipPacker(properties,packageName);
       packer.repack();
+
+      String sudoCmd = CommonUtil.getCustomizedSudoCmd();
+      String chmodCommand = sudoCmd + " chmod 644 /opt/serengeti/www/vcplugin/*";
+      ShellCommandExecutor.execCmd(chmodCommand, null, null, 0, "Changing files mode to 644 under directory vcplugin");
    }
 
 }
