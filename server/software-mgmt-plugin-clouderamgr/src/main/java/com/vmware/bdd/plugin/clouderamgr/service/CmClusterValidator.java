@@ -153,7 +153,7 @@ public class CmClusterValidator {
                   if (checkRequiredRoles(serviceName, requiredRoles, definedRoles.keySet(), errorMsgList)) {
                      if (nnGroupsNum == 1) {
                         if (definedRoles.get("HDFS_NAMENODE") < 2 && !definedRoles.containsKey("HDFS_SECONDARY_NAMENODE")) {
-                           errorMsgList.add("HDFS service not configured for High Availability must have a SecondaryNameNode");
+                           errorMsgList.add("HDFS service is not configured for High Availability. The spec file must have a HDFS_SECONDARY_NAMENODE role");
                         }
                         if (definedRoles.get("HDFS_NAMENODE") >= 2 && !definedRoles.containsKey("HDFS_JOURNALNODE")) {
                            errorMsgList.add("HDFS service configured for High Availability must have journal nodes");
