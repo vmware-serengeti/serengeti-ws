@@ -574,7 +574,7 @@
       <vmware.vlsi.version>1.0.10</vmware.vlsi.version>
       <bdd.skipTests>true</bdd.skipTests>
       <cxf.version>2.7.15</cxf.version>
-      <fasterxml.jackson.version>2.1.0</fasterxml.jackson.version>
+      <fasterxml.jackson.version>2.9.10.8</fasterxml.jackson.version>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
    </properties>
